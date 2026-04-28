@@ -1,0 +1,145 @@
+Disassembling extracted\HI-RES CHARACTER GENERATOR.payload.bin (256 bytes) starting at $1000
+============================================================
+$1000: 48        PHA
+$1001: 20 58 FF  JSR $FF58
+$1004: 86 4E     STX $4E
+$1006: BA        TSX
+$1007: BD 00 01  LDA $0100,X
+$100A: 85 37     STA $37
+$100C: A9 3C     LDA #$3C
+$100E: 85 36     STA $36
+$1010: A6 4E     LDX $4E
+$1012: 8D 57 C0  STA $C057
+$1015: 8D 52 C0  STA $C052
+$1018: 8D 55 C0  STA $C055
+$101B: A5 E6     LDA $E6
+$101D: C9 40     CMP #$40
+$101F: F0 05     BEQ $1026
+$1021: A9 20     LDA #$20
+$1023: 8D 54 C0  STA $C054
+$1026: 8D CE 03  STA $03CE
+$1029: 8D 50 C0  STA $C050
+$102C: A9 00     LDA #$00
+$102E: 8D CD 03  STA $03CD
+$1031: A9 7F     LDA #$7F
+$1033: 8D CF 03  STA $03CF
+$1036: A9 68     LDA #$68
+$1038: 8D CC 03  STA $03CC
+$103B: 68        PLA
+$103C: 48        PHA
+$103D: 84 4E     STY $4E
+$103F: C9 8D     CMP #$8D
+$1041: F0 2D     BEQ $1070
+$1043: C9 8C     CMP #$8C
+$1045: D0 2B     BNE $1072
+$1047: A0 00     LDY #$00
+$1049: 84 2A     STY $2A
+$104B: AD CE 03  LDA $03CE
+$104E: 85 2B     STA $2B
+$1050: AD CD 03  LDA $03CD
+$1053: C9 FF     CMP #$FF
+$1055: F0 01     BEQ $1058
+$1057: 98        TYA
+$1058: 91 2A     STA ($2A),Y
+$105A: C8        INY
+$105B: D0 FB     BNE $1058
+$105D: E6 2B     INC $2B
+$105F: A5 2B     LDA $2B
+$1061: 38        SEC
+$1062: ED CE 03  SBC $03CE
+$1065: C9 20     CMP #$20
+$1067: D0 E7     BNE $1050
+$1069: 84 24     STY $24
+$106B: 84 25     STY $25
+$106D: 18        CLC
+$106E: 90 6C     BCC $10DC
+$1070: F0 6C     BEQ $10DE
+$1072: A5 25     LDA $25
+$1074: 4A        LSR A
+$1075: 29 03     AND #$03
+$1077: 0D CE 03  ORA $03CE
+$107A: 85 2B     STA $2B
+$107C: A5 25     LDA $25
+$107E: 6A        ROR A
+$107F: 08        PHP
+$1080: 0A        ASL A
+$1081: 29 18     AND #$18
+$1083: 85 2A     STA $2A
+$1085: 0A        ASL A
+$1086: 0A        ASL A
+$1087: 05 2A     ORA $2A
+$1089: 0A        ASL A
+$108A: 28        PLP
+$108B: 6A        ROR A
+$108C: 18        CLC
+$108D: 65 24     ADC $24
+$108F: 85 2A     STA $2A
+$1091: 68        PLA
+$1092: 2D CF 03  AND $03CF
+$1095: 48        PHA
+$1096: AD CC 03  LDA $03CC
+$1099: 4A        LSR A
+$109A: 4A        LSR A
+$109B: 4A        LSR A
+$109C: 85 27     STA $27
+$109E: 68        PLA
+$109F: 48        PHA
+$10A0: 2A        ROL A
+$10A1: 26 27     ROL $27
+$10A3: 2A        ROL A
+$10A4: 26 27     ROL $27
+$10A6: 2A        ROL A
+$10A7: 26 27     ROL $27
+$10A9: 29 F8     AND #$F8
+$10AB: 85 26     STA $26
+$10AD: A0 00     LDY #$00
+$10AF: B1 26     LDA ($26),Y
+$10B1: 84 4F     STY $4F
+$10B3: A0 00     LDY #$00
+$10B5: 48        PHA
+$10B6: AD CD 03  LDA $03CD
+$10B9: F0 06     BEQ $10C1
+$10BB: C9 FF     CMP #$FF
+$10BD: F0 02     BEQ $10C1
+$10BF: B1 2A     LDA ($2A),Y
+$10C1: 91 2A     STA ($2A),Y
+$10C3: 68        PLA
+$10C4: 51 2A     EOR ($2A),Y
+$10C6: 91 2A     STA ($2A),Y
+$10C8: A4 4F     LDY $4F
+$10CA: A5 2B     LDA $2B
+$10CC: 18        CLC
+$10CD: 69 04     ADC #$04
+$10CF: 85 2B     STA $2B
+$10D1: C8        INY
+$10D2: C0 08     CPY #$08
+$10D4: D0 D9     BNE $10AF
+$10D6: E6 24     INC $24
+$10D8: A5 24     LDA $24
+$10DA: C5 21     CMP $21
+$10DC: 90 10     BCC $10EE
+$10DE: A5 20     LDA $20
+$10E0: 85 24     STA $24
+$10E2: E6 25     INC $25
+$10E4: A5 25     LDA $25
+$10E6: C5 23     CMP $23
+$10E8: 90 04     BCC $10EE
+$10EA: A5 22     LDA $22
+$10EC: 85 25     STA $25
+$10EE: A4 4E     LDY $4E
+$10F0: 68        PLA
+$10F1: 60        RTS
+$10F2: FF        .byte $FF
+$10F3: FF        .byte $FF
+$10F4: FF        .byte $FF
+$10F5: FF        .byte $FF
+$10F6: FF        .byte $FF
+$10F7: FF        .byte $FF
+$10F8: FF        .byte $FF
+$10F9: FF        .byte $FF
+$10FA: FF        .byte $FF
+$10FB: FF        .byte $FF
+$10FC: FF        .byte $FF
+$10FD: FF        .byte $FF
+$10FE: FF        .byte $FF
+$10FF: FF        .byte $FF

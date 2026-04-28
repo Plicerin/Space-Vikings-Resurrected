@@ -1,0 +1,196 @@
+Disassembling extracted\PLANET no 20.payload.bin (1171 bytes) starting at $8000
+============================================================
+$8000: 0E 8C 7E  ASL $7E8C
+$8003: 00        BRK
+$8004: 22        .byte $22
+$8005: 0F        .byte $0F
+$8006: 80        .byte $80
+$8007: 3E FF 7F  ROL $7FFF,X
+$800A: 45 25     EOR $25
+$800C: 04        .byte $04
+$800D: 00        BRK
+$800E: 07        .byte $07
+$800F: 52        .byte $52
+$8010: 07        .byte $07
+$8011: 50 07     BVC $801A
+$8013: 57        .byte $57
+$8014: 07        .byte $07
+$8015: 54        .byte $54
+$8016: 08        PHP
+$8017: 01 09     ORA ($09,X)
+$8019: 01 05     ORA ($05,X)
+$801B: 00        BRK
+$801C: 00        BRK
+$801D: 00        BRK
+$801E: 00        BRK
+$801F: 00        BRK
+$8020: 00        BRK
+$8021: 00        BRK
+$8022: 00        BRK
+$8023: 00        BRK
+$8024: 01 F0     ORA ($F0,X)
+$8026: D8        CLD
+$8027: 00        BRK
+$8028: 00        BRK
+$8029: 10 27     BPL $8052
+$802B: 02        .byte $02
+$802C: 10 27     BPL $8055
+$802E: 00        BRK
+$802F: 00        BRK
+$8030: 10 27     BPL $8059
+$8032: 02        .byte $02
+$8033: 10 27     BPL $805C
+$8035: 00        BRK
+$8036: 00        BRK
+$8037: F0 D8     BEQ $8011
+$8039: 02        .byte $02
+$803A: F0 D8     BEQ $8014
+$803C: 00        BRK
+$803D: 00        BRK
+$803E: F0 D8     BEQ $8018
+$8040: 02        .byte $02
+$8041: F0 D8     BEQ $801B
+$8043: 00        BRK
+$8044: 00        BRK
+$8045: 10 27     BPL $806E
+$8047: 01 F0     ORA ($F0,X)
+$8049: D8        CLD
+$804A: 00        BRK
+$804B: 00        BRK
+$804C: 60        RTS
+$804D: F0 02     BEQ $8051
+$804F: D8        CLD
+$8050: DC        .byte $DC
+$8051: 00        BRK
+$8052: 00        BRK
+$8053: 30 F8     BMI $804D
+$8055: 02        .byte $02
+$8056: 74        .byte $74
+$8057: DC        .byte $DC
+$8058: 00        BRK
+$8059: 00        BRK
+$805A: 50 FB     BVC $8057
+$805C: 02        .byte $02
+$805D: CC DE 00  CPY $00DE
+$8060: 00        BRK
+$8061: 18        CLC
+$8062: FC        .byte $FC
+$8063: 02        .byte $02
+$8064: C0 E0     CPY #$E0
+$8066: 00        BRK
+$8067: 00        BRK
+$8068: 7C        .byte $7C
+$8069: FC        .byte $FC
+$806A: 02        .byte $02
+$806B: 88        DEY
+$806C: E1 00     SBC ($00,X)
+$806E: 00        BRK
+$806F: 00        BRK
+$8070: 00        BRK
+$8071: 02        .byte $02
+$8072: A8        TAY
+$8073: E4 00     CPX $00
+$8075: 00        BRK
+$8076: 6C 07 02  JMP ($0207)
+$8079: 24 E1     BIT $E1
+$807B: 00        BRK
+$807C: 00        BRK
+$807D: D0 07     BNE $8086
+$807F: 02        .byte $02
+$8080: A8        TAY
+$8081: E4 00     CPX $00
+$8083: 00        BRK
+$8084: D0 07     BNE $808D
+$8086: 02        .byte $02
+$8087: E0 E3     CPX #$E3
+$8089: 00        BRK
+$808A: 00        BRK
+$808B: AC 0D 02  LDY $020D
+$808E: C0 E0     CPY #$E0
+$8090: 00        BRK
+$8091: 00        BRK
+$8092: A0 0F     LDY #$0F
+$8094: 02        .byte $02
+$8095: 50 E2     BVC $8079
+$8097: 00        BRK
+$8098: 00        BRK
+$8099: 04        .byte $04
+$809A: 10 02     BPL $809E
+$809C: 50 E2     BVC $8080
+$809E: 00        BRK
+$809F: 00        BRK
+$80A0: 30 11     BMI $80B3
+$80A2: 02        .byte $02
+$80A3: 0C        .byte $0C
+$80A4: E5 00     SBC $00
+$80A6: 00        BRK
+$80A7: A0 0F     LDY #$0F
+$80A9: 02        .byte $02
+$80AA: C8        INY
+$80AB: E7        .byte $E7
+$80AC: 00        BRK
+$80AD: 00        BRK
+$80AE: A0 0F     LDY #$0F
+$80B0: 02        .byte $02
+$80B1: 64        .byte $64
+$80B2: E7        .byte $E7
+$80B3: 00        BRK
+$80B4: 00        BRK
+$80B5: D8        CLD
+$80B6: 0E 02 90  ASL $9002
+$80B9: E8        INX
+$80BA: 00        BRK
+$80BB: 00        BRK
+$80BC: 80        .byte $80
+$80BD: 0C        .byte $0C
+$80BE: 02        .byte $02
+$80BF: 78        SEI
+$80C0: EC 00 00  CPX $0000
+$80C3: A0 0F     LDY #$0F
+$80C5: 02        .byte $02
+$80C6: 60        RTS
+$80C7: F0 00     BEQ $80C9
+$80C9: 00        BRK
+$80CA: 68        PLA
+$80CB: 10 02     BPL $80CF
+$80CD: 48        PHA
+$80CE: F4        .byte $F4
+$80CF: 00        BRK
+$80D0: 00        BRK
+$80D1: 88        DEY
+$80D2: 13        .byte $13
+$80D3: 02        .byte $02
+$80D4: 30 F8     BMI $80CE
+$80D6: 00        BRK
+$80D7: 00        BRK
+$80D8: 70 17     BVS $80F1
+$80DA: 02        .byte $02
+$80DB: D4        .byte $D4
+$80DC: FE 00 00  INC $0000,X
+$80DF: 40        RTI
+$80E0: 1F        .byte $1F
+$80E1: 02        .byte $02
+$80E2: D0 07     BNE $80EB
+$80E4: 00        BRK
+$80E5: 00        BRK
+$80E6: 10 27     BPL $810F
+$80E8: 01 DA     ORA ($DA,X)
+$80EA: 07        .byte $07
+$80EB: 00        BRK
+$80EC: 00        BRK
+$80ED: 10 27     BPL $8116
+$80EF: 02        .byte $02
+$80F0: DE FE 00  DEC $00FE,X
+$80F3: 00        BRK
+$80F4: 40        RTI
+$80F5: 1F        .byte $1F
+$80F6: 02        .byte $02
+$80F7: 30 F8     BMI $80F1
+$80F9: 00        BRK
+$80FA: 00        BRK
+$80FB: 88        DEY
+$80FC: 13        .byte $13
+$80FD: 02        .byte $02
+$80FE: 94 F8     STY $F8,X
+$8100: 00        BRK
+... (truncated at 256 bytes)

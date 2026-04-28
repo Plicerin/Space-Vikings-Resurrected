@@ -1,0 +1,40 @@
+Disassembling extracted\SOUND GEN.payload.bin (74 bytes) starting at $9276
+============================================================
+$9276: 38        SEC
+$9277: EE 73 92  INC $9273
+$927A: AE 74 92  LDX $9274
+$927D: 2E 70 92  ROL $9270
+$9280: 2E 71 92  ROL $9271
+$9283: 8A        TXA
+$9284: F0 01     BEQ $9287
+$9286: CA        DEX
+$9287: D0 08     BNE $9291
+$9289: 90 06     BCC $9291
+$928B: AD 30 C0  LDA $C030
+$928E: AE 74 92  LDX $9274
+$9291: 6A        ROR A
+$9292: 6A        ROR A
+$9293: 6A        ROR A
+$9294: 4D 71 92  EOR $9271
+$9297: 0A        ASL A
+$9298: 0A        ASL A
+$9299: 0A        ASL A
+$929A: 08        PHP
+$929B: AD 75 92  LDA $9275
+$929E: F0 14     BEQ $92B4
+$92A0: A8        TAY
+$92A1: 30 0B     BMI $92AE
+$92A3: AD 74 92  LDA $9274
+$92A6: F0 0C     BEQ $92B4
+$92A8: CE 74 92  DEC $9274
+$92AB: 98        TYA
+$92AC: D0 06     BNE $92B4
+$92AE: EE 74 92  INC $9274
+$92B1: 29 7F     AND #$7F
+$92B3: A8        TAY
+$92B4: 28        PLP
+$92B5: CE 72 92  DEC $9272
+$92B8: D0 C3     BNE $927D
+$92BA: CE 73 92  DEC $9273
+$92BD: D0 BE     BNE $927D
+$92BF: 60        RTS

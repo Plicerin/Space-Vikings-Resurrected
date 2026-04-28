@@ -1,0 +1,51 @@
+Disassembling extracted\MEM TRANSFER A.payload.bin (112 bytes) starting at $9400
+============================================================
+$9400: A2 00     LDX #$00
+$9402: 8E 32 95  STX $9532
+$9405: 18        CLC
+$9406: AE 32 95  LDX $9532
+$9409: E0 80     CPX #$80
+$940B: F0 60     BEQ $946D
+$940D: BD EC 8B  LDA $8BEC,X
+$9410: 85 00     STA $00
+$9412: BD 7C 8D  LDA $8D7C,X
+$9415: 85 04     STA $04
+$9417: EE 32 95  INC $9532
+$941A: AE 32 95  LDX $9532
+$941D: BD EC 8B  LDA $8BEC,X
+$9420: 85 01     STA $01
+$9422: BD 7C 8D  LDA $8D7C,X
+$9425: 85 05     STA $05
+$9427: 20 60 94  JSR $9460
+$942A: EE 32 95  INC $9532
+$942D: 4C 06 94  JMP $9406
+$9430: A2 00     LDX #$00
+$9432: 8E 32 95  STX $9532
+$9435: 18        CLC
+$9436: AE 32 95  LDX $9532
+$9439: E0 80     CPX #$80
+$943B: F0 30     BEQ $946D
+$943D: BD 7C 8D  LDA $8D7C,X
+$9440: 85 00     STA $00
+$9442: BD EC 8B  LDA $8BEC,X
+$9445: 85 04     STA $04
+$9447: EE 32 95  INC $9532
+$944A: AE 32 95  LDX $9532
+$944D: BD 7C 8D  LDA $8D7C,X
+$9450: 85 01     STA $01
+$9452: BD EC 8B  LDA $8BEC,X
+$9455: 85 05     STA $05
+$9457: 20 60 94  JSR $9460
+$945A: EE 32 95  INC $9532
+$945D: 4C 36 94  JMP $9436
+$9460: 18        CLC
+$9461: A0 00     LDY #$00
+$9463: B1 00     LDA ($00),Y
+$9465: 91 04     STA ($04),Y
+$9467: C8        INY
+$9468: 98        TYA
+$9469: 69 D8     ADC #$D8
+$946B: 90 F6     BCC $9463
+$946D: 60        RTS
+$946E: 3C        .byte $3C
+$946F: 00        BRK

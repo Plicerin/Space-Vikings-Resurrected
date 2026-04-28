@@ -1,0 +1,3 @@
+Disassembling extracted\SHIP no 0.payload.bin (1 bytes) starting at $8000
+============================================================
+$8000: 7F        .byte $7F

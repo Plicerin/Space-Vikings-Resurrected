@@ -1,0 +1,19 @@
+Disassembling extracted\LASER.payload.bin (26 bytes) starting at $92D1
+============================================================
+$92D1: A0 0E     LDY #$0E
+$92D3: A2 00     LDX #$00
+$92D5: 8A        TXA
+$92D6: 18        CLC
+$92D7: E9 01     SBC #$01
+$92D9: D0 FC     BNE $92D7
+$92DB: 8D 30 C0  STA $C030
+$92DE: E8        INX
+$92DF: E0 8C     CPX #$8C
+$92E1: D0 F2     BNE $92D5
+$92E3: 88        DEY
+$92E4: D0 ED     BNE $92D3
+$92E6: 60        RTS
+$92E7: 00        BRK
+$92E8: 00        BRK
+$92E9: 00        BRK
+$92EA: 00        BRK

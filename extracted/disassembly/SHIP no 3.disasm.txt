@@ -1,0 +1,196 @@
+Disassembling extracted\SHIP no 3.payload.bin (1046 bytes) starting at $8000
+============================================================
+$8000: 04        .byte $04
+$8001: 00        BRK
+$8002: 01 96     ORA ($96,X)
+$8004: 00        BRK
+$8005: 9C        .byte $9C
+$8006: FF        .byte $FF
+$8007: 54        .byte $54
+$8008: F2        .byte $F2
+$8009: 02        .byte $02
+$800A: 58        CLI
+$800B: 02        .byte $02
+$800C: 9C        .byte $9C
+$800D: FF        .byte $FF
+$800E: EA        NOP
+$800F: F2        .byte $F2
+$8010: 02        .byte $02
+$8011: 58        CLI
+$8012: 02        .byte $02
+$8013: 9C        .byte $9C
+$8014: FF        .byte $FF
+$8015: BE F1 02  LDX $02F1,Y
+$8018: 96 00     STX $00,Y
+$801A: 9C        .byte $9C
+$801B: FF        .byte $FF
+$801C: 54        .byte $54
+$801D: F2        .byte $F2
+$801E: 02        .byte $02
+$801F: 96 00     STX $00,Y
+$8021: 97        .byte $97
+$8022: FF        .byte $FF
+$8023: 54        .byte $54
+$8024: F2        .byte $F2
+$8025: 02        .byte $02
+$8026: 58        CLI
+$8027: 02        .byte $02
+$8028: 88        DEY
+$8029: FF        .byte $FF
+$802A: 54        .byte $54
+$802B: F2        .byte $F2
+$802C: 02        .byte $02
+$802D: 58        CLI
+$802E: 02        .byte $02
+$802F: 9C        .byte $9C
+$8030: FF        .byte $FF
+$8031: EA        NOP
+$8032: F2        .byte $F2
+$8033: 02        .byte $02
+$8034: 58        CLI
+$8035: 02        .byte $02
+$8036: B0 FF     BCS $8037
+$8038: 54        .byte $54
+$8039: F2        .byte $F2
+$803A: 02        .byte $02
+$803B: 58        CLI
+$803C: 02        .byte $02
+$803D: 9C        .byte $9C
+$803E: FF        .byte $FF
+$803F: BE F1 02  LDX $02F1,Y
+$8042: 58        CLI
+$8043: 02        .byte $02
+$8044: 88        DEY
+$8045: FF        .byte $FF
+$8046: 54        .byte $54
+$8047: F2        .byte $F2
+$8048: 01 96     ORA ($96,X)
+$804A: 00        BRK
+$804B: 9C        .byte $9C
+$804C: FF        .byte $FF
+$804D: 54        .byte $54
+$804E: F2        .byte $F2
+$804F: 02        .byte $02
+$8050: C2        .byte $C2
+$8051: 01 A7     ORA ($A7,X)
+$8053: FF        .byte $FF
+$8054: 54        .byte $54
+$8055: F2        .byte $F2
+$8056: 03        .byte $03
+$8057: 58        CLI
+$8058: 02        .byte $02
+$8059: 9C        .byte $9C
+$805A: FF        .byte $FF
+$805B: EA        NOP
+$805C: F2        .byte $F2
+$805D: 03        .byte $03
+$805E: 58        CLI
+$805F: 02        .byte $02
+$8060: 9C        .byte $9C
+$8061: FF        .byte $FF
+$8062: BE F1 03  LDX $03F1,Y
+$8065: 26 02     ROL $02
+$8067: C4 FF     CPY $FF
+$8069: 54        .byte $54
+$806A: F2        .byte $F2
+$806B: 03        .byte $03
+$806C: 26 02     ROL $02
+$806E: AE FF 2C  LDX $2CFF
+$8071: F2        .byte $F2
+$8072: 03        .byte $03
+$8073: 26 02     ROL $02
+$8075: AE FF 7C  LDX $7CFF
+$8078: F2        .byte $F2
+$8079: 01 26     ORA ($26,X)
+$807B: 02        .byte $02
+$807C: AE FF 22  LDX $22FF
+$807F: F2        .byte $F2
+$8080: 02        .byte $02
+$8081: 26 02     ROL $02
+$8083: AE FF 86  LDX $86FF
+$8086: F2        .byte $F2
+$8087: 02        .byte $02
+$8088: 26 02     ROL $02
+$808A: C4 FF     CPY $FF
+$808C: 86 F2     STX $F2
+$808E: 01 26     ORA ($26,X)
+$8090: 02        .byte $02
+$8091: C4 FF     CPY $FF
+$8093: 22        .byte $22
+$8094: F2        .byte $F2
+$8095: 02        .byte $02
+$8096: 26 02     ROL $02
+$8098: AE FF 22  LDX $22FF
+$809B: F2        .byte $F2
+$809C: 02        .byte $02
+$809D: 58        CLI
+$809E: 02        .byte $02
+$809F: A6 FF     LDX $FF
+$80A1: 22        .byte $22
+$80A2: F2        .byte $F2
+$80A3: 02        .byte $02
+$80A4: 58        CLI
+$80A5: 02        .byte $02
+$80A6: C4 FF     CPY $FF
+$80A8: 22        .byte $22
+$80A9: F2        .byte $F2
+$80AA: 02        .byte $02
+$80AB: 58        CLI
+$80AC: 02        .byte $02
+$80AD: C4 FF     CPY $FF
+$80AF: 86 F2     STX $F2
+$80B1: 02        .byte $02
+$80B2: 58        CLI
+$80B3: 02        .byte $02
+$80B4: A6 FF     LDX $FF
+$80B6: 86 F2     STX $F2
+$80B8: 02        .byte $02
+$80B9: 58        CLI
+$80BA: 02        .byte $02
+$80BB: C4 FF     CPY $FF
+$80BD: 22        .byte $22
+$80BE: F2        .byte $F2
+$80BF: 01 26     ORA ($26,X)
+$80C1: 02        .byte $02
+$80C2: C4 FF     CPY $FF
+$80C4: 22        .byte $22
+$80C5: F2        .byte $F2
+$80C6: 02        .byte $02
+$80C7: 58        CLI
+$80C8: 02        .byte $02
+$80C9: C4 FF     CPY $FF
+$80CB: 22        .byte $22
+$80CC: F2        .byte $F2
+$80CD: 01 58     ORA ($58,X)
+$80CF: 02        .byte $02
+$80D0: C4 FF     CPY $FF
+$80D2: 86 F2     STX $F2
+$80D4: 02        .byte $02
+$80D5: 26 02     ROL $02
+$80D7: C4 FF     CPY $FF
+$80D9: 86 F2     STX $F2
+$80DB: 01 26     ORA ($26,X)
+$80DD: 02        .byte $02
+$80DE: C4 FF     CPY $FF
+$80E0: 5E F2 02  LSR $02F2,X
+$80E3: 26 02     ROL $02
+$80E5: C4 FF     CPY $FF
+$80E7: 4A        LSR A
+$80E8: F2        .byte $F2
+$80E9: 02        .byte $02
+$80EA: 44        .byte $44
+$80EB: 02        .byte $02
+$80EC: F6 FF     INC $FF,X
+$80EE: 4A        LSR A
+$80EF: F2        .byte $F2
+$80F0: 02        .byte $02
+$80F1: 44        .byte $44
+$80F2: 02        .byte $02
+$80F3: F6 FF     INC $FF,X
+$80F5: 5E F2 02  LSR $02F2,X
+$80F8: 26 02     ROL $02
+$80FA: C4 FF     CPY $FF
+$80FC: 5E F2 02  LSR $02F2,X
+$80FF: 58        CLI
+$8100: 02        .byte $02
+... (truncated at 256 bytes)

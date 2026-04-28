@@ -1,0 +1,175 @@
+Disassembling extracted\ENEMY I.A24580.L68.payload.bin (1107 bytes) starting at $A000
+============================================================
+$A000: 1A        .byte $1A
+$A001: 00        BRK
+$A002: 3E 00 44  ROL $4400,X
+$A005: 00        BRK
+$A006: AF        .byte $AF
+$A007: 00        BRK
+$A008: C6 00     DEC $00
+$A00A: D7        .byte $D7
+$A00B: 00        BRK
+$A00C: E5 00     SBC $00
+$A00E: EC 00 F1  CPX $F100
+$A011: 00        BRK
+$A012: 08        PHP
+$A013: 01 28     ORA ($28,X)
+$A015: 01 45     ORA ($45,X)
+$A017: 01 76     ORA ($76,X)
+$A019: 01 8A     ORA ($8A,X)
+$A01B: 01 91     ORA ($91,X)
+$A01D: 01 98     ORA ($98,X)
+$A01F: 01 11     ORA ($11,X)
+$A021: 02        .byte $02
+$A022: 74        .byte $74
+$A023: 02        .byte $02
+$A024: D9 02 50  CMP $5002,Y
+$A027: 03        .byte $03
+$A028: 97        .byte $97
+$A029: 03        .byte $03
+$A02A: BC 03 CC  LDY $CC03,X
+$A02D: 03        .byte $03
+$A02E: E0 03     CPX #$03
+$A030: FD 03 17  SBC $1703,X
+$A033: 04        .byte $04
+$A034: 32        .byte $32
+$A035: 04        .byte $04
+$A036: 53        .byte $53
+$A037: 04        .byte $04
+$A038: 00        BRK
+$A039: 00        BRK
+$A03A: 00        BRK
+$A03B: 00        BRK
+$A03C: 00        BRK
+$A03D: 00        BRK
+$A03E: 3E 24 2D  ROL $2D24,X
+$A041: 36 04     ROL $04,X
+$A043: 00        BRK
+$A044: 2C 3C 96  BIT $963C
+$A047: 1E 35 0D  ASL $0D35,X
+$A04A: 18        CLC
+$A04B: 24 2D     BIT $2D
+$A04D: 2C 15 A5  BIT $A515
+$A050: DA        .byte $DA
+$A051: 73        .byte $73
+$A052: 1F        .byte $1F
+$A053: 56 8C     LSR $8C,X
+$A055: 15 0C     ORA $0C,X
+$A057: 18        CLC
+$A058: D0 1B     BNE $A075
+$A05A: FD BA 9E  SBC $9EBA,X
+$A05D: 21 08     AND ($08,X)
+$A05F: D8        CLD
+$A060: 3C        .byte $3C
+$A061: 60        RTS
+$A062: 0C        .byte $0C
+$A063: 18        CLC
+$A064: 9F        .byte $9F
+$A065: B9 FF 6F  LDA $6FFF,Y
+$A068: 08        PHP
+$A069: 58        CLI
+$A06A: C8        INY
+$A06B: 4A        LSR A
+$A06C: 1C        .byte $1C
+$A06D: 1C        .byte $1C
+$A06E: 94 3A     STY $3A,X
+$A070: F0 39     BEQ $A0AB
+$A072: 0C        .byte $0C
+$A073: 58        CLI
+$A074: 08        PHP
+$A075: D8        CLD
+$A076: 0D 55 6C  ORA $6C55
+$A079: 12        .byte $12
+$A07A: 24 AC     BIT $AC
+$A07C: B2        .byte $B2
+$A07D: 35 08     AND $08,X
+$A07F: 58        CLI
+$A080: 0C        .byte $0C
+$A081: 9C        .byte $9C
+$A082: 13        .byte $13
+$A083: 0C        .byte $0C
+$A084: 08        PHP
+$A085: 48        PHA
+$A086: 96 53     STX $53,Y
+$A088: 0C        .byte $0C
+$A089: 96 92     STX $92,Y
+$A08B: 9E        .byte $9E
+$A08C: 8A        TXA
+$A08D: DF        .byte $DF
+$A08E: 18        CLC
+$A08F: B8        CLV
+$A090: D9 DB 0B  CMP $0BDB,Y
+$A093: 18        CLC
+$A094: F7        .byte $F7
+$A095: 0D 18 28  ORA $2818
+$A098: 10 0C     BPL $A0A6
+$A09A: D8        CLD
+$A09B: 1A        .byte $1A
+$A09C: 0D 0C 08  ORA $080C
+$A09F: 08        PHP
+$A0A0: 08        PHP
+$A0A1: 48        PHA
+$A0A2: 08        PHP
+$A0A3: 18        CLC
+$A0A4: F8        SED
+$A0A5: DB        .byte $DB
+$A0A6: 1B        .byte $1B
+$A0A7: E0 13     CPX #$13
+$A0A9: 8C AA 35  STY $35AA
+$A0AC: 15 35     ORA $35,X
+$A0AE: 00        BRK
+$A0AF: 24 B4     BIT $B4
+$A0B1: 12        .byte $12
+$A0B2: 36 0C     ROL $0C,X
+$A0B4: 58        CLI
+$A0B5: 0C        .byte $0C
+$A0B6: 1C        .byte $1C
+$A0B7: 1F        .byte $1F
+$A0B8: 1E 0E 4D  ASL $4D0E,X
+$A0BB: 08        PHP
+$A0BC: 0F        .byte $0F
+$A0BD: 18        CLC
+$A0BE: 58        CLI
+$A0BF: DF        .byte $DF
+$A0C0: F3        .byte $F3
+$A0C1: AA        TAX
+$A0C2: 6A        ROR A
+$A0C3: 09 04     ORA #$04
+$A0C5: 00        BRK
+$A0C6: 24 96     BIT $96
+$A0C8: 36 0C     ROL $0C,X
+$A0CA: D8        CLD
+$A0CB: 6C 2E D0  JMP ($D02E)
+$A0CE: FA        .byte $FA
+$A0CF: 0C        .byte $0C
+$A0D0: 18        CLC
+$A0D1: 68        PLA
+$A0D2: 56 FC     LSR $FC,X
+$A0D4: 1B        .byte $1B
+$A0D5: 26 00     ROL $00
+$A0D7: 24 96     BIT $96
+$A0D9: 3E 08 18  ROL $1808,X
+$A0DC: 0D FD 1B  ORA $1BFD
+$A0DF: 0C        .byte $0C
+$A0E0: 0D 16 1F  ORA $1F16
+$A0E3: 04        .byte $04
+$A0E4: 00        BRK
+$A0E5: B4 26     LDY $26,X
+$A0E7: 08        PHP
+$A0E8: 5E 1F 24  LSR $241F,X
+$A0EB: 00        BRK
+$A0EC: B4 0C     LDY $0C,X
+$A0EE: 1F        .byte $1F
+$A0EF: 04        .byte $04
+$A0F0: 00        BRK
+$A0F1: 1F        .byte $1F
+$A0F2: 6E 0D E4  ROR $E40D
+$A0F5: 21 FC     AND ($FC,X)
+$A0F7: 1B        .byte $1B
+$A0F8: F6 69     INC $69,X
+$A0FA: 96 6B     STX $6B,Y
+$A0FC: 0C        .byte $0C
+$A0FD: 58        CLI
+$A0FE: 29 2D     AND #$2D
+$A100: FD DB DB  SBC $DBDB,X
+... (truncated at 256 bytes)

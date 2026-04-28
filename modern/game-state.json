@@ -1,0 +1,143 @@
+{
+  "name": "Space Vikings Game State",
+  "version": "1.0",
+  "description": "Converted from 6502 assembly disassembly ($9023-$921E)",
+  "memory_addresses": {
+    "game_state": {
+      "address": "$95FD-$95FE",
+      "description": "Main game state variables",
+      "converted_name": "gameState",
+      "structure": {
+        "byte1": "current_state",
+        "byte2": "target_state"
+      }
+    },
+    "temporary_flags": {
+      "$952F": "flag_variable",
+      "$7321": "position_x",
+      "$7323": "position_y",
+      "$8BEC": "table_1",
+      "$8D7C": "table_2",
+      "$9532": "counter_index"
+    }
+  },
+  "state_machine": {
+    "entry_point": "$9023",
+    "states": [
+      {
+        "name": "check_state_byte1",
+        "address_range": "$9023-$9087",
+        "logic": "Check $95FD (gameState.current_state) for multiple ranges",
+        "transitions": [
+          {
+            "condition": "value < 0x5A",
+            "action": "call $91C5",
+            "converted_function": "transitionToLowerState"
+          },
+          {
+            "condition": "value >= 0xAA",
+            "action": "call $918C",
+            "converted_function": "transitionToHigherState"
+          },
+          {
+            "condition": "0x46 <= value < 0x5A",
+            "action": "jump to $9088",
+            "converted_function": "mediumStateTransition"
+          },
+          {
+            "condition": "0x32 <= value < 0x46",
+            "action": "jump to $9088",
+            "converted_function": "mediumStateTransition"
+          },
+          {
+            "condition": "0x1F <= value < 0x32",
+            "action": "jump to $9088",
+            "converted_function": "mediumStateTransition"
+          }
+        ]
+      },
+      {
+        "name": "check_state_byte2",
+        "address_range": "$9088-$90E8",
+        "logic": "Check $95FE (gameState.target_state) for multiple ranges",
+        "transitions": [
+          {
+            "condition": "value < 0x5A",
+            "action": "call $91D7",
+            "converted_function": "transitionToLowerTarget"
+          },
+          {
+            "condition": "value >= 0xAA",
+            "action": "call $919E",
+            "converted_function": "transitionToHigherTarget"
+          },
+          {
+            "condition": "0x46 <= value < 0x5A",
+            "action": "jump to $90E9",
+            "converted_function": "mediumTargetTransition"
+          },
+          {
+            "condition": "0x32 <= value < 0x46",
+            "action": "jump to $90E9",
+            "converted_function": "mediumTargetTransition"
+          },
+          {
+            "condition": "0x1E <= value < 0x32",
+            "action": "jump to $90E9",
+            "converted_function": "mediumTargetTransition"
+          }
+        ]
+      },
+      {
+        "name": "position_check",
+        "address_range": "$90F2-$912D",
+        "logic": "Check $7321 (position_x) and $7323 (position_y)",
+        "conditions": [
+          {
+            "condition": "$7321 >= 0x40 && $7321 < 0xC0",
+            "converted_check": "isInHorizontalRange"
+          },
+          {
+            "condition": "$7323 < 0x7F",
+            "converted_check": "isInVerticalRange"
+          }
+        ],
+        "flag_setting": {
+          "address": "$952F",
+          "value": "0x01",
+          "description": "Set flag when position conditions met"
+        }
+      },
+      {
+        "name": "final_routine",
+        "address_range": "$921E",
+        "logic": "End of state machine processing",
+        "converted_function": "endStateProcessing"
+      }
+    ],
+    "functions": {
+      "$91C5": "transitionToLowerState",
+      "$91D7": "transitionToLowerTarget", 
+      "$918C": "transitionToHigherState",
+      "$919E": "transitionToHigherTarget",
+      "$90F2": "checkPosition",
+      "$912E": "unknownRoutine",
+      "$921E": "finalProcessing"
+    }
+  },
+  "conversion_notes": {
+    "branch_ranges": [
+      "0x1E (30) - 0x1F (31)",
+      "0x32 (50) - 0x46 (70)",
+      "0x5A (90)",
+      "0xAA (170) - 0xE6 (230)"
+    ],
+    "memory_transfer": {
+      "routine": "MEM TRANSFER A ($9400)",
+      "source": "$8BEC",
+      "destination": "$8D7C",
+      "block_size": 216,
+      "max_iterations": 128
+    }
+  }
+}

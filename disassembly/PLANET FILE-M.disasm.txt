@@ -1,0 +1,138 @@
+Disassembling extracted\PLANET FILE-M.payload.bin (175 bytes) starting at $954C
+============================================================
+$954C: 01 00     ORA ($00,X)
+$954E: 00        BRK
+$954F: 00        BRK
+$9550: 00        BRK
+$9551: 00        BRK
+$9552: 00        BRK
+$9553: 00        BRK
+$9554: 00        BRK
+$9555: 00        BRK
+$9556: 00        BRK
+$9557: 00        BRK
+$9558: 00        BRK
+$9559: 00        BRK
+$955A: 00        BRK
+$955B: 00        BRK
+$955C: 00        BRK
+$955D: 00        BRK
+$955E: 00        BRK
+$955F: 00        BRK
+$9560: 00        BRK
+$9561: 01 00     ORA ($00,X)
+$9563: 00        BRK
+$9564: 00        BRK
+$9565: 00        BRK
+$9566: 00        BRK
+$9567: 00        BRK
+$9568: 00        BRK
+$9569: 00        BRK
+$956A: 00        BRK
+$956B: 00        BRK
+$956C: 00        BRK
+$956D: 00        BRK
+$956E: 00        BRK
+$956F: 00        BRK
+$9570: 00        BRK
+$9571: 00        BRK
+$9572: 00        BRK
+$9573: 00        BRK
+$9574: 00        BRK
+$9575: 00        BRK
+$9576: 7D 46 AF  ADC $AF46,X
+$9579: 00        BRK
+$957A: 5A        .byte $5A
+$957B: 03        .byte $03
+$957C: C8        INY
+$957D: 96 55     STX $55,Y
+$957F: 9D 00 01  STA $0100,X
+$9582: A5 06     LDA $06
+$9584: 00        BRK
+$9585: 50 82     BVC $9509
+$9587: 9B        .byte $9B
+$9588: 02        .byte $02
+$9589: 07        .byte $07
+$958A: 03        .byte $03
+$958B: 03        .byte $03
+$958C: 03        .byte $03
+$958D: 03        .byte $03
+$958E: 00        BRK
+$958F: 02        .byte $02
+$9590: 01 04     ORA ($04,X)
+$9592: 02        .byte $02
+$9593: 03        .byte $03
+$9594: 04        .byte $04
+$9595: 00        BRK
+$9596: 01 04     ORA ($04,X)
+$9598: 02        .byte $02
+$9599: 00        BRK
+$959A: 03        .byte $03
+$959B: 03        .byte $03
+$959C: 03        .byte $03
+$959D: 01 02     ORA ($02,X)
+$959F: 02        .byte $02
+$95A0: 01 00     ORA ($00,X)
+$95A2: 00        BRK
+$95A3: 00        BRK
+$95A4: 00        BRK
+$95A5: 00        BRK
+$95A6: 00        BRK
+$95A7: 00        BRK
+$95A8: 00        BRK
+$95A9: 00        BRK
+$95AA: 00        BRK
+$95AB: 00        BRK
+$95AC: 00        BRK
+$95AD: 00        BRK
+$95AE: 00        BRK
+$95AF: 00        BRK
+$95B0: 00        BRK
+$95B1: 00        BRK
+$95B2: 00        BRK
+$95B3: 00        BRK
+$95B4: 00        BRK
+$95B5: 0F        .byte $0F
+$95B6: 0C        .byte $0C
+$95B7: 0F        .byte $0F
+$95B8: 0C        .byte $0C
+$95B9: 13        .byte $13
+$95BA: 13        .byte $13
+$95BB: 0C        .byte $0C
+$95BC: 09 19     ORA #$19
+$95BE: 0A        ASL A
+$95BF: 14        .byte $14
+$95C0: 0E 0D 15  ASL $150D
+$95C3: 13        .byte $13
+$95C4: 0B        .byte $0B
+$95C5: 0A        ASL A
+$95C6: 1B        .byte $1B
+$95C7: 0B        .byte $0B
+$95C8: 19 0F 0F  ORA $0F0F,Y
+$95CB: 0D 09 10  ORA $1009
+$95CE: 0E 16 17  ASL $1716
+$95D1: 08        PHP
+$95D2: 0D 16 17  ORA $1716
+$95D5: 17        .byte $17
+$95D6: 15 0F     ORA $0F,X
+$95D8: 15 05     ORA $05,X
+$95DA: 0A        ASL A
+$95DB: 12        .byte $12
+$95DC: 1B        .byte $1B
+$95DD: 0B        .byte $0B
+$95DE: 0D 0F 0D  ORA $0D0F
+$95E1: 0E 08 16  ASL $1608
+$95E4: 0D 11 0E  ORA $0E11
+$95E7: 13        .byte $13
+$95E8: 14        .byte $14
+$95E9: 09 07     ORA #$07
+$95EB: 19 19 09  ORA $0919,Y
+$95EE: 19 18 0B  ORA $0B18,Y
+$95F1: 12        .byte $12
+$95F2: 0B        .byte $0B
+$95F3: 00        BRK
+$95F4: 83        .byte $83
+$95F5: 74        .byte $74
+$95F6: 09 00     ORA #$00
+$95F8: 01 00     ORA ($00,X)
+$95FA: 12        .byte $12

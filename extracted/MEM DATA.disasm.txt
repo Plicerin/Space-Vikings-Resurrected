@@ -1,0 +1,135 @@
+Disassembling extracted\MEM DATA.payload.bin (850 bytes) starting at $8E00
+============================================================
+$8E00: D0 37     BNE $8E39
+$8E02: D0 33     BNE $8E37
+$8E04: D0 2F     BNE $8E35
+$8E06: D0 2B     BNE $8E33
+$8E08: D0 27     BNE $8E31
+$8E0A: D0 23     BNE $8E2F
+$8E0C: 50 3F     BVC $8E4D
+$8E0E: 50 3B     BVC $8E4B
+$8E10: 50 37     BVC $8E49
+$8E12: 50 33     BVC $8E47
+$8E14: 50 2F     BVC $8E45
+$8E16: 50 2B     BVC $8E43
+$8E18: 50 27     BVC $8E41
+$8E1A: 50 23     BVC $8E3F
+$8E1C: D0 3E     BNE $8E5C
+$8E1E: D0 3A     BNE $8E5A
+$8E20: D0 36     BNE $8E58
+$8E22: D0 32     BNE $8E56
+$8E24: D0 2E     BNE $8E54
+$8E26: D0 2A     BNE $8E52
+$8E28: D0 26     BNE $8E50
+$8E2A: D0 22     BNE $8E4E
+$8E2C: 50 3E     BVC $8E6C
+$8E2E: 50 3A     BVC $8E6A
+$8E30: 50 36     BVC $8E68
+$8E32: 50 32     BVC $8E66
+$8E34: 50 2E     BVC $8E64
+$8E36: 50 2A     BVC $8E62
+$8E38: 50 26     BVC $8E60
+$8E3A: 50 22     BVC $8E5E
+$8E3C: D0 3D     BNE $8E7B
+$8E3E: D0 39     BNE $8E79
+$8E40: D0 35     BNE $8E77
+$8E42: D0 31     BNE $8E75
+$8E44: D0 2D     BNE $8E73
+$8E46: D0 29     BNE $8E71
+$8E48: D0 25     BNE $8E6F
+$8E4A: D0 21     BNE $8E6D
+$8E4C: 50 3D     BVC $8E8B
+$8E4E: 50 39     BVC $8E89
+$8E50: 50 35     BVC $8E87
+$8E52: 50 31     BVC $8E85
+$8E54: 50 2D     BVC $8E83
+$8E56: 50 29     BVC $8E81
+$8E58: 50 25     BVC $8E7F
+$8E5A: 50 21     BVC $8E7D
+$8E5C: D0 3C     BNE $8E9A
+$8E5E: D0 38     BNE $8E98
+$8E60: D0 34     BNE $8E96
+$8E62: D0 30     BNE $8E94
+$8E64: D0 2C     BNE $8E92
+$8E66: D0 28     BNE $8E90
+$8E68: D0 24     BNE $8E8E
+$8E6A: D0 20     BNE $8E8C
+$8E6C: 50 3C     BVC $8EAA
+$8E6E: 50 38     BVC $8EA8
+$8E70: 50 34     BVC $8EA6
+$8E72: 50 30     BVC $8EA4
+$8E74: 50 2C     BVC $8EA2
+$8E76: 50 28     BVC $8EA0
+$8E78: 50 24     BVC $8E9E
+$8E7A: 50 20     BVC $8E9C
+$8E7C: A8        TAY
+$8E7D: 3F        .byte $3F
+$8E7E: A8        TAY
+$8E7F: 3B        .byte $3B
+$8E80: 04        .byte $04
+$8E81: A9 01     LDA #$01
+$8E83: 85 87     STA $87
+$8E85: A9 FF     LDA #$FF
+$8E87: 85 8F     STA $8F
+$8E89: B1 6A     LDA ($6A),Y
+$8E8B: 4C 0E 8D  JMP $8D0E
+$8E8E: 20 27 88  JSR $8827
+$8E91: A5 82     LDA $82
+$8E93: F0 04     BEQ $8E99
+$8E95: A9 01     LDA #$01
+$8E97: 85 87     STA $87
+$8E99: A9 FF     LDA #$FF
+$8E9B: 85 8F     STA $8F
+$8E9D: B1 6A     LDA ($6A),Y
+$8E9F: 4C 0E 8D  JMP $8D0E
+$8EA2: C8        INY
+$8EA3: B1 6A     LDA ($6A),Y
+$8EA5: 85 81     STA $81
+$8EA7: A9 00     LDA #$00
+$8EA9: 85 82     STA $82
+$8EAB: A9 FF     LDA #$FF
+$8EAD: 85 8F     STA $8F
+$8EAF: C8        INY
+$8EB0: C8        INY
+$8EB1: B1 6A     LDA ($6A),Y
+$8EB3: 4C 0E 8D  JMP $8D0E
+$8EB6: C8        INY
+$8EB7: B1 6A     LDA ($6A),Y
+$8EB9: 09 80     ORA #$80
+$8EBB: 4C 91 8C  JMP $8C91
+$8EBE: 38        SEC
+$8EBF: A5 89     LDA $89
+$8EC1: E9 01     SBC #$01
+$8EC3: 85 81     STA $81
+$8EC5: A5 8A     LDA $8A
+$8EC7: E9 00     SBC #$00
+$8EC9: 85 82     STA $82
+$8ECB: A9 FF     LDA #$FF
+$8ECD: 85 8F     STA $8F
+$8ECF: 85 87     STA $87
+$8ED1: C8        INY
+$8ED2: B1 6A     LDA ($6A),Y
+$8ED4: 4C 0E 8D  JMP $8D0E
+$8ED7: A5 87     LDA $87
+$8ED9: 48        PHA
+$8EDA: 20 4B 88  JSR $884B
+$8EDD: B0 06     BCS $8EE5
+$8EDF: 68        PLA
+$8EE0: A9 01     LDA #$01
+$8EE2: 85 87     STA $87
+$8EE4: 60        RTS
+$8EE5: 68        PLA
+$8EE6: 05 87     ORA $87
+$8EE8: 85 87     STA $87
+$8EEA: A9 FF     LDA #$FF
+$8EEC: 85 8F     STA $8F
+$8EEE: B1 6A     LDA ($6A),Y
+$8EF0: 4C 0E 8D  JMP $8D0E
+$8EF3: A9 00     LDA #$00
+$8EF5: 85 81     STA $81
+$8EF7: 85 82     STA $82
+$8EF9: C8        INY
+$8EFA: B1 6A     LDA ($6A),Y
+$8EFC: 20 DA 84  JSR $84DA
+$8EFF: 90 13     BCC $8F14
+... (truncated at 256 bytes)

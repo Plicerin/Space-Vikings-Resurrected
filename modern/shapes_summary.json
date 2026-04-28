@@ -1,0 +1,152 @@
+{
+  "total_files_processed": 26,
+  "files": [
+    {
+      "file": "PLANET no 0.payload.bin",
+      "num_shapes": 15,
+      "file_size": 1401
+    },
+    {
+      "file": "PLANET no 1.payload.bin",
+      "num_shapes": 15,
+      "file_size": 814
+    },
+    {
+      "file": "PLANET no 2.payload.bin",
+      "num_shapes": 15,
+      "file_size": 660
+    },
+    {
+      "file": "PLANET no 3.payload.bin",
+      "num_shapes": 15,
+      "file_size": 660
+    },
+    {
+      "file": "PLANET no 4.payload.bin",
+      "num_shapes": 15,
+      "file_size": 1003
+    },
+    {
+      "file": "PLANET no 5.payload.bin",
+      "num_shapes": 15,
+      "file_size": 940
+    },
+    {
+      "file": "PLANET no 6.payload.bin",
+      "num_shapes": 15,
+      "file_size": 1003
+    },
+    {
+      "file": "PLANET no 7.payload.bin",
+      "num_shapes": 15,
+      "file_size": 835
+    },
+    {
+      "file": "PLANET no 8.payload.bin",
+      "num_shapes": 15,
+      "file_size": 513
+    },
+    {
+      "file": "PLANET no 9.payload.bin",
+      "num_shapes": 15,
+      "file_size": 625
+    },
+    {
+      "file": "PLANET no 10.payload.bin",
+      "num_shapes": 15,
+      "file_size": 835
+    },
+    {
+      "file": "PLANET no 11.payload.bin",
+      "num_shapes": 15,
+      "file_size": 1346
+    },
+    {
+      "file": "PLANET no 12.payload.bin",
+      "num_shapes": 15,
+      "file_size": 1346
+    },
+    {
+      "file": "PLANET no 13.payload.bin",
+      "num_shapes": 15,
+      "file_size": 1500
+    },
+    {
+      "file": "PLANET no 14.payload.bin",
+      "num_shapes": 15,
+      "file_size": 590
+    },
+    {
+      "file": "PLANET no 15.payload.bin",
+      "num_shapes": 15,
+      "file_size": 1451
+    },
+    {
+      "file": "PLANET no 16.payload.bin",
+      "num_shapes": 15,
+      "file_size": 576
+    },
+    {
+      "file": "PLANET no 17.payload.bin",
+      "num_shapes": 15,
+      "file_size": 541
+    },
+    {
+      "file": "PLANET no 18.payload.bin",
+      "num_shapes": 15,
+      "file_size": 520
+    },
+    {
+      "file": "PLANET no 19.payload.bin",
+      "num_shapes": 15,
+      "file_size": 520
+    },
+    {
+      "file": "PLANET no 20.payload.bin",
+      "num_shapes": 15,
+      "file_size": 1171
+    },
+    {
+      "file": "PLANET FILE.payload.bin",
+      "num_shapes": 256,
+      "file_size": 175
+    },
+    {
+      "file": "PLANET FILE-M.payload.bin",
+      "num_shapes": 2,
+      "file_size": 175
+    },
+    {
+      "file": "SHIP no 1.payload.bin",
+      "num_shapes": 5,
+      "file_size": 962
+    },
+    {
+      "file": "SHIP no 3.payload.bin",
+      "num_shapes": 5,
+      "file_size": 1046
+    },
+    {
+      "file": "SHIP no 4.payload.bin",
+      "num_shapes": 5,
+      "file_size": 1592
+    }
+  ],
+  "shape_table_format": {
+    "description": "Apple II Shape Table Format",
+    "first_byte": "Number of shapes (N-1)",
+    "offset_bytes": "N bytes of offsets to shape data",
+    "shape_byte_format": "Bits 7-5: Direction (0-7), Bits 4-1: Steps (1-15), Bit 0: Pen (1=move, 0=draw)",
+    "terminator": "$00 byte",
+    "directions": {
+      "0": "Right",
+      "1": "Up-Right",
+      "2": "Up",
+      "3": "Up-Left",
+      "4": "Left",
+      "5": "Down-Left",
+      "6": "Down",
+      "7": "Down-Right"
+    }
+  }
+}

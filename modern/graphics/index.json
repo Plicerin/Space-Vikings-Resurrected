@@ -1,0 +1,157 @@
+{
+  "total_files": 25,
+  "planet_count": 21,
+  "ship_count": 4,
+  "files": [
+    {
+      "name": "PLANET no 0.payload.bin",
+      "size": 1401,
+      "type": "planet",
+      "shapes": 18
+    },
+    {
+      "name": "PLANET no 1.payload.bin",
+      "size": 814,
+      "type": "planet",
+      "shapes": 7
+    },
+    {
+      "name": "PLANET no 10.payload.bin",
+      "size": 835,
+      "type": "planet",
+      "shapes": 8
+    },
+    {
+      "name": "PLANET no 11.payload.bin",
+      "size": 1346,
+      "type": "planet",
+      "shapes": 12
+    },
+    {
+      "name": "PLANET no 12.payload.bin",
+      "size": 1346,
+      "type": "planet",
+      "shapes": 12
+    },
+    {
+      "name": "PLANET no 13.payload.bin",
+      "size": 1500,
+      "type": "planet",
+      "shapes": 18
+    },
+    {
+      "name": "PLANET no 14.payload.bin",
+      "size": 590,
+      "type": "planet",
+      "shapes": 6
+    },
+    {
+      "name": "PLANET no 15.payload.bin",
+      "size": 1451,
+      "type": "planet",
+      "shapes": 18
+    },
+    {
+      "name": "PLANET no 16.payload.bin",
+      "size": 576,
+      "type": "planet",
+      "shapes": 5
+    },
+    {
+      "name": "PLANET no 17.payload.bin",
+      "size": 541,
+      "type": "planet",
+      "shapes": 4
+    },
+    {
+      "name": "PLANET no 18.payload.bin",
+      "size": 520,
+      "type": "planet",
+      "shapes": 3
+    },
+    {
+      "name": "PLANET no 19.payload.bin",
+      "size": 520,
+      "type": "planet",
+      "shapes": 3
+    },
+    {
+      "name": "PLANET no 2.payload.bin",
+      "size": 660,
+      "type": "planet",
+      "shapes": 5
+    },
+    {
+      "name": "PLANET no 20.payload.bin",
+      "size": 1171,
+      "type": "planet",
+      "shapes": 9
+    },
+    {
+      "name": "PLANET no 3.payload.bin",
+      "size": 660,
+      "type": "planet",
+      "shapes": 5
+    },
+    {
+      "name": "PLANET no 4.payload.bin",
+      "size": 1003,
+      "type": "planet",
+      "shapes": 7
+    },
+    {
+      "name": "PLANET no 5.payload.bin",
+      "size": 940,
+      "type": "planet",
+      "shapes": 11
+    },
+    {
+      "name": "PLANET no 6.payload.bin",
+      "size": 1003,
+      "type": "planet",
+      "shapes": 7
+    },
+    {
+      "name": "PLANET no 7.payload.bin",
+      "size": 835,
+      "type": "planet",
+      "shapes": 8
+    },
+    {
+      "name": "PLANET no 8.payload.bin",
+      "size": 513,
+      "type": "planet",
+      "shapes": 3
+    },
+    {
+      "name": "PLANET no 9.payload.bin",
+      "size": 625,
+      "type": "planet",
+      "shapes": 4
+    },
+    {
+      "name": "SHIP no 0.payload.bin",
+      "size": 1,
+      "type": "ship",
+      "shapes": 0
+    },
+    {
+      "name": "SHIP no 1.payload.bin",
+      "size": 962,
+      "type": "ship",
+      "shapes": 7
+    },
+    {
+      "name": "SHIP no 3.payload.bin",
+      "size": 1046,
+      "type": "ship",
+      "shapes": 6
+    },
+    {
+      "name": "SHIP no 4.payload.bin",
+      "size": 1592,
+      "type": "ship",
+      "shapes": 8
+    }
+  ]
+}

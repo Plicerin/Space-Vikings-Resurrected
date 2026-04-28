@@ -1,0 +1,194 @@
+Disassembling extracted\CHARACTER TABLE.payload.bin (1024 bytes) starting at $1000
+============================================================
+$1000: 00        BRK
+$1001: 00        BRK
+$1002: 00        BRK
+$1003: 08        PHP
+$1004: 00        BRK
+$1005: 00        BRK
+$1006: 00        BRK
+$1007: 00        BRK
+$1008: 10 08     BPL $1012
+$100A: 36 7F     ROL $7F,X
+$100C: 1F        .byte $1F
+$100D: 1F        .byte $1F
+$100E: 3E 36 30  ROL $3036,X
+$1011: 48        PHA
+$1012: 48        PHA
+$1013: 30 00     BMI $1015
+$1015: 00        BRK
+$1016: 00        BRK
+$1017: 00        BRK
+$1018: 3C        .byte $3C
+$1019: 42        .byte $42
+$101A: 5A        .byte $5A
+$101B: 4A        LSR A
+$101C: 5A        .byte $5A
+$101D: 42        .byte $42
+$101E: 3C        .byte $3C
+$101F: 00        BRK
+$1020: 7F        .byte $7F
+$1021: 41 41     EOR ($41,X)
+$1023: 49 41     EOR #$41
+$1025: 49 7F     EOR #$7F
+$1027: 00        BRK
+$1028: 7E 44 08  ROR $0844,X
+$102B: 10 08     BPL $1035
+$102D: 44        .byte $44
+$102E: 7E 00 20  ROR $2000,X
+$1031: 50 10     BVC $1043
+$1033: 08        PHP
+$1034: 08        PHP
+$1035: 04        .byte $04
+$1036: 05 02     ORA $02
+$1038: 08        PHP
+$1039: 14        .byte $14
+$103A: 22        .byte $22
+$103B: 22        .byte $22
+$103C: 22        .byte $22
+$103D: 41 7F     EOR ($7F,X)
+$103F: 08        PHP
+$1040: 10 08     BPL $104A
+$1042: 04        .byte $04
+$1043: 7E 04 08  ROR $0804,X
+$1046: 10 00     BPL $1048
+$1048: 08        PHP
+$1049: 10 20     BPL $106B
+$104B: 7E 20 10  ROR $1020,X
+$104E: 08        PHP
+$104F: 00        BRK
+$1050: 08        PHP
+$1051: 08        PHP
+$1052: 08        PHP
+$1053: 49 2A     EOR #$2A
+$1055: 1C        .byte $1C
+$1056: 08        PHP
+$1057: 00        BRK
+$1058: 08        PHP
+$1059: 1C        .byte $1C
+$105A: 2A        ROL A
+$105B: 49 08     EOR #$08
+$105D: 08        PHP
+$105E: 08        PHP
+$105F: 00        BRK
+$1060: 08        PHP
+$1061: 49 2A     EOR #$2A
+$1063: 1C        .byte $1C
+$1064: 49 2A     EOR #$2A
+$1066: 1C        .byte $1C
+$1067: 08        PHP
+$1068: 40        RTI
+$1069: 60        RTS
+$106A: 70 78     BVS $10E4
+$106C: 70 60     BVS $10CE
+$106E: 40        RTI
+$106F: 00        BRK
+$1070: 40        RTI
+$1071: 40        RTI
+$1072: 20 20 13  JSR $1320
+$1075: 14        .byte $14
+$1076: 0C        .byte $0C
+$1077: 08        PHP
+$1078: 00        BRK
+$1079: 00        BRK
+$107A: 00        BRK
+$107B: 7C        .byte $7C
+$107C: 2A        ROL A
+$107D: 28        PLP
+$107E: 28        PLP
+$107F: 00        BRK
+$1080: 36 7F     ROL $7F,X
+$1082: 7F        .byte $7F
+$1083: 7F        .byte $7F
+$1084: 3E 1C 08  ROL $081C,X
+$1087: 00        BRK
+$1088: 08        PHP
+$1089: 1C        .byte $1C
+$108A: 3E 7F 3E  ROL $3E7F,X
+$108D: 1C        .byte $1C
+$108E: 08        PHP
+$108F: 00        BRK
+$1090: 08        PHP
+$1091: 1C        .byte $1C
+$1092: 3E 7F 7F  ROL $7F7F,X
+$1095: 2A        ROL A
+$1096: 08        PHP
+$1097: 00        BRK
+$1098: 08        PHP
+$1099: 1C        .byte $1C
+$109A: 1C        .byte $1C
+$109B: 2A        ROL A
+$109C: 7F        .byte $7F
+$109D: 7F        .byte $7F
+$109E: 2A        ROL A
+$109F: 08        PHP
+$10A0: 3E 08 08  ROL $0808,X
+$10A3: 22        .byte $22
+$10A4: 36 2A     ROL $2A,X
+$10A6: 22        .byte $22
+$10A7: 00        BRK
+$10A8: 00        BRK
+$10A9: 22        .byte $22
+$10AA: 14        .byte $14
+$10AB: 08        PHP
+$10AC: 14        .byte $14
+$10AD: 22        .byte $22
+$10AE: 00        BRK
+$10AF: 00        BRK
+$10B0: 04        .byte $04
+$10B1: 0E 04 04  ASL $0404
+$10B4: 00        BRK
+$10B5: 00        BRK
+$10B6: 00        BRK
+$10B7: 00        BRK
+$10B8: 00        BRK
+$10B9: 08        PHP
+$10BA: 00        BRK
+$10BB: 3E 00 08  ROL $0800,X
+$10BE: 00        BRK
+$10BF: 00        BRK
+$10C0: 18        CLC
+$10C1: 24 08     BIT $08
+$10C3: 14        .byte $14
+$10C4: 08        PHP
+$10C5: 12        .byte $12
+$10C6: 0C        .byte $0C
+$10C7: 00        BRK
+$10C8: 10 38     BPL $1102
+$10CA: 04        .byte $04
+$10CB: 04        .byte $04
+$10CC: 38        SEC
+$10CD: 10 00     BPL $10CF
+$10CF: 00        BRK
+$10D0: 08        PHP
+$10D1: 1C        .byte $1C
+$10D2: 08        PHP
+$10D3: 1C        .byte $1C
+$10D4: 3E 1C 3E  ROL $3E1C,X
+$10D7: 7F        .byte $7F
+$10D8: 08        PHP
+$10D9: 3E 1C 08  ROL $081C,X
+$10DC: 1C        .byte $1C
+$10DD: 1C        .byte $1C
+$10DE: 3E 7F 00  ROL $007F,X
+$10E1: 2A        ROL A
+$10E2: 3E 1C 1C  ROL $1C1C,X
+$10E5: 1C        .byte $1C
+$10E6: 3E 7F 00  ROL $007F,X
+$10E9: 10 3C     BPL $1127
+$10EB: 3E 18 0C  ROL $0C18,X
+$10EE: 1E 3F 00  ASL $003F,X
+$10F1: 08        PHP
+$10F2: 18        CLC
+$10F3: 3A        .byte $3A
+$10F4: 7B        .byte $7B
+$10F5: 3E 1C 7F  ROL $7F1C,X
+$10F8: 00        BRK
+$10F9: 00        BRK
+$10FA: 08        PHP
+$10FB: 1C        .byte $1C
+$10FC: 1C        .byte $1C
+$10FD: 08        PHP
+$10FE: 1C        .byte $1C
+$10FF: 3E 00 00  ROL $0000,X
+... (truncated at 256 bytes)

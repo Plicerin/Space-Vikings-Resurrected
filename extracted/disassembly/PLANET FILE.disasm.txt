@@ -1,0 +1,134 @@
+Disassembling extracted\PLANET FILE.payload.bin (175 bytes) starting at $954C
+============================================================
+$954C: FF        .byte $FF
+$954D: FF        .byte $FF
+$954E: 01 01     ORA ($01,X)
+$9550: FF        .byte $FF
+$9551: FF        .byte $FF
+$9552: 01 01     ORA ($01,X)
+$9554: FF        .byte $FF
+$9555: FF        .byte $FF
+$9556: 01 01     ORA ($01,X)
+$9558: FF        .byte $FF
+$9559: FF        .byte $FF
+$955A: 01 01     ORA ($01,X)
+$955C: FF        .byte $FF
+$955D: FF        .byte $FF
+$955E: 01 01     ORA ($01,X)
+$9560: FF        .byte $FF
+$9561: FF        .byte $FF
+$9562: 01 01     ORA ($01,X)
+$9564: FF        .byte $FF
+$9565: FF        .byte $FF
+$9566: 01 01     ORA ($01,X)
+$9568: FF        .byte $FF
+$9569: FF        .byte $FF
+$956A: 01 01     ORA ($01,X)
+$956C: FF        .byte $FF
+$956D: FF        .byte $FF
+$956E: 01 01     ORA ($01,X)
+$9570: FF        .byte $FF
+$9571: FF        .byte $FF
+$9572: 01 01     ORA ($01,X)
+$9574: FF        .byte $FF
+$9575: FF        .byte $FF
+$9576: 01 01     ORA ($01,X)
+$9578: FF        .byte $FF
+$9579: FF        .byte $FF
+$957A: 01 01     ORA ($01,X)
+$957C: FF        .byte $FF
+$957D: FF        .byte $FF
+$957E: 01 01     ORA ($01,X)
+$9580: FF        .byte $FF
+$9581: FF        .byte $FF
+$9582: 01 01     ORA ($01,X)
+$9584: FF        .byte $FF
+$9585: FF        .byte $FF
+$9586: 01 01     ORA ($01,X)
+$9588: FF        .byte $FF
+$9589: FF        .byte $FF
+$958A: 01 01     ORA ($01,X)
+$958C: FF        .byte $FF
+$958D: FF        .byte $FF
+$958E: 01 01     ORA ($01,X)
+$9590: FF        .byte $FF
+$9591: FF        .byte $FF
+$9592: 01 01     ORA ($01,X)
+$9594: FF        .byte $FF
+$9595: FF        .byte $FF
+$9596: 01 01     ORA ($01,X)
+$9598: FF        .byte $FF
+$9599: FF        .byte $FF
+$959A: 01 01     ORA ($01,X)
+$959C: FF        .byte $FF
+$959D: FF        .byte $FF
+$959E: 01 01     ORA ($01,X)
+$95A0: FF        .byte $FF
+$95A1: FF        .byte $FF
+$95A2: 01 01     ORA ($01,X)
+$95A4: FF        .byte $FF
+$95A5: FF        .byte $FF
+$95A6: 01 01     ORA ($01,X)
+$95A8: FF        .byte $FF
+$95A9: FF        .byte $FF
+$95AA: 01 01     ORA ($01,X)
+$95AC: FF        .byte $FF
+$95AD: FF        .byte $FF
+$95AE: 01 01     ORA ($01,X)
+$95B0: FF        .byte $FF
+$95B1: FF        .byte $FF
+$95B2: 01 01     ORA ($01,X)
+$95B4: FF        .byte $FF
+$95B5: FF        .byte $FF
+$95B6: 01 01     ORA ($01,X)
+$95B8: FF        .byte $FF
+$95B9: FF        .byte $FF
+$95BA: 01 01     ORA ($01,X)
+$95BC: FF        .byte $FF
+$95BD: FF        .byte $FF
+$95BE: 01 01     ORA ($01,X)
+$95C0: FF        .byte $FF
+$95C1: FF        .byte $FF
+$95C2: 01 01     ORA ($01,X)
+$95C4: FF        .byte $FF
+$95C5: FF        .byte $FF
+$95C6: 01 01     ORA ($01,X)
+$95C8: FF        .byte $FF
+$95C9: FF        .byte $FF
+$95CA: 01 01     ORA ($01,X)
+$95CC: FF        .byte $FF
+$95CD: FF        .byte $FF
+$95CE: 01 01     ORA ($01,X)
+$95D0: FF        .byte $FF
+$95D1: FF        .byte $FF
+$95D2: 01 01     ORA ($01,X)
+$95D4: FF        .byte $FF
+$95D5: FF        .byte $FF
+$95D6: 01 01     ORA ($01,X)
+$95D8: FF        .byte $FF
+$95D9: FF        .byte $FF
+$95DA: 01 01     ORA ($01,X)
+$95DC: FF        .byte $FF
+$95DD: FF        .byte $FF
+$95DE: 01 01     ORA ($01,X)
+$95E0: FF        .byte $FF
+$95E1: FF        .byte $FF
+$95E2: 01 01     ORA ($01,X)
+$95E4: FF        .byte $FF
+$95E5: FF        .byte $FF
+$95E6: 01 01     ORA ($01,X)
+$95E8: FF        .byte $FF
+$95E9: FF        .byte $FF
+$95EA: 01 01     ORA ($01,X)
+$95EC: FF        .byte $FF
+$95ED: FF        .byte $FF
+$95EE: 01 01     ORA ($01,X)
+$95F0: FF        .byte $FF
+$95F1: FF        .byte $FF
+$95F2: 01 01     ORA ($01,X)
+$95F4: 00        BRK
+$95F5: FF        .byte $FF
+$95F6: 01 00     ORA ($00,X)
+$95F8: FF        .byte $FF
+$95F9: FF        .byte $FF
+$95FA: 01 00     ORA ($00,X)

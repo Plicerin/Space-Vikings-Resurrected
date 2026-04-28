@@ -1,0 +1,177 @@
+Disassembling extracted\LO-HI A2-3D1.payload.bin (4864 bytes) starting at $8000
+============================================================
+$8000: 4C 1C 61  JMP $611C
+$8003: 4C 40 61  JMP $6140
+$8006: 4C 26 65  JMP $6526
+$8009: 4C 3F 65  JMP $653F
+$800C: 00        BRK
+$800D: 00        BRK
+$800E: 00        BRK
+$800F: 63        .byte $63
+$8010: FF        .byte $FF
+$8011: 7F        .byte $7F
+$8012: FF        .byte $FF
+$8013: 7F        .byte $7F
+$8014: F0 A0     BEQ $7FB6
+$8016: FF        .byte $FF
+$8017: FF        .byte $FF
+$8018: FF        .byte $FF
+$8019: FF        .byte $FF
+$801A: FF        .byte $FF
+$801B: 01 08     ORA ($08,X)
+$801D: 03        .byte $03
+$801E: 08        PHP
+$801F: 03        .byte $03
+$8020: 08        PHP
+$8021: 03        .byte $03
+$8022: 08        PHP
+$8023: 00        BRK
+$8024: 96 13     STX $13,Y
+$8026: 1D 00 96  ORA $9600,X
+$8029: 00        BRK
+$802A: FF        .byte $FF
+$802B: 00        BRK
+$802C: 00        BRK
+$802D: 00        BRK
+$802E: 00        BRK
+$802F: 00        BRK
+$8030: 00        BRK
+$8031: 00        BRK
+$8032: 08        PHP
+$8033: 00        BRK
+$8034: 00        BRK
+$8035: 44        .byte $44
+$8036: 80        .byte $80
+$8037: 95 09     STA $09,X
+$8039: A3        .byte $A3
+$803A: 09 FF     ORA #$FF
+$803C: 08        PHP
+$803D: 00        BRK
+$803E: FF        .byte $FF
+$803F: FF        .byte $FF
+$8040: AA        TAX
+$8041: 09 FF     ORA #$FF
+$8043: 03        .byte $03
+$8044: 4C E5 00  JMP $00E5
+$8047: FF        .byte $FF
+$8048: B6 08     LDX $08,Y
+$804A: AF        .byte $AF
+$804B: 08        PHP
+$804C: FF        .byte $FF
+$804D: 00        BRK
+$804E: 00        BRK
+$804F: 00        BRK
+$8050: 00        BRK
+$8051: 88        DEY
+$8052: FF        .byte $FF
+$8053: FF        .byte $FF
+$8054: FF        .byte $FF
+$8055: 69 FF     ADC #$FF
+$8057: 00        BRK
+$8058: 00        BRK
+$8059: D0 D1     BNE $802C
+$805B: 09 55     ORA #$55
+$805D: 00        BRK
+$805E: 00        BRK
+$805F: 00        BRK
+$8060: 00        BRK
+$8061: 09 09     ORA #$09
+$8063: 03        .byte $03
+$8064: 08        PHP
+$8065: E6 B8     INC $B8
+$8067: D0 02     BNE $806B
+$8069: E6 B9     INC $B9
+$806B: AD 05 02  LDA $0205
+$806E: C9 3A     CMP #$3A
+$8070: B0 0A     BCS $807C
+$8072: C9 20     CMP #$20
+$8074: F0 EF     BEQ $8065
+$8076: 2E 62 B7  ROL $B762
+$8079: 61 EC     ADC ($EC,X)
+$807B: 61 12     ADC ($12,X)
+$807D: 62        .byte $62
+$807E: BE 62 CB  LDX $CB62,Y
+$8081: 62        .byte $62
+$8082: DC        .byte $DC
+$8083: 62        .byte $62
+$8084: ED 62 44  SBC $4462
+$8087: 6D 48 71  ADC $7148
+$808A: FA        .byte $FA
+$808B: 62        .byte $62
+$808C: 0B        .byte $0B
+$808D: 63        .byte $63
+$808E: 8A        TXA
+$808F: 71 19     ADC ($19),Y
+$8091: 63        .byte $63
+$8092: EA        NOP
+$8093: 68        PLA
+$8094: 0F        .byte $0F
+$8095: 69 2A     ADC #$2A
+$8097: 63        .byte $63
+$8098: 38        SEC
+$8099: 63        .byte $63
+$809A: FF        .byte $FF
+$809B: 7F        .byte $7F
+$809C: F5 7F     SBC $7F,X
+$809E: D7        .byte $D7
+$809F: 7F        .byte $7F
+$80A0: A6 7F     LDX $7F
+$80A2: 61 7F     ADC ($7F,X)
+$80A4: 09 7F     ORA #$7F
+$80A6: 9C        .byte $9C
+$80A7: 7E 1C 7E  ROR $7E1C,X
+$80AA: 89        .byte $89
+$80AB: 7D E3 7C  ADC $7CE3,X
+$80AE: 29 7C     AND #$7C
+$80B0: 5C        .byte $5C
+$80B1: 7B        .byte $7B
+$80B2: 7C        .byte $7C
+$80B3: 7A        .byte $7A
+$80B4: 89        .byte $89
+$80B5: 79 83 78  ADC $7883,Y
+$80B8: 6B        .byte $6B
+$80B9: 77        .byte $77
+$80BA: 40        RTI
+$80BB: 76 03     ROR $03,X
+$80BD: 75 B5     ADC $B5,X
+$80BF: 73        .byte $73
+$80C0: 54        .byte $54
+$80C1: 72        .byte $72
+$80C2: E1 70     SBC ($70,X)
+$80C4: 5E 6F C9  LSR $C96F,X
+$80C7: 6D 23 6C  ADC $6C23
+$80CA: 6C 6A 79  JMP ($796A)
+$80CD: 67        .byte $67
+$80CE: CE 66 E7  DEC $E766
+$80D1: 64        .byte $64
+$80D2: F1 62     SBC ($62),Y
+$80D4: EB        .byte $EB
+$80D5: 60        RTS
+$80D6: D6 5E     DEC $5E,X
+$80D8: B3        .byte $B3
+$80D9: 5C        .byte $5C
+$80DA: 81 5A     STA ($5A,X)
+$80DC: 42        .byte $42
+$80DD: 58        CLI
+$80DE: F4        .byte $F4
+$80DF: 55 9A     EOR $9A,X
+$80E1: 53        .byte $53
+$80E2: 33        .byte $33
+$80E3: 51 BF     EOR ($BF),Y
+$80E5: 4E 3F 4C  LSR $4C3F
+$80E8: B3        .byte $B3
+$80E9: 49 1C     EOR #$1C
+$80EB: 47        .byte $47
+$80EC: 7A        .byte $7A
+$80ED: 44        .byte $44
+$80EE: CD 41 16  CMP $1641
+$80F1: 3F        .byte $3F
+$80F2: 56 3C     LSR $3C,X
+$80F4: 8C 39 B9  STY $B939
+$80F7: 36 DE     ROL $DE,X
+$80F9: 33        .byte $33
+$80FA: FB        .byte $FB
+$80FB: 30 10     BMI $810D
+$80FD: 2E 1F 2B  ROL $2B1F
+$8100: 26 28     ROL $28
+... (truncated at 256 bytes)

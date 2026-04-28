@@ -1,0 +1,199 @@
+Disassembling extracted\SHIP no 4.payload.bin (1592 bytes) starting at $8000
+============================================================
+$8000: 04        .byte $04
+$8001: 00        BRK
+$8002: 01 FA     ORA ($FA,X)
+$8004: 00        BRK
+$8005: 9C        .byte $9C
+$8006: FF        .byte $FF
+$8007: 7C        .byte $7C
+$8008: F2        .byte $F2
+$8009: 02        .byte $02
+$800A: AA        TAX
+$800B: 00        BRK
+$800C: 9C        .byte $9C
+$800D: FF        .byte $FF
+$800E: 5E F2 02  LSR $02F2,X
+$8011: AA        TAX
+$8012: 00        BRK
+$8013: 9C        .byte $9C
+$8014: FF        .byte $FF
+$8015: 4A        LSR A
+$8016: F2        .byte $F2
+$8017: 02        .byte $02
+$8018: FA        .byte $FA
+$8019: 00        BRK
+$801A: 9C        .byte $9C
+$801B: FF        .byte $FF
+$801C: 2C F2 02  BIT $02F2
+$801F: FA        .byte $FA
+$8020: 00        BRK
+$8021: 92        .byte $92
+$8022: FF        .byte $FF
+$8023: 54        .byte $54
+$8024: F2        .byte $F2
+$8025: 02        .byte $02
+$8026: FA        .byte $FA
+$8027: 00        BRK
+$8028: 9C        .byte $9C
+$8029: FF        .byte $FF
+$802A: 7C        .byte $7C
+$802B: F2        .byte $F2
+$802C: 02        .byte $02
+$802D: FA        .byte $FA
+$802E: 00        BRK
+$802F: A6 FF     LDX $FF
+$8031: 7C        .byte $7C
+$8032: F2        .byte $F2
+$8033: 02        .byte $02
+$8034: AA        TAX
+$8035: 00        BRK
+$8036: A6 FF     LDX $FF
+$8038: 5E F2 02  LSR $02F2,X
+$803B: AA        TAX
+$803C: 00        BRK
+$803D: A6 FF     LDX $FF
+$803F: 4A        LSR A
+$8040: F2        .byte $F2
+$8041: 02        .byte $02
+$8042: FA        .byte $FA
+$8043: 00        BRK
+$8044: A6 FF     LDX $FF
+$8046: 2C F2 02  BIT $02F2
+$8049: FA        .byte $FA
+$804A: 00        BRK
+$804B: 9C        .byte $9C
+$804C: FF        .byte $FF
+$804D: 2C F2 01  BIT $01F2
+$8050: FA        .byte $FA
+$8051: 00        BRK
+$8052: A6 FF     LDX $FF
+$8054: 2C F2 02  BIT $02F2
+$8057: FA        .byte $FA
+$8058: 00        BRK
+$8059: C4 FF     CPY $FF
+$805B: 54        .byte $54
+$805C: F2        .byte $F2
+$805D: 02        .byte $02
+$805E: FA        .byte $FA
+$805F: 00        BRK
+$8060: A6 FF     LDX $FF
+$8062: 7C        .byte $7C
+$8063: F2        .byte $F2
+$8064: 01 AA     ORA ($AA,X)
+$8066: 00        BRK
+$8067: A6 FF     LDX $FF
+$8069: 54        .byte $54
+$806A: F2        .byte $F2
+$806B: 02        .byte $02
+$806C: FA        .byte $FA
+$806D: 00        BRK
+$806E: C4 FF     CPY $FF
+$8070: 54        .byte $54
+$8071: F2        .byte $F2
+$8072: 02        .byte $02
+$8073: 2C 01 C4  BIT $C401
+$8076: FF        .byte $FF
+$8077: 54        .byte $54
+$8078: F2        .byte $F2
+$8079: 02        .byte $02
+$807A: 2C 01 A6  BIT $A601
+$807D: FF        .byte $FF
+$807E: 72        .byte $72
+$807F: F2        .byte $F2
+$8080: 02        .byte $02
+$8081: 22        .byte $22
+$8082: 01 A6     ORA ($A6,X)
+$8084: FF        .byte $FF
+$8085: 7C        .byte $7C
+$8086: F2        .byte $F2
+$8087: 02        .byte $02
+$8088: FA        .byte $FA
+$8089: 00        BRK
+$808A: A6 FF     LDX $FF
+$808C: 7C        .byte $7C
+$808D: F2        .byte $F2
+$808E: 01 2C     ORA ($2C,X)
+$8090: 01 C4     ORA ($C4,X)
+$8092: FF        .byte $FF
+$8093: 54        .byte $54
+$8094: F2        .byte $F2
+$8095: 02        .byte $02
+$8096: 2C 01 A6  BIT $A601
+$8099: FF        .byte $FF
+$809A: 36 F2     ROL $F2,X
+$809C: 02        .byte $02
+$809D: 22        .byte $22
+$809E: 01 A6     ORA ($A6,X)
+$80A0: FF        .byte $FF
+$80A1: 2C F2 02  BIT $02F2
+$80A4: FA        .byte $FA
+$80A5: 00        BRK
+$80A6: A6 FF     LDX $FF
+$80A8: 2C F2 01  BIT $01F2
+$80AB: 2C 01 BA  BIT $BA01
+$80AE: FF        .byte $FF
+$80AF: 68        PLA
+$80B0: F2        .byte $F2
+$80B1: 02        .byte $02
+$80B2: 54        .byte $54
+$80B3: 01 BA     ORA ($BA,X)
+$80B5: FF        .byte $FF
+$80B6: 68        PLA
+$80B7: F2        .byte $F2
+$80B8: 02        .byte $02
+$80B9: 54        .byte $54
+$80BA: 01 BA     ORA ($BA,X)
+$80BC: FF        .byte $FF
+$80BD: 40        RTI
+$80BE: F2        .byte $F2
+$80BF: 02        .byte $02
+$80C0: 2C 01 BA  BIT $BA01
+$80C3: FF        .byte $FF
+$80C4: 40        RTI
+$80C5: F2        .byte $F2
+$80C6: 02        .byte $02
+$80C7: 2C 01 BA  BIT $BA01
+$80CA: FF        .byte $FF
+$80CB: 68        PLA
+$80CC: F2        .byte $F2
+$80CD: 02        .byte $02
+$80CE: 2C 01 9C  BIT $9C01
+$80D1: FF        .byte $FF
+$80D2: 68        PLA
+$80D3: F2        .byte $F2
+$80D4: 02        .byte $02
+$80D5: 54        .byte $54
+$80D6: 01 9C     ORA ($9C,X)
+$80D8: FF        .byte $FF
+$80D9: 68        PLA
+$80DA: F2        .byte $F2
+$80DB: 02        .byte $02
+$80DC: 54        .byte $54
+$80DD: 01 9C     ORA ($9C,X)
+$80DF: FF        .byte $FF
+$80E0: 40        RTI
+$80E1: F2        .byte $F2
+$80E2: 02        .byte $02
+$80E3: 2C 01 9C  BIT $9C01
+$80E6: FF        .byte $FF
+$80E7: 40        RTI
+$80E8: F2        .byte $F2
+$80E9: 02        .byte $02
+$80EA: 2C 01 9C  BIT $9C01
+$80ED: FF        .byte $FF
+$80EE: 40        RTI
+$80EF: F2        .byte $F2
+$80F0: 01 2C     ORA ($2C,X)
+$80F2: 01 9C     ORA ($9C,X)
+$80F4: FF        .byte $FF
+$80F5: 40        RTI
+$80F6: F2        .byte $F2
+$80F7: 02        .byte $02
+$80F8: 2C 01 BA  BIT $BA01
+$80FB: FF        .byte $FF
+$80FC: 40        RTI
+$80FD: F2        .byte $F2
+$80FE: 01 54     ORA ($54,X)
+$8100: 01 9C     ORA ($9C,X)
+... (truncated at 256 bytes)

@@ -1,0 +1,605 @@
+{
+  "filename": "PLANET no 11.payload.bin",
+  "original_size": 1346,
+  "analysis": {
+    "zero_bytes": 382,
+    "high_bytes": 393,
+    "low_bytes": 953,
+    "coordinate_pairs": 385,
+    "potential_vectors": 964
+  },
+  "interpretations": {
+    "apple_shape_format": {
+      "shape_count": 185,
+      "shapes": [
+        {
+          "id": 0,
+          "start_offset": 0,
+          "vector_count": 3,
+          "vectors": [
+            {
+              "byte": 14,
+              "hex": "0E",
+              "direction": "draw",
+              "distance": 14,
+              "offset": 0
+            },
+            {
+              "byte": 140,
+              "hex": "8C",
+              "direction": "move",
+              "distance": 12,
+              "offset": 1
+            },
+            {
+              "byte": 126,
+              "hex": "7E",
+              "direction": "draw",
+              "distance": 126,
+              "offset": 2
+            }
+          ],
+          "points": [
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 14
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "move",
+              "distance": 12
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 126
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "start_offset": 4,
+          "vector_count": 9,
+          "vectors": [
+            {
+              "byte": 34,
+              "hex": "22",
+              "direction": "draw",
+              "distance": 34,
+              "offset": 4
+            },
+            {
+              "byte": 15,
+              "hex": "0F",
+              "direction": "draw",
+              "distance": 15,
+              "offset": 5
+            },
+            {
+              "byte": 128,
+              "hex": "80",
+              "direction": "move",
+              "distance": 0,
+              "offset": 6
+            },
+            {
+              "byte": 62,
+              "hex": "3E",
+              "direction": "draw",
+              "distance": 62,
+              "offset": 7
+            },
+            {
+              "byte": 255,
+              "hex": "FF",
+              "direction": "move",
+              "distance": 127,
+              "offset": 8
+            },
+            {
+              "byte": 127,
+              "hex": "7F",
+              "direction": "draw",
+              "distance": 127,
+              "offset": 9
+            },
+            {
+              "byte": 69,
+              "hex": "45",
+              "direction": "draw",
+              "distance": 69,
+              "offset": 10
+            },
+            {
+              "byte": 37,
+              "hex": "25",
+              "direction": "draw",
+              "distance": 37,
+              "offset": 11
+            },
+            {
+              "byte": 4,
+              "hex": "04",
+              "direction": "draw",
+              "distance": 4,
+              "offset": 12
+            }
+          ],
+          "points": [
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 34
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 15
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "move",
+              "distance": 0
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 62
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "move",
+              "distance": 127
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 127
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 69
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 37
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 4
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "start_offset": 14,
+          "vector_count": 13,
+          "vectors": [
+            {
+              "byte": 7,
+              "hex": "07",
+              "direction": "draw",
+              "distance": 7,
+              "offset": 14
+            },
+            {
+              "byte": 82,
+              "hex": "52",
+              "direction": "draw",
+              "distance": 82,
+              "offset": 15
+            },
+            {
+              "byte": 7,
+              "hex": "07",
+              "direction": "draw",
+              "distance": 7,
+              "offset": 16
+            },
+            {
+              "byte": 80,
+              "hex": "50",
+              "direction": "draw",
+              "distance": 80,
+              "offset": 17
+            },
+            {
+              "byte": 7,
+              "hex": "07",
+              "direction": "draw",
+              "distance": 7,
+              "offset": 18
+            },
+            {
+              "byte": 87,
+              "hex": "57",
+              "direction": "draw",
+              "distance": 87,
+              "offset": 19
+            },
+            {
+              "byte": 7,
+              "hex": "07",
+              "direction": "draw",
+              "distance": 7,
+              "offset": 20
+            },
+            {
+              "byte": 84,
+              "hex": "54",
+              "direction": "draw",
+              "distance": 84,
+              "offset": 21
+            },
+            {
+              "byte": 8,
+              "hex": "08",
+              "direction": "draw",
+              "distance": 8,
+              "offset": 22
+            },
+            {
+              "byte": 1,
+              "hex": "01",
+              "direction": "draw",
+              "distance": 1,
+              "offset": 23
+            },
+            {
+              "byte": 9,
+              "hex": "09",
+              "direction": "draw",
+              "distance": 9,
+              "offset": 24
+            },
+            {
+              "byte": 1,
+              "hex": "01",
+              "direction": "draw",
+              "distance": 1,
+              "offset": 25
+            },
+            {
+              "byte": 5,
+              "hex": "05",
+              "direction": "draw",
+              "distance": 5,
+              "offset": 26
+            }
+          ],
+          "points": [
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 7
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 82
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 7
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 80
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 7
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 87
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 7
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 84
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 8
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 1
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 9
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 1
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 5
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "start_offset": 36,
+          "vector_count": 3,
+          "vectors": [
+            {
+              "byte": 1,
+              "hex": "01",
+              "direction": "draw",
+              "distance": 1,
+              "offset": 36
+            },
+            {
+              "byte": 240,
+              "hex": "F0",
+              "direction": "move",
+              "distance": 112,
+              "offset": 37
+            },
+            {
+              "byte": 216,
+              "hex": "D8",
+              "direction": "move",
+              "distance": 88,
+              "offset": 38
+            }
+          ],
+          "points": [
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 1
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "move",
+              "distance": 112
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "move",
+              "distance": 88
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "start_offset": 42,
+          "vector_count": 4,
+          "vectors": [
+            {
+              "byte": 39,
+              "hex": "27",
+              "direction": "draw",
+              "distance": 39,
+              "offset": 42
+            },
+            {
+              "byte": 2,
+              "hex": "02",
+              "direction": "draw",
+              "distance": 2,
+              "offset": 43
+            },
+            {
+              "byte": 16,
+              "hex": "10",
+              "direction": "draw",
+              "distance": 16,
+              "offset": 44
+            },
+            {
+              "byte": 39,
+              "hex": "27",
+              "direction": "draw",
+              "distance": 39,
+              "offset": 45
+            }
+          ],
+          "points": [
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 39
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 2
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 16
+            },
+            {
+              "x": 70,
+              "y": 96,
+              "type": "draw",
+              "distance": 39
+            }
+          ]
+        }
+      ]
+    },
+    "raw_coordinate_format": {
+      "point_count": 385,
+      "points": [
+        {
+          "x": 14,
+          "y": 140,
+          "offset": 0,
+          "hex_pair": "0E8C"
+        },
+        {
+          "x": 126,
+          "y": 0,
+          "offset": 2,
+          "hex_pair": "7E00"
+        },
+        {
+          "x": 34,
+          "y": 15,
+          "offset": 4,
+          "hex_pair": "220F"
+        },
+        {
+          "x": 128,
+          "y": 62,
+          "offset": 6,
+          "hex_pair": "803E"
+        },
+        {
+          "x": 69,
+          "y": 37,
+          "offset": 10,
+          "hex_pair": "4525"
+        },
+        {
+          "x": 4,
+          "y": 0,
+          "offset": 12,
+          "hex_pair": "0400"
+        },
+        {
+          "x": 7,
+          "y": 82,
+          "offset": 14,
+          "hex_pair": "0752"
+        },
+        {
+          "x": 7,
+          "y": 80,
+          "offset": 16,
+          "hex_pair": "0750"
+        },
+        {
+          "x": 7,
+          "y": 87,
+          "offset": 18,
+          "hex_pair": "0757"
+        },
+        {
+          "x": 7,
+          "y": 84,
+          "offset": 20,
+          "hex_pair": "0754"
+        },
+        {
+          "x": 8,
+          "y": 1,
+          "offset": 22,
+          "hex_pair": "0801"
+        },
+        {
+          "x": 9,
+          "y": 1,
+          "offset": 24,
+          "hex_pair": "0901"
+        },
+        {
+          "x": 5,
+          "y": 0,
+          "offset": 26,
+          "hex_pair": "0500"
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "offset": 28,
+          "hex_pair": "0000"
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "offset": 30,
+          "hex_pair": "0000"
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "offset": 32,
+          "hex_pair": "0000"
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "offset": 34,
+          "hex_pair": "0000"
+        },
+        {
+          "x": 0,
+          "y": 16,
+          "offset": 40,
+          "hex_pair": "0010"
+        },
+        {
+          "x": 39,
+          "y": 2,
+          "offset": 42,
+          "hex_pair": "2702"
+        },
+        {
+          "x": 16,
+          "y": 39,
+          "offset": 44,
+          "hex_pair": "1027"
+        }
+      ]
+    }
+  },
+  "raw_hex": "0E8C7E00220F803EFF7F452504000752075007570754080109010500000000000000000001F0D800001027021027000010270210270000F0D802F0D80000F0D802F0D8000010270118FC00008C230200000000342102D0070000001902D0070000441602..."
+}

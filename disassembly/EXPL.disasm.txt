@@ -1,0 +1,23 @@
+Disassembling extracted\EXPL.payload.bin (34 bytes) starting at $9100
+============================================================
+$9100: 14        .byte $14
+$9101: 04        .byte $04
+$9102: A9 00     LDA #$00
+$9104: A8        TAY
+$9105: 38        SEC
+$9106: 2E 70 92  ROL $9270
+$9109: 2E 71 92  ROL $9271
+$910C: 90 03     BCC $9111
+$910E: AD 30 C0  LDA $C030
+$9111: 6A        ROR A
+$9112: 6A        ROR A
+$9113: 6A        ROR A
+$9114: 4D 71 92  EOR $9271
+$9117: 0A        ASL A
+$9118: 0A        ASL A
+$9119: 0A        ASL A
+$911A: 88        DEY
+$911B: 98        TYA
+$911C: D0 01     BNE $911F
+$911E: 60        RTS
+$911F: 4C 76 92  JMP $9276
