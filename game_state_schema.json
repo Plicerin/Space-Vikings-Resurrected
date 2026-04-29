@@ -1,0 +1,188 @@
+{
+  "version": "1.0",
+  "description": "Space Vikings Game State Schema for Modern Remake",
+  "author": "Space Vikings Resurrected Project",
+  "created": "2025-01-30",
+  "files": {
+    "p_f": {
+      "filename": "P_F.payload.bin",
+      "load_address": "38881",
+      "size": 320,
+      "description": "Planet/Starbase data - 20 records of 16 bytes each",
+      "record_format": {
+        "size": 16,
+        "fields": [
+          {"name": "word_a", "offset": 0, "size": 2, "type": "uint16le", "description": "Unknown word value A"},
+          {"name": "word_b", "offset": 2, "size": 2, "type": "uint16le", "description": "Unknown word value B"},
+          {"name": "flag", "offset": 4, "size": 1, "type": "uint8", "description": "Record flag (0 or 1)"},
+          {"name": "record_id", "offset": 5, "size": 1, "type": "uint8", "description": "Record ID (1-20)"},
+          {"name": "reserved", "offset": 6, "size": 10, "type": "bytes", "description": "Additional data (usually zeros)"}
+        ]
+      },
+      "records_with_flag_1": [1, 4, 7, 8, 11, 12, 15],
+      "records_with_flag_0": [2, 3, 5, 6, 9, 10, 13, 14, 16, 17, 18, 19, 20]
+    },
+    "planet_file": {
+      "filename": "PLANET FILE.payload.bin",
+      "load_address": "38220",
+      "size": 175,
+      "description": "Current planet state/visited status",
+      "notes": "Uninitialized template contains FF FF 01 01 repeated pattern",
+      "template_file": "PLANET FILE-M.payload.bin",
+      "template_fields": [
+        {"name": "planet_count", "offset": 0, "size": 1, "type": "uint8", "description": "Likely planet count or index"},
+        {"name": "unknown_21", "offset": 21, "size": 1, "type": "uint8", "description": "Matches P_F record 0 byte 4"},
+        {"name": "various_data", "offset": 32, "size": "variable", "type": "mixed", "description": "Various data values"}
+      ]
+    },
+    "ships_data": {
+      "filename": "SHIP'S DATA-M.payload.bin",
+      "load_address": "229712",
+      "size": 54,
+      "description": "Ship statistics and capabilities",
+      "fields": [
+        {"name": "unknown_04_05", "offset": 4, "size": 2, "type": "uint16le", "value": 1536, "description": "Unknown ship stat"},
+        {"name": "unknown_06_07", "offset": 6, "size": 2, "type": "uint16le", "value": 30795, "description": "Large value - possibly credits or capacity"},
+        {"name": "unknown_08_09", "offset": 8, "size": 2, "type": "uint16le", "value": 5170, "description": "Unknown ship stat"},
+        {"name": "unknown_0A_0B", "offset": 10, "size": 2, "type": "uint16le", "value": 1, "description": "Probably a boolean flag"},
+        {"name": "unknown_0E_0F", "offset": 14, "size": 2, "type": "uint16le", "value": 512, "description": "Unknown ship stat"},
+        {"name": "unknown_10_11", "offset": 16, "size": 2, "type": "uint16le", "value": 771, "description": "Unknown ship stat"}
+      ]
+    },
+    "planet_graphics": {
+      "files": [
+        "PLANET #1.payload.bin",
+        "PLANET #2.payload.bin",
+        "PLANET #3.payload.bin",
+        "PLANET #4.payload.bin",
+        "PLANET #5.payload.bin",
+        "PLANET #6.payload.bin",
+        "PLANET #7.payload.bin",
+        "PLANET #8.payload.bin",
+        "PLANET #9.payload.bin",
+        "PLANET #10.payload.bin",
+        "PLANET #11.payload.bin",
+        "PLANET #12.payload.bin",
+        "PLANET #13.payload.bin",
+        "PLANET #14.payload.bin",
+        "PLANET #15.payload.bin",
+        "PLANET #16.payload.bin",
+        "PLANET #17.payload.bin",
+        "PLANET #18.payload.bin",
+        "PLANET #19.payload.bin",
+        "PLANET #20.payload.bin",
+        "PLANET #21.payload.bin"
+      ],
+      "load_address": "169024",
+      "format": "Apple II Shape Table",
+      "converted_format": "JSON/SVG",
+      "converted_location": "modern/shapes_json/"
+    },
+    "ship_graphics": {
+      "files": [
+        "SHIP no 0.payload.bin",
+        "SHIP no 1.payload.bin",
+        "SHIP no 3.payload.bin",
+        "SHIP no 4.payload.bin"
+      ],
+      "load_address": "32768",
+      "notes": "SHIP no 0.payload.bin is 1 byte (7F) placeholder",
+      "format": "Apple II Shape Table",
+      "converted_format": "JSON/SVG"
+    }
+  },
+  "assembly_routines": {
+    "spacesim": {
+      "filename": "SPACE SIMULATOR ASSEMBLY.payload.bin",
+      "load_address": "36899",
+      "description": "Game state checks at $95FD-$95FE (joystick values)",
+      "joystick_addresses": {
+        "$95FD": "Joystick 1 value (paddle port 1)",
+        "$95FE": "Joystick 0 value (paddle port 0)"
+      }
+    },
+    "soundgen": {
+      "filename": "SOUND GEN.payload.bin",
+      "load_address": "37494",
+      "description": "Sound generation with Apple II speaker at $C030"
+    },
+    "explosion": {
+      "filename": "EXPL.payload.bin",
+      "load_address": "37120",
+      "description": "Explosion sound effects"
+    },
+    "laser": {
+      "filename": "LASER.payload.bin",
+      "load_address": "37585",
+      "description": "Laser effect routines"
+    },
+    "translit": {
+      "filename": "TRANLIT.OBJ0.payload.bin",
+      "load_address": "38400",
+      "description": "Unknown translation/transition object"
+    },
+    "memtransfer": {
+      "filename": "MEM TRANSFER A.payload.bin",
+      "load_address": "37888",
+      "description": "Copies 216-byte blocks between $8BEC and $8D7C tables"
+    }
+  },
+  "game_save_sequence": {
+    "description": "From END.bas - saves three files",
+    "files": [
+      {
+        "command": "BSAVE P/F,A$97E1,L$140",
+        "file": "p_f",
+        "address": "38881",
+        "length": "320"
+      },
+      {
+        "command": "BSAVE PLANET FILE,A$954C,L$AF",
+        "file": "planet_file",
+        "address": "38220",
+        "length": "175"
+      },
+      {
+        "command": "BSAVE SHIP'S DATA,A$38150,L$36",
+        "file": "ships_data",
+        "address": "229712",
+        "length": "54"
+      }
+    ],
+    "pre_save_operation": "Copies data from $29467-$29475 to $38211-$38219"
+  },
+  "dynamic_game_state": {
+    "description": "Game state variables stored in memory during gameplay",
+    "addresses": {
+      "$95FD": {
+        "decimal": 38397,
+        "type": "uint8",
+        "description": "Joystick 1 value (paddle port 1)",
+        "source": "STARSHIP SIMULATOR.bas line 7: J = PDL(1): POKE 38397,J"
+      },
+      "$95FE": {
+        "decimal": 38398,
+        "type": "uint8",
+        "description": "Joystick 0 value (paddle port 0)",
+        "source": "STARSHIP SIMULATOR.bas line 7: K = PDL(0): POKE 38398,K"
+      },
+      "$95F7": {
+        "decimal": 38391,
+        "type": "uint8",
+        "description": "Copy protection check - original value is ASCII 'M' (77)",
+        "source": "START.bas line 26: OG = PEEK(38391): POKE 38391,0: IF OG = 77 THEN PRINT \"BSAVE PLANET FILE,A$954C,L$AF\""
+      }
+    }
+  },
+  "copy_protection": {
+    "check_address": "38391",
+    "check_value": 77,
+    "original_value": "ASCII 'M'",
+    "4am_crack_modifications": [
+      {"track": "T00", "sector": "S02", "offset": "$FC", "original": "DA", "modified": "AD"},
+      {"track": "T00", "sector": "S03", "offset": "$35", "original": "ED", "modified": "DE"},
+      {"track": "T00", "sector": "S02", "offset": "$5D", "original": "DA", "modified": "AD"},
+      {"track": "T00", "sector": "S02", "offset": "$9E", "original": "ED", "modified": "DE"}
+    ]
+  }
+}
