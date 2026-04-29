@@ -1,0 +1,18 @@
+{
+  "name": "space-vikings-emulator",
+  "version": "0.1.0",
+  "description": "6502 emulator for Space Vikings Resurrected",
+  "main": "cpu6502.js",
+  "scripts": {
+    "test": "node test.js",
+    "start": "node server.js"
+  },
+  "keywords": ["6502", "emulator", "apple2", "space-vikings"],
+  "author": "Space Vikings Resurrected Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

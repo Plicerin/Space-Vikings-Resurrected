@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Vikings Remake</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <div id="loading-screen">
+            <div class="loading-container">
+                <h1>Space Vikings Remake</h1>
+                <div class="loading-bar">
+                    <div class="loading-progress"></div>
+                </div>
+                <p class="loading-text">Loading 6502 emulator...</p>
+                <div class="controls-info">
+                    <h3>Controls:</h3>
+                    <ul>
+                        <li>Arrow Keys: Navigation</li>
+                        <li>Enter/Space: Select/Action</li>
+                        <li>Esc: Back/Menu</li>
+                        <li>1-4: Quick actions</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div id="game-container" class="hidden">
+            <div id="header">
+                <h1>Space Vikings</h1>
+                <div id="game-info">
+                    <span id="credits">Credits: 0</span>
+                    <span id="location">Location: Earth</span>
+                    <span id="fuel">Fuel: 100%</span>
+                    <span id="crew">Crew: 100%</span>
+                </div>
+            </div>
+            
+            <div id="main-content">
+                <div id="canvas-container">
+                    <canvas id="game-canvas" width="800" height="600"></canvas>
+                    <div id="overlay-text">
+                        <div id="game-text"></div>
+                    </div>
+                </div>
+                
+                <div id="sidebar">
+                    <div id="ship-status">
+                        <h3>Ship Status</h3>
+                        <div class="status-item">
+                            <label>Hull Integrity:</label>
+                            <div class="status-bar"><div class="status-fill hull" style="width: 100%"></div></div>
+                        </div>
+                        <div class="status-item">
+                            <label>Shield Level:</label>
+                            <div class="status-bar"><div class="status-fill shield" style="width: 100%"></div></div>
+                        </div>
+                        <div class="status-item">
+                            <label>Engine Power:</label>
+                            <div class="status-bar"><div class="status-fill engine" style="width: 100%"></div></div>
+                        </div>
+                    </div>
+                    
+                    <div id="controls">
+                        <h3>Controls</h3>
+                        <div class="control-group">
+                            <button id="btn-nav" class="control-btn">Navigation</button>
+                            <button id="btn-trade" class="control-btn">Trading</button>
+                            <button id="btn-combat" class="control-btn">Combat</button>
+                        </div>
+                        <div class="control-group">
+                            <button id="btn-crew" class="control-btn">Crew</button>
+                            <button id="btn-ship" class="control-btn">Ship Status</button>
+                            <button id="btn-map" class="control-btn">Galaxy Map</button>
+                        </div>
+                    </div>
+                    
+                    <div id="messages">
+                        <h3>Messages</h3>
+                        <div id="message-log">
+                            <div class="message">Welcome aboard, Captain!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="footer">
+                <div id="command-input">
+                    <input type="text" id="command" placeholder="Enter command or press TAB for options..." disabled>
+                    <button id="execute-btn" disabled>Execute</button>
+                </div>
+                <div id="help">
+                    <span>Press F1 for help</span>
+                    <span>Press F5 to save</span>
+                    <span>Press F9 to load</span>
+                </div>
+            </div>
+        </div>
+        
+        <div id="modal-overlay" class="hidden">
+            <div id="modal">
+                <div id="modal-header">
+                    <h2 id="modal-title">Modal Title</h2>
+                    <button id="modal-close">&times;</button>
+                </div>
+                <div id="modal-content">
+                    <!-- Modal content will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="bundle.js"></script>
+</body>
+</html>
