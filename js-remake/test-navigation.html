@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Vikings Navigation System Test</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #ff0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .panel {
+            background: #111;
+            border: 2px solid #0f0;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .status-item {
+            padding: 10px;
+            background: #222;
+            border: 1px solid #0f0;
+            border-radius: 3px;
+        }
+        .status-label {
+            color: #0af;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        .status-value {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .control-btn {
+            padding: 15px;
+            background: #222;
+            border: 2px solid #0f0;
+            color: #0f0;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 1.2em;
+            transition: all 0.2s;
+        }
+        .control-btn:hover {
+            background: #333;
+        }
+        .control-btn:active {
+            background: #0f0;
+            color: #000;
+        }
+        .joystick-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        #joystick {
+            width: 200px;
+            height: 200px;
+            background: #111;
+            border: 3px solid #0f0;
+            border-radius: 50%;
+            margin: 0 auto;
+            position: relative;
+            cursor: pointer;
+            touch-action: none;
+        }
+        #joystickKnob {
+            width: 40px;
+            height: 40px;
+            background: #ff0;
+            border-radius: 50%;
+            position: absolute;
+            top: 80px;
+            left: 80px;
+            transition: transform 0.1s;
+        }
+        .log {
+            background: #111;
+            border: 1px solid #0f0;
+            padding: 10px;
+            height: 200px;
+            overflow-y: auto;
+            font-size: 0.9em;
+            border-radius: 3px;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-left: 3px solid #0f0;
+            background: #222;
+        }
+        .log-timestamp {
+            color: #888;
+            font-size: 0.8em;
+        }
+        .log-message {
+            color: #0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Space Vikings Navigation System Test</h1>
+        
+        <div class="panel">
+            <h2>Ship Position</h2>
+            <div class="status-grid">
+                <div class="status-item">
+                    <div class="status-label">X Coordinate</div>
+                    <div class="status-value" id="x-coord">0.00</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Y Coordinate</div>
+                    <div class="status-value" id="y-coord">0.00</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Z Coordinate</div>
+                    <div class="status-value" id="z-coord">0.00</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Velocity H</div>
+                    <div class="status-value" id="vel-h">0.00</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Velocity P</div>
+                    <div class="status-value" id="vel-p">0.00</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Speed</div>
+                    <div class="status-value" id="speed">0.00</div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="control-btn" onclick="resetPosition()">Reset Position</button>
+                <button class="control-btn" onclick="jumpToPlanet()">Jump to Planet</button>
+                <button class="control-btn" onclick="simulateBASIC()">Simulate BASIC Calc</button>
+                <button class="control-btn" onclick="testJoystickMemory()">Test $95FD/$95FE</button>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>Virtual Joystick</h2>
+            <div class="joystick-container">
+                <div id="joystick" ontouchstart="handleTouchStart(event)" ontouchmove="handleTouchMove(event)">
+                    <div id="joystickKnob"></div>
+                </div>
+                <p>Click/touch and drag to control the ship</p>
+                <p>Joystick Values: X: <span id="joy-x">127</span> | Y: <span id="joy-y">127</span></p>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>System Log</h2>
+            <div class="log" id="log"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import GameState from './src/state/GameState.js';
+        import NavigationSystem from './src/game/NavigationSystem.js';
+
+        // Initialize game systems
+        const gameState = new GameState();
+        const navigation = new NavigationSystem(gameState);
+
+        // Log system
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `
+                <span class="log-timestamp">[${timestamp}]</span>
+                <span class="log-message">${message}</span>
+            `;
+            logDiv.appendChild(logEntry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        // Update display
+        function updateDisplay() {
+            const display = navigation.getNavigationDisplay();
+            
+            document.getElementById('x-coord').textContent = display.coordinates.x;
+            document.getElementById('y-coord').textContent = display.coordinates.y;
+            document.getElementById('z-coord').textContent = display.coordinates.z;
+            document.getElementById('vel-h').textContent = display.velocity.h;
+            document.getElementById('vel-p').textContent = display.velocity.p;
+            document.getElementById('speed').textContent = display.velocity.total;
+        }
+
+        // Virtual joystick
+        let isDragging = false;
+        const joystick = document.getElementById('joystick');
+        const knob = document.getElementById('joystickKnob');
+        
+        function updateJoystickPosition(x, y) {
+            // Convert screen coordinates to joystick values (0-255)
+            const joyX = Math.floor((x / 200) * 255);
+            const joyY = Math.floor((y / 200) * 255);
+            
+            // Clamp values
+            const clampedX = Math.max(0, Math.min(255, joyX));
+            const clampedY = Math.max(0, Math.min(255, 255 - joyY)); // Invert Y for intuitive control
+            
+            // Update display
+            document.getElementById('joy-x').textContent = clampedX;
+            document.getElementById('joy-y').textContent = clampedY;
+            
+            // Update knob position
+            knob.style.transform = `translate(${x - 20}px, ${y - 20}px)`;
+            
+            // Update game state
+            gameState.poke('$95FD', clampedX);
+            gameState.poke('$95FE', clampedY);
+            
+            return { x: clampedX, y: clampedY };
+        }
+
+        function handleMouseMove(e) {
+            if (!isDragging) return;
+            
+            const rect = joystick.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Clamp to joystick bounds
+            const clampedX = Math.max(0, Math.min(200, x));
+            const clampedY = Math.max(0, Math.min(200, y));
+            
+            updateJoystickPosition(clampedX, clampedY);
+        }
+
+        function handleMouseUp() {
+            isDragging = false;
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+            
+            // Return to center
+            updateJoystickPosition(100, 100);
+            log('Joystick released');
+        }
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            isDragging = true;
+            const touch = e.touches[0];
+            const rect = joystick.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            
+            const clampedX = Math.max(0, Math.min(200, x));
+            const clampedY = Math.max(0, Math.min(200, y));
+            
+            updateJoystickPosition(clampedX, clampedY);
+            
+            document.addEventListener('touchmove', handleTouchMove);
+            document.addEventListener('touchend', handleTouchEnd);
+        }
+
+        function handleTouchMove(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            
+            const touch = e.touches[0];
+            const rect = joystick.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            
+            const clampedX = Math.max(0, Math.min(200, x));
+            const clampedY = Math.max(0, Math.min(200, y));
+            
+            updateJoystickPosition(clampedX, clampedY);
+        }
+
+        function handleTouchEnd(e) {
+            isDragging = false;
+            document.removeEventListener('touchmove', handleTouchMove);
+            document.removeEventListener('touchend', handleTouchEnd);
+            
+            // Return to center
+            updateJoystickPosition(100, 100);
+            log('Touch released');
+        }
+
+        // Initialize joystick
+        joystick.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            const rect = joystick.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const clampedX = Math.max(0, Math.min(200, x));
+            const clampedY = Math.max(0, Math.min(200, y));
+            
+            updateJoystickPosition(clampedX, clampedY);
+            log('Joystick engaged');
+            
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+        });
+
+        // Control functions
+        window.resetPosition = function() {
+            navigation.reset();
+            updateDisplay();
+            log('Navigation system reset to initial position');
+        };
+
+        window.jumpToPlanet = function() {
+            navigation.jumpTo(500, 250, 2000);
+            updateDisplay();
+            log('Jumped to planet coordinates (500, 250, 2000)');
+        };
+
+        window.simulateBASIC = function() {
+            const calc = navigation.simulateBASICCalculations();
+            log(`BASIC Calculation: X=${calc.xCalc.toFixed(2)}, Y=${calc.yCalc.toFixed(2)}, Z=${calc.zCalc.toFixed(2)}`);
+        };
+
+        window.testJoystickMemory = function() {
+            const mem95FD = gameState.peek('$95FD');
+            const mem95FE = gameState.peek('$95FE');
+            log(`Memory test: $95FD=${mem95FD}, $95FE=${mem95FE}`);
+        };
+
+        // Game loop
+        function gameLoop() {
+            // Process joystick input
+            navigation.processJoystickInput();
+            
+            // Update position
+            navigation.updatePosition();
+            
+            // Update display
+            updateDisplay();
+            
+            // Continue loop
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Initialize and start
+        log('Space Vikings Navigation System Initialized');
+        log('Based on STARSHIP SIMULATOR.bas analysis');
+        log('Joystick control via $95FD-$95FE memory locations');
+        
+        updateDisplay();
+        gameLoop();
+    </script>
+</body>
+</html>
