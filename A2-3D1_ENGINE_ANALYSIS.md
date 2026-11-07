@@ -187,6 +187,87 @@ clip-intersection ratio and the perspective divide — the second of the
 library's exactly two hand-written arithmetic primitives, and everything
 numeric in this engine is built from just these two routines.
 
+## The plotter: a real Bresenham line drawer, confirmed by execution trace
+
+The project's own `modern/web/public/data/debug/` directory already contained
+a real AppleWin CPU execution trace (`a2-3d1-trace.json`) and a live memory
+snapshot (`applewin-space-vikings-state.json`) from earlier work — neither
+had been mined for this question before. Together they turn "the plotter is
+somewhere in `$62F6`-`$7120`" into a confirmed, specific account.
+
+**Finding the real write sites.** The trace's `hgrWrites` array records every
+store to hi-res screen memory during a captured run: 187 writes, all landing
+at exactly three program counters — `$6F13`, `$6FAC`, `$6FE8` — writing mask
+values (`0x7C`, `0x7E`, `0x3F`, `0x7F`, `0x0F`, ...) that match constants
+already visible in the decompiled pseudocode below. That pins the actual
+pixel-plotting instructions precisely, instead of guessing from the self-mod
+patch list alone.
+
+**The shallow-slope octant — `FUN_6f03`/`FUN_6f9c`** (`0x6f03.c`/`0x6f9c.c`,
+plus helpers `FUN_6f35`/`FUN_6f49`/`FUN_6fd5`): used when `|dx| >= |dy|`.
+Steps the X byte-column every iteration, accumulating horizontal run-fill
+masks (`0x30, 0x40, 0x60, 0x70, 0x78, 0x7C, 0x7E, 0x7F` — each one "fill from
+bit N through bit 6"), and only advances the scanline pointer when the
+Bresenham error term (`$B8`/`$B9`/`$BA`) overflows.
+
+**The steep-slope octant — `FUN_7044`** (`0x7044.c`, 390 bytes, the single
+largest function in the file): used when `|dy| > |dx|`. Mirror image of the
+above — advances the scanline pointer every iteration, only moves X on
+overflow, and walks the per-pixel color mask with `DAT_00b7 = (DAT_00b7<<2) |
+(DAT_00b7>>7)`, an 8-bit rotate-left-by-2 that cycles `0xC0 -> 0x03 -> 0x0C ->
+0x30 -> 0xC0 -> ...`.
+
+**The shared "plot and step" primitive — `FUN_6fe6`** (`0x6fe6.c`, 4 bytes):
+ORs a mask into the current screen byte, then advances the zero-page screen
+pointer (`DAT_0099`) to the next scanline down. Its pointer math is the
+classic Apple II hi-res scanline-address discontinuity, hand-coded directly
+in zero-page arithmetic: add 4 to the pointer's high byte each line, and
+correct by `-0x1B` or `-0x1F` whenever an 8-line or 64-line block boundary is
+crossed. (Any Apple II hi-res tutorial covers why consecutive scanlines
+aren't at consecutive addresses; this routine is that algorithm, written as
+raw byte math with no comments, in 1982.)
+
+**`FUN_6cda`** (`0x6cda.c`): straight-line clear of `$2000`-`$3FFF` — all of
+hi-res page 1, 8KB, unrolled 32-bytes-at-a-time. The other half of a
+double-buffered render loop.
+
+**The data Ghidra never named.** Between `FUN_6979` (ends `$6B91`, a `JMP
+$6848`) and `FUN_6cda` (starts `$6CDA`) sits 328 bytes Ghidra's auto-analysis
+never resolved into a function, because it isn't code — three back-to-back
+lookup tables, read directly from `extracted/LO-HI A2-3D1.payload.bin`:
+
+| Range | Bytes | Content |
+|---|---|---|
+| `$6B92`-`$6BC1` | 48 | 24 little-endian 16-bit addresses: `$2000, $2080, $2100, ... $23D0` — the textbook Apple II hi-res "scanline group base address" table (3 groups of 8, offsets `+0, +0x28, +0x50`) |
+| `$6BC2`-`$6C49` | 136 | Monotonic ramp, 0-39, period alternating 3/4 (`floor(2*i/7)`) — a byte-column lookup, almost certainly converting a half-pixel-precision X coordinate down to a hi-res byte column |
+| `$6C4A`-`$6CD9` | 144 | The 7-value cycle `03 0C 30 C0 06 18 60` repeated ~20× — exactly the rotate sequence `FUN_7044` walks for its per-pixel color mask |
+
+**Self-modification, confirmed, not guessed.** The live memory snapshot names
+a `shipOpcode09Handler` at `$7148` — inside `FUN_7044`'s own address range.
+Disassembling it by hand (`A2 2E C8 B1 9B F0 02 A9 20 18 69 20 85 A3 BD 93 6B
+29 0F 05 A3 9D 93 6B CA CA 10 F2 ...`) shows a 23-iteration loop over the
+24-entry address table above: `LDA $6B93,X` / `AND #$0F` / `ORA $A3` / `STA
+$6B93,X` — reading and rewriting each entry's **high byte**, keeping its low
+nibble and ORing in either `$00` or `$40` depending on an operand byte read
+from the bytecode stream. That flips every table entry between `$20xx` (hi-res
+page 1) and `$40xx` (hi-res page 2) in one pass — a double-buffer page-select
+patch, not the per-pixel color-fringing patch this doc originally guessed
+opcode 8/9/12 were doing (that guess came from the operand-patch *count*
+alone, before any execution evidence existed). The trace backs this up
+directly: all 187 of its captured writes land in `$4xxx` (page 2) in that
+run, while `FUN_6cda` clears page 1 in parallel — a genuine page-flipped
+double buffer. (Opcodes 8 and 12 are not yet confirmed to do the same thing
+as opcode 9 — only 9 was directly named and disassembled here.)
+
+This also explains something that looked like noise earlier: Ghidra's
+decompile of `FUN_7044` and neighboring functions carries ~90 "Removing
+unreachable block" warnings, clustered almost exactly over this plotter
+region (`$61B7`-`$632A`, `$62BE`-`$62ED`, `$6D44`-`$6D89`, `$690F`-`$6919`,
+`$70C6`-`$7143`). Static analysis can't resolve control flow that depends on
+operands the program patches at runtime — so those warnings are, in effect,
+independent corroboration from the decompiler's own confusion that
+self-modification is real and concentrated right here.
+
 ## The full pipeline
 
 ```
@@ -205,6 +286,9 @@ bytecode opcode 0/1/2/3 (per vertex)
   -> perspective divide X/Z, Y/Z (same divide routine)
   -> fixed-point scale to viewport pixel coordinates
   -> hand off to the self-modifying hi-res line plotter
+       (octant-selected Bresenham: FUN_6f03/FUN_6f9c shallow, FUN_7044 steep;
+        FUN_6fe6 steps scanlines; opcode 9 page-flips the address table
+        at $6B92 between hi-res page 1/2 for double buffering)
 ```
 
 ## What's confirmed vs. still open
@@ -219,11 +303,19 @@ bytecode opcode 0/1/2/3 (per vertex)
 - Real perspective division (not a lookup-table shortcut).
 - The two shared arithmetic primitives (`FUN_635c` multiply, `FUN_6468`
   divide) and that literally everything numeric reuses them.
+- The hi-res line plotter itself: octant-selected Bresenham (`FUN_6f03`/
+  `FUN_6f9c` shallow-slope, `FUN_7044` steep-slope), the shared scanline-step
+  primitive (`FUN_6fe6`), the 328-byte unnamed data region at `$6B92`-`$6CD9`
+  (scanline-address table, byte-column lookup, pixel-mask cycle), and the
+  specific thing opcode `9`'s self-mod patch does — flip that address
+  table's high bytes between hi-res page 1 and page 2 for double buffering
+  — confirmed via a real AppleWin execution trace and live memory snapshot
+  already in `modern/web/public/data/debug/`, not just static guesswork.
 
 **Not yet traced:**
-- The actual self-modifying hi-res line/point plotter itself — the code the
-  patches in opcodes 8/9/12 target (scattered through `$62F6`–`$7120`). This
-  is where the classic Apple II hi-res color-fringing handling would live.
+- Opcodes `8` and `12`'s self-modifying patches specifically — only opcode
+  `9`'s target (`$7148`, the page-flip patch above) was directly named and
+  disassembled; 8 and 12 are not yet confirmed to do the same thing.
 - Jump-table entry 4 (`$653F`).
 - Which BASIC/assembly caller actually feeds this VM a bytecode stream per
   frame, and where that stream is built — i.e., what in `SPACE SIMULATOR
@@ -260,7 +352,17 @@ All function files referenced above live under
 | `FUN_691e` | `0x691e.c` | Fixed-point scale to viewport pixels |
 | `FUN_654e` | `0x654e.c` | Rotation matrix rebuild from 3 angles |
 | `FUN_64f8` | `0x64f8.c` | Sine/cosine table lookup (`$609A`) |
+| `FUN_6cda` | `0x6cda.c` | Clear hi-res page 1 (`$2000`-`$3FFF`) |
+| `FUN_6f03`, `FUN_6f9c` | `0x6f03.c`, `0x6f9c.c` | Shallow-slope line octant (plus helpers `FUN_6f35`/`FUN_6f49`/`FUN_6fd5`) |
+| `FUN_6fe6` | `0x6fe6.c` | Shared "OR mask, step scanline" primitive |
+| `FUN_7044` | `0x7044.c` | Steep-slope line octant; also houses opcode 9's self-mod patch (`$7148`) |
+| (unnamed, data) | n/a — `$6B92`-`$6CD9` in `extracted/LO-HI A2-3D1.payload.bin` | Scanline-address table, byte-column lookup, pixel-mask cycle |
 
 Generated via REA (Ghidra 12.1.2 backend) against
 `extracted/LO-HI A2-3D1.payload.bin`, entry point `$6000`. See
-`rea-disassembly/README.md` for regeneration instructions.
+`rea-disassembly/README.md` for regeneration instructions. The plotter
+section above also used two pre-existing debug artifacts not generated by
+this investigation: `modern/web/public/data/debug/a2-3d1-trace.json` (a real
+AppleWin CPU execution trace, with `hgrWrites`/`flow`/`hotspots`) and
+`modern/web/public/data/debug/applewin-space-vikings-state.json` (a live
+memory snapshot with named key ranges including `shipOpcode09Handler`).
