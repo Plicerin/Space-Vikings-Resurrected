@@ -1,45 +1,63 @@
 #!/usr/bin/env python3
 """
-Standalone Apple II shape-table decoder, written fresh (not a copy of the
-project's own apple2-shape-table-converter.py, which hardcodes its own
-file list and a Windows path in main() and ignores CLI args entirely --
-run it on a new file and it silently reports "File not found" for its
-own hardcoded list and processes nothing). Implements the same documented
-format that script's decode_shape_byte()/process_shape_table() logic
-uses, verified against its already-successful output for the PLANET/SHIP
-files, and used to decode ENEMY I.A24580.L68 and EXPL (not covered by
-the original script's hardcoded list) -- see COMBAT_VFX_ANALYSIS.md.
+Standalone Apple II shape-table decoder.
 
-  byte 0: number of shapes minus 1
-  next N bytes: one offset per shape (single byte, relative to table start)
-  shape data: each byte = 3-bit direction (bits 7-5), 4-bit steps (bits 4-1,
-    0 means 16), 1-bit pen status (bit 0: 1=move, 0=draw); $00 terminates.
+2026-11-07: rewritten twice in one session. The format isn't stock
+Applesoft -- Space Vikings (subLOGIC, 1982, by Mitchell Robbins per the
+manual's title page) uses its own custom shape-table encoding, close to
+but not identical to Applesoft's.
+
+Confirmed empirically, by decoding and rendering shapes until they
+matched the real game's ship/planet art shown in the manual
+(archive.org item Space_Vikings_manual_subLOGIC, page 7's cockpit-view
+screenshot -- a swept wedge-shaped ship silhouette, and planets drawn as
+a deliberately abstract scatter of short dash marks, not a circle):
+
+  +00     number of shapes
+  +01..   one 1-byte offset per shape (from table start) -- confirmed
+          against all 25 PLANET/SHIP files: 1-byte offsets are 100%
+          in-bounds; every 2-byte variant tried lands mostly past EOF.
+
+Each shape is a byte stream ending at a $00 terminator (not three
+"do nothing" vectors -- $00 is reserved as the terminator). Every other
+byte packs three vectors:
+
+  bits 0-2 (AAA): vector 1 -- bit 0 = plot flag, bits 1-2 = direction
+  bits 3-5 (BBB): vector 2 -- same layout as AAA
+  bits 6-7 (CC):  vector 3 -- only 2 bits, both direction: can never
+                  plot, and a direction of 0 is a true no-op
+
+Direction (2 bits), diagonal rather than cardinal: 0=NE, 1=SE, 2=SW,
+3=NW (CC's 0 is a no-op instead of NE). The cursor advances one diagonal
+step every vector regardless of the plot flag; when the flag is set, a
+pixel is plotted at the position the cursor was at *before* that step.
+
+This diverges from stock Applesoft (which uses 2-byte offsets, puts the
+plot flag at bit 2, and moves in the 4 cardinal directions) on all three
+points -- plausible for a commercial game's own hand-rolled, more
+compact format rather than a direct use of Applesoft's shape tables.
 
 Usage: python3 shape_table_decoder.py <input.bin> <output.json>
 """
 import sys, os, json
 
-DIRECTIONS = [
-    (1, 0), (1, -1), (0, -1), (-1, -1),
-    (-1, 0), (-1, 1), (0, 1), (1, 1),
-]
+DIRECTIONS = [(1, -1), (1, 1), (-1, 1), (-1, -1)]  # NE, SE, SW, NW
 
-def decode_shape_byte(b):
-    direction = (b >> 5) & 0b111
-    steps = (b >> 1) & 0b1111
-    pen_up = b & 0b1
-    if steps == 0:
-        steps = 16
-    return direction, steps, pen_up
+def _step(bits, is_c, x, y):
+    d = (bits >> 1) & 0x03  # skip the plot-flag bit (bit 0) to get direction
+    if is_c and d == 0:
+        return x, y
+    dx, dy = DIRECTIONS[d]
+    return x + dx, y + dy
 
 def process_shape_table(data):
     if len(data) < 2:
         return {"shapes": [], "error": "Data too short"}
     num_shapes = data[0] + 1
     offsets = [data[1 + i] for i in range(num_shapes) if 1 + i < len(data)]
+
     shapes = []
-    for shape_idx in range(len(offsets)):
-        offset = offsets[shape_idx]
+    for shape_idx, offset in enumerate(offsets):
         x, y = 0, 0
         points = [(0, 0)]
         pen_down = False
@@ -50,22 +68,22 @@ def process_shape_table(data):
             i += 1
             if byte == 0x00:
                 break
-            direction, steps, pen_up = decode_shape_byte(byte)
-            dx, dy = DIRECTIONS[direction]
-            for _ in range(steps):
-                if not pen_up:
+            for bits, is_c in (
+                (byte & 0x07, False),
+                ((byte >> 3) & 0x07, False),
+                ((byte >> 6) & 0x03, True),
+            ):
+                plots = bool(bits & 0x01) and not is_c
+                if plots:
                     if not pen_down:
-                        pen_down = True
                         path_commands.append({"type": "move", "x": x, "y": -y})
-                    x += dx; y += dy
-                    points.append((x, -y))
+                        pen_down = True
+                    # Plots at the pre-step position -- append before _step.
                     path_commands.append({"type": "line", "x": x, "y": -y})
                 else:
-                    if pen_down:
-                        pen_down = False
-                        path_commands.append({"type": "move", "x": x, "y": -y})
-                    x += dx; y += dy
-                    points.append((x, -y))
+                    pen_down = False
+                x, y = _step(bits, is_c, x, y)
+                points.append((x, -y))
         xs = [p[0] for p in points]; ys = [p[1] for p in points]
         shapes.append({
             "id": shape_idx,
@@ -92,7 +110,10 @@ def main():
     result["hex_preview"] = data[:50].hex()
     with open(out_path, "w") as f:
         json.dump(result, f, indent=2)
-    print(f"{in_path}: {result['num_shapes']} shapes -> {out_path}")
+    if "error" in result:
+        print(f"{in_path}: {result['error']} -> {out_path}")
+    else:
+        print(f"{in_path}: {result['num_shapes']} shapes -> {out_path}")
 
 if __name__ == "__main__":
     main()

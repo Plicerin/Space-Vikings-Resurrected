@@ -43,13 +43,17 @@ func load_shapes(path: String) -> void:
 		var dots: Array[Vector2] = []
 
 		if commands.is_empty():
-			if points.size() == 1:
-				dots.append(Vector2(points[0][0], points[0][1]))
-			elif points.size() > 1:
-				var subpath := PackedVector2Array()
-				for p in points:
-					subpath.append(Vector2(p[0], p[1]))
-				subpaths.append(subpath)
+			# tools/shape_table_decoder.py always populates path_commands
+			# now (possibly empty) — empty here means this shape's cursor
+			# never actually plots a pixel, not "no pen-state breakdown
+			# available" (a quirk of an earlier, wrong decoder, which this
+			# used to work around by drawing a line through every visited
+			# position regardless of whether it was ever plotted). Render
+			# nothing for it, except a single debug dot for a totally
+			# blank shape so the viewer can still tell "this index exists
+			# but draws nothing" apart from "doesn't exist."
+			if points.size() <= 1:
+				dots.append(Vector2.ZERO)
 		else:
 			var subpath := PackedVector2Array()
 			for cmd in commands:

@@ -115,11 +115,13 @@ than opening directly into it.
 `scripts/shape_view.gd` parses the shape JSON directly (no Godot-native
 resource conversion yet) and draws each shape's `path_commands` as a
 polyline — `move` starts a new subpath (pen up), `line` extends the current
-one (pen down) — via `_draw()`. Shapes with a single point and no
-`path_commands` are drawn as dots; these are the texture/crater detail
-scattered across planet surfaces. A few shapes in the source data have
-multiple points but no `path_commands` breakdown (a quirk of the original
-converter) — those are drawn as one continuous polyline.
+one (pen down) — via `_draw()`. A shape with no `path_commands` at all
+(it never actually plots anything) is drawn as a single debug dot so the
+viewer can tell "exists but draws nothing" apart from "doesn't exist" —
+this is common and correct for planet files specifically: planets are
+drawn as a deliberately abstract scatter of short dash shapes, not a
+circle (confirmed against the real game's manual — see
+`tools/shape_table_decoder.py`'s docstring).
 
 By default it draws one shape at a time (`shape_index`, starting at 0) —
 use the arrow keys while the scene is running to step through every shape
@@ -132,23 +134,26 @@ Swap to a different shape file at runtime or in the inspector via the
 `shape_file_path` export on the `PlanetTest` node, or call
 `load_shape_file(path)` on it from code.
 
-## Known unknown: vertical orientation
+## Vertical orientation
 
 The `flip_y` export defaults to `false` (render the JSON's y values as-is).
 Godot's 2D coordinate system is y-down, same as the Apple II's, so this
-*should* be correct without inversion — but the original shape-SVG
-converter inverted y for its SVG output, specifically because Apple II y
-increases downward. Verify visually once you can actually open the editor:
-if a planet circle renders upside down or a ship's nose points the wrong
-way, flip `flip_y` to `true`.
+is correct without inversion — confirmed 2026-11-07 by decoding `SHIP no
+1`'s shape 2 and comparing it directly against the real cockpit-view
+screenshot in the game's manual (archive.org item
+`Space_Vikings_manual_subLOGIC`, page 7): nose-left, swept wedge body,
+matches with `flip_y = false`.
 
 ## Next steps
 
-- Visually verify orientation/scale against the original game's screenshots
-  or the converted SVGs in `modern/shapes_json/*.svg`.
+- Decide real starting proportions/scale for the combat VFX scripts
+  (`scripts/combat/`) against the now-corrected `ENEMY`/`EXPL` shape
+  data — they were built and tuned against the shape-table decoder's
+  wrong output; the shape indices they reference still exist, but their
+  actual visual content, scale, and screen-position assumptions haven't
+  been re-verified since the decoder fix.
 - Convert `assets/shapes/*.json` to native Godot resources (or at least an
-  import step) instead of parsing raw JSON at runtime, once the format is
-  confirmed correct.
+  import step) instead of parsing raw JSON at runtime.
 - Fill in the remaining stubs in the "What's real vs. stubbed" table
   above, starting with whichever matters most for a playable loop
   (Enlist Troops and Sell Loot are the two that gate finishing an

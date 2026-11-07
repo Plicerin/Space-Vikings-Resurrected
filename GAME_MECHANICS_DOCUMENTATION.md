@@ -134,19 +134,28 @@ $03CE (974):  previously "crew morale"    [62 refs] - MOST REFERENCED — likely
 
 ### Shape Tables ($8000 loading address)
 **26 Files Converted:** 21 planets + 3 ships + 2 special graphics
-**Format Decoded:**
+**Format Decoded** (corrected 2026-11-07 — verified against the real
+ship/planet art in the archive.org manual scan, page 7; see
+`tools/shape_table_decoder.py`'s docstring for the full derivation):
 - First byte: Number of shapes minus 1
-- Offsets table to each shape
-- Vector drawing with 8 directions
-- Pen up/down control via bit 0
+- Offsets table to each shape, one byte per shape
+- Each byte packs **three** vectors, not one — bits 0-2, bits 3-5, bits
+  6-7, each vector's low bit a plot flag and its remaining bits a
+  2-bit direction. No step count exists in the real format (the table
+  below with "steps 1-15" was an invented guess that produced scrambled
+  shapes).
+- Pen up/down: controlled by each vector's own plot flag (not a
+  separate control byte)
 
-**Direction Encoding:**
+**Direction Encoding** (diagonal, not the 8-compass-point guess
+previously here):
 ```
-0: Right          4: Left
-1: Up-Right       5: Down-Left  
-2: Up             6: Down
-3: Up-Left        7: Down-Right
+0: NE (up-right)      2: SW (down-left)
+1: SE (down-right)    3: NW (up-left)
 ```
+The third vector per byte (bits 6-7) only has these 2 direction bits and
+no plot bit at all — it can move but never draw, and a value of 0 there
+is a true no-op rather than "NE."
 
 ## Sound System
 

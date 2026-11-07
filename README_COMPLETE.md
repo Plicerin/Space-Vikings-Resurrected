@@ -73,12 +73,22 @@ python apple2-shape-table-converter.py extracted/PLANET\ \#\ 0.payload.bin
 - **4am Crack**: Modified 4 bytes: T00,S02,$FC: DA→AD, T00,S03,$35: ED→DE, T00,S02,$5D: DA→AD, T00,S02,$9E: ED→DE
 
 ### 2. Apple II Shape Table Format
-The game uses Apple II's compact "shape tables" for vector graphics:
+**Corrected 2026-11-07.** The description below replaces an earlier,
+invented guess (8 compass directions + a 4-bit step count) that produced
+scrambled, unrecognizable shapes. The real format was pinned down by
+decoding until shapes matched the actual ship/planet art shown in the
+archive.org manual scan (`Space_Vikings_manual_subLOGIC`, page 7) — see
+`tools/shape_table_decoder.py`'s module docstring for the full
+derivation. It's a custom format (not stock Applesoft, despite
+Space Vikings using Applesoft's real `DRAW` command elsewhere):
 - **First byte** = number of shapes minus 1
-- **Offsets** to each shape's data
-- **Direction encoding**: 0=Right, 1=Up-Right, 2=Up, 3=Up-Left, 4=Left, 5=Down-Left, 6=Down, 7=Down-Right
-- **Steps**: 1-15 encoded in bits, 0 means 16 steps
-- **Pen status**: Bit 0 = 1 (move without drawing), 0 (draw line)
+- **Offsets** = one byte per shape, from the table's start
+- **Vector bytes**: each byte packs **three** vectors (bits 0-2, 3-5,
+  6-7). Each vector's low bit is a plot flag; its remaining bits select
+  one of 4 **diagonal** directions (0=NE, 1=SE, 2=SW, 3=NW). There is no
+  step count — every vector moves exactly one diagonal step, plotted or
+  not. The third (6-7) vector only has 2 bits total, so it can never
+  plot, and a value of 0 there is a no-op rather than "NE."
 - **Terminator**: $00 byte ends each shape
 - **y inversion**: Apple II y increases downward, converter inverts for SVG
 

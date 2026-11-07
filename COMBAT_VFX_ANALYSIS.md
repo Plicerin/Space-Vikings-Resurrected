@@ -123,10 +123,18 @@ the shape pointer to `EXPL`'s load address first).
 The project's own `apple2-shape-table-converter.py` has a hardcoded file
 list and a hardcoded Windows path baked into `main()` — it ignores command-
 line arguments entirely, so it silently did nothing for files outside its
-original list. `tools/shape_table_decoder.py` is a fresh implementation of
-the same documented byte format (verified against that script's own
-already-correct output for the 24 planet/ship files), written to actually
-take a file argument:
+original list. `tools/shape_table_decoder.py` is a fresh implementation
+written to actually take a file argument. (2026-11-07: both scripts'
+*byte-decode* logic was also wrong at the time this was first written —
+"verified against that script's own already-correct output" below just
+meant the two scripts agreed with each other, not that either was right.
+Both have since been corrected against the real ship/planet art in the
+game's manual; see `tools/shape_table_decoder.py`'s docstring. The
+`ENEMY`/`EXPL` shapes the combat VFX scripts below were built against
+came from the *old*, wrong decode and have been regenerated — the
+specific shape indices (2, 15-18, etc.) referenced in `scripts/combat/`
+still exist in the new data, but their exact visual content, scale, and
+screen-position assumptions haven't been re-verified against it yet.)
 
 ```bash
 python3 tools/shape_table_decoder.py "extracted/ENEMY I.A24580.L68.payload.bin" \

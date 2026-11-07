@@ -92,12 +92,17 @@ The game uses memory in distinct regions:
 
 ### Shape Table Loading Address
 - **$8000 (32768)**: Graphics binaries (PLANET/SHIP files) loading address
-- **Shape table format**:
+- **Shape table format** (corrected 2026-11-07 — the format below this
+  line was an invented guess that produced scrambled shapes; see
+  `tools/shape_table_decoder.py`'s module docstring for the real,
+  manual-art-verified format and how it was derived):
   - First byte = number of shapes minus 1
-  - Followed by offsets to each shape's data
-  - Directions: 0=Right, 1=Up-Right, 2=Up, 3=Up-Left, 4=Left, 5=Down-Left, 6=Down, 7=Down-Right
-  - Steps: Encoded as 1-15, with 0 meaning 16 steps
-  - Pen status: Bit 0 = 1 means move without drawing, 0 means draw line
+  - Followed by one 1-byte offset per shape
+  - Each byte after that packs **three** vectors (bits 0-2, 3-5, 6-7),
+    each vector's low bit a plot flag and its remaining bits selecting
+    one of 4 **diagonal** directions (NE/SE/SW/NW), not 8 compass
+    directions with a step count — there is no step count in the real
+    format, every vector moves exactly one diagonal step
   - Terminator: $00 byte ends each shape
 
 ### Converted Graphics

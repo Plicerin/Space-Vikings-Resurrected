@@ -1,15 +1,23 @@
 #!/usr/bin/env python3
 """
 Apple II Shape Table Converter for Space Vikings
-Converts Apple II binary shape tables to SVG/JSON format based on Apple II documentation.
-Shape table format:
-- First byte: Number of shapes (N-1)
-- Next N bytes: Offsets to each shape's data
-- Shape data: Bytes with bit layout:
-  Bits 7-5: Direction (0-7)
-  Bits 4-1: Step count (1-15)
-  Bit 0: Pen status (1=move, 0=draw)
-- Terminator: $00 byte
+
+2026-11-07: decode logic corrected. Space Vikings (subLOGIC, 1982) uses
+its own custom shape-table encoding, not Applesoft's stock format and
+not this file's original guessed format either -- see
+tools/shape_table_decoder.py's module docstring for the full derivation
+(confirmed by decoding until shapes matched the real ship/planet art in
+the archive.org manual scan, page 7). Summary:
+
+- First byte: number of shapes minus 1
+- Next N bytes: one 1-byte offset per shape, from table start
+- Shape data: a byte stream per shape, terminated by $00. Every other
+  byte packs three vectors (bits 0-2, bits 3-5, bits 6-7); each vector's
+  low bit is a plot flag, its remaining bits (2 for the first two
+  vectors, 1 for the third, which can never plot) select one of four
+  DIAGONAL directions, not cardinal ones. The cursor moves every vector
+  regardless of the plot flag; a plotted pixel is at the position the
+  cursor was at *before* that step.
 """
 
 import os
@@ -18,92 +26,77 @@ import struct
 import math
 from pathlib import Path
 
-# Apple II direction vectors (clockwise from 0=right)
+# Diagonal direction vectors, selected by each vector's 2 direction bits.
 DIRECTIONS = [
-    (1, 0),    # 0: Right
-    (1, -1),   # 1: Up-Right
-    (0, -1),   # 2: Up
-    (-1, -1),  # 3: Up-Left
-    (-1, 0),   # 4: Left
-    (-1, 1),   # 5: Down-Left
-    (0, 1),    # 6: Down
-    (1, 1),    # 7: Down-Right
+    (1, -1),   # 0: NE
+    (1, 1),    # 1: SE
+    (-1, 1),   # 2: SW
+    (-1, -1),  # 3: NW
 ]
 
-def decode_shape_byte(byte):
-    """Decode Apple II shape byte into direction, steps, and pen status."""
-    direction = (byte >> 5) & 0b111  # Bits 7-5
-    steps = (byte >> 1) & 0b1111     # Bits 4-1
-    pen_up = byte & 0b1              # Bit 0
-    
-    # Step count is 1-15, with 0 meaning 16 steps (per Apple II docs)
-    if steps == 0:
-        steps = 16
-    
-    return direction, steps, pen_up
+def _step(bits, is_c, x, y):
+    d = (bits >> 1) & 0b11
+    if is_c and d == 0:
+        return x, y
+    dx, dy = DIRECTIONS[d]
+    return x + dx, y + dy
 
 def process_shape_table(data, start_offset=0):
     """Process Apple II shape table from binary data."""
     if len(data) < 2:
         return {"shapes": [], "error": "Data too short"}
-    
+
     # Read number of shapes (N-1)
     num_shapes_minus_one = data[0]
     num_shapes = num_shapes_minus_one + 1
-    
+
     # Read shape offsets
     offsets = []
     for i in range(num_shapes):
         if 1 + i >= len(data):
             break
         offsets.append(data[1 + i])
-    
+
     shapes = []
-    
+
     for shape_idx in range(num_shapes):
         if shape_idx >= len(offsets):
             break
-        
+
         offset = offsets[shape_idx]
         shape_start = offset
-        
+
         # Process shape data
-        shape_data = []
         x, y = 0, 0  # Relative coordinates
         points = [(0, 0)]  # Start at origin
         pen_down = False  # Track pen state
         path_commands = []
-        
+
         i = shape_start
         while i < len(data):
             byte = data[i]
             i += 1
-            
+
             if byte == 0x00:  # Terminator
                 break
-            
-            direction, steps, pen_up = decode_shape_byte(byte)
-            dx, dy = DIRECTIONS[direction]
-            
-            # Apple II coordinate system: y increases downward
-            # We'll invert y for modern coordinate system (y increases upward)
-            for step in range(steps):
-                if not pen_up:  # pen_down (bit 0 = 0 means draw)
+
+            for bits, is_c in (
+                (byte & 0x07, False),
+                ((byte >> 3) & 0x07, False),
+                ((byte >> 6) & 0x03, True),
+            ):
+                plots = bool(bits & 0x01) and not is_c
+                if plots:
                     if not pen_down:
                         pen_down = True
                         path_commands.append({"type": "move", "x": x, "y": -y})
-                    x += dx
-                    y += dy
-                    points.append((x, -y))
+                    # Plots at the pre-step position -- append before _step.
                     path_commands.append({"type": "line", "x": x, "y": -y})
-                else:  # pen_up (bit 0 = 1 means move without drawing)
-                    if pen_down:
-                        pen_down = False
-                        path_commands.append({"type": "move", "x": x, "y": -y})
-                    x += dx
-                    y += dy
-                    points.append((x, -y))
-        
+                else:
+                    pen_down = False
+                x, y = _step(bits, is_c, x, y)
+                points.append((x, -y))
+
         # Calculate bounding box
         if points:
             min_x = min(p[0] for p in points)
@@ -156,39 +149,49 @@ def binary_to_shape_table(binary_path):
     return result
 
 def create_svg_from_shape(shape, shape_id=None):
-    """Create SVG path from shape data."""
-    if not shape.get("points"):
+    """Create SVG path(s) from shape data.
+
+    Uses path_commands (move/line), not the raw points list -- points
+    includes every position the cursor visited, drawn or not, so
+    connecting all of them with "L" (the original behavior here) drew a
+    solid line straight through real pen-up gaps and made every shape
+    look artificially continuous. move starts a new subpath; only
+    line-connected runs should render as visible strokes.
+    """
+    commands = shape.get("path_commands") or []
+    if not commands:
         return ""
-    
-    # Scale factor for better visualization
+
     scale = 5
     offset_x = 50
     offset_y = 50
-    
+
     svg_lines = []
     svg_lines.append(f'<g id="shape-{shape_id if shape_id else shape["id"]}">')
-    
-    # Draw path
-    path_data = []
-    for i, point in enumerate(shape["points"]):
-        x = point[0] * scale + offset_x
-        y = point[1] * scale + offset_y
-        
-        if i == 0:
-            path_data.append(f"M {x} {y}")
+
+    subpaths = []
+    current = []
+    for cmd in commands:
+        x = cmd["x"] * scale + offset_x
+        y = cmd["y"] * scale + offset_y
+        if cmd["type"] == "move":
+            if len(current) > 1:
+                subpaths.append(current)
+            current = [f"M {x} {y}"]
         else:
-            path_data.append(f"L {x} {y}")
-    
-    if path_data:
-        svg_lines.append(f'<path d="{" ".join(path_data)}" stroke="black" fill="none" stroke-width="2"/>')
-    
-    # Draw origin marker
+            current.append(f"L {x} {y}")
+    if len(current) > 1:
+        subpaths.append(current)
+
+    for subpath in subpaths:
+        svg_lines.append(f'<path d="{" ".join(subpath)}" stroke="black" fill="none" stroke-width="2"/>')
+
     origin_x = offset_x
     origin_y = offset_y
     svg_lines.append(f'<circle cx="{origin_x}" cy="{origin_y}" r="3" fill="red"/>')
-    
+
     svg_lines.append('</g>')
-    
+
     return "\n".join(svg_lines)
 
 def convert_planet_file(planet_path, output_dir):
