@@ -86,7 +86,7 @@ The game uses Apple II's compact "shape tables" for vector graphics:
 - **SPACE SIMULATOR ASSEMBLY** ($9023): Main game state checks at $95FD-$95FE
 - **SOUND GEN** ($9276): Apple II speaker sound generation via $C030 access
 - **MEM TRANSFER A** ($9400): Copies 216-byte blocks between $8BEC-$8D7C tables
-- **EXPL** ($9100): Explosion sound that calls SOUND GEN
+- **EXPL** (catalog address $9270, not $9100): Not a sound routine. REA's Ghidra decode rejects both candidate addresses as invalid 6502 code; `H_D.bas` only invokes it via Applesoft's `DRAW` command. It's shape-table graphics data for the explosion visual, not executable code, and it doesn't call SOUND GEN.
 - **LASER** ($92D1): Laser effect routines
 
 ### 4. Graphics Conversion Status

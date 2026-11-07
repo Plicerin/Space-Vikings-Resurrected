@@ -41,7 +41,7 @@ class CPU6502 {
 - **$C000-$CFFF**: I/O space (keyboard, speaker, graphics)
 - **$D000-$FFFF**: ROM (BASIC, monitor, firmware)
 - **Memory-mapped game state**: 
-  - `$03CE` (974): Crew morale
+  - `$03CE` (974): previously labeled "crew morale" — disputed; REA's decompile of `HI-RES CHARACTER GENERATOR` shows this used as a display/inverse-mode flag, matching `analysis/comprehensive_memory_layout.md`'s independent "likely screen/display control" guess. See `GAME_MECHANICS_DOCUMENTATION.md`'s Crew Management note.
   - `$9541` (38209): Credits/currency
   - `$9516` (38166): Core game state
   - `$95FD-$95FE` (38397-38398): Joystick positions
@@ -119,7 +119,7 @@ class CombatSystem {
 class CrewSystem {
   constructor() {
     this.crew = [];
-    this.morale = 100; // $03CE
+    this.morale = 100; // $03CE -- label disputed, likely a display flag not crew morale; see GAME_MECHANICS_DOCUMENTATION.md
     this.skills = {
       piloting: 0,
       gunnery: 0,
