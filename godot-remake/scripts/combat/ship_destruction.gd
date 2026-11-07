@@ -12,6 +12,9 @@ extends Node2D
 ## Not wired to a hull/health system — none has been traced yet. Call
 ## `play()` directly to preview it (see the Start screen's combat demo).
 
+const ShapeTable = preload("res://scripts/shapes/shape_table.gd")
+const VectorShape2D = preload("res://scripts/shapes/vector_shape_2d.gd")
+
 signal finished
 
 const CENTER := Vector2(140, 65)

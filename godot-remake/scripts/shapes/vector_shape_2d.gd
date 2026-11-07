@@ -1,4 +1,3 @@
-class_name VectorShape2D
 extends Node2D
 ## Draws one shape (by index) from a ShapeTable at this node's position —
 ## the idiomatic replacement for an Apple II `XDRAW shape AT x,y`. Unlike
@@ -6,6 +5,11 @@ extends Node2D
 ## HGRCanvas (the parent space) supplies the pixel-coordinate scale, so
 ## positions and shape indices here are the same numbers the BASIC source
 ## uses.
+##
+## No `class_name` (see shape_table.gd) — callers preload this script
+## into a local `VectorShape2D` const.
+
+const ShapeTable = preload("res://scripts/shapes/shape_table.gd")
 
 @export var color: Color = Color.WHITE
 @export var stroke_width: float = 1.0

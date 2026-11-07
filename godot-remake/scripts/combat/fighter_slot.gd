@@ -1,4 +1,3 @@
-class_name FighterSlot
 extends Node2D
 ## One fighter's approach/retreat/explosion visuals
 ## (`STARSHIP SIMULATOR.bas` lines 1000-1222). Two of these, mirrored
@@ -7,6 +6,12 @@ extends Node2D
 ## animation here is the idiomatic-Godot replacement for the original's
 ## manual per-frame redraw loop; the shapes, phases, and their order are
 ## ported straight from the BASIC source.
+##
+## No `class_name` (see shape_table.gd) — callers preload this script
+## into a local `FighterSlot` const.
+
+const ShapeTable = preload("res://scripts/shapes/shape_table.gd")
+const VectorShape2D = preload("res://scripts/shapes/vector_shape_2d.gd")
 
 signal retreat_finished
 signal explosion_finished

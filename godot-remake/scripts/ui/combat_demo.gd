@@ -7,6 +7,7 @@ extends Control
 ## trigger inside space_flight.tscn, since no "when does a fighter
 ## encounter start" condition has been traced in the analysis docs.
 
+const ShapeTable = preload("res://scripts/shapes/shape_table.gd")
 const ENEMY_SHAPES := "res://assets/shapes/ENEMY I.A24580.L68.payload.json"
 
 @onready var _spawn_fighters_btn: Button = $VBox/Buttons/SpawnFightersButton
@@ -21,7 +22,8 @@ const ENEMY_SHAPES := "res://assets/shapes/ENEMY I.A24580.L68.payload.json"
 
 
 func _ready() -> void:
-	var table := ShapeTable.load_file(ENEMY_SHAPES)
+	var table := ShapeTable.new()
+	table.load_shapes(ENEMY_SHAPES)
 	_fighter_encounter.table = table
 	_incoming_fire.table = table
 	_ship_destruction.table = table

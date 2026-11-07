@@ -10,6 +10,9 @@ extends Node2D
 ## (never ported here — no player-relative combat position is tracked
 ## yet); PLAYER_POINT is a fixed stand-in for "toward the viewer."
 
+const ShapeTable = preload("res://scripts/shapes/shape_table.gd")
+const VectorShape2D = preload("res://scripts/shapes/vector_shape_2d.gd")
+
 signal finished
 
 const PLAYER_POINT := Vector2(140, 150)

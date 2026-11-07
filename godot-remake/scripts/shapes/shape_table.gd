@@ -1,4 +1,3 @@
-class_name ShapeTable
 extends RefCounted
 ## Loads a converted Apple II shape-table JSON file (see
 ## modern/shapes_json/*.payload.json in the main repo) and exposes each
@@ -6,17 +5,21 @@ extends RefCounted
 ## scripts/shape_view.gd (the debug viewer) and the combat VFX scripts —
 ## written once here so both read the exact same path-command/pen-state
 ## logic rather than duplicating it.
+##
+## Deliberately no `class_name` — that requires Godot's global script-
+## class cache, which only exists after the project has been opened once
+## in the full editor (not guaranteed on a fresh clone run straight from
+## the command line). Callers `preload()` this script into a local
+## `ShapeTable` const instead; see scripts/shape_view.gd for the pattern.
 
 var shape_count: int = 0
 var _subpaths_by_shape: Dictionary = {} # int -> Array[PackedVector2Array]
 var _dots_by_shape: Dictionary = {} # int -> Array[Vector2]
 
-static func load_file(path: String) -> ShapeTable:
-	var table := ShapeTable.new()
-	table._load(path)
-	return table
-
-func _load(path: String) -> void:
+## Instance method, not a static factory — a static factory would need to
+## self-reference this script's own type, which needs either class_name
+## or a self-preload, both more trouble than they're worth here.
+func load_shapes(path: String) -> void:
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
 		push_error("ShapeTable: could not open %s" % path)

@@ -15,6 +15,9 @@ extends Node2D
 ## position is tracked), so here firing at any point during the approach
 ## counts as a hit.
 
+const ShapeTable = preload("res://scripts/shapes/shape_table.gd")
+const FighterSlot = preload("res://scripts/combat/fighter_slot.gd")
+
 signal encounter_resolved(destroyed: bool)
 
 @export var approach_steps: int = 16

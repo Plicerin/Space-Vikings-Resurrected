@@ -19,6 +19,8 @@ extends Node2D
 @export var dot_radius: float = 1.5
 @export var flip_y: bool = false
 
+const ShapeTable = preload("res://scripts/shapes/shape_table.gd")
+
 var _table: ShapeTable
 var _subpaths: Array[PackedVector2Array] = []
 var _dots: Array[Vector2] = []
@@ -48,7 +50,8 @@ func _load_shapes() -> void:
 	_subpaths.clear()
 	_dots.clear()
 
-	_table = ShapeTable.load_file(shape_file_path)
+	_table = ShapeTable.new()
+	_table.load_shapes(shape_file_path)
 	if _table.shape_count == 0:
 		return
 

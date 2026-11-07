@@ -18,6 +18,16 @@ layers so far:
 Run `godot --path godot-remake` (or open `project.godot` in the editor) —
 it boots to `scenes/start.tscn`.
 
+**Convention:** no script in this project uses `class_name`. A `class_name`
+requires Godot's global script-class cache, which only gets built the
+first time the project is opened in the full editor — not guaranteed on
+a fresh clone run straight from the command line (a real bug found this
+way: the shape viewer worked for whoever built it, then broke on a fresh
+clone elsewhere). Scripts that need to reference each other's types
+`preload()` the script into a local const instead — see
+`scripts/shapes/shape_table.gd` for the pattern. Keep doing this for any
+new script that needs a type name.
+
 ## What's real vs. stubbed
 
 | Area | Status | Source doc |
