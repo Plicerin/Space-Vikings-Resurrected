@@ -1,0 +1,33 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/ship_destruction.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/shapes/vector_shape_2d.gd" id="2"]
+
+[node name="ShipDestruction" type="Node2D"]
+script = ExtResource("1")
+
+[node name="Flash" type="Node2D" parent="."]
+script = ExtResource("2")
+color = Color(1, 0.9, 0.3, 1)
+
+[node name="Debris15" type="Node2D" parent="."]
+script = ExtResource("2")
+color = Color(1, 0.5, 0.2, 1)
+
+[node name="Debris16" type="Node2D" parent="."]
+script = ExtResource("2")
+color = Color(1, 0.5, 0.2, 1)
+
+[node name="Debris17" type="Node2D" parent="."]
+script = ExtResource("2")
+color = Color(1, 0.5, 0.2, 1)
+
+[node name="Debris18" type="Node2D" parent="."]
+script = ExtResource("2")
+color = Color(1, 0.5, 0.2, 1)
+
+[node name="Wreckage" type="Node2D" parent="."]
+script = ExtResource("2")
+color = Color(0.6, 0.6, 0.6, 1)
+
+[node name="Sparks" type="Node2D" parent="."]

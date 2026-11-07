@@ -31,8 +31,9 @@ it boots to `scenes/start.tscn`.
 | Galaxy map, Command console, Status screen | Real navigation/readout, no original visuals (starmap chart, bezel HUD) ported yet | — |
 | Enlist / Sell Loot / Repair-Restock / Establish Base / Cryogenics / Radar / End | Stubs (`GameState.show_stub(...)`) — menu options exist and are gated correctly, but each just shows a note citing where its real logic lives | `GROUND_COMBAT_ANALYSIS.md` |
 | A2-3D1's own 3D math (VM, clipping, perspective, plotter) | Not ported, by design — Godot's native 3D replaces it | `A2-3D1_ENGINE_ANALYSIS.md` |
-| Starfield during flight | Placeholder (`MultiMeshInstance3D`) standing in for whatever A2-3D1's confirmed per-frame call actually drew | `FLIGHT_CONTROL_AND_PROGRESSION_ANALYSIS.md` |
-| Combat (fighters/lasers/explosions), atmosphere/reentry mode, 2D shape-table rendering in-engine | Not started | `COMBAT_VFX_ANALYSIS.md` |
+| Starfield during flight | Placeholder (`MultiMeshInstance3D`), deliberately finite — the original's own starfield is a bounded sphere you can fly through, not infinite/regenerating, so this isn't a bug to fix | `FLIGHT_CONTROL_AND_PROGRESSION_ANALYSIS.md` |
+| Combat VFX: fighter approach/retreat/explosion, laser beam, EX.bas ship destruction, incoming-fire pattern | Real — see "Combat VFX" below | `COMBAT_VFX_ANALYSIS.md` |
+| Combat integration (when an encounter actually starts during flight), atmosphere/reentry mode, 2D shape-table rendering elsewhere in-engine | Not started | `COMBAT_VFX_ANALYSIS.md` |
 
 Every stub was deliberately kept navigable (not a dead end) so the full
 original overlay graph — Start → Galaxy Map → Command Console → Ground
@@ -45,11 +46,44 @@ specific key — see `GROUND_COMBAT_ANALYSIS.md`'s "Retreating mid-battle"
 section). This port uses an explicit Retreat button instead of
 reproducing that bug as if it were a design choice.
 
-Validated by instantiating every scene and running the ground-combat
-battle loop headlessly (`godot --headless --path . res://scenes/<x>.tscn
---quit-after N`); no editor install was available to click through it by
-hand, so give the flight controls and menus a manual pass before trusting
-the feel of anything.
+Validated two ways, since no GUI/editor automation is available in this
+environment: every scene is instantiated headlessly
+(`godot --headless --path . res://scenes/<x>.tscn --quit-after N`) to
+catch script/scene errors, and the flight controller and combat VFX were
+additionally driven through a real render pass (an automated input
+sequence under `cage`'s headless Wayland backend, with screenshots
+captured and visually inspected) to confirm they actually look right, not
+just that they run without erroring. Still worth a manual pass in a real
+windowed session before trusting the feel of anything.
+
+## Combat VFX
+
+`scripts/combat/` ports `COMBAT_VFX_ANALYSIS.md`'s trace of
+`STARSHIP SIMULATOR.bas`/`EX.bas` — none of which uses the A2-3D1 3D
+engine, all of it flat 2D vector/sprite drawing over the cockpit view in
+the original. `scripts/shapes/hgr_canvas.gd` reproduces the Apple II's
+280x192 hi-res coordinate space (scaled up) so the ported code can use the
+BASIC source's literal pixel coordinates (reticle corners, `M`-loop screen
+Y, etc.) directly instead of re-deriving new ones.
+
+- **Fighter encounter** (`fighter_encounter.gd` + `fighter_slot.gd`): the
+  two-fighter flip-book approach, the fixed-shape retreat/flyby, and the
+  scale-flash + debris-stamp explosion — lines 1000-1222.
+- **Laser beam** (`laser_beam.gd`): the two converging cockpit-corner
+  triangles, flickered 3x — lines 1505-1530. Sound (`CALL LA`, confirmed
+  pure frequency-sweep speaker tone, decoupled from the visual) isn't
+  ported; audio is a separate, not-yet-started task.
+- **Ship destruction** (`ship_destruction.gd`): `EX.bas`'s bigger
+  screen-centered version of the same flash+debris, plus a genuine
+  radiating-line particle burst, plus persistent (stand-in) wreckage —
+  not wired to any hull/health system, since none has been traced yet.
+- **Incoming fire** (`incoming_fire.gd`): the separate generic
+  shape-crosses-the-screen-and-sometimes-fires pattern, lines 5000-5251.
+
+All four are reachable standalone from the Start screen's "Combat VFX
+Demo" button — not yet wired into an actual spawn trigger inside
+`space_flight.tscn`, since no "when does a fighter encounter start"
+condition has been traced in the analysis docs.
 
 ## The shape-table viewer
 
@@ -109,9 +143,16 @@ way, flip `flip_y` to `true`.
   above, starting with whichever matters most for a playable loop
   (Enlist Troops and Sell Loot are the two that gate finishing an
   invasion cleanly).
-- Hook the converted shape data up to actual sprites/meshes in the flight
-  and combat scenes — it's only ever been rendered in the standalone
-  viewer so far.
+- Hook the converted shape data up to actual sprites/meshes for the
+  player's own ship and planet surfaces in the flight scene — combat VFX
+  now uses real shape data (see above), but flight still uses a plain
+  mesh placeholder.
+- Wire the combat VFX into an actual encounter — needs tracing when/why a
+  fighter encounter or incoming-fire pattern starts during flight, and
+  (for `ship_destruction.gd`) a real hull/health system to trigger off.
 - Decide a real starting troop/transport count (`GameState.troops`,
   `gf_transports`) once START.bas's MISC FILE initialization is traced;
   both are placeholders right now, flagged as such in `game_state.gd`.
+- Sound — nothing emits audio yet. Every effect that has one in the
+  original (laser, explosions) notes exactly what's missing in its own
+  script.

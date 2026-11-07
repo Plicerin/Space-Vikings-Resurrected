@@ -19,9 +19,9 @@ extends Node2D
 @export var dot_radius: float = 1.5
 @export var flip_y: bool = false
 
+var _table: ShapeTable
 var _subpaths: Array[PackedVector2Array] = []
 var _dots: Array[Vector2] = []
-var _shape_count: int = 0
 
 func _ready() -> void:
 	_load_shapes()
@@ -30,66 +30,43 @@ func _ready() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not event.is_pressed():
 		return
+	var shape_count: int = _table.shape_count if _table else 0
 	if event.is_action_pressed("ui_right") or event.is_action_pressed("ui_down"):
-		shape_index = (max(shape_index, 0) + 1) % max(_shape_count, 1)
+		shape_index = (max(shape_index, 0) + 1) % max(shape_count, 1)
 		_load_shapes()
 		queue_redraw()
 	elif event.is_action_pressed("ui_left") or event.is_action_pressed("ui_up"):
-		shape_index = (max(shape_index, 0) - 1 + _shape_count) % max(_shape_count, 1)
+		shape_index = (max(shape_index, 0) - 1 + shape_count) % max(shape_count, 1)
 		_load_shapes()
 		queue_redraw()
 
-func _to_local(x: float, y: float) -> Vector2:
-	var yy := -y if flip_y else y
-	return Vector2(x, yy) * scale_factor
+func _to_local(p: Vector2) -> Vector2:
+	var yy := -p.y if flip_y else p.y
+	return Vector2(p.x, yy) * scale_factor
 
 func _load_shapes() -> void:
 	_subpaths.clear()
 	_dots.clear()
 
-	var file := FileAccess.open(shape_file_path, FileAccess.READ)
-	if file == null:
-		push_error("ShapeView: could not open %s" % shape_file_path)
+	_table = ShapeTable.load_file(shape_file_path)
+	if _table.shape_count == 0:
 		return
 
-	var parsed = JSON.parse_string(file.get_as_text())
-	file.close()
+	var indices: Array[int] = []
+	if shape_index >= 0:
+		indices.append(shape_index)
+	else:
+		for i in range(_table.shape_count):
+			indices.append(i)
 
-	if typeof(parsed) != TYPE_DICTIONARY or not parsed.has("shapes"):
-		push_error("ShapeView: %s has no 'shapes' array" % shape_file_path)
-		return
-
-	_shape_count = parsed["shapes"].size()
-
-	for shape in parsed["shapes"]:
-		if shape_index >= 0 and shape.get("id", -1) != shape_index:
-			continue
-		var commands: Array = shape.get("path_commands", [])
-		var points: Array = shape.get("points", [])
-
-		if commands.is_empty():
-			if points.size() == 1:
-				_dots.append(_to_local(points[0][0], points[0][1]))
-			elif points.size() > 1:
-				# No explicit pen-state breakdown for this shape; the
-				# converter emits one continuous polyline in that case.
-				var subpath := PackedVector2Array()
-				for p in points:
-					subpath.append(_to_local(p[0], p[1]))
-				_subpaths.append(subpath)
-			continue
-
-		var subpath := PackedVector2Array()
-		for cmd in commands:
-			var pt := _to_local(cmd["x"], cmd["y"])
-			if cmd["type"] == "move":
-				if subpath.size() > 1:
-					_subpaths.append(subpath)
-				subpath = PackedVector2Array([pt])
-			else:
-				subpath.append(pt)
-		if subpath.size() > 1:
-			_subpaths.append(subpath)
+	for i in indices:
+		for subpath in _table.get_subpaths(i):
+			var local_subpath := PackedVector2Array()
+			for p in subpath:
+				local_subpath.append(_to_local(p))
+			_subpaths.append(local_subpath)
+		for dot in _table.get_dots(i):
+			_dots.append(_to_local(dot))
 
 func _draw() -> void:
 	for subpath in _subpaths:
@@ -97,8 +74,9 @@ func _draw() -> void:
 	for dot in _dots:
 		draw_circle(dot, dot_radius, stroke_color)
 
-	var label := "%s — shape %d/%d (←/→ to cycle)" % [shape_file_path.get_file(), shape_index, _shape_count - 1]
-	draw_string(get_theme_default_font(), Vector2(-150, -120), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 16)
+	var shape_count: int = _table.shape_count if _table else 0
+	var label := "%s — shape %d/%d (←/→ to cycle)" % [shape_file_path.get_file(), shape_index, shape_count - 1]
+	draw_string(ThemeDB.fallback_font, Vector2(-150, -120), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 16)
 
 ## Swap in a different converted shape file at runtime and redraw.
 func load_shape_file(path: String) -> void:
