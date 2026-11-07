@@ -1,10 +1,57 @@
 # Space Vikings — Godot scaffold
 
-A minimal Godot 4.x project to replace the non-functional `js-remake/` port.
-Right now this does exactly one thing: load a converted Apple II shape-table
-file and draw it as plain lines and dots, to confirm the reverse-engineered
-shape data (`modern/shapes_json/*.payload.json` in the main repo, copied
-into `assets/shapes/` here) renders correctly in an actual engine.
+A Godot 4.x project to replace the non-functional `js-remake/` port. Two
+layers so far:
+
+- **The shape-table viewer** (`scenes/planet_test.tscn`,
+  `scripts/shape_view.gd`) — the original proof-of-concept: load a
+  converted Apple II shape-table file and draw it as plain lines and dots,
+  to confirm the reverse-engineered shape data
+  (`modern/shapes_json/*.payload.json` in the main repo, copied into
+  `assets/shapes/` here) renders correctly in an actual engine. Still
+  reachable from the Start screen.
+- **The actual game scaffold** (everything under `autoload/`, the rest of
+  `scenes/`, `scripts/ui/`, `scripts/flight/`) — a real, playable-today
+  skeleton wiring up the state machine and mechanics traced in the parent
+  repo's analysis docs. See "What's real vs. stubbed" below.
+
+Run `godot --path godot-remake` (or open `project.godot` in the editor) —
+it boots to `scenes/start.tscn`.
+
+## What's real vs. stubbed
+
+| Area | Status | Source doc |
+|---|---|---|
+| Shared game state (`autoload/game_state.gd`) | Real — named fields replacing every address this investigation confirmed | all four `*_ANALYSIS.md` docs |
+| Space flight attitude model (pitch/bank/heading) | Real — ports the documented coordinated-turn behavior; rates/limits are feel-tuned for modern input, not byte-matched | `FLIGHT_CONTROL_AND_PROGRESSION_ANALYSIS.md` |
+| Ground invasion battle loop | Real — the full per-round formula, tech-tier branching, retreat, surrender | `GROUND_COMBAT_ANALYSIS.md` |
+| Loot collection by tech tier | Real | `GROUND_COMBAT_ANALYSIS.md` |
+| Shore Leave: pay troops (morale) | Real | `GROUND_COMBAT_ANALYSIS.md` |
+| Troop recall | Real (thin — no morale/credit effect in the original either) | `GROUND_COMBAT_ANALYSIS.md` |
+| Galaxy map, Command console, Status screen | Real navigation/readout, no original visuals (starmap chart, bezel HUD) ported yet | — |
+| Enlist / Sell Loot / Repair-Restock / Establish Base / Cryogenics / Radar / End | Stubs (`GameState.show_stub(...)`) — menu options exist and are gated correctly, but each just shows a note citing where its real logic lives | `GROUND_COMBAT_ANALYSIS.md` |
+| A2-3D1's own 3D math (VM, clipping, perspective, plotter) | Not ported, by design — Godot's native 3D replaces it | `A2-3D1_ENGINE_ANALYSIS.md` |
+| Starfield during flight | Placeholder (`MultiMeshInstance3D`) standing in for whatever A2-3D1's confirmed per-frame call actually drew | `FLIGHT_CONTROL_AND_PROGRESSION_ANALYSIS.md` |
+| Combat (fighters/lasers/explosions), atmosphere/reentry mode, 2D shape-table rendering in-engine | Not started | `COMBAT_VFX_ANALYSIS.md` |
+
+Every stub was deliberately kept navigable (not a dead end) so the full
+original overlay graph — Start → Galaxy Map → Command Console → Ground
+Forces → {Shore Leave, Recall, Collect} and back — can be walked end to
+end today, even where a given screen's real behavior isn't built yet.
+
+One deliberate deviation from faithful porting: the original's ground-
+battle retreat trigger is a verified bug (any keypress fires it, not a
+specific key — see `GROUND_COMBAT_ANALYSIS.md`'s "Retreating mid-battle"
+section). This port uses an explicit Retreat button instead of
+reproducing that bug as if it were a design choice.
+
+Validated by instantiating every scene and running the ground-combat
+battle loop headlessly (`godot --headless --path . res://scenes/<x>.tscn
+--quit-after N`); no editor install was available to click through it by
+hand, so give the flight controls and menus a manual pass before trusting
+the feel of anything.
+
+## The shape-table viewer
 
 Only the 21 `PLANET no N`/`SHIP no N` files are included — `PLANET FILE`
 and `PLANET FILE-M` are save-state data (the undeciphered `FF FF 01 01`
@@ -14,10 +61,10 @@ garbage "shapes," so they're deliberately left out here.
 
 ## Opening
 
-Requires Godot 4.3+ (not installed in this environment — install it
-yourself, then `godot --path godot-remake` or open `project.godot` from
-the editor's project manager). Running the project opens `scenes/planet_test.tscn`,
-which draws `assets/shapes/PLANET no 0.payload.json`.
+Requires Godot 4.3+. `godot --path godot-remake` or open `project.godot`
+from the editor's project manager; the project now boots to
+`scenes/start.tscn`, with a button through to the shape viewer rather
+than opening directly into it.
 
 ## How it works
 
@@ -58,6 +105,13 @@ way, flip `flip_y` to `true`.
 - Convert `assets/shapes/*.json` to native Godot resources (or at least an
   import step) instead of parsing raw JSON at runtime, once the format is
   confirmed correct.
-- Wire up actual game state (ship, planets, navigation) per
-  `HANDOVER.md` / `GAME_MECHANICS_DOCUMENTATION.md` in the parent repo —
-  this scaffold only proves the graphics pipeline, nothing else yet.
+- Fill in the remaining stubs in the "What's real vs. stubbed" table
+  above, starting with whichever matters most for a playable loop
+  (Enlist Troops and Sell Loot are the two that gate finishing an
+  invasion cleanly).
+- Hook the converted shape data up to actual sprites/meshes in the flight
+  and combat scenes — it's only ever been rendered in the standalone
+  viewer so far.
+- Decide a real starting troop/transport count (`GameState.troops`,
+  `gf_transports`) once START.bas's MISC FILE initialization is traced;
+  both are placeholders right now, flagged as such in `game_state.gd`.

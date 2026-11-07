@@ -11,8 +11,13 @@ config_version=5
 [application]
 
 config/name="Space Vikings Remake"
-run/main_scene="res://scenes/planet_test.tscn"
+run/main_scene="res://scenes/start.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")
+
+[autoload]
+
+InputSetup="*res://autoload/input_setup.gd"
+GameState="*res://autoload/game_state.gd"
 
 [rendering]
 
