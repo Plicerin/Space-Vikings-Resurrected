@@ -146,12 +146,16 @@ matches with `flip_y = false`.
 
 ## Next steps
 
-- Decide real starting proportions/scale for the combat VFX scripts
-  (`scripts/combat/`) against the now-corrected `ENEMY`/`EXPL` shape
-  data — they were built and tuned against the shape-table decoder's
-  wrong output; the shape indices they reference still exist, but their
-  actual visual content, scale, and screen-position assumptions haven't
-  been re-verified since the decoder fix.
+- Re-verified against the corrected `ENEMY`/`EXPL` data (2026-11-07): the
+  explosion and EX.bas destruction sequences still look solid (shape 15
+  carries the debris, 16-18 are blank in the real data — that's fine,
+  the flash+flicker is what sells it). The approach flip-book is
+  different: it now visibly strobes between detailed and near-blank
+  shapes every couple of frames as a direct consequence of which indices
+  the real table has content at (see `fighter_encounter.gd`'s doc
+  comment). Kept as-is deliberately, but not yet confirmed to be
+  correct — worth another look once there's more confidence in the
+  format (or real footage of this exact moment to compare against).
 - Convert `assets/shapes/*.json` to native Godot resources (or at least an
   import step) instead of parsing raw JSON at runtime.
 - Fill in the remaining stubs in the "What's real vs. stubbed" table

@@ -316,18 +316,136 @@ bytecode opcode 0/1/2/3 (per vertex)
 - Opcodes `8` and `12`'s self-modifying patches specifically — only opcode
   `9`'s target (`$7148`, the page-flip patch above) was directly named and
   disassembled; 8 and 12 are not yet confirmed to do the same thing.
-- Jump-table entry 4 (`$653F`).
+- Jump-table entry 4 (`$653F`) itself — though `RADAR.bas`'s `SN = 24585`
+  constant (`$6009`, confirmed below) shows at least one BASIC-level name
+  for it, even without tracing its body.
 - Which BASIC/assembly caller actually feeds this VM a bytecode stream per
   frame, and where that stream is built — i.e., what in `SPACE SIMULATOR
   ASSEMBLY` or the BASIC overlays constructs the "draw this object" command
-  list consumed here. (`STARSHIP SIMULATOR.bas`'s `P`/`B`/`H` variables —
-  pitch/bank/heading, PEEKed from `$7321`–`$7323`, a region
+  list consumed here for the *flight* view specifically (see below — this
+  *is* now traced for the radar view). (`STARSHIP SIMULATOR.bas`'s `P`/`B`/`H`
+  variables — pitch/bank/heading, PEEKed from `$7321`–`$7323`, a region
   `analysis/comprehensive_memory_layout.md` currently lists as "unknown
   purpose" — are a strong candidate for the 3 angle bytes opcode `5`
   consumes; not yet directly confirmed by tracing the actual call site.)
-- Exact relationship between this library and the 21 `PLANET # N` /
-  `SHIP # N` shape files — whether they're consumed as this bytecode format
-  directly, or converted into it by another routine.
+
+**Resolved 2026-11-07 — the `SHIP # N` files are real 3D models for this
+engine, rendered on the radar screen:**
+
+Confirmed two ways: (1) structural decode of
+`extracted/SHIP no {1,3,4}.payload.bin` — skip a 2-byte header (`04 00`),
+then a run of 7-byte records (1-byte opcode, always `1`/`2`/`3` — this
+engine's "draw line to vertex" ops — plus a signed 16-bit X/Y/Z vertex),
+terminated by a single `7F` byte. Every vertex in a given file clusters
+tightly in the same small region of 3D space (e.g. `SHIP no 1`: X≈270-560,
+Y≈-175..-65, Z≈-3535..-3465) — the same world-coordinate scale
+`STARSHIP SIMULATOR.bas` itself uses (its own `Z9=-3500` reference
+constant sits right in the middle of that Z range). Rendering each file's
+X/Y as a wireframe polyline produces three distinct, detailed, genuinely
+ship-like silhouettes (engine nacelles, a solar-panel/radiator grid, a
+swept hull, a boxy sensor mast) — not noise, and not the same shape
+repeated. (2) The actual call site: `RADAR.bas` line 2005 —
+`POKE P1,63:BV%=20000:GOSUB 6000:POKE YI,LO%:...:CALL 24576` — calls this
+engine's own entry 1 (`$6000` = 24576 decimal) directly, right before
+drawing the radar housing/border (lines 2032-2042). `ORBIT.bas`/`START.bas`
+BLOAD `SHIP # J` to the fixed address `A$7879` beforehand (`J` already
+tier-corrected: `IF PEEK(38205)=2 THEN J=3`), and that data is still
+resident in memory — untouched by anything else — when `RADAR.bas` later
+runs its `CALL 24576`. So: **the radar screen is a true 3D wireframe
+render of the system's orbital defender**, via this engine, distinct from
+both the flat `ENEMY`-shape-table XDRAW fighter sprite used in actual
+flight combat (see `COMBAT_VFX_ANALYSIS.md`) and the separate inline
+`DATA`-statement 2D silhouette+text shown by `SHIP no N I.D..bas` (reached
+by pressing `X` while on radar — `RADAR.bas` line 2056/5005). Three
+different rendering systems, three different screens, now all identified.
+
+One more detail this explains for free: `START.bas` line 240 BLOADs
+`DEBRIS` to that *same* `A$7879` slot instead of `SHIP # J` whenever
+`PEEK(38205)=0` (no defender) and the planet's already been fought over —
+i.e. radar shows drifting wreckage in that same 3D view when there's no
+live ship left to show.
+
+**Live-verified 2026-11-07, via MAME.** Traced the actual key that
+reaches `RADAR.bas` from inside `STARSHIP SIMULATOR.bas`'s main loop
+(lines 200-206's `ON K-... GOTO` chain): raw `PEEK(-16384)` must be
+`210` (ASCII `R`+128), which survives the chain's adjustments
+(`210-176=34`, then `34-33=1` → `GOTO 320` → `PRINT "RUNRADAR"`) — so
+**pressing `R` during flight opens radar.** Scripted exactly that via
+MAME's Lua console (`natkeyboard:post("R")`) and captured the result: a
+distinct filled polygon blip sits on the radar display, clearly
+different in shape from the single-pixel star dots around it, in the
+same spot across every frame while the screen is paused on `RADAR.bas`'s
+blocking `GET A$` at line 2050. Confirmed live memory at `$7879` held
+`SHIP no 3.payload.bin`'s exact bytes (`04 00 01 96 00 9C FF 54 F2 02...`)
+at the time, with `PEEK(38205)=3` — so this blip is that exact decoded
+model, actually rendered by the actual engine, not an inference.
+
+**Planet point-field, resolved 2026-11-07, also live-verified.** The
+VM's own bytecode-pointer zero page (`$9B`/`$9C`) is forced to a fixed
+high byte `$73` in `FUN_6140`'s prologue (`0x6140.c` line 32) — i.e.
+every invocation of this VM starts somewhere in the `$7300` page, which
+is exactly where `ORBIT.bas` BLOADs `PLANET # 0` (see
+`CATALOG_FINDINGS.md`). A fine-grained live memory trace (sampling
+every frame, not every 3rd — the periodic excursion only lasts ~12
+frames out of every ~175) caught it there directly: the pointer walks
+`$7316 → $73FD` in clean steps, recurring roughly every 3 seconds.
+
+Decoded the real byte-level opcode lengths properly this time by
+reading `FUN_6140`'s full switch statement (not just the general-doc
+summary): op `4`=2 bytes, `5`=10, `6`=5, `7`-`9`=2, `10`=3, `11`=3 (jump),
+`12`=2, `13`=3, `14`=5, `15`=7, `16`/`17`=1, with `0`/`1`/`2`/`3` (vertex
+ops) at 7 bytes each as the general doc already said. Walking
+`PLANET # 0`'s real disk bytes with this table, starting at offset 22
+(exactly `$7316`, matching the live trace), decodes **the entire rest
+of the 1401-byte file with zero errors**, ending precisely on the `7F`
+terminator — far stronger evidence than the Applesoft shape-table
+reading ever produced for this specific file (that reading also
+"worked" without erroring, which is why it went unquestioned initially,
+but it's a coincidental alternate parse, not what the game uses).
+
+The result: **195 vertices, every single one opcode `0`** (plot-only,
+never connected by opcode `1`/`2`/`3`'s line-draw) — a genuine point
+field with zero surface, projected through the exact same
+translate/rotate/clip/perspective pipeline as the ships. That's why it
+reads on screen as scattered dots rather than any kind of shape — there
+*is* no shape, just floating points, which is exactly the manual's own
+"very abstract... cluster of dots" framing. Not random, though: all
+195 points' Y-coordinates cycle through the *exact same 12-value
+sequence* repeated ~16 times (`620, 994, -179, -915, 31, 1059, 430,
+-792, -540, 760, 909, -345, 620, 994, ...`), with X and Z varying more
+freely (175 and 117 distinct values respectively) — consistent with a
+simple ring/band generator (fixed latitude bands, free longitude)
+baked out once into a static file, not hand-placed vertex-by-vertex
+the way the ships' silhouettes clearly were. Both `X`/`Y`/`Z` span
+exactly `±10000`, i.e. the whole field sits inside a fixed cube/sphere
+of that radius.
+
+**Resolved, same day**: `# 1`-`# 20` are not vestigial. `RE.bas`
+("REENTRY SEQUENCE", per its own on-screen text) line 30 does
+`BLOAD PLANET # `;`PEEK(38209)`;`,A29440` — a real variable, not
+hardcoded. `PEEK(38209)` is the current-planet-index register (the
+same variable indexes several other `$9xxx+index` per-planet state
+tables used throughout `SHORE LEAVE.bas`/`GROUND FORCES.bas`). So the
+real split is by *scenario*, not by planet number: `ORBIT.bas` (going
+*into* orbit, from space) always shows the generic `# 0` abstract
+point-field; `RE.bas` (re-entry, heading *toward* a specific world)
+loads that planet's real `# N` file instead.
+
+Decoded all 21 real `PLANET # N` files (direct from the disk, same
+opcode-aware walk) to check the split cleanly: **every single one of
+`# 1`-`# 20` is dominated by connecting-line ops (68-202 lines each,
+0-21 stray points)** — the exact opposite composition from `# 0`'s
+195-points-zero-lines. Rendering `# 11` top-down (X horizontal, Z
+vertical, ignoring the mostly-flat Y) makes this obvious: the first 5
+vertices trace a closed `±10000` square (a ground-plane boundary),
+and inside it sit a dozen-plus small, distinct, non-repeating polygon
+shapes (triangles, pentagons, a larger faceted cluster, a winding
+branching line) — a genuine top-down terrain/landmark map, nothing
+like `# 0`'s floating dot cloud. So the earlier "generated vs
+modeled" question had a real answer hiding a second one: `# 0` (deep
+space, decorative) is the procedurally-patterned point field;
+`# 1`-`# 20` (the real, per-world data, used on actual re-entry) are
+genuinely modeled terrain maps.
 
 ## Source map
 

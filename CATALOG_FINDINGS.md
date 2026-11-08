@@ -62,15 +62,21 @@ runtime addresses, harvested from `START.bas`:
 
 | File | Length | Purpose |
 |---|---|---|
-| `PLANET # 0` … `PLANET # 20` | `$021D`–`$05DC` each | One per planet. Loaded into `$7300` when the player approaches. **21 distinct planets.** |
+| `PLANET # 0` … `PLANET # 20` | `$021D`–`$05DC` each | One per planet. Loaded into `$7300` when the player approaches. **21 distinct planets.** (Corrected twice now, 2026-11-07: same file as `extracted/PLANET no N.payload.bin` — confirmed via a direct DOS 3.3 catalog/TSL read, there is no separate file. First correction said this was the Applesoft shape-table format, same as the manual-verified SHIP/ENEMY art; that was itself wrong — it just happened to *also* parse under that format without erroring. **Second correction, now live-confirmed**: it's real `A2-3D1` bytecode, same VM as the ships (see that doc's "Planet point-field" section) — MAME live memory trace caught the VM's own program-counter zero page walking cleanly through `$7300`+ with zero decode errors all the way to EOF, something the shape-table reading never demonstrated. `PLANET # 0` specifically (the only one `ORBIT.bas` ever actually loads — the `# 0` is hardcoded, not parameterized by `J`) decodes as 195 isolated-point plots (opcode `0`, never connected by a line) with no surface at all, which is why it reads on screen as scattered dots rather than a shape. `PLANET # 5`/`# 11` (never observed loaded in play) decode with real connecting-line opcodes instead — open question why those exist if `ORBIT.bas` can't reach them.) |
 | `DEBRIS` | `$0162` | Debris-field record, also at `$7300`. |
 
-`$7879` is reused as the player's-ship sprite buffer:
+`$7879` is reused as a ship-model buffer (corrected 2026-11-07: this is
+the **orbital defender's** ship, not the player's — confirmed live, see
+`A2-3D1_ENGINE_ANALYSIS.md`'s "Resolved 2026-11-07"/"Live-verified"
+sections. `J=PEEK(38205)` — the defender's tech tier, tier-corrected
+`2→3` — picks which `SHIP # J` loads here, and `RADAR.bas` (`CALL
+24576`) renders it as a real 3D wireframe blip on the radar display,
+not during flight):
 
 | File | Length | Purpose |
 |---|---|---|
-| `SHIP # 1`, `SHIP # 3`, `SHIP # 4` | `$03C2`–`$0638` | 3D model data for the player's chosen ship. (Indices 0 and 2 absent — see note above.) |
-| `SHIP # 0` | `$0001` | One-byte file at the same slot. Likely a placeholder/marker since ship 0 is also referenced by `SHIP # 0 I.D.` text. |
+| `SHIP # 1`, `SHIP # 3`, `SHIP # 4` | `$03C2`–`$0638` | Real A2-3D1 bytecode-VM 3D wireframe model (opcodes `1`/`2`/`3`, line-to-vertex) of the orbital defender for that tech tier, rendered on radar. |
+| `SHIP # 0` | `$0001` | Genuinely just the `$7F` terminator byte, confirmed via a direct disk read — tier 0 (the unarmed station) has no defender model to show at all, not an extraction bug. |
 
 `$7FFF` is the enemy-data slot:
 

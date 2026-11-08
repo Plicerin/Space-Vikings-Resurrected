@@ -14,6 +14,17 @@ extends Node2D
 ## of those has a Godot-side equivalent yet (no player-relative 3D combat
 ## position is tracked), so here firing at any point during the approach
 ## counts as a hit.
+##
+## Left as-is, not yet confirmed correct (2026-11-07): the flip-book
+## shape index (3, 4, 5, 6...) lands on genuinely detailed art at the odd
+## indices and on a near-blank 2-pixel shape at the even ones in the
+## *corrected* ENEMY table, so the approaching fighter visibly flickers
+## between "small scattered shape" and "almost invisible" every couple of
+## frames. That might be authentic to the real game, or might mean this
+## mechanic (which specific indices the flip-book should actually hit,
+## or the step rate) still isn't fully right. Kept faithful to the
+## decoded data for now rather than smoothed over — revisit once there's
+## more confidence in which reading is correct.
 
 const ShapeTable = preload("res://scripts/shapes/shape_table.gd")
 const FighterSlot = preload("res://scripts/combat/fighter_slot.gd")
