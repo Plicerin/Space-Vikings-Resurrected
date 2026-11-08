@@ -46,10 +46,17 @@ var planet_secured: Array[bool] = []
 var planet_has_base: Array[bool] = []
 var planet_scouted: Array[bool] = []
 var planet_population_scale: Array[int] = []
-# Original: $38205, read as a single "current target's orbital
-# defender" register, not literally a per-planet array — simplified
-# to one flag per planet here since the port doesn't yet model transit.
-var planet_orbital_defender: Array[bool] = []
+# Original: $38205 ("ET"), read as a single "current target's orbital
+# defender tech tier" register — 0 (no ship, e.g. an unarmed station),
+# 1 (light cruiser), 3 (heavy cruiser), 4 (seen in H_D.bas/ORBIT.bas's
+# tier-correction logic; a raw 2 always gets remapped to 3 before use,
+# so 2 itself never appears here) — not literally a per-planet array in
+# the original, simplified to one entry per planet here since the port
+# doesn't yet model transit. Confirmed live in MAME 2026-11-07: this is
+# exactly which SHIP # N wireframe RADAR.bas renders — see
+# A2-3D1_ENGINE_ANALYSIS.md and scripts/shapes/a2_3d1_model.gd.
+const DEFENDER_TIERS: Array[int] = [0, 1, 3, 4]
+var planet_orbital_defender_tier: Array[int] = []
 
 var current_planet: int = 0        # $38209 ("orbiting" planet)
 var target_planet: int = 0         # $38163 (travel target)
@@ -87,14 +94,19 @@ func start_new_game() -> void:
 	planet_has_base.clear()
 	planet_scouted.clear()
 	planet_population_scale.clear()
-	planet_orbital_defender.clear()
+	planet_orbital_defender_tier.clear()
 	for i in range(PLANET_COUNT):
 		planet_tech.append(0)
 		planet_secured.append(false)
 		planet_has_base.append(false)
 		planet_scouted.append(false)
 		planet_population_scale.append(1)
-		planet_orbital_defender.append(false)
+		# Placeholder distribution — the original's real per-planet tier
+		# assignment (likely tied to planet_tech/population, going by
+		# GROUND_COMBAT_ANALYSIS.md's tech-tier framing) hasn't been
+		# traced yet. Picked here just so the radar screen has variety
+		# to actually show; change freely once that's found.
+		planet_orbital_defender_tier.append(DEFENDER_TIERS.pick_random())
 
 	loot.clear()
 	for i in range(13):

@@ -14,9 +14,18 @@ screenshot -- a swept wedge-shaped ship silhouette, and planets drawn as
 a deliberately abstract scatter of short dash marks, not a circle):
 
   +00     number of shapes
-  +01..   one 1-byte offset per shape (from table start) -- confirmed
-          against all 25 PLANET/SHIP files: 1-byte offsets are 100%
-          in-bounds; every 2-byte variant tried lands mostly past EOF.
+  +01..   one 1-byte offset per shape (from table start)
+
+2026-11-07, later the same day: confirmed live in MAME that this format
+is the real one for ENEMY/EXPL specifically (SHTAB live memory dump
+matched this decoder's output byte-for-byte during an actual fighter
+encounter). It is NOT what SHIP # N or PLANET # N actually are, even
+though both "decode" under this format without erroring -- that's a
+coincidental alternate parse. Both are real A2-3D1 3D-engine bytecode
+instead (vertex/line-draw opcodes, not shape vectors) -- see
+tools/a2_3d1_model_decoder.py and A2-3D1_ENGINE_ANALYSIS.md's "Resolved"
+sections. Don't retarget this decoder at SHIP/PLANET files again without
+re-checking that doc first.
 
 Each shape is a byte stream ending at a $00 terminator (not three
 "do nothing" vectors -- $00 is reserved as the terminator). Every other

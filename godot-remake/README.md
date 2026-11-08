@@ -39,9 +39,12 @@ new script that needs a type name.
 | Shore Leave: pay troops (morale) | Real | `GROUND_COMBAT_ANALYSIS.md` |
 | Troop recall | Real (thin — no morale/credit effect in the original either) | `GROUND_COMBAT_ANALYSIS.md` |
 | Galaxy map, Command console, Status screen | Real navigation/readout, no original visuals (starmap chart, bezel HUD) ported yet | — |
-| Enlist / Sell Loot / Repair-Restock / Establish Base / Cryogenics / Radar / End | Stubs (`GameState.show_stub(...)`) — menu options exist and are gated correctly, but each just shows a note citing where its real logic lives | `GROUND_COMBAT_ANALYSIS.md` |
+| Radar screen | Real — see "Radar" below | `A2-3D1_ENGINE_ANALYSIS.md` |
+| Enlist / Sell Loot / Repair-Restock / Establish Base / Cryogenics / End | Stubs (`GameState.show_stub(...)`) — menu options exist and are gated correctly, but each just shows a note citing where its real logic lives | `GROUND_COMBAT_ANALYSIS.md` |
 | A2-3D1's own 3D math (VM, clipping, perspective, plotter) | Not ported, by design — Godot's native 3D replaces it | `A2-3D1_ENGINE_ANALYSIS.md` |
 | Starfield during flight | Placeholder (`MultiMeshInstance3D`), deliberately finite — the original's own starfield is a bounded sphere you can fly through, not infinite/regenerating, so this isn't a bug to fix | `FLIGHT_CONTROL_AND_PROGRESSION_ANALYSIS.md` |
+| Planet during flight (deep-space view) | Real — `PLANET # 0`'s actual 195-point field, same file `ORBIT.bas` loads for this view | `A2-3D1_ENGINE_ANALYSIS.md` |
+| Planet during re-entry (per-world terrain map) | Data decoded (all 21 real `PLANET # N` files), not wired into any scene yet — see "Next steps" | `A2-3D1_ENGINE_ANALYSIS.md` |
 | Combat VFX: fighter approach/retreat/explosion, laser beam, EX.bas ship destruction, incoming-fire pattern | Real — see "Combat VFX" below | `COMBAT_VFX_ANALYSIS.md` |
 | Combat integration (when an encounter actually starts during flight), atmosphere/reentry mode, 2D shape-table rendering elsewhere in-engine | Not started | `COMBAT_VFX_ANALYSIS.md` |
 
@@ -95,6 +98,45 @@ Demo" button — not yet wired into an actual spawn trigger inside
 `space_flight.tscn`, since no "when does a fighter encounter start"
 condition has been traced in the analysis docs.
 
+## Radar
+
+Press `R` during flight (`space_flight.gd`'s `open_radar` action,
+matching the real `ON K-... GOTO` key-dispatch chain in `STARSHIP
+SIMULATOR.bas` lines 200-206 — confirmed live in MAME, see
+`A2-3D1_ENGINE_ANALYSIS.md`'s "Live-verified 2026-11-07" section) or
+choose Radar from the Command Console. This is **not** the Applesoft
+shape-table system the rest of the shape viewer uses — `SHIP # N` is
+real `A2-3D1` 3D-engine bytecode (vertex/line-draw opcodes), a genuinely
+different binary format, decoded by `tools/a2_3d1_model_decoder.py` and
+loaded by `scripts/shapes/a2_3d1_model.gd`.
+
+- `radar_hud.gd`: the border/crosshair/reticle overlay, literal HPLOT
+  coordinates from `RADAR.bas` lines 2005-2042, drawn through
+  `HgrCanvas` same as the combat VFX.
+- `radar_screen.gd` + `a2_3d1_model.gd`: the actual 3D wireframe ship
+  blip. Idiomatic-Godot choice, not a port: the model is built as a
+  real `ArrayMesh` (`Mesh.PRIMITIVE_LINES`) and rendered through a real
+  `Camera3D` — Godot's own 3D pipeline replaces the original's
+  hand-rolled 6502 rotate/clip/perspective-divide math, same spirit as
+  the flight scene's `Camera3D`/`MeshInstance3D` use (see the "A2-3D1's
+  own 3D math" row in the table above). The camera auto-frames each
+  model from its own bounding radius, since the four real ship files
+  span very different absolute sizes. A slow constant spin on the model
+  is also new — the original's view is static while its own blocking
+  `GET A$` waits for a keypress; the spin is purely to make "this is a
+  real rotating 3D model" legible at a glance. Both are flagged in
+  `radar_screen.gd`'s own doc comment if either reads as inauthentic
+  rather than additive once more of the original is ported.
+- Tier → ship mapping (`GameState.planet_orbital_defender_tier`, values
+  0/1/3/4) and each tier's on-screen description are pulled directly
+  from the real `SHIP no N I.D..bas` text. Which real planet gets which
+  tier is a placeholder (random at new-game time) — the original's real
+  assignment formula hasn't been traced yet.
+- Pressing `X` (the original's path to the plain-text `SHIP # N I.D.`
+  screen — a *third*, separate rendering system using inline `DATA`
+  points, distinct from both this radar view and the `ENEMY` shape
+  table) routes to a stub for now; that screen isn't built yet.
+
 ## The shape-table viewer
 
 Only the 21 `PLANET no N`/`SHIP no N` files are included — `PLANET FILE`
@@ -138,14 +180,35 @@ Swap to a different shape file at runtime or in the inspector via the
 
 The `flip_y` export defaults to `false` (render the JSON's y values as-is).
 Godot's 2D coordinate system is y-down, same as the Apple II's, so this
-is correct without inversion — confirmed 2026-11-07 by decoding `SHIP no
-1`'s shape 2 and comparing it directly against the real cockpit-view
-screenshot in the game's manual (archive.org item
-`Space_Vikings_manual_subLOGIC`, page 7): nose-left, swept wedge body,
-matches with `flip_y = false`.
+is correct without inversion.
+
+(Correction, 2026-11-07, same day: the original version of this note
+cited decoding `SHIP no 1`'s shape 2 under *this* shape-table viewer
+and comparing it to the manual's cockpit-view screenshot as the
+confirming evidence. That comparison is no longer trustworthy as
+stated — `SHIP # N` turned out not to be shape-table data at all, it's
+real `A2-3D1` 3D-engine bytecode (see the "Radar" section above); the
+match was a coincidental alternate parse, the same pattern that also
+tripped up `PLANET # N` — see `A2-3D1_ENGINE_ANALYSIS.md`'s "Resolved"
+sections. The `flip_y=false` conclusion itself is still believed
+correct — it's confirmed independently via `ENEMY`'s live SHTAB memory
+match in MAME, which genuinely is this shape-table format — just not
+on the SHIP-vs-manual evidence this note originally cited.)
 
 ## Next steps
 
+- Radar is real now (2026-11-07) — see "Radar" above. Same day: flight's
+  planet placeholder is now `PLANET # 0`'s real 195-point field (see
+  `space_flight.gd`), and all 21 real `PLANET # N` files are decoded
+  into `assets/models/` via `tools/extract_planets.py` — but only `# 0`
+  is wired into a scene so far. `PLANET # 1`-`# 20` (`RE.bas`'s
+  re-entry view, genuinely modeled line-connected terrain maps, a
+  different kind of visual from `# 0`'s point field) have no scene or
+  trigger yet — there's no existing "approaching a planet closely
+  enough to re-enter" condition in this port's flight loop to hang it
+  off of. Also left for later: the real per-planet tier-assignment
+  formula (currently random at new-game time) and the `SHIP # N I.D.`
+  text screen reached by pressing `X` on radar (currently a stub).
 - Re-verified against the corrected `ENEMY`/`EXPL` data (2026-11-07): the
   explosion and EX.bas destruction sequences still look solid (shape 15
   carries the debris, 16-18 are blank in the real data — that's fine,

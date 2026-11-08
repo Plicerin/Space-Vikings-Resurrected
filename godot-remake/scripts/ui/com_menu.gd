@@ -32,11 +32,7 @@ func _on_ground_forces_pressed() -> void:
 
 
 func _on_radar_pressed() -> void:
-	GameState.show_stub(
-		"RADAR",
-		"Single-point A2-3D1-projected bearing indicator for the current target — see A2-3D1_ENGINE_ANALYSIS.md and RADAR.bas.",
-		"res://scenes/com.tscn"
-	)
+	GameState.goto_scene("res://scenes/radar.tscn")
 
 
 func _on_end_pressed() -> void:

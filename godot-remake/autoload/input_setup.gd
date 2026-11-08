@@ -13,6 +13,7 @@ const ACTIONS := {
 	"throttle_down": [KEY_Q, KEY_PAGEDOWN],
 	"open_com": [KEY_C],
 	"open_ground_forces": [KEY_G],
+	"open_radar": [KEY_R],
 	"fire_laser": [KEY_SPACE, KEY_CTRL],
 }
 

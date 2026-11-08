@@ -135,7 +135,7 @@ func _on_round_tick() -> void:
 
 	# Line 570: an orbital defender still present taxes progress every
 	# round, independent of the round's own outcome.
-	if GameState.planet_orbital_defender[GameState.current_planet]:
+	if GameState.planet_orbital_defender_tier[GameState.current_planet] != 0:
 		x -= randf() * 1.0
 
 	# Line 575: troop morale (1-6) is added to progress every round,
