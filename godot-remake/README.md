@@ -44,9 +44,9 @@ new script that needs a type name.
 | A2-3D1's own 3D math (VM, clipping, perspective, plotter) | Not ported, by design — Godot's native 3D replaces it | `A2-3D1_ENGINE_ANALYSIS.md` |
 | Starfield during flight | Placeholder (`MultiMeshInstance3D`), deliberately finite — the original's own starfield is a bounded sphere you can fly through, not infinite/regenerating, so this isn't a bug to fix | `FLIGHT_CONTROL_AND_PROGRESSION_ANALYSIS.md` |
 | Planet during flight (deep-space view) | Real — `PLANET # 0`'s actual 195-point field, same file `ORBIT.bas` loads for this view | `A2-3D1_ENGINE_ANALYSIS.md` |
-| Planet during re-entry (per-world terrain map) | Data decoded (all 21 real `PLANET # N` files), not wired into any scene yet — see "Next steps" | `A2-3D1_ENGINE_ANALYSIS.md` |
+| Planet during re-entry (per-world terrain map) | Real — `scenes/planet_approach.tscn`, triggered automatically by proximity to the planet during flight | `A2-3D1_ENGINE_ANALYSIS.md` |
 | Combat VFX: fighter approach/retreat/explosion, laser beam, EX.bas ship destruction, incoming-fire pattern | Real — see "Combat VFX" below | `COMBAT_VFX_ANALYSIS.md` |
-| Combat integration (when an encounter actually starts during flight), atmosphere/reentry mode, 2D shape-table rendering elsewhere in-engine | Not started | `COMBAT_VFX_ANALYSIS.md` |
+| Combat integration (when an encounter actually starts during flight) | Not started | `COMBAT_VFX_ANALYSIS.md` |
 
 Every stub was deliberately kept navigable (not a dead end) so the full
 original overlay graph — Start → Galaxy Map → Command Console → Ground
@@ -137,6 +137,32 @@ loaded by `scripts/shapes/a2_3d1_model.gd`.
   points, distinct from both this radar view and the `ENEMY` shape
   table) routes to a stub for now; that screen isn't built yet.
 
+## Re-entry
+
+`scenes/planet_approach.tscn` + `scripts/ui/planet_approach.gd` — ports
+`RE.bas` ("REENTRY SEQUENCE START", confirmed from its own on-screen
+text). `space_flight.gd` triggers it automatically on proximity to the
+planet, standing in for the original's `ABS(X)<900 AND ABS(Y)<900 AND
+ABS(Z)<900` world-position box test (`STARSHIP SIMULATOR.bas` line
+156) with a plain distance check — this port's flight model doesn't
+track position in the original's units, and has no "weapon fired"
+flag yet to port that condition's other half.
+
+Shows the *real* per-world terrain map (`PLANET # <current_planet>`,
+selected the same way `RE.bas` does it — `PEEK(38209)`) — genuinely
+modeled, line-connected data, a different visual from the generic
+point-field `Planet` seen during ordinary flight. After a few seconds
+(or any keypress), returns to flight. Liberty, not in the original:
+the ship gets nudged back away from the planet first, since nothing
+else in this port's flight loop would otherwise move it out of range
+before the very next frame re-triggered the same sequence — the
+original's own position variables keep evolving every frame
+regardless of this transition, so it never needed an explicit reset.
+
+Also fixed along the way: `[G] Ground Forces`'s HUD text has said
+"(when in range)" since this scene was scaffolded, but nothing actually
+enforced it until this same proximity check went in.
+
 ## The shape-table viewer
 
 Only the 21 `PLANET no N`/`SHIP no N` files are included — `PLANET FILE`
@@ -197,18 +223,13 @@ on the SHIP-vs-manual evidence this note originally cited.)
 
 ## Next steps
 
-- Radar is real now (2026-11-07) — see "Radar" above. Same day: flight's
-  planet placeholder is now `PLANET # 0`'s real 195-point field (see
-  `space_flight.gd`), and all 21 real `PLANET # N` files are decoded
-  into `assets/models/` via `tools/extract_planets.py` — but only `# 0`
-  is wired into a scene so far. `PLANET # 1`-`# 20` (`RE.bas`'s
-  re-entry view, genuinely modeled line-connected terrain maps, a
-  different kind of visual from `# 0`'s point field) have no scene or
-  trigger yet — there's no existing "approaching a planet closely
-  enough to re-enter" condition in this port's flight loop to hang it
-  off of. Also left for later: the real per-planet tier-assignment
-  formula (currently random at new-game time) and the `SHIP # N I.D.`
-  text screen reached by pressing `X` on radar (currently a stub).
+- Radar, flight's planet, and re-entry are all real now (2026-11-07) —
+  see "Radar"/"Re-entry" above. Left for later: the real per-planet
+  tier-assignment formula (currently random at new-game time), the
+  `SHIP # N I.D.` text screen reached by pressing `X` on radar
+  (currently a stub), and a real "weapon fired" flag so the re-entry
+  trigger can port the original's full condition instead of proximity
+  alone.
 - Re-verified against the corrected `ENEMY`/`EXPL` data (2026-11-07): the
   explosion and EX.bas destruction sequences still look solid (shape 15
   carries the debris, 16-18 are blank in the real data — that's fine,
