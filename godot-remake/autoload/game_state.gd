@@ -47,15 +47,26 @@ var planet_has_base: Array[bool] = []
 var planet_scouted: Array[bool] = []
 var planet_population_scale: Array[int] = []
 # Original: $38205 ("ET"), read as a single "current target's orbital
-# defender tech tier" register — 0 (no ship, e.g. an unarmed station),
-# 1 (light cruiser), 3 (heavy cruiser), 4 (seen in H_D.bas/ORBIT.bas's
-# tier-correction logic; a raw 2 always gets remapped to 3 before use,
-# so 2 itself never appears here) — not literally a per-planet array in
-# the original, simplified to one entry per planet here since the port
+# defender tech tier" register — the real text per tier, straight from
+# SHIP no N I.D..bas (not a guess): 0 = no ship ("THERE IS NO STARSHIP
+# IN THIS SYSTEM" — an unarmed station), 1 = "SMALL SPACE LAB AND
+# OBSERVATORY, MINIMUM WEAPONS AND ARMOR" (weakest real ship), 3 =
+# "LIGHT CRUISER WITH LASERS, MISSILES AND FIGHTER COVER", 4 = "HEAVY
+# CRUISER WITH PHOTON MISSILES AND HEAVY LASERS, 20-40 FIGHTERS" —
+# a raw ET value of 2 always gets remapped to 3 before use in the
+# original (H_D.bas/ORBIT.bas's tier-correction logic), so 2 itself
+# never appears here. Not literally a per-planet array in the
+# original, simplified to one entry per planet here since the port
 # doesn't yet model transit. Confirmed live in MAME 2026-11-07: this is
 # exactly which SHIP # N wireframe RADAR.bas renders — see
 # A2-3D1_ENGINE_ANALYSIS.md and scripts/shapes/a2_3d1_model.gd.
 const DEFENDER_TIERS: Array[int] = [0, 1, 3, 4]
+const DEFENDER_TIER_LABELS := {
+	0: "THERE IS NO STARSHIP IN THIS SYSTEM.",
+	1: "SMALL SPACE LAB AND OBSERVATORY\nMINIMUM WEAPONS AND ARMOR.",
+	3: "LIGHT CRUISER WITH LASERS,\nMISSILES AND FIGHTER COVER.",
+	4: "HEAVY CRUISER WITH PHOTON\nMISSILES AND HEAVY LASERS.\n20-40 FIGHTERS.",
+}
 var planet_orbital_defender_tier: Array[int] = []
 
 var current_planet: int = 0        # $38209 ("orbiting" planet)

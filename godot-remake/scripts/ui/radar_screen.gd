@@ -9,8 +9,8 @@ extends Node3D
 ##
 ## Original behavior (line 2050's blocking `GET A$`): any key returns
 ## to flight except X, which goes to the plain-text ship-identification
-## screen (`SHIP no N I.D..bas` — line 2056/5005's `RUN SHIP # J I.D.`)
-## — not yet built, routed to a stub here.
+## screen (`SHIP no N I.D..bas` — line 2056/5005's `RUN SHIP # J I.D.`,
+## see scripts/ui/ship_id_screen.gd).
 ##
 ## Idiomatic-Godot liberty, not in the original: a slow constant spin on
 ## the ship model. The original's view is static while GET A$ blocks;
@@ -19,13 +19,6 @@ extends Node3D
 ## out to read as inauthentic rather than additive.
 
 const A2_3D1_Model = preload("res://scripts/shapes/a2_3d1_model.gd")
-
-const TIER_LABELS := {
-	0: "THERE IS NO STARSHIP IN THIS SYSTEM.",
-	1: "SMALL SPACE LAB AND OBSERVATORY\nMINIMUM WEAPONS AND ARMOR.",
-	3: "LIGHT CRUISER WITH LASERS,\nMISSILES AND FIGHTER COVER.",
-	4: "HEAVY CRUISER WITH PHOTON\nMISSILES AND HEAVY LASERS.\n20-40 FIGHTERS.",
-}
 
 const SPIN_SPEED := 0.3 # radians/sec — see doc comment above
 
@@ -54,7 +47,7 @@ func _ready() -> void:
 	# auto-framed further out than that.
 	_camera.far = distance * 3.0
 
-	var desc: String = TIER_LABELS.get(tier, "UNIDENTIFIED CONTACT.")
+	var desc: String = GameState.DEFENDER_TIER_LABELS.get(tier, "UNIDENTIFIED CONTACT.")
 	_info_label.text = "%s\n\n[any key] return     [X] ship I.D." % desc
 
 
@@ -66,11 +59,6 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventKey and event.pressed):
 		return
 	if event.physical_keycode == KEY_X:
-		var tier: int = GameState.planet_orbital_defender_tier[GameState.current_planet]
-		GameState.show_stub(
-			"SHIP # %d I.D." % tier,
-			"Plain-text ship identification screen (SHIP no %d I.D..bas) — a third, separate rendering system (inline DATA-point 2D silhouette + description), distinct from this radar view's real 3D wireframe." % tier,
-			"res://scenes/radar.tscn",
-		)
+		GameState.goto_scene("res://scenes/ship_id.tscn")
 	else:
 		GameState.goto_scene("res://scenes/flight/space_flight.tscn")

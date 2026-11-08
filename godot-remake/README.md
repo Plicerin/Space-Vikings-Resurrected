@@ -40,6 +40,7 @@ new script that needs a type name.
 | Troop recall | Real (thin — no morale/credit effect in the original either) | `GROUND_COMBAT_ANALYSIS.md` |
 | Galaxy map, Command console, Status screen | Real navigation/readout, no original visuals (starmap chart, bezel HUD) ported yet | — |
 | Radar screen | Real — see "Radar" below | `A2-3D1_ENGINE_ANALYSIS.md` |
+| Ship I.D. screen (press X on radar) | Real — see "Ship I.D." below | — |
 | Enlist / Sell Loot / Repair-Restock / Establish Base / Cryogenics / End | Stubs (`GameState.show_stub(...)`) — menu options exist and are gated correctly, but each just shows a note citing where its real logic lives | `GROUND_COMBAT_ANALYSIS.md` |
 | A2-3D1's own 3D math (VM, clipping, perspective, plotter) | Not ported, by design — Godot's native 3D replaces it | `A2-3D1_ENGINE_ANALYSIS.md` |
 | Starfield during flight | Placeholder (`MultiMeshInstance3D`), deliberately finite — the original's own starfield is a bounded sphere you can fly through, not infinite/regenerating, so this isn't a bug to fix | `FLIGHT_CONTROL_AND_PROGRESSION_ANALYSIS.md` |
@@ -132,10 +133,29 @@ loaded by `scripts/shapes/a2_3d1_model.gd`.
   from the real `SHIP no N I.D..bas` text. Which real planet gets which
   tier is a placeholder (random at new-game time) — the original's real
   assignment formula hasn't been traced yet.
-- Pressing `X` (the original's path to the plain-text `SHIP # N I.D.`
-  screen — a *third*, separate rendering system using inline `DATA`
-  points, distinct from both this radar view and the `ENEMY` shape
-  table) routes to a stub for now; that screen isn't built yet.
+- Pressing `X` goes to the real `SHIP # N I.D.` screen now — see
+  "Ship I.D." below.
+
+## Ship I.D.
+
+`scenes/ship_id.tscn` + `scripts/ui/ship_id_screen.gd` — the *third*
+ship-rendering system in this game (see "Radar" above for the other
+two): `SHIP no N I.D..bas`'s own inline `DATA`-point 2D point-plotter,
+decoded by `tools/decode_ship_id.py`. Draws the bordered 5px-grid box
+from the original's lines 12-14 (literal `HPLOT` coordinates, same
+convention as `radar_hud.gd`) plus the silhouette itself — confirmed
+visually against all three real ships before wiring in: each one
+genuinely draws *two* views (a top-down and a side profile, at two
+different Y origins the original's own code switches between
+mid-stream), not a decode artifact. Tier 0 correctly shows just the
+empty grid (`SHIP no 0 I.D..bas` has no `DATA` at all — "THERE IS NO
+STARSHIP IN THIS SYSTEM").
+
+Layout liberty, not in the original: the description text goes below
+the drawing instead of beside it (`HTAB 25`, the right ~40% of the
+screen in the original), matching this port's own other new screens'
+layout instead. Any key returns to radar, matching every one of the
+four real files' own unconditional `RUN RADAR`.
 
 ## Re-entry
 
@@ -223,13 +243,15 @@ on the SHIP-vs-manual evidence this note originally cited.)
 
 ## Next steps
 
-- Radar, flight's planet, and re-entry are all real now (2026-11-07) —
-  see "Radar"/"Re-entry" above. Left for later: the real per-planet
-  tier-assignment formula (currently random at new-game time), the
-  `SHIP # N I.D.` text screen reached by pressing `X` on radar
-  (currently a stub), and a real "weapon fired" flag so the re-entry
-  trigger can port the original's full condition instead of proximity
-  alone.
+- Radar, flight's planet, re-entry, and the Ship I.D. screen are all
+  real now (2026-11-07) — see "Radar"/"Re-entry"/"Ship I.D." above.
+  Also fixed project-wide: every pure-2D scene (this project has quite
+  a few) was rendering against the engine's default gray clear color
+  instead of black, since nothing had set one — `project.godot` now
+  sets it globally. Left for later: the real per-planet
+  tier-assignment formula (currently random at new-game time), and a
+  real "weapon fired" flag so the re-entry trigger can port the
+  original's full condition instead of proximity alone.
 - Re-verified against the corrected `ENEMY`/`EXPL` data (2026-11-07): the
   explosion and EX.bas destruction sequences still look solid (shape 15
   carries the debris, 16-18 are blank in the real data — that's fine,
