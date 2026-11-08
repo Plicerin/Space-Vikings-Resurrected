@@ -9,9 +9,12 @@ extends Control
 ##
 ## The original also routes Shore Leave/Enlist/Sell Loot/Repair/Build
 ## Base through one shared overlay (SHORE LEAVE.bas, dispatched by
-## $38388); this port splits them into separate destinations, with only
-## Shore Leave's pay-troops flow actually implemented so far (see
-## scripts/ui/shore_leave.gd) — the rest are stubs pointing back here.
+## $38388); this port splits them into separate destinations instead.
+## Shore Leave (scripts/ui/shore_leave.gd), Enlist (enlist.gd), Sell
+## Loot (sell_loot.gd), and Establish Base (establish_base.gd) are all
+## real now. Repair/Restock and Cryogenics are still stubs — Repair
+## needs twelve ship-system damage values this port doesn't model yet
+## (nothing damages them until combat is wired into flight).
 
 @onready var _menu: VBoxContainer = $VBox/Menu
 @onready var _battle: VBoxContainer = $VBox/Battle
@@ -38,18 +41,12 @@ func _ready() -> void:
 	_attack_btn.pressed.connect(_on_attack_pressed)
 	_recall_btn.pressed.connect(func(): GameState.goto_scene("res://scenes/recall.tscn"))
 	_shore_leave_btn.pressed.connect(func(): GameState.goto_scene("res://scenes/shore_leave.tscn"))
-	_enlist_btn.pressed.connect(func(): GameState.show_stub(
-		"ENLIST TROOPS", "1 credit/troop, one-shot per trip — SHORE LEAVE.bas lines 2200-2300.", "res://scenes/ground_forces.tscn"
-	))
-	_sell_loot_btn.pressed.connect(func(): GameState.show_stub(
-		"SELL LOOT", "Converts the 13 loot categories to credits — SHORE LEAVE.bas lines 2400-2460.", "res://scenes/ground_forces.tscn"
-	))
+	_enlist_btn.pressed.connect(func(): GameState.goto_scene("res://scenes/enlist.tscn"))
+	_sell_loot_btn.pressed.connect(func(): GameState.goto_scene("res://scenes/sell_loot.tscn"))
 	_repair_btn.pressed.connect(func(): GameState.show_stub(
-		"REPAIR/RESTOCK", "Repairs ship systems, buys weapons — SHORE LEAVE.bas lines 2500-3110.", "res://scenes/ground_forces.tscn"
+		"REPAIR/RESTOCK", "Repairs ship systems, buys weapons — SHORE LEAVE.bas lines 2500-3110. Needs ship-system damage values this port doesn't model yet (nothing damages them until combat is wired into flight).", "res://scenes/ground_forces.tscn"
 	))
-	_base_btn.pressed.connect(func(): GameState.show_stub(
-		"ESTABLISH BASE", "20000-25000cr one-shot per trip — SHORE LEAVE.bas lines 2100-2160.", "res://scenes/ground_forces.tscn"
-	))
+	_base_btn.pressed.connect(func(): GameState.goto_scene("res://scenes/establish_base.tscn"))
 	_cryo_btn.pressed.connect(func(): GameState.show_stub(
 		"CRYOGENICS", "Puts troops in cryo sleep — GROUND FORCES.bas lines 4000-4020.", "res://scenes/ground_forces.tscn"
 	))
@@ -68,10 +65,22 @@ func _update_menu_gating() -> void:
 	_sell_loot_btn.disabled = not has_base
 	_repair_btn.disabled = not has_base
 
+	# Lines 66-67: Attack and Enlist both additionally require troops
+	# actually being here ($38158=$38209 — troops_stationed_at ==
+	# current_planet). Attack keeps its own press-time check too
+	# (below) since it's reachable even with no base at all.
+	if GameState.troops_stationed_at != GameState.current_planet:
+		_enlist_btn.disabled = true
+
 
 # --- Attack / battle loop (GROUND FORCES.bas lines 170-690) ---
 
 func _on_attack_pressed() -> void:
+	if GameState.troops_stationed_at != GameState.current_planet:
+		GameState.show_stub(
+			"ATTACK PLANET", "YOU LEFT YOUR TROOPS ON ANOTHER PLANET!", "res://scenes/ground_forces.tscn"
+		)
+		return
 	if GameState.gf_transports <= 0.0:
 		GameState.show_stub(
 			"ATTACK PLANET", "THERE ARE NO TRANSPORTS AVAILABLE!", "res://scenes/ground_forces.tscn"
@@ -94,7 +103,7 @@ func _on_attack_pressed() -> void:
 		# Line 220-240: no enemy at all — instant surrender, no loop.
 		GameState.gf_planet_surrendered = true
 		GameState.planet_secured[GameState.current_planet] = true
-		_finish_battle("PLANET IS NON-HABITABLE. NO ENEMY TO RESIST — SECURED IMMEDIATELY.")
+		_finish_battle("PLANET IS NON-HABITABLE. NO ENEMY TO RESIST — SECURED IMMEDIATELY.", true)
 		return
 
 	# Lines 90-93 (H_D.bas) / line 510 (GROUND FORCES.bas): enemy
@@ -165,7 +174,7 @@ func _on_round_tick() -> void:
 	if GameState.gf_victory_progress >= GameState.gf_enemy_strength:
 		GameState.gf_planet_surrendered = true
 		GameState.planet_secured[GameState.current_planet] = true
-		_finish_battle("THE PLANET HAS SURRENDERED!")
+		_finish_battle("THE PLANET HAS SURRENDERED!", true)
 	elif GameState.troops <= 0.0:
 		_finish_battle("THE BATTLE IS LOST! ALL TROOPS HAVE BEEN DESTROYED!")
 
@@ -178,7 +187,7 @@ func _on_retreat_pressed() -> void:
 	_finish_battle("GROUND FORCES RETREATING, SIR! PLANET NOT SECURED!")
 
 
-func _finish_battle(message: String) -> void:
+func _finish_battle(message: String, just_won: bool = false) -> void:
 	_in_battle = false
 	_round_timer.stop()
 	_status_label.text = message
@@ -186,6 +195,15 @@ func _finish_battle(message: String) -> void:
 	_battle.visible = false
 	_menu.visible = true
 	_update_menu_gating()
-	if GameState.gf_planet_surrendered:
-		GameState.gf_planet_surrendered = false
+	if just_won:
+		# $38208 ("surrendered") is never reset by the original's own
+		# ground-invasion code — it stays true persistently afterward,
+		# gating Enlist/Repair later. (Only a declined repair bill, or
+		# re-approaching via STARSHIP SIMULATOR, ever clears it — see
+		# SHORE LEAVE.bas line 2610 / STARSHIP SIMULATOR.bas line 1500,
+		# neither ported yet.) `just_won` is a one-shot transition
+		# trigger local to this call, not a read of that persistent
+		# flag — reading-and-clearing it here was a real bug: it broke
+		# Enlist's gate, which needs gf_planet_surrendered to actually
+		# stay true after a win.
 		GameState.goto_scene("res://scenes/collect.tscn")

@@ -34,6 +34,13 @@ var _returned: bool = false
 
 
 func _ready() -> void:
+	# H_D.bas line 105: `POKE 38206,0: POKE 38389,0: POKE 38149,0` resets
+	# the once-per-trip Enlist/Establish-Base flags at the start of a
+	# fresh orbital engagement. This port has no H_D.bas equivalent of
+	# its own yet; re-entry is the nearest real moment to hang it off.
+	GameState.enlisted_this_trip = false
+	GameState.base_built_this_trip = false
+
 	var built: Dictionary = A2_3D1_Model.build_planet_mesh(GameState.current_planet)
 	_terrain.mesh = built["mesh"]
 	var radius: float = built["radius"]

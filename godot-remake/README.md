@@ -41,7 +41,8 @@ new script that needs a type name.
 | Galaxy map, Command console, Status screen | Real navigation/readout, no original visuals (starmap chart, bezel HUD) ported yet | — |
 | Radar screen | Real — see "Radar" below | `A2-3D1_ENGINE_ANALYSIS.md` |
 | Ship I.D. screen (press X on radar) | Real — see "Ship I.D." below | — |
-| Enlist / Sell Loot / Repair-Restock / Establish Base / Cryogenics / End | Stubs (`GameState.show_stub(...)`) — menu options exist and are gated correctly, but each just shows a note citing where its real logic lives | `GROUND_COMBAT_ANALYSIS.md` |
+| Enlist / Sell Loot / Establish Base | Real — `scripts/ui/{enlist,sell_loot,establish_base}.gd`, exact formulas from `SHORE LEAVE.bas` | `GROUND_COMBAT_ANALYSIS.md` |
+| Repair/Restock / Cryogenics / End | Stubs (`GameState.show_stub(...)`) — menu options exist and are gated correctly, but each just shows a note citing where its real logic lives. Repair specifically needs ship-system damage values this port doesn't model yet | `GROUND_COMBAT_ANALYSIS.md` |
 | A2-3D1's own 3D math (VM, clipping, perspective, plotter) | Not ported, by design — Godot's native 3D replaces it | `A2-3D1_ENGINE_ANALYSIS.md` |
 | Starfield during flight | Placeholder (`MultiMeshInstance3D`), deliberately finite — the original's own starfield is a bounded sphere you can fly through, not infinite/regenerating, so this isn't a bug to fix | `FLIGHT_CONTROL_AND_PROGRESSION_ANALYSIS.md` |
 | Planet during flight (deep-space view) | Real — `PLANET # 0`'s actual 195-point field, same file `ORBIT.bas` loads for this view | `A2-3D1_ENGINE_ANALYSIS.md` |
@@ -183,6 +184,49 @@ Also fixed along the way: `[G] Ground Forces`'s HUD text has said
 "(when in range)" since this scene was scaffolded, but nothing actually
 enforced it until this same proximity check went in.
 
+## Shore Leave
+
+Three of the five base-gated menu options in `ground_forces.gd` are
+real now, each its own scene (the original routes all five through one
+shared `SHORE LEAVE.bas` overlay, dispatched by `$38388`; this port
+keeps them separate, same as the already-existing pay-troops flow):
+
+- **Enlist** (`scripts/ui/enlist.gd`) — 1 credit/troop, capped so total
+  troops can't exceed 20000. Input is a `SpinBox`, standing in for the
+  original's digit-by-digit numeric-entry subroutine — same ultimate
+  effect, not a byte-exact port of that subroutine.
+- **Sell Loot** (`scripts/ui/sell_loot.gd`) — the exact 13-category
+  multiplier table from `SHORE LEAVE.bas` lines 2400-2406
+  (`GameState.compute_loot_value()`), including the one category whose
+  multiplier is itself re-rolled every sale and the final ×2 on the
+  whole sum. No Y/N gate in the original — it applies immediately on
+  entering the screen, this port does too.
+- **Establish Base** (`scripts/ui/establish_base.gd`) —
+  `GameState.roll_base_cost()` is the original's exact
+  `20000 + (RND(1)*5000)*(RND(1)*10)` formula. Keeps a genuine quirk
+  from the source as-is: the once-per-trip flag is consumed the moment
+  you reach the cost quote, *before* the Y/N prompt — declining on cost
+  or saying "N" still uses up the attempt.
+
+Both Enlist and Establish Base's once-per-trip flags
+(`GameState.enlisted_this_trip`/`base_built_this_trip`) reset where the
+original does (`H_D.bas` line 105, the start of a fresh orbital
+engagement) — this port's nearest equivalent moment is re-entry
+(`planet_approach.gd`).
+
+Found and fixed two real pre-existing gaps while wiring this up, both
+in `ground_forces.gd`:
+- `_finish_battle()` was clearing `gf_planet_surrendered` right after a
+  win to trigger the Collect transition — but the original's `$38208`
+  never resets there, and Enlist's gate needs it to actually stay true
+  afterward. Now a separate one-shot `just_won` parameter drives the
+  transition instead of reading-and-clearing the persistent flag.
+- Attack and Enlist were both missing the original's
+  `troops_stationed_at == current_planet` check (`GROUND FORCES.bas`
+  lines 66-67, "YOU LEFT YOUR TROOPS ON ANOTHER PLANET!") — documented
+  in this file's own doc comment as something the original has, never
+  actually wired in until now.
+
 ## The shape-table viewer
 
 Only the 21 `PLANET no N`/`SHIP no N` files are included — `PLANET FILE`
@@ -243,15 +287,19 @@ on the SHIP-vs-manual evidence this note originally cited.)
 
 ## Next steps
 
-- Radar, flight's planet, re-entry, and the Ship I.D. screen are all
-  real now (2026-11-07) — see "Radar"/"Re-entry"/"Ship I.D." above.
-  Also fixed project-wide: every pure-2D scene (this project has quite
-  a few) was rendering against the engine's default gray clear color
-  instead of black, since nothing had set one — `project.godot` now
-  sets it globally. Left for later: the real per-planet
-  tier-assignment formula (currently random at new-game time), and a
-  real "weapon fired" flag so the re-entry trigger can port the
-  original's full condition instead of proximity alone.
+- Radar, flight's planet, re-entry, the Ship I.D. screen, and three of
+  the five Shore Leave options are all real now (2026-11-07) — see
+  "Radar"/"Re-entry"/"Ship I.D."/"Shore Leave" above. Also fixed
+  project-wide: every pure-2D scene (this project has quite a few) was
+  rendering against the engine's default gray clear color instead of
+  black, since nothing had set one — `project.godot` now sets it
+  globally. Left for later: Repair/Restock and Cryogenics (Repair
+  needs ship-system damage values this port doesn't model yet — a
+  natural pairing with the still-not-started combat-integration work),
+  the real per-planet tier-assignment formula (currently random at
+  new-game time), and a real "weapon fired" flag so the re-entry
+  trigger can port the original's full condition instead of proximity
+  alone.
 - Re-verified against the corrected `ENEMY`/`EXPL` data (2026-11-07): the
   explosion and EX.bas destruction sequences still look solid (shape 15
   carries the debris, 16-18 are blank in the real data — that's fine,

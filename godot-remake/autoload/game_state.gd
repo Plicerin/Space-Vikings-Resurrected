@@ -35,6 +35,12 @@ var troops: float = 50.0 # TR — placeholder starting value; the original's
 var troop_morale: int = 6          # $38203, range 1 (AWFUL) - 6 (EXCELLENT)
 var troop_location: int = 0        # $38166: 0=on board 1=planetside 2=shore leave 3=cryo
 var troops_stationed_at: int = -1  # $38158
+# $38389 (enlist) / $38149 (base) — "once per trip" flags, both reset
+# together by H_D.bas line 105 at the start of a fresh orbital
+# engagement. This port's nearest equivalent moment is the re-entry
+# sequence (scripts/ui/planet_approach.gd) — see its _ready().
+var enlisted_this_trip: bool = false
+var base_built_this_trip: bool = false
 
 # --- Per-planet state, indexed by planet id ---
 # Original: $38282+C tech, $38219+C secured, $38303+C base,
@@ -88,6 +94,43 @@ var gf_planet_surrendered: bool = false # $38208
 # tables and SHORE LEAVE.bas's "SELL LOOT" valuation — see
 # GROUND_COMBAT_ANALYSIS.md. Index 0 = $38171 ... index 12 = $38183.
 var loot: Array[float] = []
+# Only index 2 ($38173, "general goods"), 11 ($38182, "food"), and 12
+# ($38183, "wine/liquor") have confirmed real-world labels from other
+# BASIC source (GAME_MECHANICS_DOCUMENTATION.md); the rest are
+# placeholder names — their on-screen label was never traced. Shared
+# by collect.gd and scripts/ui/sell_loot.gd.
+const LOOT_LABELS := [
+	"RAW MATERIALS A", "RAW MATERIALS B", "GENERAL GOODS", "RAW MATERIALS C",
+	"GOODS D", "GOODS E", "GOODS F", "GOODS G",
+	"GOODS H", "GOODS I", "LUXURY GOODS", "FOOD", "WINE/LIQUOR",
+]
+# SHORE LEAVE.bas lines 2400-2406: "SELL LOOT"'s exact per-category
+# credit multiplier, in loot[] index order (0 = $38171 ... 12 =
+# $38183). Index 0 alone also rolls an extra RND(1) each sale (not
+# baked into this table — see compute_loot_value()); the whole sum is
+# then doubled (line 2406, also applied in compute_loot_value()).
+const LOOT_SELL_MULTIPLIERS: Array[float] = [
+	300.0, 150.0, 100.0, 200.0, 200.0, 200.0, 300.0, 15.0, 5.0, 25.0, 1500.0, 1000.0, 2000.0,
+]
+
+
+## SHORE LEAVE.bas lines 2400-2406 ("SELL LOOT"), ported exactly:
+## index 0's multiplier is itself randomized per sale (`300*RND(1)`,
+## not a fixed 300 like every other category), and the full sum is
+## doubled at the end.
+func compute_loot_value() -> float:
+	var total := 0.0
+	for i in range(loot.size()):
+		var multiplier: float = LOOT_SELL_MULTIPLIERS[i]
+		if i == 0:
+			multiplier *= randf()
+		total += loot[i] * multiplier
+	return total * 2.0
+
+
+## SHORE LEAVE.bas line 2170: `C = 20000 + ((RND(1)*5000) * (RND(1)*10))`.
+func roll_base_cost() -> float:
+	return 20000.0 + ((randf() * 5000.0) * (randf() * 10.0))
 
 # --- Stub-screen handoff (for state-graph nodes not yet built out) ---
 var stub_title: String = ""
@@ -131,6 +174,8 @@ func start_new_game() -> void:
 	troops_stationed_at = current_planet
 	current_planet = 0
 	target_planet = 0
+	enlisted_this_trip = false
+	base_built_this_trip = false
 
 	ship_position = Vector3.ZERO
 	pitch_deg = 0.0

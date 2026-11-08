@@ -9,15 +9,8 @@ extends Control
 @onready var _continue_btn: Button = $VBox/ContinueButton
 
 # loot[] index -> original address: index N = $38171 + N (0 = $38171 ...
-# 12 = $38183). Only index 2 ($38173, "general goods"), 11 ($38182,
-# "food"), and 12 ($38183, "wine/liquor") have confirmed real-world
-# labels from other BASIC source (GAME_MECHANICS_DOCUMENTATION.md); the
-# rest are placeholder names — their on-screen label was never traced.
-const LABELS := [
-	"RAW MATERIALS A", "RAW MATERIALS B", "GENERAL GOODS", "RAW MATERIALS C",
-	"GOODS D", "GOODS E", "GOODS F", "GOODS G",
-	"GOODS H", "GOODS I", "LUXURY GOODS", "FOOD", "WINE/LIQUOR",
-]
+# 12 = $38183). Labels now live on GameState.LOOT_LABELS, shared with
+# scripts/ui/sell_loot.gd.
 
 # COLLECT.bas lines 925-1050: which multiplier (J1 or J2) each category
 # uses at tech 2-4, and the one category (index 2, $38173) that always
