@@ -1,6 +1,7 @@
 extends Control
 ## Ports COM.bas's main menu (lines 20-127): Computer / Ground Forces /
-## Radar / End / Return.
+## Radar / End / Return. "End" isn't a mission-end/scoring screen
+## despite the name — it's Save/Continue/Quit (see end_game.gd).
 
 @onready var _computer_btn: Button = $VBox/ComputerButton
 @onready var _ground_forces_btn: Button = $VBox/GroundForcesButton
@@ -36,7 +37,9 @@ func _on_radar_pressed() -> void:
 
 
 func _on_end_pressed() -> void:
-	GameState.show_stub("END", "Mission end/scoring sequence — not yet traced.", "res://scenes/com.tscn")
+	# Not a mission-end/scoring sequence, despite the name — turned out
+	# to be Save/Continue/Quit once traced (END.bas). See end_game.gd.
+	GameState.goto_scene("res://scenes/end_game.tscn")
 
 
 func _on_status_pressed() -> void:

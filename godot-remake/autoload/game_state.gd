@@ -338,3 +338,86 @@ func show_stub(title: String, note: String, back_scene: String) -> void:
 	stub_note = note
 	stub_back_scene = back_scene
 	goto_scene("res://scenes/stub_screen.tscn")
+
+
+# --- Save / load (END.bas lines 190-220, "SAVE GAME") ---
+# The original BSAVEs three raw memory-image files straight to the
+# Apple II disk (P/F, PLANET FILE, and a 54-byte SHIP'S DATA block —
+# the same memory range SHIP'S DATA-M's new-game template occupies,
+# see the ship-system-health fields above) plus 9 bytes of ship
+# position. This port has no equivalent of raw memory images to BSAVE,
+# so it serializes the fields that actually hold persistent state
+# instead, to a single JSON file — same real effect (resume where you
+# left off), not a byte-exact format.
+const SAVE_PATH := "user://savegame.json"
+
+
+func has_save_file() -> bool:
+	return FileAccess.file_exists(SAVE_PATH)
+
+
+func save_to_disk() -> void:
+	var data := {
+		"credits": credits, "stardate": stardate,
+		"troops": troops, "troop_morale": troop_morale,
+		"troop_location": troop_location, "troops_stationed_at": troops_stationed_at,
+		"current_planet": current_planet, "target_planet": target_planet,
+		"orbital_defender_tier": orbital_defender_tier,
+		"planet_tech": planet_tech, "planet_secured": planet_secured,
+		"planet_has_base": planet_has_base, "planet_scouted": planet_scouted,
+		"planet_population_scale": planet_population_scale,
+		"loot": loot,
+		"gf_fighters": gf_fighters, "gf_transports": gf_transports,
+		"gf_tanks": gf_tanks, "gf_missiles": gf_missiles,
+		"ship_shield": ship_shield, "ship_energy": ship_energy,
+		"ship_engine1": ship_engine1, "ship_engine2": ship_engine2,
+		"ship_computer": ship_computer, "ship_radar": ship_radar,
+		"ship_env_control": ship_env_control, "ship_hull": ship_hull,
+		"ship_hyperdrive": ship_hyperdrive, "ship_missile_system": ship_missile_system,
+		"ship_laser": ship_laser, "ship_nav_computer": ship_nav_computer,
+		"ship_position": [ship_position.x, ship_position.y, ship_position.z],
+	}
+	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	file.store_string(JSON.stringify(data))
+
+
+func load_from_disk() -> void:
+	var file := FileAccess.open(SAVE_PATH, FileAccess.READ)
+	if file == null:
+		return
+	var data: Dictionary = JSON.parse_string(file.get_as_text())
+	if data == null:
+		return
+	credits = data.get("credits", credits)
+	stardate = data.get("stardate", stardate)
+	troops = data.get("troops", troops)
+	troop_morale = data.get("troop_morale", troop_morale)
+	troop_location = data.get("troop_location", troop_location)
+	troops_stationed_at = data.get("troops_stationed_at", troops_stationed_at)
+	current_planet = data.get("current_planet", current_planet)
+	target_planet = data.get("target_planet", target_planet)
+	orbital_defender_tier = data.get("orbital_defender_tier", orbital_defender_tier)
+	planet_tech.assign(data.get("planet_tech", planet_tech))
+	planet_secured.assign(data.get("planet_secured", planet_secured))
+	planet_has_base.assign(data.get("planet_has_base", planet_has_base))
+	planet_scouted.assign(data.get("planet_scouted", planet_scouted))
+	planet_population_scale.assign(data.get("planet_population_scale", planet_population_scale))
+	loot.assign(data.get("loot", loot))
+	gf_fighters = data.get("gf_fighters", gf_fighters)
+	gf_transports = data.get("gf_transports", gf_transports)
+	gf_tanks = data.get("gf_tanks", gf_tanks)
+	gf_missiles = data.get("gf_missiles", gf_missiles)
+	ship_shield = data.get("ship_shield", ship_shield)
+	ship_energy = data.get("ship_energy", ship_energy)
+	ship_engine1 = data.get("ship_engine1", ship_engine1)
+	ship_engine2 = data.get("ship_engine2", ship_engine2)
+	ship_computer = data.get("ship_computer", ship_computer)
+	ship_radar = data.get("ship_radar", ship_radar)
+	ship_env_control = data.get("ship_env_control", ship_env_control)
+	ship_hull = data.get("ship_hull", ship_hull)
+	ship_hyperdrive = data.get("ship_hyperdrive", ship_hyperdrive)
+	ship_missile_system = data.get("ship_missile_system", ship_missile_system)
+	ship_laser = data.get("ship_laser", ship_laser)
+	ship_nav_computer = data.get("ship_nav_computer", ship_nav_computer)
+	var pos: Array = data.get("ship_position", [0.0, 0.0, 0.0])
+	ship_position = Vector3(pos[0], pos[1], pos[2])

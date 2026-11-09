@@ -42,7 +42,7 @@ new script that needs a type name.
 | Radar screen | Real — see "Radar" below | `A2-3D1_ENGINE_ANALYSIS.md` |
 | Ship I.D. screen (press X on radar) | Real — see "Ship I.D." below | — |
 | Enlist / Sell Loot / Establish Base / Cryogenics / Repair/Restock / Buy Weapons | Real — `scripts/ui/{enlist,sell_loot,establish_base,cryogenics,repair_ship,buy_weapons}.gd`, exact formulas/state machine from `SHORE LEAVE.bas` | `GROUND_COMBAT_ANALYSIS.md` |
-| End | Stub (`GameState.show_stub(...)`) — menu option exists and is reachable, but just shows a note citing where its real logic lives (`END.bas`, not traced yet) | — |
+| End (Save/Continue/Quit) | Real — `scripts/ui/end_game.gd`. Turned out NOT to be a mission-end/scoring sequence despite the name — `END.bas` is Save Game/Continue Present Game/End Game. Real JSON save/load added alongside it (`GameState.save_to_disk()`/`load_from_disk()`), plus a Load Game option on the start screen | — |
 | A2-3D1's own 3D math (VM, clipping, perspective, plotter) | Not ported, by design — Godot's native 3D replaces it | `A2-3D1_ENGINE_ANALYSIS.md` |
 | Starfield during flight | Placeholder (`MultiMeshInstance3D`), deliberately finite — the original's own starfield is a bounded sphere you can fly through, not infinite/regenerating, so this isn't a bug to fix | `FLIGHT_CONTROL_AND_PROGRESSION_ANALYSIS.md` |
 | Planet during flight (deep-space view) | Real — `PLANET # 0`'s actual 195-point field, same file `ORBIT.bas` loads for this view | `A2-3D1_ENGINE_ANALYSIS.md` |
@@ -356,12 +356,16 @@ on the SHIP-vs-manual evidence this note originally cited.)
   Leave" above), which closed out all six Shore Leave options and also
   surfaced the real starting values for several previously-placeholder
   `GameState` fields (troops/credits/stardate/fighters/transports/
-  troop_location, all twelve ship-system health fields). Left for
-  later: End/scoring, actual combat (now that ship-system health
-  fields exist, the natural next step for Repair/Restock to mean
-  anything is something that damages them), and a real "weapon fired"
-  flag so the re-entry trigger can port the original's full condition
-  instead of proximity alone.
+  troop_location, all twelve ship-system health fields). Also traced
+  `END.bas` (Command Console's "4) END") — not a mission-end/scoring
+  sequence despite the name, it's Save/Continue/Quit — and added this
+  port's first real persistence (`end_game.gd`,
+  `GameState.save_to_disk()`/`load_from_disk()`, a Load Game option on
+  the start screen) alongside it. Left for later: actual combat (now
+  that ship-system health fields exist, the natural next step for
+  Repair/Restock to mean anything is something that damages them), and
+  a real "weapon fired" flag so the re-entry trigger can port the
+  original's full condition instead of proximity alone.
 - Re-verified against the corrected `ENEMY`/`EXPL` data (2026-11-07): the
   explosion and EX.bas destruction sequences still look solid (shape 15
   carries the debris, 16-18 are blank in the real data — that's fine,
