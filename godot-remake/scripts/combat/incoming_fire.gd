@@ -1,10 +1,24 @@
 extends Node2D
-## `STARSHIP SIMULATOR.bas` lines 5000-5251: a second, simpler enemy
+## `STARSHIP SIMULATOR.bas` lines 5000-5096: a second, simpler enemy
 ## pattern, independent of the two-fighter approach in
-## `fighter_encounter.gd` — one shape crosses the screen from a random
-## edge position along a straight trajectory, with a per-step chance
-## (`RND(1)<.3`) to fire a fading tracer toward the player, and a smaller
-## chance to reuse the retreat-flicker animation.
+## `fighter_encounter.gd` — one shape crosses the screen in a straight
+## line from a random top/bottom starting point, with a per-step
+## chance (`RND(1)<.3`) to fire a fading tracer toward the player, and
+## a smaller chance to reuse the retreat-flicker animation.
+##
+## CORRECTION (2026-11-09): this port originally hardcoded shape index
+## 2 for the whole pattern — wrong, and a real one, not a cosmetic
+## detail. The source's own shape pick (lines 5050-5080) depends on
+## which horizontal third the spawn point falls in: `X1>190` (right
+## third) draws shape **9**, which decodes to 23 real path commands;
+## `X1<91` (left third) and the remaining middle case both draw shapes
+## **10** and **8**, which both decode to only 2 commands (a single
+## near-invisible dash — the same "odd=detailed, even=blank" pattern
+## already confirmed elsewhere in this table, see
+## `fighter_encounter.gd`'s doc comment). Shape 2 is neither of these —
+## it's the fixed retreat/explosion shape `fighter_slot.gd` uses
+## elsewhere. The structured, ship-like silhouette the manual's cockpit
+## screenshot shows is shape 9; this port was never drawing it.
 ##
 ## The original's tracer target is the player's actual 3D position
 ## (never ported here — no player-relative combat position is tracked
@@ -44,30 +58,47 @@ func _ready() -> void:
 	_ship.visible = false
 
 
+## Lines 5000-5080, ported directly (HGR pixel-space coordinates, same
+## convention `hgr_canvas.gd`/`radar_hud.gd` already use):
+## `X1=(RND(5)*260)+10`, `Y1` starts at the top (10) or bottom (120)
+## edge with roughly 60%/40% odds, and the shape/horizontal-velocity
+## pick depends on which third of the screen X1 falls in.
 func start() -> void:
 	_clear_tracers()
 	_step = 0
 	_timer = 0.0
-	_pos = _random_edge_point()
-	var target := _random_edge_point()
-	_vel = (target - _pos) / (TOTAL_STEPS * STEP_DURATION)
+
+	var x1 := randf() * 260.0 + 10.0
+	var y1: float
+	var y2: float
+	if randf() >= 0.4:
+		y1 = 10.0
+		y2 = randf() * 7.0
+	else:
+		y1 = 120.0
+		y2 = -(randf() * 7.0)
+
+	var shape_idx: int
+	var x2: float
+	if x1 > 190.0:
+		x2 = -7.0
+		shape_idx = 9
+	elif x1 < 91.0:
+		x2 = 7.0
+		shape_idx = 10
+	else:
+		x2 = -2.0
+		shape_idx = 8
+		if absf(y2) < 4.0:
+			y2 *= 2.0
+
+	_pos = Vector2(x1, y1)
+	_vel = Vector2(x2, y2) / STEP_DURATION
 	_active = true
 	_ship.visible = true
 	_ship.rotation_degrees = 0.0
-	_ship.configure(table, 2)
+	_ship.configure(table, table.clamp_index(shape_idx))
 	_ship.position = _pos
-
-
-func _random_edge_point() -> Vector2:
-	match randi() % 4:
-		0:
-			return Vector2(0.0, randf() * SCREEN.size.y)
-		1:
-			return Vector2(SCREEN.size.x, randf() * SCREEN.size.y)
-		2:
-			return Vector2(randf() * SCREEN.size.x, 0.0)
-		_:
-			return Vector2(randf() * SCREEN.size.x, SCREEN.size.y)
 
 
 func _process(delta: float) -> void:
@@ -86,7 +117,11 @@ func _process(delta: float) -> void:
 	elif randf() < FLICKER_CHANCE:
 		_flicker()
 
-	if _step >= TOTAL_STEPS:
+	# Line 5095's own bounds check (`Y1<10 OR Y1>120 OR X1<10 OR
+	# X1>270`) ends the pattern early once it leaves the HUD-bordered
+	# play field, same bounds `TOTAL_STEPS` approximates as a fixed
+	# step count -- whichever ends the pattern first.
+	if _step >= TOTAL_STEPS or _pos.y < 10.0 or _pos.y > 120.0 or _pos.x < 10.0 or _pos.x > 270.0:
 		_active = false
 		_ship.visible = false
 		finished.emit()

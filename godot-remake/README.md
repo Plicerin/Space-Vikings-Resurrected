@@ -93,10 +93,17 @@ Y, etc.) directly instead of re-deriving new ones.
   radiating-line particle burst, plus persistent (stand-in) wreckage —
   now wired to a real trigger, see "Combat integration" below.
 - **Incoming fire** (`incoming_fire.gd`): the separate generic
-  shape-crosses-the-screen-and-sometimes-fires pattern, lines 5000-5251
-  — spawned for feedback whenever the ambient damage tick lands a hit
-  (see below); its own internal random-shootdown sub-mechanic (lines
-  5200-5251) isn't ported.
+  shape-crosses-the-screen pattern, lines 5000-5251, now spawning on
+  its own real independent roll and with its own real shootdown
+  sub-mechanic (see "Combat integration" below). Also fixed
+  2026-11-09: this port originally hardcoded shape index 2 for the
+  whole pattern — wrong. The real source's own shape pick (lines
+  5050-5080) depends on which third of the screen the spawn point
+  falls in: the right third draws shape **9** (23 real path commands,
+  genuinely detailed); the other two both draw shapes **10**/**8**
+  (2 commands each, a near-invisible dash — same "odd=detailed,
+  even=blank" pattern already confirmed in `fighter_encounter.gd`'s
+  own doc comment). Shape 2 was never one of these three.
 
 All four remain reachable standalone from the Start screen's "Combat
 VFX Demo" button. Ship Destruction and Incoming Fire are now also
