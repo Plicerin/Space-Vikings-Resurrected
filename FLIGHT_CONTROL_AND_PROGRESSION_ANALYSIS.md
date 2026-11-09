@@ -38,7 +38,12 @@ the exact addresses `STARSHIP SIMULATOR.bas` POKEs from `J=PDL(1):K=PDL(0)`
   (shallow bank, up to the dead zone) or `FUN_91ec` (deep/wrapped bank) 1-4
   times, escalating with bank steepness — a real coordinated turn: bank
   is the cause, turning is the effect, exactly like a plane and not like a
-  tank-steering twin-stick model.
+  tank-steering twin-stick model. `FUN_91b3`/`FUN_91ec` are now individually
+  confirmed exact mirror-image wrapping ops, not just presumed symmetric:
+  `FUN_91b3` is `heading == 0 ? heading=0xff : heading--` and `FUN_91ec` is
+  `heading == 0xff ? heading=0 : heading++` — i.e. `-1 mod 256` and
+  `+1 mod 256` respectively, confirmed directly from each function's own
+  Ghidra decompile (`.../functions/0x91b3.c`, `.../functions/0x91ec.c`).
 - A one-shot correction in `FUN_90f2` detects pitch crossing the
   inverted/vertical threshold (`<0x40` or `>0xbf`) and adds `±0x7e`/`0x81`
   to heading — flipping heading correctly after looping over the top.
@@ -137,10 +142,10 @@ matching the recollection closely.
 - The overlay state graph is fully derivable and maps directly onto a
   Godot scene/state-machine design.
 - Remaining open items are cosmetic/non-blocking: exactly what A2-3D1
-  draws every frame during normal flight (`FUN_921e`), opcodes 8/12's
-  self-modifying patch targets, and `FUN_91ec`'s exact behavior (presumed
-  symmetric to `FUN_91b3`, not yet individually confirmed). None of these
-  change any decision needed to start building.
+  draws every frame during normal flight (`FUN_921e`), and opcodes 8/12's
+  self-modifying patch targets. (`FUN_91ec`'s exact behavior is no longer
+  open — confirmed individually, see above.) None of these change any
+  decision needed to start building.
 
 ## Source map
 
@@ -150,7 +155,7 @@ matching the recollection closely.
 | Pitch stepper | `.../0x918c.c`, `.../0x91c5.c` |
 | Bank stepper + spring-back | `.../0x91d7.c`, `.../0x919e.c`, `.../0x91fe.c`, `.../0x920e.c` |
 | Vertical-loop heading flip | `.../0x90f2.c` |
-| Bank-driven heading turn rate | `.../0x912e.c`, `.../0x91b3.c`, `.../0x91ec.c` (unconfirmed) |
+| Bank-driven heading turn rate | `.../0x912e.c`, `.../0x91b3.c`, `.../0x91ec.c` (confirmed) |
 | Per-frame call into A2-3D1 | `.../0x921e.c` |
 | Landing flag set | `detokenized/GROUND FORCES.bas`, line 14 |
 | Landing flag consumed (morale -1) | `detokenized/H_D.bas`, lines 12-13 |

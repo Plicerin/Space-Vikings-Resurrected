@@ -16,9 +16,9 @@ extends Node3D
 ##     correction.
 ## The original's exact paddle-threshold/byte-wrap constants don't
 ## translate 1:1 to a modern keyboard or analog stick, so the rates/
-## limits below are tuned for feel rather than byte-matched — and
-## FUN_91ec's exact behavior was never independently confirmed in the
-## disassembly either (see the doc's "Open items" section). Treat these
+## limits below are tuned for feel rather than byte-matched. (FUN_91ec
+## is now individually confirmed, not just presumed symmetric to
+## FUN_91b3 — see the doc's "coordinated turn" section.) Treat these
 ## export values as a starting point, not a verified constant.
 
 @export var pitch_rate_deg: float = 60.0        # deg/sec at full deflection, no spring-back
