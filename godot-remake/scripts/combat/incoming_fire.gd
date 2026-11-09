@@ -9,11 +9,17 @@ extends Node2D
 ## The original's tracer target is the player's actual 3D position
 ## (never ported here — no player-relative combat position is tracked
 ## yet); PLAYER_POINT is a fixed stand-in for "toward the viewer."
+##
+## `tracer_fired` lets `flight_combat.gd` drive the real shootdown
+## sub-mechanic (lines 5200-5251) without this node touching GameState
+## itself — stays pure visual, same convention as the rest of
+## `scripts/combat/`.
 
 const ShapeTable = preload("res://scripts/shapes/shape_table.gd")
 const VectorShape2D = preload("res://scripts/shapes/vector_shape_2d.gd")
 
 signal finished
+signal tracer_fired
 
 const PLAYER_POINT := Vector2(140, 150)
 const FIRE_CHANCE := 0.3 # RND(1)<.3
@@ -90,6 +96,7 @@ func _fire_tracer() -> void:
 	# Line 5098: GOSUB 4110's preset (light) — the same one the ambient
 	# damage tick's lighter hit uses (flight_combat.gd).
 	AudioManager.play_hit_light()
+	tracer_fired.emit()
 	var line := Line2D.new()
 	line.add_point(_pos)
 	line.add_point(PLAYER_POINT)

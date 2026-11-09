@@ -107,22 +107,31 @@ are not yet — see that section for why.
 ## Combat integration
 
 `scripts/flight/flight_combat.gd`, wired into `space_flight.tscn`'s HUD
-layer, ports `STARSHIP SIMULATOR.bas`'s two real combat mechanisms:
+layer, ports `STARSHIP SIMULATOR.bas`'s three real combat mechanisms.
 
-- **Ambient incoming damage** (lines 189-192/3000-3381, "GOSUB 3000")
-  — the main mechanism. Runs on a tuned timer (the original rolls this
-  every main-loop pass; a real-time per-frame roll would land damage
-  far faster than BASIC's own effective frame rate, so this is tuned
-  to feel similarly occasional rather than ported byte-exact). Gated
-  on an orbital defender being present and being within a world-space
-  range of the planet (`COMBAT_RANGE`, a liberty — line 192's real
-  box-bounds check doesn't translate to this port's position units;
-  the original's other gate, "or landed," has no equivalent since
-  landed-ness is a separate scene here, not a flight sub-state). Per-hit
-  formula is a literal port: two independent 40%-chance rolls plus an
-  independent 30%-chance roll can land a hit; SHIELD drains first, and
-  only cascades to RADAR/engines/COMPUTER/LASER/HULL once the shield
-  is empty (`$38201`, "shields up," is never toggled anywhere in the
+**Combat gate** (lines 189/190/192, `_is_combat_eligible()`): current
+planet's tech >= 2, the planet NOT surrendered
+(`GameState.gf_planet_surrendered`), and an orbital defender present
+within range (`orbital_defender_tier != 0` and `COMBAT_RANGE` of the
+planet — a liberty standing in for the original's landed-OR-bounding-
+box test, since this port's flight scene has no "landed" sub-state).
+The surrendered check was missing until 2026-11-09, found by a live
+MAME investigation driven by the user pushing back on an earlier wrong
+conclusion here — see "Next steps" below for the full story. Without
+it, this port's combat could never fire at all, since every automated
+test happens to start at the one planet (SOL, the home base) where
+`gf_planet_surrendered` is genuinely true from the first frame of a
+new game.
+
+- **Ambient incoming damage** (lines 3000-3381, "GOSUB 3000") — runs
+  on a tuned timer (the original rolls this every main-loop pass; a
+  real-time per-frame roll would land damage far faster than BASIC's
+  own effective frame rate, so this is tuned to feel similarly
+  occasional rather than ported byte-exact). Per-hit formula is a
+  literal port: two independent 40%-chance rolls plus an independent
+  30%-chance roll can land a hit; SHIELD drains first, and only
+  cascades to RADAR/engines/COMPUTER/LASER/HULL once the shield is
+  empty (`$38201`, "shields up," is never toggled anywhere in the
   available BASIC source, so this port treats it as permanently true
   rather than modeling a switch that doesn't exist). HULL reaching 0
   triggers `S_X.bas` — a new screen, `scenes/player_destroyed.tscn`,
@@ -131,22 +140,41 @@ layer, ports `STARSHIP SIMULATOR.bas`'s two real combat mechanisms:
   then `PR#6`s (reboots from the disk's boot sector) after two
   keypresses; this port's closest real equivalent is returning to the
   start screen on any key or Continue.
-- **Laser fire** (lines 185/1500-1570, "GOSUB 1500") — gated on LASER
-  health > 0, always adds to `GameState.gf_victory_progress` (the
-  SAME ground-invasion-surrender counter `GROUND FORCES.bas` uses —
-  firing from orbit genuinely helps soften a planet toward surrender
-  before you ever reach Ground Forces) and to the new
-  `defender_damage_points`/`defender_damage_threshold` pair (toward
-  destroying the current orbital defender ship, `EX.bas`). Neither is
+- **The incoming-fire enemy sprite** (lines 190/192/5000-5251,
+  "GOSUB 5000") — this is the actual "findable, shootable ship" the
+  Flight Training manual page shows directly in the cockpit view (see
+  "Next steps"). Now spawns on its own real independent roll (60%,
+  same tick as the ambient check above), gated on
+  `GameState.flight_escort_fighters > 0` — a real register confirmed
+  live (starts at 30, never written anywhere in BASIC, so like
+  `$38205` it must be a machine-code default this port can only match,
+  not derive). Its own internal shootdown sub-mechanic (lines
+  5200-5251) is ported too: firing a tracer (`incoming_fire.gd`'s
+  `tracer_fired` signal) rolls a 30% chance to intercept the raider,
+  decrementing `flight_escort_fighters` by 1 and `ship_missile_system`
+  by 2 — simplified from the source, which additionally gates this on
+  an unresolved status register (`$38165`) this port treats as
+  always-eligible instead.
+- **Laser fire** (lines 185/1500-1570, "GOSUB 1500") — firing while
+  the current planet is already surrendered re-arms its resistance
+  instead of doing nothing (line 1500's own quirk, now ported); gated
+  on LASER health > 0, always adds to `GameState.gf_victory_progress`
+  (the SAME ground-invasion-surrender counter `GROUND FORCES.bas`
+  uses — firing from orbit genuinely helps soften a planet toward
+  surrender before you ever reach Ground Forces) and to
+  `defender_damage_points`/`defender_damage_threshold` (toward
+  destroying the current orbital defender ship, `EX.bas` — which also
+  halves `flight_escort_fighters`, line 56, now ported). Neither is
   gated on proximity — the original checks the fire button every
   main-loop pass regardless of position, so firing always "counts"
-  against whatever system you're currently at. Confirmed by direct
-  trace, not guessed: destroying the defender does NOT require an
-  escort fighter count or any state this port doesn't already have.
+  against whatever system you're currently at.
 
-Found and fixed two real pre-existing gaps while wiring this in, both
-because flight combat and ground combat turned out to share state more
-than this port's split architecture had assumed:
+Found and fixed three real pre-existing gaps while wiring this in:
+- `gf_planet_surrendered` defaulted to `false` in this port; the real
+  value at new-game start is `true` (confirmed live — SOL,
+  `current_planet=0`, is your home base, already "yours"). This was
+  the actual root cause of combat never firing in testing, not a
+  missing feature.
 - `gf_enemy_strength`/`defender_damage_threshold`/`gf_victory_progress`
   reset at system arrival in the real source (`H_D.bas` lines 90-93),
   not at the start of a ground attack — moved from
@@ -157,17 +185,14 @@ than this port's split architecture had assumed:
   combat had already made toward the same shared counter.
 
 Not yet wired in, documented rather than silently dropped:
-- The simpler incoming-fire visual's own independent spawn trigger and
-  internal random-shootdown sub-mechanic (lines 5200-5251, which can
-  reduce an escort-fighter-count register, `$38207`, this port doesn't
-  model) — it's currently spawned only as visual feedback when the
-  ambient tick lands a hit, not under its own original gating.
 - The two-fighter approach minigame's real trigger (`$38202`, line
   1501). That register is never written anywhere in the available
-  BASIC source — unlike `$38205` (read on every single encounter, and
-  clearly load-bearing), there's no confident analog trigger point to
-  port it to yet. `fighter_encounter.gd` stays reachable only from the
-  dev-tool Combat VFX Demo for now.
+  BASIC source — unlike `$38205`/`$38207` (both confirmed real and
+  load-bearing by live testing), there's no confident analog trigger
+  point to port it to yet. `fighter_encounter.gd` stays reachable only
+  from the dev-tool Combat VFX Demo for now.
+- A proper live, interactive re-entry — see "Next steps" below;
+  `RE.bas` turns out not to be a static display at all.
 
 ## Sound
 
@@ -524,6 +549,24 @@ on the SHIP-vs-manual evidence this note originally cited.)
 
 ## Next steps
 
+- **Re-entry should be live, interactive flight, not a static
+  display.** Found 2026-11-09 while re-investigating "does a ship ever
+  render during flight" (see "Combat integration" above for the full
+  story): `RE.bas` doesn't show a 3-second terrain view and then
+  return control — it resets ship position, BLOADs the real per-world
+  terrain, sets `$38210=1` (atmosphere), and immediately hands back
+  into the SAME live `STARSHIP SIMULATOR.bas` loop. You keep flying,
+  now low over real terrain, with the exact same combat (ambient
+  damage, the incoming-fire enemy, laser fire) still active — this is
+  genuinely where the manual's own cockpit screenshot comes from, not
+  a separate mode. This port's `planet_approach.tscn` (a timed
+  3-second display, `scripts/ui/planet_approach.gd`) doesn't match
+  that shape at all. Fixing it properly means either merging it into
+  `space_flight.tscn` with a terrain-swap and an "atmosphere" flag, or
+  giving the flight scene its own atmosphere sub-state directly — a
+  real redesign of that screen, not a quick patch, so it's recorded
+  here rather than attempted inside the combat-gating fix that found
+  it.
 - Radar, flight's planet, re-entry, the Ship I.D. screen, and all five
   Shore Leave options are all real now (2026-11-07/09) — see
   "Radar"/"Re-entry"/"Ship I.D."/"Shore Leave" above. Also fixed
@@ -584,23 +627,42 @@ on the SHIP-vs-manual evidence this note originally cited.)
   synthesized procedurally and wired into every real call site.
 - ~~Hook the converted shape data up to actual sprites/meshes for the
   player's own ship and planet surfaces in the flight scene~~ —
-  resolved (2026-11-09), and it turned out to already be a non-issue
-  on both halves. The planet half was already done earlier in this
-  same investigation (`space_flight.gd`'s `Planet` node has used real
-  `PLANET # 0` data since the "Radar" work above — this bullet was
-  just never updated). The "player's own ship" half isn't a gap to
-  fill at all: booted the real game live in MAME
-  (`WLR_BACKENDS=headless cage -- mame apple2p -flop1 "disk_image/
-  Space Vikings (4am crack).dsk" -gameio paddles`) and captured real
-  screenshots of normal flight — the cockpit view never renders a 3D
-  model of the player's own ship, or of any other ship, anywhere; the
-  only thing in the main 3D view is the point-field planet and the
-  instrument-panel HUD. Every ship visual in the real game (the
-  two-fighter approach, `EX.bas`'s explosion, the radar screen) is
-  either a flat 2D shape-table overlay or a separate dedicated screen
-  (radar), never a 3D model positioned in the flight camera's own
-  world space. This port already matches that shape exactly — there
-  was nothing left to hook up.
+  resolved (2026-11-09). The planet half was already done earlier in
+  this same investigation (`space_flight.gd`'s `Planet` node has used
+  real `PLANET # 0` data since the "Radar" work above — this bullet
+  was just never updated).
+
+  The "ship" half took two live-MAME passes to get right, and the
+  first pass reached the wrong conclusion — worth recording exactly
+  how, since it's a real methodology lesson for this investigation,
+  not just a correction. Booted the real game and captured flight
+  screenshots at SOL (the home planet, `current_planet=0`) on a fresh
+  game: no ship ever appeared, across deep space, a real re-entry
+  (`RE.bas`), manual `$7879`/`$7300` buffer pokes, and a full attitude
+  sweep. That looked conclusive, so this file briefly claimed there
+  was no ship-rendering gap at all. The user pushed back from direct
+  memory of the game, which prompted finding the actual manual
+  (`abandonware/.../Space Vikings/- Documenattion/space_vikings.pdf`,
+  11 pages, sitting in the project's own abandonware archive) — its
+  cover/Flight-Training screenshot shows a 3D ship silhouette directly
+  in the cockpit view. Re-tested with that concretely in hand: `PEEK
+  (38208)` ("surrendered") reads **true** at SOL from the moment a new
+  game starts, confirmed live — because SOL is your home base, already
+  "yours." The real combat gate (`STARSHIP SIMULATOR.bas` line 190:
+  `IF PEEK(38208)=0 AND ... THEN GOSUB 3000: IF RND(1)<.5 AND
+  PEEK(38207)>0 THEN GOSUB 5000`) requires it **false** — so every
+  previous test, run at the one planet that structurally can never
+  pass that gate, was guaranteed to show nothing no matter how long it
+  ran or what was loaded into which buffer. Forced `$38208=0` for one
+  more test and the real incoming-fire enemy sprite (`GOSUB 5000`)
+  showed up immediately, fired back, and visibly reduced a real
+  escort-fighter-count register (`$38207`) as the exchange continued —
+  genuinely findable and shootable, exactly as described. See "Combat
+  integration" above for what this port now does with that (the gate
+  it was missing, the new `GameState.flight_escort_fighters` field,
+  and the real architecture gap this same investigation surfaced:
+  `RE.bas` is live interactive flight over real terrain, not the timed
+  static display `planet_approach.tscn` currently is).
 - ~~Decide a real starting troop/transport count~~ — done (2026-11-09):
   traced both `START.bas`'s new-game MISC FILE write (line 2050:
   `PRINT 100.3: PRINT 2000: PRINT 10000`, i.e. real

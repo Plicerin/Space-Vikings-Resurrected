@@ -140,7 +140,8 @@ var gf_missiles: float = 0.0         # M, $38153 (blob: 0) — ground-combat
 	# (that's $38187, a totally different "missile system health"
 	# value the real source also happens to call "MISSILES")
 var gf_reserve_troops: float = 0.0   # T9 (held back when transport capacity is exceeded)
-var gf_planet_surrendered: bool = false # $38208
+var gf_planet_surrendered: bool = true # $38208 — real default confirmed
+	# true (see start_new_game()'s own comment on this)
 
 # --- Flight combat (STARSHIP SIMULATOR.bas lines 1500-1570/3000-3381,
 # "GOSUB 1500"/"GOSUB 3000") — see scripts/flight/flight_combat.gd ---
@@ -156,6 +157,17 @@ var damage_alert_active: bool = false        # $38393 — set the first
 	# (STARSHIP SIMULATOR.bas line 3360's "RUN DMG", a one-line HUD
 	# flash in the real source, not a full screen — see DMG.bas);
 	# cleared by Repair/Restock completing (SHORE LEAVE.bas line 2555)
+var flight_escort_fighters: int = 30         # $38207 — a flight-encounter
+	# escort fighter count, confirmed genuinely real and live 2026-11-09
+	# (booted a fresh game in MAME, read it directly: starts at 30, no
+	# BASIC POKE sets it — like $38205/$38201/$38202, it must be a
+	# machine-code default). NOT the same register as gf_fighters
+	# ($38156, the ground-combat squadron count) — the real source just
+	# happens to use "fighters" for both. Gates whether GOSUB 5000 (the
+	# incoming-fire visual, incoming_fire.gd) can spawn at all; EX.bas
+	# halves it when the orbital defender is destroyed; the
+	# incoming-fire pattern's own internal shootdown sub-mechanic
+	# (lines 5200-5251) can decrement it by 1 per successful intercept.
 
 # --- Ship system health (SHORE LEAVE.bas lines 2500-2545, "REPAIR
 # SHIP") ---
@@ -362,11 +374,20 @@ func start_new_game() -> void:
 	gf_tanks = 0.0
 	gf_missiles = 0.0
 	gf_reserve_troops = 0.0
-	gf_planet_surrendered = false
+	# Confirmed live in MAME 2026-11-09 (not the `false` this port
+	# previously assumed): a brand new game starts with $38208 already
+	# TRUE. Makes narrative sense once traced — SOL (current_planet=0)
+	# is your home base, already "yours" — but it's also directly
+	# load-bearing: with the old `false` default, this port's own
+	# combat gates (`not gf_planet_surrendered`, flight_combat.gd)
+	# would have treated a fresh game's home planet as hostile.
+	gf_planet_surrendered = true
+	planet_secured[0] = true
 
 	defender_damage_points = 0.0
 	defender_damage_threshold = 0.0
 	damage_alert_active = false
+	flight_escort_fighters = 30
 
 	ship_shield = 100.0
 	ship_energy = 63.0
@@ -433,6 +454,7 @@ func save_to_disk() -> void:
 		"defender_damage_points": defender_damage_points,
 		"defender_damage_threshold": defender_damage_threshold,
 		"damage_alert_active": damage_alert_active,
+		"flight_escort_fighters": flight_escort_fighters,
 		"ship_shield": ship_shield, "ship_energy": ship_energy,
 		"ship_engine1": ship_engine1, "ship_engine2": ship_engine2,
 		"ship_computer": ship_computer, "ship_radar": ship_radar,
@@ -478,6 +500,7 @@ func load_from_disk() -> void:
 	defender_damage_points = data.get("defender_damage_points", defender_damage_points)
 	defender_damage_threshold = data.get("defender_damage_threshold", defender_damage_threshold)
 	damage_alert_active = data.get("damage_alert_active", damage_alert_active)
+	flight_escort_fighters = data.get("flight_escort_fighters", flight_escort_fighters)
 	ship_shield = data.get("ship_shield", ship_shield)
 	ship_energy = data.get("ship_energy", ship_energy)
 	ship_engine1 = data.get("ship_engine1", ship_engine1)
