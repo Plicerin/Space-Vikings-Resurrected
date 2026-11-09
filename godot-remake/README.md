@@ -86,8 +86,8 @@ Y, etc.) directly instead of re-deriving new ones.
   scale-flash + debris-stamp explosion — lines 1000-1222.
 - **Laser beam** (`laser_beam.gd`): the two converging cockpit-corner
   triangles, flickered 3x — lines 1505-1530. Sound (`CALL LA`, confirmed
-  pure frequency-sweep speaker tone, decoupled from the visual) isn't
-  ported; audio is a separate, not-yet-started task.
+  decoupled from the visual) now plays via `AudioManager.play_laser()` —
+  see "Sound" below.
 - **Ship destruction** (`ship_destruction.gd`): `EX.bas`'s bigger
   screen-centered version of the same flash+debris, plus a genuine
   radiating-line particle burst, plus persistent (stand-in) wreckage —
@@ -168,6 +168,70 @@ Not yet wired in, documented rather than silently dropped:
   clearly load-bearing), there's no confident analog trigger point to
   port it to yet. `fighter_encounter.gd` stays reachable only from the
   dev-tool Combat VFX Demo for now.
+
+## Sound
+
+Every real sound cue in the whole game turns out to reduce to exactly
+two machine-code routines — confirmed by reading their disassembly
+(`disassembly/LASER.disasm.txt` and `disassembly/SOUND GEN.disasm.txt`)
+rather than guessing, since the BASIC source only ever says `CALL SG`/
+`CALL LA`/`CALL NOISE`/`CALL EX` with no hint of what those actually
+sound like:
+
+- **LASER** ($92D1-$92E6) — a tight loop: 14 repetitions, each toggling
+  the speaker 140 times with a per-toggle delay that grows every
+  toggle. A growing delay between toggles means a falling toggle rate,
+  i.e. falling pitch, so each of the 14 reps is a quick descending
+  chirp back-to-back — the classic "pew" laser-zap shape. Used for
+  every laser-fire visual (`CALL LA`, line 1505).
+- **SOUND GEN** ($9276-$92BF, aliased `SG`/`NOISE`/`EX` under different
+  BASIC variable names — confirmed the same routine by address, all
+  three resolve to $9276) — a 16-bit shift register toggling the
+  speaker in a pseudo-random pattern, wrapped in a nested duration
+  loop set via `POKE 37490/37491` before most calls — a noise burst,
+  not a tone. Used for every hit, miss, retreat-flicker, and explosion
+  sound. Three real parameter presets found cited in `STARSHIP
+  SIMULATOR.bas` (subroutines 4100/4110/4120, 10x10/5x5/7x7 loop
+  counts) became the NOISE_HEAVY/LIGHT/MEDIUM presets.
+
+Neither is cycle-exact — that would mean emulating real 6502 timing
+against the speaker toggle, not just the routine's algorithmic shape —
+each sound is synthesized from the real shape (chirp vs. noise,
+relative durations) via `AudioManager` (`autoload/audio_manager.gd`),
+not reproduced bit-for-bit. Same "faithful shape, feel-tuned constants"
+approach this port already uses for non-byte-exact timing elsewhere.
+
+`EX.bas` (75 calls) and `S_X.bas` (500 calls) call the noise routine
+directly in a loop, with whatever duration-loop parameters happened to
+be left over from whatever ran before — genuinely unknowable, not just
+unported — so their much longer call counts (not a specific leftover
+parameter state) are what this port actually reproduces, as the
+NOISE_EXPLOSION/NOISE_DESTRUCTION presets, scaled up proportionally.
+
+Wired into every real call site found by grepping the source for
+`CALL SG`/`CALL LA`/`CALL NOISE`/`CALL EX`: `laser_beam.gd` and
+`flight_combat.gd`'s own `fire_laser()` (the laser sweep — both play
+it, since one is the cockpit visual and the other is the actual flight
+mechanic, not yet wired to each other — see "Combat integration"
+above), `flight_combat.gd`'s ambient damage tick (light/medium presets
+per branch, same as the source calling both independently),
+`incoming_fire.gd`'s tracer fire (light), `fighter_encounter.gd`'s
+approach start and `fighter_slot.gd`'s retreat/explosion (medium —
+all three are bare `CALL SG` sites with no preceding `GOSUB 4100/4110/
+4120`, so this port just picks MEDIUM for all of them rather than
+tracking real leftover state), `ship_destruction.gd` (EX.bas's
+explosion), and `player_destroyed.gd` (S_X.bas's destruction — the
+longest burst in the game).
+
+Not wired, documented rather than silently dropped: `H_D.bas`'s own
+~426-call noise burst during a hyperdrive jump (lines 17-20, the
+"warp" sequence) — this port's `galaxy_map.gd` doesn't have a visual
+counterpart for that sequence (travel is instant), so adding just the
+sound without anything on screen to tie it to would likely read as a
+stray, unexplained noise rather than an actual warp effect. Also not
+ported: the simpler incoming-fire pattern's own internal
+random-shootdown sub-mechanic's sound (line 5230, part of the
+already-deferred 5200-5251 mechanic — see "Combat integration" above).
 
 ## Radar
 
@@ -513,8 +577,11 @@ on the SHIP-vs-manual evidence this note originally cited.)
   920-921). The "What's real vs. stubbed" table above is now fully
   real except End/scoring's own non-existence (there wasn't one — see
   "Combat integration"/"Shore Leave" above for what `END.bas` and
-  `SHORE LEAVE.bas`'s "BUY WEAPONS" actually turned out to be instead)
-  and sound.
+  `SHORE LEAVE.bas`'s "BUY WEAPONS" actually turned out to be instead).
+  Sound is real now too (2026-11-09, see "Sound" above) — every real
+  sound cue in the game reduces to exactly two machine-code routines
+  (a laser sweep and a noise burst, confirmed from their disassembly),
+  synthesized procedurally and wired into every real call site.
 - Hook the converted shape data up to actual sprites/meshes for the
   player's own ship and planet surfaces in the flight scene — combat VFX
   now uses real shape data (see above), but flight still uses a plain
@@ -532,6 +599,3 @@ on the SHIP-vs-manual evidence this note originally cited.)
   `troop_location` really does start at 3 (cryo sleep), confirmed
   directly from the blob, not the 0 (awake aboard) this port assumed
   before.
-- Sound — nothing emits audio yet. Every effect that has one in the
-  original (laser, explosions) notes exactly what's missing in its own
-  script.

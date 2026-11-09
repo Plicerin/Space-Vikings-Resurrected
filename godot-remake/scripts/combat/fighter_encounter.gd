@@ -63,6 +63,7 @@ func _ready() -> void:
 
 
 func start_encounter() -> void:
+	AudioManager.play_hit_medium() # line 1010's bare CALL SG, once per encounter start
 	_left.table = table
 	_right.table = table
 	_step = 0

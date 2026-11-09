@@ -3,9 +3,10 @@ extends Node2D
 ## `HPLOT`-filled triangles from the cockpit's bottom corners converging
 ## on the target reticle, flickered 3 times (`FOR LX=1 TO 3`) — drawn then
 ## erased via `HCOLOR=0` in the original, ported here as a visibility
-## toggle instead of redraw-to-erase. `CALL LA` (pure frequency-sweep
-## speaker tone, confirmed decoupled from the visual — see
-## COMBAT_VFX_ANALYSIS.md) is not ported; sound is a separate task.
+## toggle instead of redraw-to-erase. `CALL LA` (the laser sweep tone,
+## confirmed decoupled from the visual — see COMBAT_VFX_ANALYSIS.md)
+## now plays via AudioManager.play_laser() — see its own doc comment
+## for the real routine this is synthesized from.
 
 const APEX := Vector2(136, 60)
 const BASE_OUTER := Vector2(90, 123)
@@ -48,6 +49,7 @@ func _process(_delta: float) -> void:
 
 
 func fire() -> void:
+	AudioManager.play_laser()
 	if _tween:
 		_tween.kill()
 	_tween = create_tween()

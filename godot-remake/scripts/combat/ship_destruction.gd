@@ -7,7 +7,9 @@ extends Node2D
 ## 7-10 of `EX.bas`, clamped to screen bounds), plus persistent wreckage
 ## left behind afterward. `CALL EX` is 75 calls to the same sound routine
 ## used everywhere else (`SG`, "sound gen") — not a distinct explosion
-## sound, and not ported; sound is a separate task.
+## sound, just a much longer burst of it. Plays via
+## AudioManager.play_explosion() — see its own doc comment for how a
+## 75-call burst became a concrete duration.
 ##
 ## Not wired to a hull/health system — none has been traced yet. Call
 ## `play()` directly to preview it (see the Start screen's combat demo).
@@ -38,6 +40,7 @@ func _ready() -> void:
 
 
 func play() -> void:
+	AudioManager.play_explosion()
 	_clear_sparks()
 	_wreckage.visible = false
 

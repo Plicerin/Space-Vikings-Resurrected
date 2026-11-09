@@ -84,6 +84,7 @@ func _ready() -> void:
 func fire_laser() -> void:
 	if GameState.ship_laser <= 0.0:
 		return
+	AudioManager.play_laser()
 	var tech: int = GameState.planet_tech[GameState.current_planet]
 	GameState.gf_victory_progress = minf(GameState.gf_victory_progress + 10.0 / (tech + 1.0), 255.0)
 	GameState.defender_damage_points = minf(GameState.defender_damage_points + 1.0 / (tech + 1.0), 255.0)
@@ -98,10 +99,15 @@ func _ambient_damage_tick() -> void:
 		return
 
 	var hit := false
+	# Lines 3001/3010/3019: GOSUB 4110's preset (light).
 	if randf() <= 0.4 and randf() <= 0.4:
 		hit = true
+		AudioManager.play_hit_light()
+	# Line 3030/3032: GOSUB 4120's preset (medium) — independent of the
+	# branch above, same as the source (both can fire the same tick).
 	if randf() <= 0.3:
 		hit = true
+		AudioManager.play_hit_medium()
 	if not hit:
 		return
 

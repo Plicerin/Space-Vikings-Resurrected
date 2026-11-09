@@ -9,7 +9,9 @@ extends Control
 ## Visually simpler than EX.bas: no ship-shape flash at all, just a
 ## literal port of lines 6-30's expanding radial burst (`X1=5 TO 130
 ## STEP 8`, 15 random lines per step, `Y2` clamped to [-60,65]) plus
-## the exact text, "YOUR SHIP HAS BEEN DESTROYED!!".
+## the exact text, "YOUR SHIP HAS BEEN DESTROYED!!". Line 6's `FOR J=1
+## TO 500: CALL EX` (500 calls — the longest burst anywhere in the
+## game) plays via AudioManager.play_destruction().
 ##
 ## The original waits for two keypresses then `PR#6` — a hard reboot
 ## from the disk's boot sector. This port's closest real equivalent is
@@ -25,6 +27,7 @@ const CENTER := Vector2(140, 60)
 
 
 func _ready() -> void:
+	AudioManager.play_destruction()
 	_continue_btn.pressed.connect(_on_continue)
 	_spawn_burst()
 

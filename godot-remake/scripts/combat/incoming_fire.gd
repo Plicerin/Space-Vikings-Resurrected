@@ -87,6 +87,9 @@ func _process(delta: float) -> void:
 
 
 func _fire_tracer() -> void:
+	# Line 5098: GOSUB 4110's preset (light) — the same one the ambient
+	# damage tick's lighter hit uses (flight_combat.gd).
+	AudioManager.play_hit_light()
 	var line := Line2D.new()
 	line.add_point(_pos)
 	line.add_point(PLAYER_POINT)

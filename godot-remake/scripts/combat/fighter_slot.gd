@@ -58,6 +58,7 @@ func _kill_tweens() -> void:
 ## alternating-ROT loop.
 func start_retreat() -> void:
 	_kill_tweens()
+	AudioManager.play_hit_medium() # line 1100's 2x bare CALL SG
 	var rot_deg := 25.0 * 360.0 / 255.0
 	_approach.configure(table, 2)
 
@@ -84,6 +85,7 @@ func start_retreat() -> void:
 ## sequence; the flash and the simultaneous overlay carry the effect.
 func start_explosion() -> void:
 	_kill_tweens()
+	AudioManager.play_hit_medium() # line 1205's bare CALL SG
 	var anchor := _approach.position
 	_approach.visible = false
 
