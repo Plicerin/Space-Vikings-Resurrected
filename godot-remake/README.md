@@ -303,6 +303,25 @@ destroy threshold zeroes `orbital_defender_tier`, halves
 `flight_escort_fighters`, and makes `ShipBlip` actually disappear next
 frame, same as a laser kill already did.
 
+**Live-confirmed, not just manual+source cross-referenced** (2026-11-09):
+until this point the whole mechanic above rested on the manual's text
+and the `GOSUB 1535`/`J2=120` source evidence converging — strong, but
+never actually watched executing. Scripted the real disk live in MAME:
+forced the ship's position to the exact center of line 1050's hit box
+via direct memory poke (a RADAR.bas round-trip — press R, then X — is
+what forces a resync, since `X`'s fall-through to a fresh `RUN
+STARSHIP SIMULATOR` is what re-reads the poked position bytes into the
+live X/Y/Z variables), forced the planet hostile, and held the real
+fire button. Watched live: `defender_damage_points` jumped 0→30,
+exactly matching `120/(TE+1)` with the real tech value read off
+memory; that crossed the threshold and the game's own `PRINT "RUNEX"`
+chain fired *on its own* — `orbital_defender_tier` zeroed itself
+without being poked, and the real `EX.bas` explosion rendered on
+screen. One real timing gotcha worth keeping: a single missile-fire
+cycle takes roughly 420 emulated frames (~7 real seconds) in
+interpreted Applesoft BASIC — a scripted test with a shorter hold
+window just looks like a broken mechanic, not a miss.
+
 ## Sound
 
 Every real sound cue in the whole game turns out to reduce to exactly
