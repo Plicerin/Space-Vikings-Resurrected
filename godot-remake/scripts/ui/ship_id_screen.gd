@@ -26,7 +26,7 @@ extends Node2D
 
 
 func _ready() -> void:
-	var tier: int = GameState.planet_orbital_defender_tier[GameState.current_planet]
+	var tier: int = GameState.orbital_defender_tier
 	_drawing.tier = tier
 	var desc: String = GameState.DEFENDER_TIER_LABELS.get(tier, "UNIDENTIFIED CONTACT.")
 	_label.text = "-SHIP I.D.-\n\n%s\n\n[any key] return" % desc

@@ -28,7 +28,7 @@ const SPIN_SPEED := 0.3 # radians/sec — see doc comment above
 
 
 func _ready() -> void:
-	var tier: int = GameState.planet_orbital_defender_tier[GameState.current_planet]
+	var tier: int = GameState.orbital_defender_tier
 	var built: Dictionary = A2_3D1_Model.build_ship_mesh(tier)
 	_ship_blip.mesh = built["mesh"]
 

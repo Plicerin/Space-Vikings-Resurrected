@@ -61,11 +61,25 @@ var planet_population_scale: Array[int] = []
 # CRUISER WITH PHOTON MISSILES AND HEAVY LASERS, 20-40 FIGHTERS" —
 # a raw ET value of 2 always gets remapped to 3 before use in the
 # original (H_D.bas/ORBIT.bas's tier-correction logic), so 2 itself
-# never appears here. Not literally a per-planet array in the
-# original, simplified to one entry per planet here since the port
-# doesn't yet model transit. Confirmed live in MAME 2026-11-07: this is
+# never appears here. Confirmed live in MAME 2026-11-07: this is
 # exactly which SHIP # N wireframe RADAR.bas renders — see
 # A2-3D1_ENGINE_ANALYSIS.md and scripts/shapes/a2_3d1_model.gd.
+#
+# Exhaustively grepped every detokenized .bas file for writes to
+# $38205 (2026-11-09): the ONLY one in the entire BASIC source is
+# EX.bas's post-encounter `POKE 38205,0` reset. It is never assigned a
+# nonzero tier anywhere in BASIC — H_D.bas, ORBIT.bas and RADAR.bas all
+# only ever read it. It must be set by machine code (plausibly inside
+# "SPACE SIMULATOR ASSEMBLY" or another CALL'd overlay reachable only
+# from the hyperdrive-jump path), which the available linear
+# disassembly dumps under disassembly/ don't resolve either — those
+# that were checked either don't reference $953D (its absolute
+# address) at all or decode-truncate well before any plausible site.
+# Confirmed real, NOT per-planet, architecture from this: $38205 is a
+# single transient global, not an array indexed by planet — so this
+# port now models it the same way (see orbital_defender_tier below)
+# instead of fixing one tier per planet for the whole game, which was
+# this field's previous, less faithful shape.
 const DEFENDER_TIERS: Array[int] = [0, 1, 3, 4]
 const DEFENDER_TIER_LABELS := {
 	0: "THERE IS NO STARSHIP IN THIS SYSTEM.",
@@ -73,7 +87,17 @@ const DEFENDER_TIER_LABELS := {
 	3: "LIGHT CRUISER WITH LASERS,\nMISSILES AND FIGHTER COVER.",
 	4: "HEAVY CRUISER WITH PHOTON\nMISSILES AND HEAVY LASERS.\n20-40 FIGHTERS.",
 }
-var planet_orbital_defender_tier: Array[int] = []
+# Re-rolled by galaxy_map.gd on each system selection — the real
+# trigger point (somewhere on the hyperdrive-jump path, H_D.bas) isn't
+# reachable from BASIC alone (see note above), so this port re-rolls
+# at its own closest analog: committing to travel to a new system.
+# Uniform pick, same distribution this field always used — only the
+# *when* changed, not the odds.
+var orbital_defender_tier: int = 0 # $38205 ("ET")
+
+
+func reroll_orbital_defender_tier() -> void:
+	orbital_defender_tier = DEFENDER_TIERS.pick_random()
 
 var current_planet: int = 0        # $38209 ("orbiting" planet)
 var target_planet: int = 0         # $38163 (travel target)
@@ -148,19 +172,13 @@ func start_new_game() -> void:
 	planet_has_base.clear()
 	planet_scouted.clear()
 	planet_population_scale.clear()
-	planet_orbital_defender_tier.clear()
 	for i in range(PLANET_COUNT):
 		planet_tech.append(0)
 		planet_secured.append(false)
 		planet_has_base.append(false)
 		planet_scouted.append(false)
 		planet_population_scale.append(1)
-		# Placeholder distribution — the original's real per-planet tier
-		# assignment (likely tied to planet_tech/population, going by
-		# GROUND_COMBAT_ANALYSIS.md's tech-tier framing) hasn't been
-		# traced yet. Picked here just so the radar screen has variety
-		# to actually show; change freely once that's found.
-		planet_orbital_defender_tier.append(DEFENDER_TIERS.pick_random())
+	orbital_defender_tier = DEFENDER_TIERS.pick_random()
 
 	loot.clear()
 	for i in range(13):

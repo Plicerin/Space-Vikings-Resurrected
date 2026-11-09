@@ -129,11 +129,22 @@ loaded by `scripts/shapes/a2_3d1_model.gd`.
   real rotating 3D model" legible at a glance. Both are flagged in
   `radar_screen.gd`'s own doc comment if either reads as inauthentic
   rather than additive once more of the original is ported.
-- Tier → ship mapping (`GameState.planet_orbital_defender_tier`, values
+- Tier → ship mapping (`GameState.orbital_defender_tier`, values
   0/1/3/4) and each tier's on-screen description are pulled directly
-  from the real `SHIP no N I.D..bas` text. Which real planet gets which
-  tier is a placeholder (random at new-game time) — the original's real
-  assignment formula hasn't been traced yet.
+  from the real `SHIP no N I.D..bas` text. The original's `$38205` is a
+  single transient global register, never once assigned a nonzero
+  value anywhere in the detokenized BASIC source (exhaustively
+  grepped, 2026-11-09) — only read (`H_D.bas`, `ORBIT.bas`,
+  `RADAR.bas`) and reset to 0 after an encounter (`EX.bas`). It must be
+  set by machine code the available linear disassembly dumps don't
+  resolve either. This port can't reproduce the real trigger point or
+  odds, but it does now match the real *shape* of the state — a single
+  current-system value, re-rolled by `galaxy_map.gd` on each system
+  selection (its closest analog to a hyperdrive jump) — rather than its
+  previous shape, a fixed tier picked per planet at new-game time and
+  held for the whole game, which was wrong in a way the real source
+  rules out directly (a per-planet array implies a persisted property;
+  `$38205` demonstrably isn't one).
 - Pressing `X` goes to the real `SHIP # N I.D.` screen now — see
   "Ship I.D." below.
 
@@ -300,18 +311,22 @@ on the SHIP-vs-manual evidence this note originally cited.)
 
 ## Next steps
 
-- Radar, flight's planet, re-entry, the Ship I.D. screen, and four of
-  the five Shore Leave options are all real now (2026-11-07/09) — see
+- Radar, flight's planet, re-entry, the Ship I.D. screen, and all five
+  Shore Leave options are all real now (2026-11-07/09) — see
   "Radar"/"Re-entry"/"Ship I.D."/"Shore Leave" above. Also fixed
   project-wide: every pure-2D scene (this project has quite a few) was
   rendering against the engine's default gray clear color instead of
   black, since nothing had set one — `project.godot` now sets it
-  globally. Left for later: Repair/Restock (needs ship-system damage
-  values this port doesn't model yet — a natural pairing with the
-  still-not-started combat-integration work), End/scoring, the real
-  per-planet tier-assignment formula (currently random at new-game
-  time), and a real "weapon fired" flag so the re-entry trigger can
-  port the original's full condition instead of proximity alone.
+  globally. Also reworked `GameState.orbital_defender_tier` from a
+  fixed-per-planet array to a transient global re-rolled per system
+  arrival, matching the real `$38205`'s actual shape (see "Radar"
+  above) — its real trigger point and odds are still unresolved (not
+  in BASIC, and not in the available disassembly either). Left for
+  later: Repair/Restock (needs ship-system damage values this port
+  doesn't model yet — a natural pairing with the still-not-started
+  combat-integration work), End/scoring, and a real "weapon fired"
+  flag so the re-entry trigger can port the original's full condition
+  instead of proximity alone.
 - Re-verified against the corrected `ENEMY`/`EXPL` data (2026-11-07): the
   explosion and EX.bas destruction sequences still look solid (shape 15
   carries the debris, 16-18 are blank in the real data — that's fine,

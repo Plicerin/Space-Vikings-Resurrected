@@ -24,7 +24,7 @@ const POINT_SIZE := 6.0
 
 
 ## Loads one SHIP # N model by tier (0/1/3/4 -- the real
-## PEEK(38205)/ET values, see GameState.planet_orbital_defender_tier)
+## PEEK(38205)/ET values, see GameState.orbital_defender_tier)
 ## and returns {"mesh": ArrayMesh, "radius": float}. Returns an empty
 ## mesh (0 vertices, radius 0) for tier 0, which is correct: the
 ## unarmed station genuinely has no ship model, confirmed against the

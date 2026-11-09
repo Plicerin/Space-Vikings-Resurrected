@@ -36,4 +36,10 @@ func _make_select_callback(index: int) -> Callable:
 	return func():
 		GameState.current_planet = index
 		GameState.target_planet = index
+		# H_D.bas loads this system's orbital defender (`SHIP # PEEK(38205)`)
+		# right after a hyperdrive jump completes; that register is never
+		# written in BASIC (see GameState.orbital_defender_tier's doc
+		# comment), so this port re-rolls it here instead, at its closest
+		# analog: committing to travel to a new system.
+		GameState.reroll_orbital_defender_tier()
 		GameState.goto_scene("res://scenes/com.tscn")
