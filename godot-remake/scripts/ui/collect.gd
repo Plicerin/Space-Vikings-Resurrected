@@ -30,9 +30,9 @@ func _ready() -> void:
 		0:
 			lines.append("PLANET IS NON-HABITABLE. THERE IS NO LOOT TO GATHER, SIR.")
 		1:
-			_add_loot(12, randf() * 5.0) # wine/liquor
-			_add_loot(11, randf() * 5.0) # food
-			_add_loot(2, randf() * 10.0) # general goods
+			_add_loot(12, randf() * 5.0) # gold
+			_add_loot(11, randf() * 5.0) # silver
+			_add_loot(2, randf() * 10.0) # luxury foods
 			lines.append("PLANET IS PRIMITIVE. A LITTLE GOLD AND SILVER, SOME WINES AND LIQUORS, SIR.")
 		2, 3, 4:
 			var j1 := 0.0
@@ -43,6 +43,15 @@ func _ready() -> void:
 			elif tech == 4:
 				j1 = 15.0
 				j2 = 15.0
+			# Lines 920-921: a second loot collection within the same
+			# system visit (any planet) gets cut to 60% — see
+			# GameState.loot_collected_this_visit's doc comment. The
+			# fixed-index category (line 1030's hardcoded `RND(1)*20`)
+			# is NOT derived from J1/J2, so it's exempt — matches source.
+			if GameState.loot_collected_this_visit:
+				j1 *= 0.6
+				j2 *= 0.6
+			GameState.loot_collected_this_visit = true
 			for i in J1_INDICES:
 				_add_loot(i, randf() * j1)
 			for i in J2_INDICES:

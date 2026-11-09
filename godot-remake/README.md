@@ -38,7 +38,7 @@ new script that needs a type name.
 | Loot collection by tech tier | Real | `GROUND_COMBAT_ANALYSIS.md` |
 | Shore Leave: pay troops (morale) | Real | `GROUND_COMBAT_ANALYSIS.md` |
 | Troop recall | Real (thin — no morale/credit effect in the original either) | `GROUND_COMBAT_ANALYSIS.md` |
-| Galaxy map, Command console, Status screen | Real navigation/readout, no original visuals (starmap chart, bezel HUD) ported yet | — |
+| Galaxy map, Command console, Status screen, COMPUTER sub-menu (Navigation Computer, Galaxy Directory, Supplies Report) | Real navigation/readout, no original visuals (starmap chart, bezel HUD) ported yet — see "COMPUTER sub-menu" below | — |
 | Radar screen | Real — see "Radar" below | `A2-3D1_ENGINE_ANALYSIS.md` |
 | Ship I.D. screen (press X on radar) | Real — see "Ship I.D." below | — |
 | Enlist / Sell Loot / Establish Base / Cryogenics / Repair/Restock / Buy Weapons | Real — `scripts/ui/{enlist,sell_loot,establish_base,cryogenics,repair_ship,buy_weapons}.gd`, exact formulas/state machine from `SHORE LEAVE.bas` | `GROUND_COMBAT_ANALYSIS.md` |
@@ -350,6 +350,56 @@ in `ground_forces.gd`:
   in this file's own doc comment as something the original has, never
   actually wired in until now.
 
+## COMPUTER sub-menu
+
+The Command Console's "1) COMPUTER" option (`COM.bas` lines 200-280)
+is real now instead of a stub, gated on `GameState.ship_computer`
+(line 215's "COMPUTER NOT FUNCTIONING" if it's 0 — the same field
+Repair/Restock models and ambient combat damage can zero out):
+
+- **Navigation Computer** (`nav_computer.gd`) — Directory (same
+  destination as the Central Computer's own "2) GALAXY DIRECTORY"
+  button, confirmed the same in source too) and Set Course. Set Course
+  is real data entry (sets `GameState.target_planet`, same 1-20
+  range/"THAT'S WHERE WE ARE NOW" gate as the original's numeric-entry
+  subroutine) but has no further mechanical effect in this port yet —
+  the real source's separate hyperdrive-jump step that would later
+  read `target_planet` (`H_D.bas`, triggered by an in-flight key this
+  port hasn't identified) doesn't exist here; `galaxy_map.gd` already
+  collapses "pick a destination" and "arrive there" into one click, an
+  architecture decision from well before this screen existed.
+- **Galaxy Directory** (`galaxy_directory.gd`) — a system list, gated
+  per-system on `GameState.planet_scouted` ("NO INFORMATION AVAILABLE"
+  if unscouted). Found and fixed a real gap while tracing this:
+  nothing had ever set `planet_scouted` to true anywhere — `H_D.bas`
+  line 16 does it on arrival (`POKE 38240+target,1`), now ported in
+  `galaxy_map.gd` alongside its other per-arrival resets. Genuine
+  quirk kept as-is: the list's own "RETURN" goes to Navigation
+  Computer's menu specifically (`COM.bas` line 969), regardless of
+  which of the two real entry points you used to reach this screen.
+- **Supplies Report** (`supply_report.gd`, `SUPPLY.bas`) — a real find
+  while scoping this: it directly and unambiguously labels all
+  thirteen loot categories by address, which turned out to disagree
+  with `GameState.LOOT_LABELS`'s previous guesses at several indices
+  (two of the three it claimed were "confirmed" were actually wrong —
+  $38182 was labeled "food," it's really SILVER; $38183 was labeled
+  "wine/liquor," it's really GOLD). Fixed the whole table from this
+  screen's own source, including real per-category display units
+  (`LOOT_UNIT_SCALE`/`LOOT_UNIT_NAMES` — e.g. Platinum displays as
+  `loot[10] * 10` POUNDS). Tracing `COLLECT.bas` for the same fix
+  also surfaced a real, previously-unported mechanic: a second loot
+  collection within the same system visit gets cut to 60%
+  (`$301`/`GameState.loot_collected_this_visit`, reset at the same
+  arrival point as the label fix above) — now ported in `collect.gd`.
+- **Galaxy Map** / **Ship Status** aliases — "3) GALAXY MAP" and
+  "4) SHIP STATUS" just go to the already-real `galaxy_map.tscn`/
+  `status.tscn`, exactly matching the original's own `RUN` targets.
+
+Every sub-screen under this menu returns straight to the top-level
+Command Console (`com.tscn`) on exit, never back to the Central
+Computer menu itself — a real, consistent pattern in the source, not
+a simplification.
+
 ## The shape-table viewer
 
 Only the 21 `PLANET no N`/`SHIP no N` files are included — `PLANET FILE`
@@ -452,13 +502,19 @@ on the SHIP-vs-manual evidence this note originally cited.)
   format (or real footage of this exact moment to compare against).
 - Convert `assets/shapes/*.json` to native Godot resources (or at least an
   import step) instead of parsing raw JSON at runtime.
-- Fill in the remaining stubs in the "What's real vs. stubbed" table
-  above — just the Command Console's "COMPUTER" sub-menu now
-  (Navigation/Galaxy Directory/Ship Status detail/Supplies Report,
-  `COM.bas` lines 220-280 and `SUPPLY.bas`, not traced yet) and
-  `END.bas`'s own mission-scoring question (there wasn't one — see
+- The Command Console's "COMPUTER" sub-menu is real now too
+  (2026-11-09, see "COMPUTER sub-menu" above) — Navigation Computer,
+  Galaxy Directory, Supplies Report, plus Galaxy Map/Ship Status
+  aliases. Tracing it also fixed a real, previously-wrong
+  `GameState.LOOT_LABELS` table (`SUPPLY.bas` unambiguously labels all
+  thirteen categories by address; the old table had two of its three
+  "confirmed" labels at the wrong indices) and added a previously-
+  unported loot diminishing-returns mechanic (`COLLECT.bas` lines
+  920-921). The "What's real vs. stubbed" table above is now fully
+  real except End/scoring's own non-existence (there wasn't one — see
   "Combat integration"/"Shore Leave" above for what `END.bas` and
-  `SHORE LEAVE.bas`'s "BUY WEAPONS" actually turned out to be instead).
+  `SHORE LEAVE.bas`'s "BUY WEAPONS" actually turned out to be instead)
+  and sound.
 - Hook the converted shape data up to actual sprites/meshes for the
   player's own ship and planet surfaces in the flight scene — combat VFX
   now uses real shape data (see above), but flight still uses a plain

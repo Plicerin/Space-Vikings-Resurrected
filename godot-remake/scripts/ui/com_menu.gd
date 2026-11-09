@@ -2,6 +2,8 @@ extends Control
 ## Ports COM.bas's main menu (lines 20-127): Computer / Ground Forces /
 ## Radar / End / Return. "End" isn't a mission-end/scoring screen
 ## despite the name — it's Save/Continue/Quit (see end_game.gd).
+## "Computer" leads to its own 5-option sub-menu (see
+## central_computer.gd).
 
 @onready var _computer_btn: Button = $VBox/ComputerButton
 @onready var _ground_forces_btn: Button = $VBox/GroundForcesButton
@@ -21,11 +23,7 @@ func _ready() -> void:
 
 
 func _on_computer_pressed() -> void:
-	GameState.show_stub(
-		"COMPUTER",
-		"Per-planet tech/population/secured/base readout — COM.bas lines 990-1180.",
-		"res://scenes/com.tscn"
-	)
+	GameState.goto_scene("res://scenes/central_computer.tscn")
 
 
 func _on_ground_forces_pressed() -> void:

@@ -52,6 +52,14 @@ var base_built_this_trip: bool = false
 # $38261+C population scale, $38240+C scouted/visited (COM.bas
 # lines 1005-1180; GROUND_COMBAT_ANALYSIS.md's source map).
 const PLANET_COUNT := 20
+# Shared by galaxy_map.gd, galaxy_directory.gd, and nav_computer.gd —
+# COLLECT.bas/STATUS.bas/COM.bas's own identical 20-name DATA line.
+const STAR_NAMES := [
+	"SOL", "ALPHA CENTAURI", "BARNARD'S STAR", "WOLF 359", "LUYTEN",
+	"LALANDE 21185", "SIRIUS", "VARCAR", "XANADON", "EPSILON ERIDANA",
+	"CYGNI", "PROCYON", "TAU CETI", "LACAILLE 9352", "LARSEN-C",
+	"GROOMBRIDGE 1618", "KRUGER 60", "EPSILON INDI", "ARGO", "SHIVANDA",
+]
 var planet_tech: Array[int] = []
 var planet_secured: Array[bool] = []
 var planet_has_base: Array[bool] = []
@@ -238,15 +246,34 @@ func set_ship_system_health(index: int, value: float) -> void:
 # tables and SHORE LEAVE.bas's "SELL LOOT" valuation — see
 # GROUND_COMBAT_ANALYSIS.md. Index 0 = $38171 ... index 12 = $38183.
 var loot: Array[float] = []
-# Only index 2 ($38173, "general goods"), 11 ($38182, "food"), and 12
-# ($38183, "wine/liquor") have confirmed real-world labels from other
-# BASIC source (GAME_MECHANICS_DOCUMENTATION.md); the rest are
-# placeholder names — their on-screen label was never traced. Shared
-# by collect.gd and scripts/ui/sell_loot.gd.
+# Real labels for all thirteen, confirmed directly 2026-11-09 by
+# SUPPLY.bas lines 1410-1490 ("SUPPLY REPORT," reached from the
+# Command Console's COMPUTER sub-menu, see supply_report.gd) — it
+# enumerates every one of $38171-$38183 unambiguously by address.
+# This REPLACES an earlier, wrong guess: the previous version of this
+# table had only 3 of 13 labels "confirmed" (from a different,
+# apparently mismapped source), and two of those three were wrong —
+# $38182 (index 11) was labeled "food," it's really SILVER; $38183
+# (index 12) was labeled "wine/liquor," it's really GOLD. collect.gd's
+# own inline comments for its tech-1 loot branch had the same
+# mismapping baked in (fixed alongside this).
 const LOOT_LABELS := [
-	"RAW MATERIALS A", "RAW MATERIALS B", "GENERAL GOODS", "RAW MATERIALS C",
-	"GOODS D", "GOODS E", "GOODS F", "GOODS G",
-	"GOODS H", "GOODS I", "LUXURY GOODS", "FOOD", "WINE/LIQUOR",
+	"ART WORKS", "WINE/LIQUOR", "LUXURY FOODS", "FIGHTER PARTS",
+	"WEAPONS", "ELECTRONIC PARTS", "FISSIONABLES", "STEEL",
+	"COLLAPSIUM", "TITANIUM", "PLATINUM", "SILVER", "GOLD",
+]
+# SUPPLY.bas's own per-category real-world unit scale + unit name,
+# same index order — e.g. index 10 (PLATINUM, $38181) displays as
+# `loot[10] * 10` POUNDS. Cosmetic (Supplies Report display only, see
+# supply_report.gd) — does NOT affect compute_loot_value() below,
+# which uses the raw counts exactly as SHORE LEAVE.bas's own formula
+# does.
+const LOOT_UNIT_SCALE: Array[float] = [
+	10.0, 100.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 10.0, 20.0, 10.0,
+]
+const LOOT_UNIT_NAMES := [
+	"UNITS", "CASES", "CASES", "CRATES", "CRATES", "CRATES", "POUNDS",
+	"TONS", "TONS", "THOUSAND POUNDS", "POUNDS", "POUNDS", "POUNDS",
 ]
 # SHORE LEAVE.bas lines 2400-2406: "SELL LOOT"'s exact per-category
 # credit multiplier, in loot[] index order (0 = $38171 ... 12 =
@@ -256,6 +283,12 @@ const LOOT_LABELS := [
 const LOOT_SELL_MULTIPLIERS: Array[float] = [
 	300.0, 150.0, 100.0, 200.0, 200.0, 200.0, 300.0, 15.0, 5.0, 25.0, 1500.0, 1000.0, 2000.0,
 ]
+# COLLECT.bas lines 920-921: a second loot-collection within the same
+# system visit (any planet, not just the same one — this is a single
+# global flag) gets J1/J2's multipliers cut to ×0.6; H_D.bas line 5
+# resets it on every fresh system arrival (`POKE 301,0`), same moment
+# galaxy_map.gd already resets the other per-arrival fields at.
+var loot_collected_this_visit: bool = false # $301
 
 
 ## SHORE LEAVE.bas lines 2400-2406 ("SELL LOOT"), ported exactly:
@@ -314,6 +347,7 @@ func start_new_game() -> void:
 	target_planet = 0
 	enlisted_this_trip = false
 	base_built_this_trip = false
+	loot_collected_this_visit = false
 
 	ship_position = Vector3.ZERO
 	pitch_deg = 0.0
@@ -391,7 +425,7 @@ func save_to_disk() -> void:
 		"planet_tech": planet_tech, "planet_secured": planet_secured,
 		"planet_has_base": planet_has_base, "planet_scouted": planet_scouted,
 		"planet_population_scale": planet_population_scale,
-		"loot": loot,
+		"loot": loot, "loot_collected_this_visit": loot_collected_this_visit,
 		"gf_fighters": gf_fighters, "gf_transports": gf_transports,
 		"gf_tanks": gf_tanks, "gf_missiles": gf_missiles,
 		"gf_enemy_strength": gf_enemy_strength, "gf_victory_progress": gf_victory_progress,
@@ -433,6 +467,7 @@ func load_from_disk() -> void:
 	planet_scouted.assign(data.get("planet_scouted", planet_scouted))
 	planet_population_scale.assign(data.get("planet_population_scale", planet_population_scale))
 	loot.assign(data.get("loot", loot))
+	loot_collected_this_visit = data.get("loot_collected_this_visit", loot_collected_this_visit)
 	gf_fighters = data.get("gf_fighters", gf_fighters)
 	gf_transports = data.get("gf_transports", gf_transports)
 	gf_tanks = data.get("gf_tanks", gf_tanks)

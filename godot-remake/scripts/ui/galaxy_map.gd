@@ -3,22 +3,13 @@ extends Control
 ## The original's GALAXY MAP.bas also draws a starfield-position chart
 ## of each system — not ported yet, this is list-selection only.
 
-# Source: detokenized/COLLECT.bas and STATUS.bas share this exact DATA
-# line (20 star names) — see GROUND_COMBAT_ANALYSIS.md.
-const STAR_NAMES := [
-	"SOL", "ALPHA CENTAURI", "BARNARD'S STAR", "WOLF 359", "LUYTEN",
-	"LALANDE 21185", "SIRIUS", "VARCAR", "XANADON", "EPSILON ERIDANA",
-	"CYGNI", "PROCYON", "TAU CETI", "LACAILLE 9352", "LARSEN-C",
-	"GROOMBRIDGE 1618", "KRUGER 60", "EPSILON INDI", "ARGO", "SHIVANDA",
-]
-
 @onready var _list: VBoxContainer = $VBox/ScrollContainer/List
 @onready var _flight_btn: Button = $VBox/FlightButton
 
 
 func _ready() -> void:
 	_flight_btn.pressed.connect(func(): GameState.goto_scene("res://scenes/flight/space_flight.tscn"))
-	for i in range(STAR_NAMES.size()):
+	for i in range(GameState.STAR_NAMES.size()):
 		var btn := Button.new()
 		var secured := i < GameState.planet_secured.size() and GameState.planet_secured[i]
 		var base := i < GameState.planet_has_base.size() and GameState.planet_has_base[i]
@@ -27,7 +18,7 @@ func _ready() -> void:
 			tags += "  [SECURED]"
 		if base:
 			tags += "  [BASE]"
-		btn.text = "%d) %s%s" % [i, STAR_NAMES[i], tags]
+		btn.text = "%d) %s%s" % [i, GameState.STAR_NAMES[i], tags]
 		btn.pressed.connect(_make_select_callback(i))
 		_list.add_child(btn)
 
@@ -59,4 +50,12 @@ func _make_select_callback(index: int) -> Callable:
 			GameState.defender_damage_threshold = float(tech) * 60.0
 		GameState.gf_victory_progress = 0.0
 		GameState.defender_damage_points = 0.0
+		# H_D.bas line 5: `POKE 301,0` — same real arrival moment resets
+		# the loot diminishing-returns flag too (see
+		# GameState.loot_collected_this_visit's doc comment).
+		GameState.loot_collected_this_visit = false
+		# H_D.bas line 16: `POKE 38240+PEEK(38163),1` — arriving at a
+		# system marks it scouted, gating the Galaxy Directory's detail
+		# view (galaxy_directory.gd).
+		GameState.planet_scouted[index] = true
 		GameState.goto_scene("res://scenes/com.tscn")
