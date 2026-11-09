@@ -582,10 +582,25 @@ on the SHIP-vs-manual evidence this note originally cited.)
   sound cue in the game reduces to exactly two machine-code routines
   (a laser sweep and a noise burst, confirmed from their disassembly),
   synthesized procedurally and wired into every real call site.
-- Hook the converted shape data up to actual sprites/meshes for the
-  player's own ship and planet surfaces in the flight scene — combat VFX
-  now uses real shape data (see above), but flight still uses a plain
-  mesh placeholder.
+- ~~Hook the converted shape data up to actual sprites/meshes for the
+  player's own ship and planet surfaces in the flight scene~~ —
+  resolved (2026-11-09), and it turned out to already be a non-issue
+  on both halves. The planet half was already done earlier in this
+  same investigation (`space_flight.gd`'s `Planet` node has used real
+  `PLANET # 0` data since the "Radar" work above — this bullet was
+  just never updated). The "player's own ship" half isn't a gap to
+  fill at all: booted the real game live in MAME
+  (`WLR_BACKENDS=headless cage -- mame apple2p -flop1 "disk_image/
+  Space Vikings (4am crack).dsk" -gameio paddles`) and captured real
+  screenshots of normal flight — the cockpit view never renders a 3D
+  model of the player's own ship, or of any other ship, anywhere; the
+  only thing in the main 3D view is the point-field planet and the
+  instrument-panel HUD. Every ship visual in the real game (the
+  two-fighter approach, `EX.bas`'s explosion, the radar screen) is
+  either a flat 2D shape-table overlay or a separate dedicated screen
+  (radar), never a 3D model positioned in the flight camera's own
+  world space. This port already matches that shape exactly — there
+  was nothing left to hook up.
 - ~~Decide a real starting troop/transport count~~ — done (2026-11-09):
   traced both `START.bas`'s new-game MISC FILE write (line 2050:
   `PRINT 100.3: PRINT 2000: PRINT 10000`, i.e. real
