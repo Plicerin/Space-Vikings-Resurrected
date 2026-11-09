@@ -196,10 +196,12 @@ numeric in this engine is built from just these two routines.
 ## The plotter: a real Bresenham line drawer, confirmed by execution trace
 
 The project's own `modern/web/public/data/debug/` directory already contained
-a real AppleWin CPU execution trace (`a2-3d1-trace.json`) and a live memory
-snapshot (`applewin-space-vikings-state.json`) from earlier work — neither
-had been mined for this question before. Together they turn "the plotter is
-somewhere in `$62F6`-`$7120`" into a confirmed, specific account.
+an execution trace (`a2-3d1-trace.json` — from this repo's own custom 6502
+emulator, not AppleWin; see the correction in the source map at the end of
+this doc) and a live memory snapshot (`applewin-space-vikings-state.json`,
+genuinely AppleWin-sourced) from earlier work — neither had been mined for
+this question before. Together they turn "the plotter is somewhere in
+`$62F6`-`$7120`" into a confirmed, specific account.
 
 **Finding the real write sites.** The trace's `hgrWrites` array records every
 store to hi-res screen memory during a captured run: 187 writes, all landing
@@ -362,33 +364,73 @@ listed non-contiguous range) end to end, every branch target verified
 by hand, shows **none of those 24 addresses are actually touched by
 this code**. All four submodes (bytecode parameter `0`/`1`/`2`/other)
 funnel through the exact same shape: load `$00` or `$FF` into `A`,
-`STA $6DDD` (the *only* self-mod write site), then check/fill a
-32-byte table at `$6CE0` against `$20` or `$40`, then `JSR $6CDA`
-(`FUN_6cda`) and return. The 24-address list appears to be a Ghidra
-decompiler artifact from re-analyzing this self-modifying binary
-across multiple passes and merging observed writes from opcode `9`'s
-real code into opcode `8`'s comment block, not something reachable
-from a real single execution of case `8` — the earlier "24+ sites in
-case 8 alone" claim is retracted.
+`STA $6CDD` (the *only* self-mod write site — **correcting an earlier
+version of this section, which misread this instruction's operand
+bytes as `$6DDD`**; see the live-verification note below for how that
+got caught), then check/fill a 32-byte table at `$6CE0` against `$20`
+or `$40`, then `JSR $6CDA` (`FUN_6cda`) and return. The 24-address list
+appears to be a Ghidra decompiler artifact from re-analyzing this
+self-modifying binary across multiple passes and merging observed
+writes from opcode `9`'s real code into opcode `8`'s comment block,
+not something reachable from a real single execution of case `8` —
+the earlier "24+ sites in case 8 alone" claim is retracted.
 
-What case `8` actually does is better than the old guess: **`$6CE0`
-is not a separate lookup table — it's the high-byte operands of the
-32 unrolled `STA $2000,X`/`STA $2100,X`/.../`STA $3F00,X` instructions
-inside `FUN_6cda` itself** (each is a 3-byte `9D lo hi` instruction;
-`$6CE0` is exactly the `hi` byte of the first one, 3 bytes apart
-matches the fill loop's stride exactly). Filling that table with
-`$20, $21, $22, ... $3F` (the "already `$20`? skip" / fill-from-`$20`
-path) retargets `FUN_6cda` to clear hi-res **page 1** (`$2000`-
-`$3FFF`, its as-shipped default); filling it with `$40...$5F` instead
-retargets it to clear **page 2** (`$4000`-`$5FFF`). So **opcode `8` is
-how the renderer picks which hi-res page to clear each frame** — the
-other half of the double-buffering scheme whose page-flip side (the
-plotter's own scanline table) opcode `9` already confirmed. The
-`$6DDD` write (confirmed as the zero-page source operand of an `LDA`
-inside `FUN_6dd5`, the line-octant dispatcher, normally `$B5`) is real
-and mechanically confirmed, but *why* it gets redirected to literal
-`$00`/`$FF` specifically isn't chased further — a much narrower loose
-end than the "24 unknown addresses" it replaces.
+What case `8` actually does is better than the old guess, on two
+levels. First, **`$6CE0` is not a separate lookup table — it's the
+high-byte operands of the 32 unrolled `STA $2000,X`/`STA $2100,X`/
+.../`STA $3F00,X` instructions inside `FUN_6cda` itself** (each is a
+3-byte `9D lo hi` instruction; `$6CE0` is exactly the `hi` byte of the
+first one, 3 bytes apart matches the fill loop's stride exactly).
+Filling that table with `$20, $21, $22, ... $3F` (the "already `$20`?
+skip" / fill-from-`$20` path) retargets `FUN_6cda` to clear hi-res
+**page 1** (`$2000`-`$3FFF`, its as-shipped default); filling it with
+`$40...$5F` instead retargets it to clear **page 2** (`$4000`-
+`$5FFF`). So **opcode `8` is how the renderer picks which hi-res page
+to clear each frame** — the other half of the double-buffering scheme
+whose page-flip side (the plotter's own scanline table) opcode `9`
+already confirmed.
+
+Second, `$6CDD` is the one-byte immediate **operand of `FUN_6cda`'s
+own `LDA #$00`** — the value it loads once and then stores into every
+one of its 32 cleared pages. So the same patch that retargets *which*
+page gets cleared can also retarget *what* it gets cleared to: `$00`
+(true clear/black) or `$FF` (fill solid/white) — a draw/erase-style
+toggle on the clear routine itself, not a redirect into an unrelated
+line-drawing routine as an earlier dead-end hand-disassembly of mine
+briefly concluded (see below).
+
+**Live-verified 2026-11-09, via a real-time MAME memory write tap**
+(`mem:install_write_tap`, not sampling — this catches every write
+instantly, with no gap a value could hide in): across a 9000-frame
+window of ordinary flight, opcode 8 fired 22 times, each one landing
+exactly on a page-flip transition already seen in `$6CE0` (11 to page
+1, 11 to page 2, alternating cleanly) — confirming this code path
+really does run, in sync with opcode 9, every double-buffer cycle of
+real gameplay. Every single one of those 22 writes stored `$00`. The
+`$FF`-fill alternative exists in the code (confirmed reachable from
+submodes `2`/other) but was never observed firing in this test window
+— worth re-checking in a context more likely to use it (an explosion
+flash, a mode transition) if that's ever needed, but it doesn't block
+anything.
+
+**How this correction actually happened, since it's worth recording
+as a cautionary tale about this exact project's own standard:** an
+earlier pass of this section misread the two operand bytes of `8D DD
+6C` (`STA $6CDD`) as address `$6DDD` instead — a straightforward
+hex-digit transposition made while hand-tracing a dense hex dump. That
+wrong address happened to land inside a *real*, different function
+(`FUN_6dd5`, the line-octant dispatcher) at the operand of one of
+*its* instructions (`LDA $B5`), which was coherent and plausible
+enough on its own to write up as a real (if unresolved) finding. A
+live memory-sampling check (once per video frame) on `$6DDD` showed it
+never changing — contradicting the hand-disassembly's claim that it's
+written unconditionally every time this code runs, which `$6CE0`'s
+own confirmed, repeated toggling proved it does. That contradiction is
+what sent this back to the raw bytes for a third read, which caught
+the digit transposition. The lesson: a self-consistent story landing
+on a real nearby function is not the same as the right address — the
+live write-tap, not the plausibility of the static story, is what
+actually settled this.
 
 **Bonus, found while re-verifying opcode `9`:** its handler is bigger
 than previously documented. Beyond the already-confirmed `$6B93`
@@ -612,7 +654,27 @@ Generated via REA (Ghidra 12.1.2 backend) against
 `extracted/LO-HI A2-3D1.payload.bin`, entry point `$6000`. See
 `rea-disassembly/README.md` for regeneration instructions. The plotter
 section above also used two pre-existing debug artifacts not generated by
-this investigation: `modern/web/public/data/debug/a2-3d1-trace.json` (a real
-AppleWin CPU execution trace, with `hgrWrites`/`flow`/`hotspots`) and
+this investigation: `modern/web/public/data/debug/a2-3d1-trace.json`
+(`hgrWrites`/`flow`/`hotspots`) and
 `modern/web/public/data/debug/applewin-space-vikings-state.json` (a live
-memory snapshot with named key ranges including `shipOpcode09Handler`).
+memory snapshot with named key ranges including `shipOpcode09Handler`,
+sourced from a real AppleWin save state — `source` field in the JSON
+names a `.aws.yaml` file).
+
+**Correction, 2026-11-09:** `a2-3d1-trace.json` is *not* an AppleWin
+trace, despite this doc previously calling it one — its `entryTo6000`/
+`trace` fields (`ok`/`steps`/`unknown`) are the exact shape
+`modern/web/tools/trace_a2_3d1.py` produces, built on this repo's own
+from-scratch `emulator/cpu6502.py` (the same emulator found to be
+missing common opcodes while chasing a different question — see
+[[space_vikings_a2_3d1_starfield_confirmed]]). Re-running that tool
+fresh this session did not reproduce the cached file (`entryTo6000`
+now fails with 25 unknown opcodes instead of completing). The specific
+mechanisms this section cites it for (opcode 9's page-flip, the
+plotter write sites) are independently confirmed elsewhere — by direct
+hand-disassembly of the raw payload (reproducible by anyone, see
+opcode 8/9/12 above) and, for opcode 9's page-flip specifically, by a
+live MAME memory write tap — so nothing here is actually resting on
+the unreproducible file any more, but don't cite `a2-3d1-trace.json`
+itself as evidence going forward. `applewin-space-vikings-state.json`
+is a separate file and isn't implicated by this.
