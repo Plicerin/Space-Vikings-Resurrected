@@ -21,20 +21,25 @@ var heading_deg: float = 0.0
 var throttle: float = 0.0
 
 # --- Economy ---
-# Original: credits/stardate were persisted via the "MISC FILE" disk
-# file (SD/TR/CR), not a fixed memory address — see GROUND_COMBAT_
-# ANALYSIS.md's "MISC FILE" read/write call sites.
-var credits: float = 1000.0
-var stardate: float = 0.0
+# Original: credits/stardate/troops were persisted via the "MISC FILE"
+# disk file (SD/TR/CR), not a fixed memory address. Real starting
+# values, not placeholders — `START.bas` line 2050's new-game MISC
+# FILE write: `PRINT 100.3: PRINT 2000: PRINT 10000` (SD, TR, CR, in
+# that literal order), found 2026-11-09 while tracing Repair/Restock.
+var credits: float = 10000.0
+var stardate: float = 100.3
 
 # --- Troops ---
-var troops: float = 50.0 # TR — placeholder starting value; the original's
-	# real starting troop count is set wherever START.bas's MISC FILE is
-	# first initialized, which hasn't been traced yet. Not a confirmed
-	# number — change freely once that's found.
+var troops: float = 2000.0         # TR, real starting value (see above)
 var troop_morale: int = 6          # $38203, range 1 (AWFUL) - 6 (EXCELLENT)
-var troop_location: int = 0        # $38166: 0=on board 1=planetside 2=shore leave 3=cryo
-var troops_stationed_at: int = -1  # $38158
+var troop_location: int = 3        # $38166: 0=on board 1=planetside 2=shore
+	# leave 3=cryo. Real starting value IS 3 (cryo), confirmed directly
+	# from `SHIP'S DATA-M.payload.bin` (the new-game memory blob) —
+	# surprising but literal: a new game starts with troops already in
+	# cryogenic sleep.
+var troops_stationed_at: int = 1   # $38158, real starting value — set by
+	# an explicit `POKE 38158,1` in START.bas's new-game setup (line
+	# 2030), which runs after and overrides the blob's own value there
 # $38389 (enlist) / $38149 (base) — "once per trip" flags, both reset
 # together by H_D.bas line 105 at the start of a fresh orbital
 # engagement. This port's nearest equivalent moment is the re-entry
@@ -104,14 +109,108 @@ var target_planet: int = 0         # $38163 (travel target)
 
 # --- Ground battle state (GROUND_COMBAT_ANALYSIS.md, GROUND FORCES.bas
 # lines 500-690) ---
-var gf_enemy_strength: float = 0.0   # SP, $38150
-var gf_victory_progress: float = 0.0 # VP, $38160
-var gf_fighters: float = 0.0         # P, $38156
-var gf_transports: float = 10.0      # TP, $38155 — placeholder starting count
-var gf_tanks: float = 0.0            # T, $38154
-var gf_missiles: float = 0.0         # M, $38153
+# Starting values for $38150/$38153-38156/$38160 below are the real
+# ones, not placeholders — read directly from `extracted/SHIP'S DATA-M
+# .payload.bin` (2026-11-09), the exact 54-byte binary blob
+# `START.bas` line 2020 BLOADs to $9506 (=38150 decimal, the base of
+# this entire shared-register range) on every new game.
+var gf_enemy_strength: float = 0.0   # SP, $38150 (blob: 0)
+var gf_victory_progress: float = 1.0 # VP, $38160 (blob: 1 — overwritten to
+	# 0 by ground_forces.gd before every battle anyway, so this only
+	# matters if something reads it before a first attack)
+var gf_fighters: float = 75.0        # P, $38156 (blob: 75)
+var gf_transports: float = 6.0       # TP, $38155 (blob: 6)
+var gf_tanks: float = 0.0            # T, $38154 (blob: 0)
+var gf_missiles: float = 0.0         # M, $38153 (blob: 0) — ground-combat
+	# missile COUNT, NOT the same register as ship_missile_system below
+	# (that's $38187, a totally different "missile system health"
+	# value the real source also happens to call "MISSILES")
 var gf_reserve_troops: float = 0.0   # T9 (held back when transport capacity is exceeded)
 var gf_planet_surrendered: bool = false # $38208
+
+# --- Ship system health (SHORE LEAVE.bas lines 2500-2545, "REPAIR
+# SHIP") ---
+# Real starting values, same source as the ground-battle defaults
+# above (the blob), with two exceptions overridden by explicit POKEs
+# in START.bas's own new-game setup (line 2030) that run right after
+# the BLOAD and win: $38200 (redundant, blob already had 100) and
+# $38187 (blob said 100, the explicit `POKE 38187,60` overrides it to
+# 60 — the value actually used).
+#
+# All twelve are driven generically by REPAIR_SYSTEMS below
+# (label/getter/setter/multiplier/max, in the original's exact DATA
+# order) rather than one-off repair functions per field — see
+# scripts/ui/repair_ship.gd.
+var ship_shield: float = 100.0        # $38200
+var ship_energy: float = 63.0         # $38199 — special: repairs cap at
+	# 63, not 100 (SHORE LEAVE.bas line 2524's distinct formula; the
+	# blob's own starting value is already exactly 63, independently
+	# confirming the cap)
+var ship_engine1: float = 100.0       # $38198
+var ship_engine2: float = 100.0       # $38197
+var ship_computer: float = 100.0      # $38196
+var ship_radar: float = 100.0         # $38195
+var ship_env_control: float = 128.0   # $38194 — literal blob value, above
+	# the general 100 "full health" ceiling every other system uses;
+	# not a transcription error, just means this system never actually
+	# needs repair (its repair check is `IF D<100`, so a value that
+	# starts above 100 never triggers)
+var ship_hull: float = 100.0          # $38193 ("HULL DMG." in the source,
+	# but higher reads as healthier here, same convention as every
+	# other system — not literally "amount of damage")
+var ship_hyperdrive: float = 100.0    # $38190
+var ship_missile_system: float = 60.0 # $38187 — ship-system condition,
+	# NOT gf_missiles (the ground-combat ammo count, $38153) above;
+	# the real source just happens to label both "MISSILES"
+var ship_laser: float = 100.0         # $38186
+var ship_nav_computer: float = 100.0  # $38184
+
+# label, cost multiplier, full-health value — in the original's exact
+# DATA order (SHORE LEAVE.bas line 2500). repair_ship.gd reads/writes
+# the matching ship_* field above by index (same match-by-index
+# pattern buy_weapons.gd already uses for its 4 categories).
+const REPAIR_LABELS := [
+	"SHIELD", "ENERGY", "# 1 ENGINE", "# 2 ENGINE", "COMPUTER", "RADAR",
+	"ENV. CONTROL", "HULL DMG.", "HYPERDRIVE", "MISSILES", "LASER", "NAV. COMP.",
+]
+const REPAIR_MULTIPLIERS: Array[float] = [
+	150.0, 200.0, 150.0, 150.0, 150.0, 150.0, 150.0, 150.0, 150.0, 100.0, 150.0, 150.0,
+]
+const REPAIR_MAX_HEALTH: Array[float] = [
+	100.0, 63.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0,
+]
+
+
+func get_ship_system_health(index: int) -> float:
+	match index:
+		0: return ship_shield
+		1: return ship_energy
+		2: return ship_engine1
+		3: return ship_engine2
+		4: return ship_computer
+		5: return ship_radar
+		6: return ship_env_control
+		7: return ship_hull
+		8: return ship_hyperdrive
+		9: return ship_missile_system
+		10: return ship_laser
+		_: return ship_nav_computer
+
+
+func set_ship_system_health(index: int, value: float) -> void:
+	match index:
+		0: ship_shield = value
+		1: ship_energy = value
+		2: ship_engine1 = value
+		3: ship_engine2 = value
+		4: ship_computer = value
+		5: ship_radar = value
+		6: ship_env_control = value
+		7: ship_hull = value
+		8: ship_hyperdrive = value
+		9: ship_missile_system = value
+		10: ship_laser = value
+		_: ship_nav_computer = value
 
 # --- Loot / goods inventory ---
 # Original: $38171-$38183, 13 bytes, shared between COLLECT.bas's loot
@@ -184,12 +283,12 @@ func start_new_game() -> void:
 	for i in range(13):
 		loot.append(0.0)
 
-	credits = 1000.0
-	stardate = 0.0
-	troops = 50.0
+	credits = 10000.0
+	stardate = 100.3
+	troops = 2000.0
 	troop_morale = 6
-	troop_location = 0
-	troops_stationed_at = current_planet
+	troop_location = 3
+	troops_stationed_at = 1
 	current_planet = 0
 	target_planet = 0
 	enlisted_this_trip = false
@@ -202,13 +301,26 @@ func start_new_game() -> void:
 	throttle = 0.0
 
 	gf_enemy_strength = 0.0
-	gf_victory_progress = 0.0
-	gf_fighters = 0.0
-	gf_transports = 10.0
+	gf_victory_progress = 1.0
+	gf_fighters = 75.0
+	gf_transports = 6.0
 	gf_tanks = 0.0
 	gf_missiles = 0.0
 	gf_reserve_troops = 0.0
 	gf_planet_surrendered = false
+
+	ship_shield = 100.0
+	ship_energy = 63.0
+	ship_engine1 = 100.0
+	ship_engine2 = 100.0
+	ship_computer = 100.0
+	ship_radar = 100.0
+	ship_env_control = 128.0
+	ship_hull = 100.0
+	ship_hyperdrive = 100.0
+	ship_missile_system = 60.0
+	ship_laser = 100.0
+	ship_nav_computer = 100.0
 
 
 ## Thin wrapper so call sites read like the original's `RUN "X"` program

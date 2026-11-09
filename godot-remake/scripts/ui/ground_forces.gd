@@ -10,14 +10,18 @@ extends Control
 ## The original also routes Shore Leave/Enlist/Sell Loot/Repair/Build
 ## Base/Cryogenics through one shared overlay (SHORE LEAVE.bas,
 ## dispatched by $38388); this port splits them into separate
-## destinations instead. Shore Leave (scripts/ui/shore_leave.gd),
-## Enlist (enlist.gd), Sell Loot (sell_loot.gd), Establish Base
-## (establish_base.gd), and Cryogenics (cryogenics.gd, SHORE LEAVE.bas
-## lines 4000-4020 — NOT GROUND FORCES.bas, an earlier doc comment here
-## named the wrong file) are all real now. Only Repair/Restock remains
-## a stub — it needs twelve ship-system damage values this port
-## doesn't model yet (nothing damages them until combat is wired into
-## flight).
+## destinations instead. All six are real now: Shore Leave
+## (scripts/ui/shore_leave.gd), Enlist (enlist.gd, which also chains
+## into buy_weapons.gd — see its own doc comment for why), Sell Loot
+## (sell_loot.gd), Establish Base (establish_base.gd), Repair/Restock
+## (repair_ship.gd — "ship-system damage" now has real fields,
+## GameState.ship_shield etc., with real starting values traced from
+## SHIP'S DATA-M.payload.bin; nothing actually damages them further yet
+## since combat isn't wired into flight, but MISSILES' own real
+## starting health is 60/100, so this screen never shows a trivial
+## always-$0 bill even untouched), and Cryogenics (cryogenics.gd, SHORE
+## LEAVE.bas lines 4000-4020 — NOT GROUND FORCES.bas, an earlier doc
+## comment here named the wrong file).
 
 @onready var _menu: VBoxContainer = $VBox/Menu
 @onready var _battle: VBoxContainer = $VBox/Battle
@@ -46,9 +50,7 @@ func _ready() -> void:
 	_shore_leave_btn.pressed.connect(func(): GameState.goto_scene("res://scenes/shore_leave.tscn"))
 	_enlist_btn.pressed.connect(func(): GameState.goto_scene("res://scenes/enlist.tscn"))
 	_sell_loot_btn.pressed.connect(func(): GameState.goto_scene("res://scenes/sell_loot.tscn"))
-	_repair_btn.pressed.connect(func(): GameState.show_stub(
-		"REPAIR/RESTOCK", "Repairs ship systems, buys weapons — SHORE LEAVE.bas lines 2500-3110. Needs ship-system damage values this port doesn't model yet (nothing damages them until combat is wired into flight).", "res://scenes/ground_forces.tscn"
-	))
+	_repair_btn.pressed.connect(func(): GameState.goto_scene("res://scenes/repair_ship.tscn"))
 	_base_btn.pressed.connect(func(): GameState.goto_scene("res://scenes/establish_base.tscn"))
 	_cryo_btn.pressed.connect(func(): GameState.goto_scene("res://scenes/cryogenics.tscn"))
 	_return_btn.pressed.connect(func(): GameState.goto_scene("res://scenes/com.tscn"))
