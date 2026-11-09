@@ -33,19 +33,51 @@ extends Node3D
 ## defender's own destruction sequence, player-ship destruction) is
 ## wired in via the `FlightCombat` child under `HUD` — see
 ## `flight_combat.gd`'s doc comment for the full source trace.
+##
+## `ShipBlip`: the orbital defender itself, rendered in open-space
+## flight next to the planet -- not just on the radar screen. This was
+## a real gap, found only after a direct user correction ("the ship is
+## 3d right next to the planet... it is the ship you see on the
+## radar") and confirmed live in MAME 2026-11-09: a genuine hyperdrive
+## jump to a hostile system (current_planet 1->2, orbital_defender_tier
+## organically changing 3->2 on arrival -- SOL, planet 0, is pre-
+## surrendered and useless as a test bed here, see
+## GameState.gf_planet_surrendered's doc comment) shows a compact,
+## solid silhouette near the horizon that is absent both at SOL and
+## during the hyperspace-warp transit itself. Ruled out as just this
+## scene's own `Planet` node (PLANET # 0 is a real but *sparse* 195-
+## point field spanning a ±10000-unit volume -- it would read as
+## scattered dots across a wide area, not one small dense blob) by
+## inspecting that model's own raw coordinate data directly. Built from
+## the same `A2_3D1_Model.build_ship_mesh(tier)` radar_screen.gd
+## already uses correctly, keyed off the same
+## `GameState.orbital_defender_tier` -- tier 0 (no defender) naturally
+## renders nothing, same as radar, since `SHIP no 0.json` is genuinely
+## an empty model. Orbit position/speed are idiomatic-Godot liberties,
+## not in the original (whose 6502 bytecode interpreter does its own
+## rotate/clip/perspective-divide per frame rather than tracking an
+## orbit) -- see README.md's "What's real vs. stubbed" table.
 
 const A2_3D1_Model = preload("res://scripts/shapes/a2_3d1_model.gd")
 const PLANET_VISUAL_RADIUS := 400.0 # matches the old placeholder's footprint
 const PLANET_WORLD_POSITION := Vector3(0, 0, -3000) # must match the Planet node's transform below
 const REENTRY_RANGE := 500.0
 
+const SHIP_BLIP_VISUAL_RADIUS := 120.0 # smaller than the planet -- see doc comment above
+const SHIP_BLIP_ORBIT_RADIUS := 650.0
+const SHIP_BLIP_ORBIT_SPEED := 0.15 # radians/sec, liberty -- see doc comment above
+const SHIP_BLIP_SPIN_SPEED := 0.3 # matches radar_screen.gd's own spin liberty
+
 @onready var _debug_label: Label = $HUD/DebugLabel
 @onready var _planet: MeshInstance3D = $Planet
+@onready var _ship_blip: MeshInstance3D = $ShipBlip
 @onready var _flight_combat = $HUD/FlightCombat
 
 var _reentering: bool = false
 var _status_message: String = ""
 var _status_timer: float = 0.0
+var _ship_blip_orbit_angle: float = 0.0
+var _ship_blip_tier: int = -1
 
 
 func _ready() -> void:
@@ -56,6 +88,8 @@ func _ready() -> void:
 		_planet.scale = Vector3.ONE * (PLANET_VISUAL_RADIUS / radius)
 	assert(_planet.position.is_equal_approx(PLANET_WORLD_POSITION), "Planet node moved — update PLANET_WORLD_POSITION to match")
 
+	_setup_ship_blip()
+
 	_flight_combat.player_destroyed.connect(func():
 		GameState.goto_scene("res://scenes/player_destroyed.tscn")
 	)
@@ -65,8 +99,35 @@ func _ready() -> void:
 	)
 
 
+## Rebuilds the orbital defender's visible model whenever
+## `orbital_defender_tier` changes -- called from `_ready()` and polled
+## in `_process()` below, rather than wired to a one-off signal, so a
+## destroyed defender's blip actually disappears mid-flight
+## (`_check_defender_destroyed()`, flight_combat.gd) and any other
+## future write to the tier (rearm, load-game) picks up the same way.
+func _setup_ship_blip() -> void:
+	var tier: int = GameState.orbital_defender_tier
+	_ship_blip_tier = tier
+	var built: Dictionary = A2_3D1_Model.build_ship_mesh(tier)
+	_ship_blip.mesh = built["mesh"]
+	var ship_radius: float = built["radius"]
+	if ship_radius > 0.0:
+		_ship_blip.scale = Vector3.ONE * (SHIP_BLIP_VISUAL_RADIUS / ship_radius)
+
+
 func _process(delta: float) -> void:
 	_planet.rotate_y(0.05 * delta)
+
+	if GameState.orbital_defender_tier != _ship_blip_tier:
+		_setup_ship_blip()
+
+	_ship_blip_orbit_angle += SHIP_BLIP_ORBIT_SPEED * delta
+	_ship_blip.position = PLANET_WORLD_POSITION + Vector3(
+		cos(_ship_blip_orbit_angle) * SHIP_BLIP_ORBIT_RADIUS,
+		0.0,
+		sin(_ship_blip_orbit_angle) * SHIP_BLIP_ORBIT_RADIUS,
+	)
+	_ship_blip.rotate_y(SHIP_BLIP_SPIN_SPEED * delta)
 
 	if Input.is_action_just_pressed("fire_laser"):
 		_flight_combat.fire_laser()

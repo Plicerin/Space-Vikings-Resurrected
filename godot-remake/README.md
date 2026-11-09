@@ -201,6 +201,32 @@ Not yet wired in, documented rather than silently dropped:
 - A proper live, interactive re-entry — see "Next steps" below;
   `RE.bas` turns out not to be a static display at all.
 
+**The orbital defender's own 3D model, rendered in flight next to the
+planet** — distinct from everything above. The incoming-fire sprite
+resolved earlier (previous bullet list, and the "Next steps" entry
+below) is a small raider that crosses the screen and fires tracers;
+the user explicitly disambiguated it from *this*, a separate "large
+ship in orbit around the planet... it is the ship you see on the
+radar" — i.e. the actual `SHIP # N` A2-3D1 model (`GameState.
+orbital_defender_tier`), already correctly rendered on the radar
+screen (see "Radar" below) but, until now, nowhere in the flight scene
+itself. Confirmed live in MAME 2026-11-09 with a genuine hyperdrive
+jump (earlier jump tests had silently no-op'd from an off-by-one bug
+in the test script itself — the real game is 1-indexed, `S$(1)="SOL"`
+— so they never actually left SOL; fixed, then re-run: `current_planet`
+genuinely went 1→2 and `orbital_defender_tier` organically changed
+3→2 on arrival). Post-jump screenshots show a compact, solid
+silhouette near the horizon, absent at SOL and absent during the warp
+transit itself — and ruled out as just this scene's own `Planet` node
+by checking `PLANET # 0`'s raw data directly: it's a genuine but
+*sparse* 195-point field spanning a ±10000-unit volume, which would
+read as scattered dots across a wide area, not one small dense blob.
+Wired in as `ShipBlip` (`space_flight.tscn`/`space_flight.gd`), reusing
+the same `A2_3D1_Model.build_ship_mesh(tier)` the radar screen already
+uses, in a slow orbit around the planet; rebuilds itself whenever
+`orbital_defender_tier` changes mid-flight (e.g. destroying the
+defender) rather than only once at scene load.
+
 ## Sound
 
 Every real sound cue in the whole game turns out to reduce to exactly

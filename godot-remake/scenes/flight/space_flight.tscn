@@ -33,6 +33,8 @@ fov = 70.0
 [node name="Planet" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3000)
 
+[node name="ShipBlip" type="MeshInstance3D" parent="."]
+
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 rotation_degrees = Vector3(-60, -30, 0)
 
