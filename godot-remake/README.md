@@ -41,8 +41,8 @@ new script that needs a type name.
 | Galaxy map, Command console, Status screen | Real navigation/readout, no original visuals (starmap chart, bezel HUD) ported yet | — |
 | Radar screen | Real — see "Radar" below | `A2-3D1_ENGINE_ANALYSIS.md` |
 | Ship I.D. screen (press X on radar) | Real — see "Ship I.D." below | — |
-| Enlist / Sell Loot / Establish Base | Real — `scripts/ui/{enlist,sell_loot,establish_base}.gd`, exact formulas from `SHORE LEAVE.bas` | `GROUND_COMBAT_ANALYSIS.md` |
-| Repair/Restock / Cryogenics / End | Stubs (`GameState.show_stub(...)`) — menu options exist and are gated correctly, but each just shows a note citing where its real logic lives. Repair specifically needs ship-system damage values this port doesn't model yet | `GROUND_COMBAT_ANALYSIS.md` |
+| Enlist / Sell Loot / Establish Base / Cryogenics | Real — `scripts/ui/{enlist,sell_loot,establish_base,cryogenics}.gd`, exact formulas/state machine from `SHORE LEAVE.bas` | `GROUND_COMBAT_ANALYSIS.md` |
+| Repair/Restock / End | Stubs (`GameState.show_stub(...)`) — menu options exist and are gated correctly, but each just shows a note citing where its real logic lives. Repair specifically needs ship-system damage values this port doesn't model yet | `GROUND_COMBAT_ANALYSIS.md` |
 | A2-3D1's own 3D math (VM, clipping, perspective, plotter) | Not ported, by design — Godot's native 3D replaces it | `A2-3D1_ENGINE_ANALYSIS.md` |
 | Starfield during flight | Placeholder (`MultiMeshInstance3D`), deliberately finite — the original's own starfield is a bounded sphere you can fly through, not infinite/regenerating, so this isn't a bug to fix | `FLIGHT_CONTROL_AND_PROGRESSION_ANALYSIS.md` |
 | Planet during flight (deep-space view) | Real — `PLANET # 0`'s actual 195-point field, same file `ORBIT.bas` loads for this view | `A2-3D1_ENGINE_ANALYSIS.md` |
@@ -186,8 +186,9 @@ enforced it until this same proximity check went in.
 
 ## Shore Leave
 
-Three of the five base-gated menu options in `ground_forces.gd` are
-real now, each its own scene (the original routes all five through one
+Four of the five base-gated menu options in `ground_forces.gd` are
+real now (Cryogenics isn't actually base-gated in the original — see
+below), each its own scene (the original routes all five through one
 shared `SHORE LEAVE.bas` overlay, dispatched by `$38388`; this port
 keeps them separate, same as the already-existing pay-troops flow):
 
@@ -207,6 +208,18 @@ keeps them separate, same as the already-existing pay-troops flow):
   from the source as-is: the once-per-trip flag is consumed the moment
   you reach the cost quote, *before* the Y/N prompt — declining on cost
   or saying "N" still uses up the attempt.
+- **Cryogenics** (`scripts/ui/cryogenics.gd`) — a pure three-state
+  toggle on `GameState.troop_location` ($38166: 0=aboard/awake,
+  1=planetside, 2=paid shore leave, 3=cryo), exactly
+  `SHORE LEAVE.bas` lines 4000-4020. Not actually gated on having a
+  base in the original — `GROUND FORCES.bas` line 65's base check only
+  covers menu options 3-6 (Shore Leave/Enlist/Sell Loot/Repair), and
+  Cryogenics is option 8, so `ground_forces.gd` doesn't disable its
+  button when `has_base` is false, matching the source. (An earlier
+  version of this port's own doc comment cited the wrong source file
+  for this screen — `GROUND FORCES.bas` lines 4000-4020, which is
+  actually that file's unrelated stat-display subroutine; the real
+  Cryogenics logic lives in `SHORE LEAVE.bas`.)
 
 Both Enlist and Establish Base's once-per-trip flags
 (`GameState.enlisted_this_trip`/`base_built_this_trip`) reset where the
@@ -287,19 +300,18 @@ on the SHIP-vs-manual evidence this note originally cited.)
 
 ## Next steps
 
-- Radar, flight's planet, re-entry, the Ship I.D. screen, and three of
-  the five Shore Leave options are all real now (2026-11-07) — see
+- Radar, flight's planet, re-entry, the Ship I.D. screen, and four of
+  the five Shore Leave options are all real now (2026-11-07/09) — see
   "Radar"/"Re-entry"/"Ship I.D."/"Shore Leave" above. Also fixed
   project-wide: every pure-2D scene (this project has quite a few) was
   rendering against the engine's default gray clear color instead of
   black, since nothing had set one — `project.godot` now sets it
-  globally. Left for later: Repair/Restock and Cryogenics (Repair
-  needs ship-system damage values this port doesn't model yet — a
-  natural pairing with the still-not-started combat-integration work),
-  the real per-planet tier-assignment formula (currently random at
-  new-game time), and a real "weapon fired" flag so the re-entry
-  trigger can port the original's full condition instead of proximity
-  alone.
+  globally. Left for later: Repair/Restock (needs ship-system damage
+  values this port doesn't model yet — a natural pairing with the
+  still-not-started combat-integration work), End/scoring, the real
+  per-planet tier-assignment formula (currently random at new-game
+  time), and a real "weapon fired" flag so the re-entry trigger can
+  port the original's full condition instead of proximity alone.
 - Re-verified against the corrected `ENEMY`/`EXPL` data (2026-11-07): the
   explosion and EX.bas destruction sequences still look solid (shape 15
   carries the debris, 16-18 are blank in the real data — that's fine,
