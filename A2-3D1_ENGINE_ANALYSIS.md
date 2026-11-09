@@ -319,15 +319,60 @@ bytecode opcode 0/1/2/3 (per vertex)
 - Jump-table entry 4 (`$653F`) itself — though `RADAR.bas`'s `SN = 24585`
   constant (`$6009`, confirmed below) shows at least one BASIC-level name
   for it, even without tracing its body.
-- Which BASIC/assembly caller actually feeds this VM a bytecode stream per
-  frame, and where that stream is built — i.e., what in `SPACE SIMULATOR
-  ASSEMBLY` or the BASIC overlays constructs the "draw this object" command
-  list consumed here for the *flight* view specifically (see below — this
-  *is* now traced for the radar view). (`STARSHIP SIMULATOR.bas`'s `P`/`B`/`H`
-  variables — pitch/bank/heading, PEEKed from `$7321`–`$7323`, a region
-  `analysis/comprehensive_memory_layout.md` currently lists as "unknown
-  purpose" — are a strong candidate for the 3 angle bytes opcode `5`
-  consumes; not yet directly confirmed by tracing the actual call site.)
+
+**Resolved 2026-11-09 — what A2-3D1 draws every frame during normal
+flight, confirmed live, not inferred:**
+
+`SPACE SIMULATOR ASSEMBLY`'s `FUN_921e` (the last thing `entry()`/`$9023`
+calls, every single frame — see `FLIGHT_CONTROL_AND_PROGRESSION_ANALYSIS.md`)
+is literally `func_0x6000()`, i.e. it calls this engine's entry 1 every
+frame of real flight, not just on the radar screen. `FUN_6140`'s prologue
+forces its bytecode program-counter's high byte to `$73` on every
+invocation — and `START.bas` line 100 `BLOAD PLANET # 0,A$7300` loads the
+already-decoded 195-point, zero-line starfield there *before* `SPACE
+SIMULATOR ASSEMBLY` is even loaded (line 110), with nothing else in the
+normal flight loop overwriting that blob (only `RE.bas`, atmospheric
+reentry, swaps it for a real per-planet terrain file — see the
+planet-point-field section below). So structurally the only thing this
+call *can* render during ordinary deep-space flight is that point field.
+
+Live-verified this directly in MAME on 2026-11-09, booting the real disk
+with no state hacks (default `START.bas` boot position): a single Lua
+script captured a screenshot and a raw memory dump of `$7300`-`$7327`
+(29440-29479) at the same instant, mid-flight. The dump matched
+`extracted/PLANET no 0.payload.bin`'s first 40 bytes **exactly**, with one
+expected exception — bytes 27-36 (`$731B`-`$7324`) diverge from the static
+file, and that exact span is `XI`/`YI`/`ZI`/`P1`/`B1`/`H1`
+(`STARSHIP SIMULATOR.bas` line 1's own constants: `XI=29467`...`H1=29475`)
+— i.e. the ship's live position/pitch/bank/heading registers are
+physically overlaid on top of 10 bytes of the starfield's own bytecode
+buffer, and every other byte around them is pristine, untouched disk
+data. The screenshot (not committed, scratch only) shows exactly what
+that byte content predicts: a field of small scattered, multi-colored
+dots filling the cockpit's 3D viewport above the dashboard HUD, with no
+connected lines anywhere in it — matching the point field's own
+structure (confirmed earlier: 195 vertices, every one a point-only
+opcode `0`, never a line-draw `1`/`2`/`3`).
+
+One honest caveat from chasing this: this repo also contains a
+from-scratch Python 6502 emulator (`emulator/cpu6502.py`) and a tool
+built on it (`modern/web/tools/extract_planet_hgr_from_cpu.py`) with
+pre-existing cached output (`modern/web/public/data/debug/planet-0-state9023-*-hgr.json`,
+dated 2026-11-06) that looked like it already answered this question —
+a pixel-identical hi-res render between calling `$9023` and calling
+`$6000` directly. Re-running that exact tool fresh in this session
+**did not reproduce that result**: `self.opcodes` in that emulator is
+missing several extremely common absolute-addressing opcodes (`LDA`
+`$AD`, `LDX` `$AE`, `CMP` `$CD`, and others — `_get_operand`/`_get_address`
+already handle them, they're just never registered in the dispatch
+dict), so the current emulator cannot correctly execute `$9023` at all
+— its very first real instruction (`LDA $95FD`) is one of the missing
+ones. The cached JSON predates this finding and its provenance (which
+script/version actually produced it) could not be re-established from
+the current repo state. **Don't cite those specific cached files as
+evidence** — they may well be right, but they're not currently
+reproducible, and this question is answered above by live MAME
+observation instead, which doesn't depend on that emulator at all.
 
 **Resolved 2026-11-07 — the `SHIP # N` files are real 3D models for this
 engine, rendered on the radar screen:**

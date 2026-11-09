@@ -63,11 +63,13 @@ the BASIC files for `CALL 24576`) found only `RADAR.bas` calling into
 A2-3D1 and concluded the engine was radar-only. That's now known to be
 incomplete: the engine actually runs **every single frame** during normal
 flight too, from this assembly routine, not just when the radar screen is
-up. What it draws there (most likely a 3D starfield, given the engine's
-"transform and plot a point" primitive is a natural fit, but not
-confirmed) is still open — but it doesn't block the Godot port either way,
-since Godot's own particle/Node3D systems can reproduce whatever the
-visual turns out to be far more cheaply than re-hosting the original VM.
+up. **Confirmed 2026-11-09** (live MAME screenshot + byte-exact memory
+dump, see `A2-3D1_ENGINE_ANALYSIS.md`'s "what A2-3D1 draws every frame"
+section): it's the 195-point deep-space starfield (`PLANET # 0`), resident
+at `$7300` since boot. Doesn't block the Godot port either way, since
+Godot's own particle/Node3D systems reproduce it far more cheaply than
+re-hosting the original VM — see `godot-remake/scripts/flight/starfield.gd`
+and [[space_vikings_starfield_fidelity]] for the existing placeholder.
 
 ## Landing and the troop-morale mechanic
 
@@ -141,11 +143,11 @@ matching the recollection closely.
   port it faithfully rather than match the remembered-but-incorrect buff.
 - The overlay state graph is fully derivable and maps directly onto a
   Godot scene/state-machine design.
-- Remaining open items are cosmetic/non-blocking: exactly what A2-3D1
-  draws every frame during normal flight (`FUN_921e`), and opcodes 8/12's
-  self-modifying patch targets. (`FUN_91ec`'s exact behavior is no longer
-  open — confirmed individually, see above.) None of these change any
-  decision needed to start building.
+- Remaining open items are cosmetic/non-blocking: opcodes 8/12's
+  self-modifying patch targets. (`FUN_91ec`'s exact behavior and what
+  A2-3D1 draws every frame via `FUN_921e` are no longer open — both
+  confirmed individually, see above.) None of these change any decision
+  needed to start building.
 
 ## Source map
 

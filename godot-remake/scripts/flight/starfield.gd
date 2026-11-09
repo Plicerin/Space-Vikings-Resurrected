@@ -2,10 +2,11 @@ extends MultiMeshInstance3D
 ## Placeholder for the "A2-3D1 engine runs every frame during normal
 ## flight" finding in FLIGHT_CONTROL_AND_PROGRESSION_ANALYSIS.md
 ## (SPACE SIMULATOR ASSEMBLY's FUN_921e calls straight into the 3D
-## engine's entry point once per frame; what it actually draws there —
-## almost certainly a starfield, given the engine's "transform and plot
-## a point" primitive is a natural fit — was never independently
-## confirmed). Godot's own MultiMesh replaces whatever that call
+## engine's entry point once per frame). Confirmed live 2026-11-09
+## (MAME screenshot + byte-exact $7300 memory dump, see
+## A2-3D1_ENGINE_ANALYSIS.md): it's PLANET # 0, a static 195-point
+## deep-space starfield with zero connecting lines, resident at $7300
+## since boot. Godot's own MultiMesh replaces whatever that call
 ## actually did; this does not attempt to reproduce the original's
 ## bytecode-driven point transform, consistent with the decision that
 ## A2-3D1's internals don't need to survive the port.
