@@ -1,10 +1,12 @@
 extends Node2D
 ## `STARSHIP SIMULATOR.bas` lines 5000-5096: a second, simpler enemy
-## pattern, independent of the two-fighter approach in
-## `fighter_encounter.gd` — one shape crosses the screen in a straight
-## line from a random top/bottom starting point, with a per-step
-## chance (`RND(1)<.3`) to fire a fading tracer toward the player, and
-## a smaller chance to reuse the retreat-flicker animation.
+## pattern, independent of the real missile-vs-orbital-defender strike
+## in `missile_strike.gd` (lines 1000-1222, misidentified as a
+## "two-fighter approach" until 2026-11-09 — see that file's doc
+## comment) — one shape crosses the screen in a straight line from a
+## random top/bottom starting point, with a per-step chance
+## (`RND(1)<.3`) to fire a fading tracer toward the player, and a
+## smaller chance to reuse the miss-flicker animation.
 ##
 ## CORRECTION (2026-11-09): this port originally hardcoded shape index
 ## 2 for the whole pattern — wrong, and a real one, not a cosmetic
@@ -15,8 +17,8 @@ extends Node2D
 ## **10** and **8**, which both decode to only 2 commands (a single
 ## near-invisible dash — the same "odd=detailed, even=blank" pattern
 ## already confirmed elsewhere in this table, see
-## `fighter_encounter.gd`'s doc comment). Shape 2 is neither of these —
-## it's the fixed retreat/explosion shape `fighter_slot.gd` uses
+## `missile_strike.gd`'s doc comment). Shape 2 is neither of these —
+## it's the fixed miss/explosion shape `missile_trail.gd` uses
 ## elsewhere. The structured, ship-like silhouette the manual's cockpit
 ## screenshot shows is shape 9; this port was never drawing it.
 ##

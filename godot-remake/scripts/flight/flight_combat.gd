@@ -65,13 +65,23 @@ extends Node2D
 ## flight_escort_fighters (line 56) -- ported in
 ## _check_defender_destroyed().
 ##
-## Still NOT ported, documented rather than silently dropped: the
-## two-fighter approach minigame's real trigger ($38202, GOSUB 1500
-## line 1501). That register is never written anywhere in the
-## available BASIC source, so unlike $38205/$38207 (both confirmed
-## real and load-bearing by live testing) there's still no confident
-## analog trigger point to port it to; fighter_encounter.gd remains
-## reachable only from the dev-tool combat demo.
+## Missile fire (fire_missile()) is now wired too (2026-11-09) -- GOSUB
+## 1500/1501's OTHER branch (`IF PEEK(38202)=1 THEN 1000`), confirmed
+## by the real manual (page 8's "Missile/Laser" section, page 13's
+## "Tactical Considerations") to be a second, player-selected weapon
+## against the SAME orbital defender, not the "two-fighter minigame"
+## this port originally (wrongly) filed it under -- see
+## missile_strike.gd's doc comment for the full correction. Unlike the
+## laser's unconditional damage, this is real aim-and-range-gated
+## (line 1050's bounding-box hit-test, approximated here as an angle-
+## to-target + distance check against ShipBlip's actual live position)
+## and deals 120x the laser's defender-damage per hit (line 1085's
+## J2=120 vs the laser's J2=1) -- "use your lasers on the ship until
+## you come within missile range and then use your missiles to finish
+## him off" (manual, page 13). GameState.missile_mode_active (toggled
+## by the new toggle_weapon action, TAB -- the real key is W, already
+## claimed by WASD pitch in this port) selects which weapon fire_weapon()
+## dispatches to on a fire-button press.
 ##
 ## Bigger finding from the same investigation, NOT addressed here:
 ## RE.bas ("re-entry") doesn't show a static terrain display at all --
@@ -88,6 +98,7 @@ extends Node2D
 
 const ShipDestructionScript = preload("res://scripts/combat/ship_destruction.gd")
 const IncomingFireScript = preload("res://scripts/combat/incoming_fire.gd")
+const MissileStrikeScript = preload("res://scripts/combat/missile_strike.gd")
 const ShapeTable = preload("res://scripts/shapes/shape_table.gd")
 const ENEMY_SHAPES := "res://assets/shapes/ENEMY I.A24580.L68.payload.json"
 
@@ -102,11 +113,37 @@ const TICK_INTERVAL := 1.0 # liberty -- the original rolls this every
 	# the original's real effective cadence. Tuned to feel similarly
 	# occasional rather than ported byte-exact.
 
+# Manual page 13: "Missiles have a very limited effective range. An
+# enemy ship must be within half the range covered by your forward
+# radar scan or your missiles will self-destruct before reaching their
+# target." This port has no modeled "forward radar scan range" either,
+# so MISSILE_RANGE reuses the manual's own stated ratio against the
+# existing COMBAT_RANGE liberty rather than inventing an unrelated
+# constant.
+const MISSILE_RANGE := COMBAT_RANGE * 0.5
+# Line 1050's real hit-box (+-150/+-60.20/+-100 around a fixed target
+# roughly 3500 units out) is a positional test, not an angular one --
+# this port's equivalent is a forward-cone check against ShipBlip's
+# live position, so the box is approximated as an angle. Feel-tuned,
+# not derived (this port's world units/camera FOV don't match the
+# original's 1:1) -- generous enough that a roughly-centered crosshair
+# counts, same spirit as the box's own generous margins at that range.
+const MISSILE_AIM_TOLERANCE_DEG := 8.0
+
 signal player_destroyed
 signal status_message(text: String)
 
+# Set by space_flight.gd right after instancing -- fire_missile()'s
+# real aim/range check needs the player's own live position/heading
+# (ship_node) and the orbital defender's live position (ship_blip_target,
+# space_flight.gd's ShipBlip), neither of which flight_combat.gd tracks
+# itself.
+@export var ship_node: Node3D
+@export var ship_blip_target: Node3D
+
 @onready var _ship_destruction: ShipDestructionScript = $HGRCanvas/ShipDestruction
 @onready var _incoming_fire: IncomingFireScript = $HGRCanvas/IncomingFire
+@onready var _missile_strike: MissileStrikeScript = $HGRCanvas/MissileStrike
 @onready var _tick_timer: Timer = $TickTimer
 
 
@@ -115,9 +152,22 @@ func _ready() -> void:
 	table.load_shapes(ENEMY_SHAPES)
 	_ship_destruction.table = table
 	_incoming_fire.table = table
+	_missile_strike.table = table
 	_incoming_fire.tracer_fired.connect(_on_tracer_fired)
 	_tick_timer.timeout.connect(_ambient_damage_tick)
 	_tick_timer.start(TICK_INTERVAL)
+
+
+## Line 1501's own dispatch (`IF PEEK(38202)=1 THEN 1000` else
+## fall through to the laser at 1505) -- space_flight.gd calls this on
+## every fire-button press instead of fire_laser() directly, so the
+## weapon-select toggle (GameState.missile_mode_active) actually takes
+## effect.
+func fire_weapon() -> void:
+	if GameState.missile_mode_active:
+		fire_missile()
+	else:
+		fire_laser()
 
 
 func fire_laser() -> void:
@@ -130,6 +180,46 @@ func fire_laser() -> void:
 	GameState.defender_damage_points = minf(GameState.defender_damage_points + 1.0 / (tech + 1.0), 255.0)
 	_check_surrender()
 	_check_defender_destroyed()
+
+
+## Lines 1000/1050/1085/1090: the real aim-and-range-gated weapon
+## against the orbital defender -- see missile_strike.gd's doc comment
+## for the full correction/source trace. Unlike fire_laser(), hit-or-
+## miss is resolved HERE, upfront, exactly like the original (line
+## 1085 branches on HIT before the draw loop even finishes); the
+## missile_strike.gd animation is purely the visual playback of an
+## already-decided outcome.
+func fire_missile() -> void:
+	_rearm_if_surrendered()
+	if GameState.ship_missile_system <= 0.0:
+		return
+	var hit := _is_missile_hit()
+	GameState.ship_missile_system = maxf(GameState.ship_missile_system - 2.0, 0.0)
+	_missile_strike.start_strike(hit)
+	if not hit:
+		return
+	var tech: int = GameState.planet_tech[GameState.current_planet]
+	GameState.gf_victory_progress = minf(GameState.gf_victory_progress + 10.0 / (tech + 1.0), 255.0)
+	GameState.defender_damage_points = minf(GameState.defender_damage_points + 120.0 / (tech + 1.0), 255.0)
+	_check_surrender()
+	_check_defender_destroyed()
+
+
+## Real aim/range check, approximating line 1050's fixed bounding-box
+## test (see MISSILE_AIM_TOLERANCE_DEG's doc comment) against ShipBlip's
+## actual live orbit position, using the player's actual current
+## heading -- not a flat chance roll, matching the manual's own
+## description of this as the real "aimable" mechanic.
+func _is_missile_hit() -> bool:
+	if ship_node == null or ship_blip_target == null:
+		return false
+	var to_target := ship_blip_target.global_position - ship_node.global_position
+	var distance := to_target.length()
+	if distance < 0.01 or distance > MISSILE_RANGE:
+		return false
+	var forward := -ship_node.global_transform.basis.z
+	var angle_deg := rad_to_deg(forward.angle_to(to_target / distance))
+	return angle_deg <= MISSILE_AIM_TOLERANCE_DEG
 
 
 ## Line 1500: firing while the current planet is already surrendered

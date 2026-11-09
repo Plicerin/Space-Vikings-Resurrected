@@ -81,8 +81,10 @@ the original. `scripts/shapes/hgr_canvas.gd` reproduces the Apple II's
 BASIC source's literal pixel coordinates (reticle corners, `M`-loop screen
 Y, etc.) directly instead of re-deriving new ones.
 
-- **Fighter encounter** (`fighter_encounter.gd` + `fighter_slot.gd`): the
-  two-fighter flip-book approach, the fixed-shape retreat/flyby, and the
+- **Missile strike** (`missile_strike.gd` + `missile_trail.gd`, renamed
+  2026-11-09 from `fighter_encounter.gd`/`fighter_slot.gd` — see
+  "Missile strike" below for the full correction): the twin-trail
+  flip-book approach, the fixed-shape miss/flyby, and the
   scale-flash + debris-stamp explosion — lines 1000-1222.
 - **Laser beam** (`laser_beam.gd`): the two converging cockpit-corner
   triangles, flickered 3x — lines 1505-1530. Sound (`CALL LA`, confirmed
@@ -102,14 +104,16 @@ Y, etc.) directly instead of re-deriving new ones.
   falls in: the right third draws shape **9** (23 real path commands,
   genuinely detailed); the other two both draw shapes **10**/**8**
   (2 commands each, a near-invisible dash — same "odd=detailed,
-  even=blank" pattern already confirmed in `fighter_encounter.gd`'s
+  even=blank" pattern already confirmed in `missile_strike.gd`'s
   own doc comment). Shape 2 was never one of these three.
 
 All four remain reachable standalone from the Start screen's "Combat
-VFX Demo" button. Ship Destruction and Incoming Fire are now also
-wired into real flight (see "Combat integration" below); the Fighter
-Encounter minigame and the Laser Beam cockpit-corner visual specifically
-are not yet — see that section for why.
+VFX Demo" button (the demo's two Missile Strike buttons preview the
+hit and miss outcomes directly, since a live encounter's outcome now
+depends on real aim/range). Ship Destruction, Incoming Fire, and
+Missile Strike are now all wired into real flight (see "Combat
+integration" below); the Laser Beam cockpit-corner visual specifically
+is not yet.
 
 ## Combat integration
 
@@ -148,9 +152,14 @@ new game.
   keypresses; this port's closest real equivalent is returning to the
   start screen on any key or Continue.
 - **The incoming-fire enemy sprite** (lines 190/192/5000-5251,
-  "GOSUB 5000") — this is the actual "findable, shootable ship" the
-  Flight Training manual page shows directly in the cockpit view (see
-  "Next steps"). Now spawns on its own real independent roll (60%,
+  "GOSUB 5000") — a small raider, found and fixed earlier in this
+  investigation. CORRECTION (2026-11-09): this bullet used to claim it
+  was the ship the manual's Flight Training cockpit screenshot shows —
+  that's very likely wrong. Given "Missile strike" below (the manual's
+  own "use your lasers... then your missiles to finish him off"), the
+  screenshot almost certainly depicts the large orbital defender
+  (`ShipBlip`, "Radar" below), not this small crossing-the-screen
+  raider. Now spawns on its own real independent roll (60%,
   same tick as the ambient check above), gated on
   `GameState.flight_escort_fighters > 0` — a real register confirmed
   live (starts at 30, never written anywhere in BASIC, so like
@@ -175,6 +184,10 @@ new game.
   gated on proximity — the original checks the fire button every
   main-loop pass regardless of position, so firing always "counts"
   against whatever system you're currently at.
+- **Missile fire** (line 1501's other branch, `IF PEEK(38202)=1 THEN
+  1000`, lines 1000-1222) — the real *aimable* weapon, and a correction
+  to how this port previously read that code. See "Missile strike"
+  below for the full story.
 
 Found and fixed three real pre-existing gaps while wiring this in:
 - `gf_planet_surrendered` defaulted to `false` in this port; the real
@@ -192,12 +205,6 @@ Found and fixed three real pre-existing gaps while wiring this in:
   combat had already made toward the same shared counter.
 
 Not yet wired in, documented rather than silently dropped:
-- The two-fighter approach minigame's real trigger (`$38202`, line
-  1501). That register is never written anywhere in the available
-  BASIC source — unlike `$38205`/`$38207` (both confirmed real and
-  load-bearing by live testing), there's no confident analog trigger
-  point to port it to yet. `fighter_encounter.gd` stays reachable only
-  from the dev-tool Combat VFX Demo for now.
 - A proper live, interactive re-entry — see "Next steps" below;
   `RE.bas` turns out not to be a static display at all.
 
@@ -226,6 +233,75 @@ the same `A2_3D1_Model.build_ship_mesh(tier)` the radar screen already
 uses, in a slow orbit around the planet; rebuilds itself whenever
 `orbital_defender_tier` changes mid-flight (e.g. destroying the
 defender) rather than only once at scene load.
+
+**Missile strike** — a second real weapon against that same ship, and
+a correction to a misreading that stood in this project since the
+Combat VFX Demo was first built. `fighter_encounter.gd`/`fighter_slot.gd`
+(lines 1000-1222) were built under the theory that this was a
+"two-fighter approach minigame," reachable only from the dev-tool demo
+for lack of a confident real trigger. That theory was never confirmed
+against the actual manual and turned out to be wrong. Re-reading the
+manual directly (at the user's prompt) settles it in its own words:
+page 8's "Missile/Laser" indicator-light section says a green light
+shows which weapon is "presently engaged," toggled with the **W**
+key, both fired by the same button; page 13's "Tactical Considerations"
+says "use your lasers on the ship until you come within missile range
+and then use your missiles to finish him off," and that missiles "must
+be within half the range covered by your forward radar scan or your
+missiles will self-destruct before reaching their target... (The
+explosion is smaller than a direct hit.)" That's a direct description
+of lines 1000-1222: line 1501's `IF PEEK(38202)=1 THEN 1000` is the
+weapon-select branch the laser's own line 1505 falls through from, not
+a fighter encounter at all. The smoking gun confirming it targets the
+SAME orbital defender rather than a separate enemy: a successful hit
+(line 1085) calls the exact same `GOSUB 1535` the laser uses — the
+victory-progress/defender-damage/surrender/destroy routine — with
+`J2=120` where the laser's own call uses `J2=1`. A real missile hit
+deals **120x** the laser's defender-damage per shot, which is exactly
+the "finish him off" framing: soften from any range and angle with the
+weak, unconditional laser, then land one well-aimed, close-range
+missile to actually end it.
+
+Renamed 2026-11-09 (`fighter_encounter.gd`→`missile_strike.gd`,
+`fighter_slot.gd`→`missile_trail.gd`, scenes and node names to match)
+rather than just correcting the doc comments in place, since the
+semantic recharacterization is total — these files were never about
+fighters. `missile_strike.gd`'s own doc comment carries the full
+correction for anyone who finds the old names in history. Also fixed
+in the same pass: `start_retreat()`/`start_explosion()` (now
+`start_miss()`/`start_hit()`) both played the `NOISE_MEDIUM` preset —
+wrong, since lines 1100/1200 explicitly call `GOSUB 4100` (the
+`NOISE_HEAVY` preset) before their own `CALL SG`, unlike the bare
+line-1010 tick this project's "bare `CALL SG` = MEDIUM" convention
+actually applies to.
+
+Wired into real flight as `flight_combat.gd`'s `fire_missile()`, now a
+genuinely *aimable* mechanic — the thing the laser's own "always
+counts, no matter where you're pointed" mechanic structurally can't
+be. Unlike the laser, hit-or-miss is resolved before the visual plays
+(matching the original's own line 1085, which branches on `HIT` before
+the draw loop even finishes): a real 3D check against `ShipBlip`'s
+live orbiting position — forward-cone angle (`MISSILE_AIM_TOLERANCE_DEG`,
+a feel-tuned liberty approximating line 1050's fixed bounding box,
+since this port's world units/camera don't match the original's 1:1)
+and range (`MISSILE_RANGE`, half of the existing `COMBAT_RANGE`
+liberty, directly matching the manual's own stated "half the range
+covered by your forward radar scan" ratio rather than inventing an
+unrelated constant). `GameState.missile_mode_active` (`$38202`) is
+toggled by the new `toggle_weapon` action — TAB, not the real W key,
+since this port's W is already claimed by WASD pitch-up
+(`ship_controller.gd`) — and `flight_combat.gd`'s new `fire_weapon()`
+dispatches a fire-button press to `fire_missile()` or `fire_laser()`
+accordingly, matching line 1501's own branch. Missile health
+(`ship_missile_system`, `$38187`) is consumed on every shot, hit or
+miss, same as the source's own unconditional `GOSUB 1090` decrement.
+Verified end-to-end with a headless Godot harness, not just read: a
+correctly-aimed in-range shot deals exactly 120x a laser shot's
+defender-damage, an out-of-range or off-aim shot deals none (while
+still consuming a missile), and a missile hit that crosses the
+destroy threshold zeroes `orbital_defender_tier`, halves
+`flight_escort_fighters`, and makes `ShipBlip` actually disappear next
+frame, same as a laser kill already did.
 
 ## Sound
 
@@ -590,9 +666,16 @@ on the SHIP-vs-manual evidence this note originally cited.)
   terrain, sets `$38210=1` (atmosphere), and immediately hands back
   into the SAME live `STARSHIP SIMULATOR.bas` loop. You keep flying,
   now low over real terrain, with the exact same combat (ambient
-  damage, the incoming-fire enemy, laser fire) still active — this is
-  genuinely where the manual's own cockpit screenshot comes from, not
-  a separate mode. This port's `planet_approach.tscn` (a timed
+  damage, the incoming-fire enemy, laser fire) still active. CORRECTION
+  (2026-11-09): this bullet used to claim the manual's own cockpit
+  screenshot (page 7/front cover) comes from this re-entry view — on a
+  direct re-read of the manual, that's wrong. The screenshot's
+  background is open starfield with no terrain at all, matching deep-
+  space flight near a hostile system, not re-entry — see "Missile
+  strike" above; it almost certainly shows the orbital defender
+  (`ShipBlip`), consistent with the manual's own "Missile/Laser" and
+  "Tactical Considerations" sections being about that exact ship.
+  This port's `planet_approach.tscn` (a timed
   3-second display, `scripts/ui/planet_approach.gd`) doesn't match
   that shape at all. Fixing it properly means either merging it into
   `space_flight.tscn` with a terrain-swap and an "atmosphere" flag, or
@@ -695,7 +778,12 @@ on the SHIP-vs-manual evidence this note originally cited.)
   it was missing, the new `GameState.flight_escort_fighters` field,
   and the real architecture gap this same investigation surfaced:
   `RE.bas` is live interactive flight over real terrain, not the timed
-  static display `planet_approach.tscn` currently is).
+  static display `planet_approach.tscn` currently is). This bullet's
+  own "exactly as described" turned out to be only half the picture —
+  a follow-up session (same day) found the real orbital-defender ship
+  itself also renders in flight (`ShipBlip`) and is the target of a
+  second, genuinely aimable weapon (missile strike); see "Radar"'s
+  `ShipBlip` paragraph and "Missile strike" above.
 - ~~Decide a real starting troop/transport count~~ — done (2026-11-09):
   traced both `START.bas`'s new-game MISC FILE write (line 2050:
   `PRINT 100.3: PRINT 2000: PRINT 10000`, i.e. real

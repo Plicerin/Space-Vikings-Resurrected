@@ -112,6 +112,21 @@ var orbital_defender_tier: int = 0 # $38205 ("ET")
 func reroll_orbital_defender_tier() -> void:
 	orbital_defender_tier = DEFENDER_TIERS.pick_random()
 
+# $38202 -- which weapon the fire button fires at the orbital defender,
+# confirmed live by the real manual's "Missile/Laser" indicator-light
+# section (page 8): a green light shows which weapon is "presently
+# engaged," toggled by the W key (`flight.gd`'s `toggle_weapon`
+# action -- remapped off a real key, since this port's W is already
+# WASD pitch-up). false = laser (STARSHIP SIMULATOR.bas line
+# 1501's fallthrough to 1505): weak, unconditional ambient damage at
+# any range. true = missile (line 1501's `GOTO 1000`): real
+# aim-and-range-gated, 120x the laser's defender-damage per hit -- see
+# flight_combat.gd's fire_missile() and missile_strike.gd's doc
+# comment for the full source trace. $38202's own machine-code setter
+# was never found in the available BASIC source, but the manual
+# settles who sets it (the player) even without the exact POKE site.
+var missile_mode_active: bool = false
+
 var current_planet: int = 0        # $38209 ("orbiting" planet)
 var target_planet: int = 0         # $38163 (travel target)
 
@@ -442,7 +457,7 @@ func save_to_disk() -> void:
 		"troops": troops, "troop_morale": troop_morale,
 		"troop_location": troop_location, "troops_stationed_at": troops_stationed_at,
 		"current_planet": current_planet, "target_planet": target_planet,
-		"orbital_defender_tier": orbital_defender_tier,
+		"orbital_defender_tier": orbital_defender_tier, "missile_mode_active": missile_mode_active,
 		"planet_tech": planet_tech, "planet_secured": planet_secured,
 		"planet_has_base": planet_has_base, "planet_scouted": planet_scouted,
 		"planet_population_scale": planet_population_scale,
@@ -483,6 +498,7 @@ func load_from_disk() -> void:
 	current_planet = data.get("current_planet", current_planet)
 	target_planet = data.get("target_planet", target_planet)
 	orbital_defender_tier = data.get("orbital_defender_tier", orbital_defender_tier)
+	missile_mode_active = data.get("missile_mode_active", missile_mode_active)
 	planet_tech.assign(data.get("planet_tech", planet_tech))
 	planet_secured.assign(data.get("planet_secured", planet_secured))
 	planet_has_base.assign(data.get("planet_has_base", planet_has_base))

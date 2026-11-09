@@ -95,9 +95,13 @@ func play_hit_medium() -> void:
 	_play(_noise_medium)
 
 
-## GOSUB 4100 preset, standalone (not currently a direct call site on
-## its own, but kept as the base unit the two explosion sounds below
-## scale up from).
+## GOSUB 4100 preset -- lines 1100/1200's own call before their `CALL
+## SG`, i.e. the missile strike's miss (`missile_trail.gd`'s
+## start_miss()) and hit (start_hit()) sounds. Found 2026-11-09: both
+## previously played NOISE_MEDIUM (the bare-CALL-SG convention used
+## elsewhere in this project), which was wrong here specifically since
+## lines 1100/1200 explicitly set this preset first. Also the base unit
+## the two explosion sounds below scale up from.
 func play_hit_heavy() -> void:
 	_play(_noise_heavy)
 

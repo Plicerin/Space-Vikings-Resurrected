@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/ui/combat_demo.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/shapes/hgr_canvas.gd" id="2"]
 [ext_resource type="Script" path="res://scripts/combat/laser_beam.gd" id="3"]
-[ext_resource type="PackedScene" path="res://scenes/combat/fighter_encounter.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/combat/missile_strike.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/combat/incoming_fire.tscn" id="5"]
 [ext_resource type="PackedScene" path="res://scenes/combat/ship_destruction.tscn" id="6"]
 
@@ -20,7 +20,7 @@ script = ExtResource("2")
 [node name="LaserBeam" type="Node2D" parent="HGRCanvas"]
 script = ExtResource("3")
 
-[node name="FighterEncounter" parent="HGRCanvas" instance=ExtResource("4")]
+[node name="MissileStrike" parent="HGRCanvas" instance=ExtResource("4")]
 
 [node name="IncomingFire" parent="HGRCanvas" instance=ExtResource("5")]
 
@@ -55,9 +55,13 @@ autowrap_mode = 2
 layout_mode = 2
 alignment = 1
 
-[node name="SpawnFightersButton" type="Button" parent="VBox/Buttons"]
+[node name="SpawnMissileHitButton" type="Button" parent="VBox/Buttons"]
 layout_mode = 2
-text = "SPAWN FIGHTERS"
+text = "MISSILE STRIKE (HIT)"
+
+[node name="SpawnMissileMissButton" type="Button" parent="VBox/Buttons"]
+layout_mode = 2
+text = "MISSILE STRIKE (MISS)"
 
 [node name="SpawnIncomingButton" type="Button" parent="VBox/Buttons"]
 layout_mode = 2

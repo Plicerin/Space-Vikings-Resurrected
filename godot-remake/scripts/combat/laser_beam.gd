@@ -39,7 +39,7 @@ func _mirror_triangle(tri: PackedVector2Array) -> PackedVector2Array:
 
 
 func _process(_delta: float) -> void:
-	# Polled (like fighter_encounter.gd's hit check) rather than
+	# Polled rather than
 	# _unhandled_input: Input.action_press() — used by the automated
 	# combat-VFX test, see README — doesn't dispatch a real InputEvent, and
 	# a focused UI Button would otherwise have first claim on a real

@@ -4,6 +4,7 @@
 [ext_resource type="Script" path="res://scripts/shapes/hgr_canvas.gd" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/combat/ship_destruction.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/combat/incoming_fire.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/combat/missile_strike.tscn" id="5"]
 
 [node name="FlightCombat" type="Node2D"]
 script = ExtResource("1")
@@ -14,5 +15,7 @@ script = ExtResource("2")
 [node name="ShipDestruction" parent="HGRCanvas" instance=ExtResource("3")]
 
 [node name="IncomingFire" parent="HGRCanvas" instance=ExtResource("4")]
+
+[node name="MissileStrike" parent="HGRCanvas" instance=ExtResource("5")]
 
 [node name="TickTimer" type="Timer" parent="."]

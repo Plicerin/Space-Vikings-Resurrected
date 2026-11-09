@@ -15,6 +15,10 @@ const ACTIONS := {
 	"open_ground_forces": [KEY_G],
 	"open_radar": [KEY_R],
 	"fire_laser": [KEY_SPACE, KEY_CTRL],
+	# Real key is W (manual page 8, "Missile/Laser... Use the W key to
+	# toggle between weapon systems") -- unusable here since this port's
+	# W is already WASD pitch-up (ship_controller.gd); TAB is free.
+	"toggle_weapon": [KEY_TAB],
 }
 
 func _init() -> void:

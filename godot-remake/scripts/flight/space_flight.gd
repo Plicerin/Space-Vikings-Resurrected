@@ -71,6 +71,7 @@ const SHIP_BLIP_SPIN_SPEED := 0.3 # matches radar_screen.gd's own spin liberty
 @onready var _debug_label: Label = $HUD/DebugLabel
 @onready var _planet: MeshInstance3D = $Planet
 @onready var _ship_blip: MeshInstance3D = $ShipBlip
+@onready var _ship: Node3D = $Ship
 @onready var _flight_combat = $HUD/FlightCombat
 
 var _reentering: bool = false
@@ -89,6 +90,9 @@ func _ready() -> void:
 	assert(_planet.position.is_equal_approx(PLANET_WORLD_POSITION), "Planet node moved — update PLANET_WORLD_POSITION to match")
 
 	_setup_ship_blip()
+
+	_flight_combat.ship_node = _ship
+	_flight_combat.ship_blip_target = _ship_blip
 
 	_flight_combat.player_destroyed.connect(func():
 		GameState.goto_scene("res://scenes/player_destroyed.tscn")
@@ -130,7 +134,7 @@ func _process(delta: float) -> void:
 	_ship_blip.rotate_y(SHIP_BLIP_SPIN_SPEED * delta)
 
 	if Input.is_action_just_pressed("fire_laser"):
-		_flight_combat.fire_laser()
+		_flight_combat.fire_weapon()
 
 	if _status_timer > 0.0:
 		_status_timer -= delta
@@ -138,12 +142,14 @@ func _process(delta: float) -> void:
 	var in_range := _is_in_range()
 	var damage_line := "\nDAMAGE ALERT" if GameState.damage_alert_active else ""
 	var status_line := ("\n" + _status_message) if _status_timer > 0.0 else ""
+	var weapon_label := "MISSILE" if GameState.missile_mode_active else "LASER"
 	_debug_label.text = (
-		"PITCH %d   BANK %d   HEADING %d   THROTTLE %.2f\nPOS %s\n\n[C] Command Console   [G] Ground Forces (%s)   [R] Radar   [SPACE] Fire%s%s"
+		"PITCH %d   BANK %d   HEADING %d   THROTTLE %.2f\nPOS %s\n\n[C] Command Console   [G] Ground Forces (%s)   [R] Radar   [SPACE] Fire %s   [TAB] Switch Weapon%s%s"
 		% [
 			int(GameState.pitch_deg), int(GameState.bank_deg), int(GameState.heading_deg),
 			GameState.throttle, GameState.ship_position,
 			"in range" if in_range else "out of range",
+			weapon_label,
 			damage_line, status_line,
 		]
 	)
@@ -165,3 +171,5 @@ func _unhandled_input(event: InputEvent) -> void:
 			GameState.goto_scene("res://scenes/ground_forces.tscn")
 	elif event.is_action_pressed("open_radar"):
 		GameState.goto_scene("res://scenes/radar.tscn")
+	elif event.is_action_pressed("toggle_weapon"):
+		GameState.missile_mode_active = not GameState.missile_mode_active
