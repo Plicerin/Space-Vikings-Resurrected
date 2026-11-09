@@ -62,12 +62,18 @@ Notable opcodes:
   3 angle bytes; see below. Calls `FUN_654e`.
 - **`7`** — zeroes `$C054` (hi-res page-1 soft switch) and sets a parameter —
   page selection.
-- **`8`, `9`, `12`** — **self-modifying code**: patch the operand bytes of
-  dozens of addresses scattered through `$62F6`–`$7120` (24+ sites in case 8
-  alone). This is the standard Apple II hi-res trick: pixel color depends on
-  which half of a screen byte a pixel falls in, so the fast path is to patch
-  the plotting routine's own instruction operands at runtime (draw/erase mode,
-  color pattern) rather than branch on every pixel.
+- **`8`, `9`, `12`** — **self-modifying code**, three genuinely different
+  tricks, each hand-disassembled directly from the raw payload (see
+  "What's confirmed vs. still open" below for the full writeup):
+  opcode `8` **retargets which hi-res page `FUN_6cda` clears** by patching
+  the 32 unrolled `STA $2000,X`-style instructions' own high-byte operands;
+  opcode `9` **flips the plotter's scanline-base-address table** between
+  hi-res page 1/2 (the already-live-verified double-buffer page-flip) *and*
+  patches 8 further sites with values derived from the same flip decision;
+  opcode `12` **toggles 13 plot-primitive opcode bytes** between `$11`
+  (`ORA (zp),Y` — draw) and `$51` (`EOR (zp),Y` — erase/XOR) — the classic
+  Apple II hi-res draw-vs-undraw trick, confirmed at the exact instruction
+  level.
 - **`11`** — an explicit jump: reads a 16-bit address out of the bytecode
   stream and sets the program counter to it. The VM has its own `JMP`.
 - **`13`** — set the output-vertex-list pointer (for query/readback mode,
@@ -256,8 +262,9 @@ opcode 8/9/12 were doing (that guess came from the operand-patch *count*
 alone, before any execution evidence existed). The trace backs this up
 directly: all 187 of its captured writes land in `$4xxx` (page 2) in that
 run, while `FUN_6cda` clears page 1 in parallel — a genuine page-flipped
-double buffer. (Opcodes 8 and 12 are not yet confirmed to do the same thing
-as opcode 9 — only 9 was directly named and disassembled here.)
+double buffer. (Opcodes 8 and 12 are now confirmed too, each doing
+something genuinely different from opcode 9 and from each other — see
+"What's confirmed vs. still open" below.)
 
 This also explains something that looked like noise earlier: Ghidra's
 decompile of `FUN_7044` and neighboring functions carries ~90 "Removing
@@ -311,14 +318,93 @@ bytecode opcode 0/1/2/3 (per vertex)
   table's high bytes between hi-res page 1 and page 2 for double buffering
   — confirmed via a real AppleWin execution trace and live memory snapshot
   already in `modern/web/public/data/debug/`, not just static guesswork.
+- Opcodes `8`, `9` (extended), and `12`'s self-modifying patches, all
+  hand-disassembled directly from the raw payload: opcode `8` retargets
+  `FUN_6cda`'s hi-res clear between page 1/2 by patching its own 32
+  `STA`s' high-byte operands; opcode `9` additionally patches 8 more
+  sites beyond the page-flip table; opcode `12` toggles 13 plot-opcode
+  bytes between `ORA`/`EOR` (draw/erase). See "What's confirmed vs.
+  still open" below for the full writeup.
 
 **Not yet traced:**
-- Opcodes `8` and `12`'s self-modifying patches specifically — only opcode
-  `9`'s target (`$7148`, the page-flip patch above) was directly named and
-  disassembled; 8 and 12 are not yet confirmed to do the same thing.
 - Jump-table entry 4 (`$653F`) itself — though `RADAR.bas`'s `SN = 24585`
   constant (`$6009`, confirmed below) shows at least one BASIC-level name
   for it, even without tracing its body.
+
+**Resolved 2026-11-09 — opcodes `8` and `12`'s self-modifying patches,
+hand-disassembled directly from the raw payload (not just Ghidra's
+pseudocode, which turned out to be misleading for opcode `8` — see
+below):**
+
+**Opcode `12`** (`$6D...` region's own case handler) is clean and fully
+confirmed. It reads one bytecode parameter byte; if it's `0`, `A =
+$11`, else `A = $51`. That single byte is then stored, unmodified,
+into **13 fixed addresses**: `$6DA4, $6DA9, $6DB0, $6E95, $6F11,
+$6FAA, $6FE6` (`FUN_6fe6`, the shared "OR mask, step scanline"
+primitive), `$7056, $7080, $708B, $70D8, $7102, $710D` — all 13 are
+unrolled `STA` absolute instructions, verified byte-for-byte
+(`$7195`-`$71BC` in the raw payload). `$11` is the 6502 opcode for
+`ORA (zp),Y`; `$51` is `EOR (zp),Y`. Both are 2-byte indirect-indexed
+instructions — i.e. opcode `12` **patches the actual plot opcode** at
+13 sites throughout the shallow/steep-slope plotters between additive
+OR (draw) and XOR (erase/undraw). This is the classic Apple II
+hi-res "undraw by re-XORing the same shape" trick, confirmed at the
+exact instruction level — it's the source-level mechanism behind
+[[space_vikings_undraw_artifacts]].
+
+**Opcode `8`** turned out *not* to match its own Ghidra pseudocode.
+The decompile for case `8`'s submode-1 branch lists "Read-only address
+is written" warnings for 24 addresses scattered through
+`$62F6`-`$7120` (the basis for this doc's original "dozens of
+addresses" description) — but hand-disassembling the real case-8 code
+block (`$6D44`-`$6D8E`, confirmed as part of `FUN_6140` by its own
+listed non-contiguous range) end to end, every branch target verified
+by hand, shows **none of those 24 addresses are actually touched by
+this code**. All four submodes (bytecode parameter `0`/`1`/`2`/other)
+funnel through the exact same shape: load `$00` or `$FF` into `A`,
+`STA $6DDD` (the *only* self-mod write site), then check/fill a
+32-byte table at `$6CE0` against `$20` or `$40`, then `JSR $6CDA`
+(`FUN_6cda`) and return. The 24-address list appears to be a Ghidra
+decompiler artifact from re-analyzing this self-modifying binary
+across multiple passes and merging observed writes from opcode `9`'s
+real code into opcode `8`'s comment block, not something reachable
+from a real single execution of case `8` — the earlier "24+ sites in
+case 8 alone" claim is retracted.
+
+What case `8` actually does is better than the old guess: **`$6CE0`
+is not a separate lookup table — it's the high-byte operands of the
+32 unrolled `STA $2000,X`/`STA $2100,X`/.../`STA $3F00,X` instructions
+inside `FUN_6cda` itself** (each is a 3-byte `9D lo hi` instruction;
+`$6CE0` is exactly the `hi` byte of the first one, 3 bytes apart
+matches the fill loop's stride exactly). Filling that table with
+`$20, $21, $22, ... $3F` (the "already `$20`? skip" / fill-from-`$20`
+path) retargets `FUN_6cda` to clear hi-res **page 1** (`$2000`-
+`$3FFF`, its as-shipped default); filling it with `$40...$5F` instead
+retargets it to clear **page 2** (`$4000`-`$5FFF`). So **opcode `8` is
+how the renderer picks which hi-res page to clear each frame** — the
+other half of the double-buffering scheme whose page-flip side (the
+plotter's own scanline table) opcode `9` already confirmed. The
+`$6DDD` write (confirmed as the zero-page source operand of an `LDA`
+inside `FUN_6dd5`, the line-octant dispatcher, normally `$B5`) is real
+and mechanically confirmed, but *why* it gets redirected to literal
+`$00`/`$FF` specifically isn't chased further — a much narrower loose
+end than the "24 unknown addresses" it replaces.
+
+**Bonus, found while re-verifying opcode `9`:** its handler is bigger
+than previously documented. Beyond the already-confirmed `$6B93`
+scanline-table page-flip loop (`$7148`-`$7163`), the *same* handler
+continues straight through (no branch back to the dispatch loop in
+between) into 8 more `STA` absolute writes: `$6FF0, $7063` (both get
+the raw `$20`/`$40` mode byte), `$6FF7, $709E` (mode byte `-4`),
+`$701B, $70E5` (mode byte `-4+$24`), `$7023, $7120` (mode byte
+`-4+$24+3`) — all hand-verified in the raw payload (`$7164`-`$7186`)
+and matching Ghidra's case-`9` pseudocode (`FUN_6140.c`'s `case '\t'`
+block) address-for-address. Exact semantic role of these 8 sites
+wasn't chased further (they sit inside/near the shallow- and
+steep-slope plotters, consistent with being more of the same
+draw-mode/pattern machinery), but the mechanical fact — opcode `9`
+patches 9 things total, not just the one page-flip table — is now
+confirmed, correcting this doc's earlier incomplete description.
 
 **Resolved 2026-11-09 — what A2-3D1 draws every frame during normal
 flight, confirmed live, not inferred:**
@@ -518,7 +604,8 @@ All function files referenced above live under
 | `FUN_6cda` | `0x6cda.c` | Clear hi-res page 1 (`$2000`-`$3FFF`) |
 | `FUN_6f03`, `FUN_6f9c` | `0x6f03.c`, `0x6f9c.c` | Shallow-slope line octant (plus helpers `FUN_6f35`/`FUN_6f49`/`FUN_6fd5`) |
 | `FUN_6fe6` | `0x6fe6.c` | Shared "OR mask, step scanline" primitive |
-| `FUN_7044` | `0x7044.c` | Steep-slope line octant; also houses opcode 9's self-mod patch (`$7148`) |
+| `FUN_7044` | `0x7044.c` | Steep-slope line octant; also houses opcode 9's self-mod patch (`$7148`-`$7186`) and opcode 12's (`$7195`-`$71BC`) |
+| (unnamed, opcode `8` handler) | n/a — `$6D44`-`$6D8E` | Retargets `FUN_6cda`'s hi-res page via its own `STA` operands at `$6CE0`+ |
 | (unnamed, data) | n/a — `$6B92`-`$6CD9` in `extracted/LO-HI A2-3D1.payload.bin` | Scanline-address table, byte-column lookup, pixel-mask cycle |
 
 Generated via REA (Ghidra 12.1.2 backend) against

@@ -143,10 +143,10 @@ matching the recollection closely.
   port it faithfully rather than match the remembered-but-incorrect buff.
 - The overlay state graph is fully derivable and maps directly onto a
   Godot scene/state-machine design.
-- Remaining open items are cosmetic/non-blocking: opcodes 8/12's
-  self-modifying patch targets. (`FUN_91ec`'s exact behavior and what
-  A2-3D1 draws every frame via `FUN_921e` are no longer open — both
-  confirmed individually, see above.) None of these change any decision
+- No remaining open items in this area block the port. (`FUN_91ec`'s
+  exact behavior, what A2-3D1 draws every frame via `FUN_921e`, and
+  opcodes 8/9/12's self-modifying patch targets are all confirmed now
+  — see `A2-3D1_ENGINE_ANALYSIS.md`.) None of these change any decision
   needed to start building.
 
 ## Source map
