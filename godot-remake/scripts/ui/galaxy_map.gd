@@ -42,4 +42,21 @@ func _make_select_callback(index: int) -> Callable:
 		# comment), so this port re-rolls it here instead, at its closest
 		# analog: committing to travel to a new system.
 		GameState.reroll_orbital_defender_tier()
+		# H_D.bas lines 90-93: on arrival, the ground-invasion/flight-
+		# combat thresholds reset together from this planet's tech
+		# (tech<2 planets get no orbital threat at all). Previously this
+		# was set at the start of a ground attack instead
+		# (ground_forces.gd) — moved here 2026-11-09 while wiring flight
+		# combat in, to match the real arrival-time reset and because
+		# flight combat (flight_combat.gd) now shares gf_victory_progress
+		# with ground combat and needs it zeroed at the same real moment.
+		var tech: int = GameState.planet_tech[index]
+		if tech < 2:
+			GameState.gf_enemy_strength = 0.0
+			GameState.defender_damage_threshold = 0.0
+		else:
+			GameState.gf_enemy_strength = float(tech) * 60.0
+			GameState.defender_damage_threshold = float(tech) * 60.0
+		GameState.gf_victory_progress = 0.0
+		GameState.defender_damage_points = 0.0
 		GameState.goto_scene("res://scenes/com.tscn")

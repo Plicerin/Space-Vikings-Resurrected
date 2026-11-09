@@ -109,11 +109,14 @@ func _on_attack_pressed() -> void:
 		_finish_battle("PLANET IS NON-HABITABLE. NO ENEMY TO RESIST — SECURED IMMEDIATELY.", true)
 		return
 
-	# Lines 90-93 (H_D.bas) / line 510 (GROUND FORCES.bas): enemy
-	# resistance threshold scales directly with tech; tech 1 ("limited
-	# atomic") still runs the loop but with resistance forced to 0.
-	GameState.gf_enemy_strength = float(tech) * 60.0 if tech >= 2 else 0.0
-	GameState.gf_victory_progress = 0.0
+	# gf_enemy_strength/gf_victory_progress are NOT reset here — the
+	# real source sets them once, at system arrival (H_D.bas lines
+	# 90-93, ported in galaxy_map.gd), and GROUND FORCES.bas's own
+	# attack code never touches either. Re-zeroing gf_victory_progress
+	# on every Attack press used to be a real bug here: it would
+	# silently erase progress flight combat had already contributed
+	# toward the same shared counter (flight_combat.gd) before Ground
+	# Forces was ever opened.
 	_in_battle = true
 	_menu.visible = false
 	_battle.visible = true

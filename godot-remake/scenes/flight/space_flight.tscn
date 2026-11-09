@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scripts/flight/space_flight.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/flight/ship_controller.gd" id="2"]
 [ext_resource type="Script" path="res://scripts/flight/starfield.gd" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/flight/flight_combat.tscn" id="4"]
 
 [sub_resource type="Sky" id="Sky_1"]
 
@@ -43,3 +44,5 @@ offset_top = 16.0
 offset_right = 600.0
 offset_bottom = 120.0
 text = ""
+
+[node name="FlightCombat" parent="HUD" instance=ExtResource("4")]

@@ -48,7 +48,7 @@ new script that needs a type name.
 | Planet during flight (deep-space view) | Real — `PLANET # 0`'s actual 195-point field, same file `ORBIT.bas` loads for this view | `A2-3D1_ENGINE_ANALYSIS.md` |
 | Planet during re-entry (per-world terrain map) | Real — `scenes/planet_approach.tscn`, triggered automatically by proximity to the planet during flight | `A2-3D1_ENGINE_ANALYSIS.md` |
 | Combat VFX: fighter approach/retreat/explosion, laser beam, EX.bas ship destruction, incoming-fire pattern | Real — see "Combat VFX" below | `COMBAT_VFX_ANALYSIS.md` |
-| Combat integration (when an encounter actually starts during flight) | Not started | `COMBAT_VFX_ANALYSIS.md` |
+| Combat integration (ambient incoming damage, laser fire, orbital defender destruction, player ship destruction) | Real — `scripts/flight/flight_combat.gd`, wired into `space_flight.tscn`; see "Combat integration" below | `COMBAT_VFX_ANALYSIS.md` |
 
 Every stub was deliberately kept navigable (not a dead end) so the full
 original overlay graph — Start → Galaxy Map → Command Console → Ground
@@ -91,14 +91,83 @@ Y, etc.) directly instead of re-deriving new ones.
 - **Ship destruction** (`ship_destruction.gd`): `EX.bas`'s bigger
   screen-centered version of the same flash+debris, plus a genuine
   radiating-line particle burst, plus persistent (stand-in) wreckage —
-  not wired to any hull/health system, since none has been traced yet.
+  now wired to a real trigger, see "Combat integration" below.
 - **Incoming fire** (`incoming_fire.gd`): the separate generic
-  shape-crosses-the-screen-and-sometimes-fires pattern, lines 5000-5251.
+  shape-crosses-the-screen-and-sometimes-fires pattern, lines 5000-5251
+  — spawned for feedback whenever the ambient damage tick lands a hit
+  (see below); its own internal random-shootdown sub-mechanic (lines
+  5200-5251) isn't ported.
 
-All four are reachable standalone from the Start screen's "Combat VFX
-Demo" button — not yet wired into an actual spawn trigger inside
-`space_flight.tscn`, since no "when does a fighter encounter start"
-condition has been traced in the analysis docs.
+All four remain reachable standalone from the Start screen's "Combat
+VFX Demo" button. Ship Destruction and Incoming Fire are now also
+wired into real flight (see "Combat integration" below); the Fighter
+Encounter minigame and the Laser Beam cockpit-corner visual specifically
+are not yet — see that section for why.
+
+## Combat integration
+
+`scripts/flight/flight_combat.gd`, wired into `space_flight.tscn`'s HUD
+layer, ports `STARSHIP SIMULATOR.bas`'s two real combat mechanisms:
+
+- **Ambient incoming damage** (lines 189-192/3000-3381, "GOSUB 3000")
+  — the main mechanism. Runs on a tuned timer (the original rolls this
+  every main-loop pass; a real-time per-frame roll would land damage
+  far faster than BASIC's own effective frame rate, so this is tuned
+  to feel similarly occasional rather than ported byte-exact). Gated
+  on an orbital defender being present and being within a world-space
+  range of the planet (`COMBAT_RANGE`, a liberty — line 192's real
+  box-bounds check doesn't translate to this port's position units;
+  the original's other gate, "or landed," has no equivalent since
+  landed-ness is a separate scene here, not a flight sub-state). Per-hit
+  formula is a literal port: two independent 40%-chance rolls plus an
+  independent 30%-chance roll can land a hit; SHIELD drains first, and
+  only cascades to RADAR/engines/COMPUTER/LASER/HULL once the shield
+  is empty (`$38201`, "shields up," is never toggled anywhere in the
+  available BASIC source, so this port treats it as permanently true
+  rather than modeling a switch that doesn't exist). HULL reaching 0
+  triggers `S_X.bas` — a new screen, `scenes/player_destroyed.tscn`,
+  a literal port of its expanding radial-burst algorithm (`X1=5 TO 130
+  STEP 8`, 15 random lines per step) plus its exact text. The original
+  then `PR#6`s (reboots from the disk's boot sector) after two
+  keypresses; this port's closest real equivalent is returning to the
+  start screen on any key or Continue.
+- **Laser fire** (lines 185/1500-1570, "GOSUB 1500") — gated on LASER
+  health > 0, always adds to `GameState.gf_victory_progress` (the
+  SAME ground-invasion-surrender counter `GROUND FORCES.bas` uses —
+  firing from orbit genuinely helps soften a planet toward surrender
+  before you ever reach Ground Forces) and to the new
+  `defender_damage_points`/`defender_damage_threshold` pair (toward
+  destroying the current orbital defender ship, `EX.bas`). Neither is
+  gated on proximity — the original checks the fire button every
+  main-loop pass regardless of position, so firing always "counts"
+  against whatever system you're currently at. Confirmed by direct
+  trace, not guessed: destroying the defender does NOT require an
+  escort fighter count or any state this port doesn't already have.
+
+Found and fixed two real pre-existing gaps while wiring this in, both
+because flight combat and ground combat turned out to share state more
+than this port's split architecture had assumed:
+- `gf_enemy_strength`/`defender_damage_threshold`/`gf_victory_progress`
+  reset at system arrival in the real source (`H_D.bas` lines 90-93),
+  not at the start of a ground attack — moved from
+  `ground_forces.gd`'s `_on_attack_pressed()` to `galaxy_map.gd`'s
+  system-selection callback (this port's arrival-equivalent).
+  `ground_forces.gd` was also zeroing `gf_victory_progress` on every
+  Attack press, which would have silently erased any progress flight
+  combat had already made toward the same shared counter.
+
+Not yet wired in, documented rather than silently dropped:
+- The simpler incoming-fire visual's own independent spawn trigger and
+  internal random-shootdown sub-mechanic (lines 5200-5251, which can
+  reduce an escort-fighter-count register, `$38207`, this port doesn't
+  model) — it's currently spawned only as visual feedback when the
+  ambient tick lands a hit, not under its own original gating.
+- The two-fighter approach minigame's real trigger (`$38202`, line
+  1501). That register is never written anywhere in the available
+  BASIC source — unlike `$38205` (read on every single encounter, and
+  clearly load-bearing), there's no confident analog trigger point to
+  port it to yet. `fighter_encounter.gd` stays reachable only from the
+  dev-tool Combat VFX Demo for now.
 
 ## Radar
 
@@ -361,11 +430,16 @@ on the SHIP-vs-manual evidence this note originally cited.)
   sequence despite the name, it's Save/Continue/Quit — and added this
   port's first real persistence (`end_game.gd`,
   `GameState.save_to_disk()`/`load_from_disk()`, a Load Game option on
-  the start screen) alongside it. Left for later: actual combat (now
-  that ship-system health fields exist, the natural next step for
-  Repair/Restock to mean anything is something that damages them), and
-  a real "weapon fired" flag so the re-entry trigger can port the
-  original's full condition instead of proximity alone.
+  the start screen) alongside it. Combat integration is also real now
+  (2026-11-09, see "Combat integration" above) — ambient incoming
+  damage, laser fire shared with ground-invasion surrender, orbital
+  defender destruction, and player-ship destruction (`S_X.bas`, a new
+  `player_destroyed.tscn`) are all wired into actual flight; Repair/
+  Restock now has something that actually damages the fields it
+  repairs. Left for later: a real "weapon fired" flag so the re-entry
+  trigger can port the original's full condition instead of proximity
+  alone, and the two items noted as deliberately not-yet-wired at the
+  end of "Combat integration" above.
 - Re-verified against the corrected `ENEMY`/`EXPL` data (2026-11-07): the
   explosion and EX.bas destruction sequences still look solid (shape 15
   carries the debris, 16-18 are blank in the real data — that's fine,
@@ -379,16 +453,16 @@ on the SHIP-vs-manual evidence this note originally cited.)
 - Convert `assets/shapes/*.json` to native Godot resources (or at least an
   import step) instead of parsing raw JSON at runtime.
 - Fill in the remaining stubs in the "What's real vs. stubbed" table
-  above, starting with whichever matters most for a playable loop
-  (Enlist Troops and Sell Loot are the two that gate finishing an
-  invasion cleanly).
+  above — just the Command Console's "COMPUTER" sub-menu now
+  (Navigation/Galaxy Directory/Ship Status detail/Supplies Report,
+  `COM.bas` lines 220-280 and `SUPPLY.bas`, not traced yet) and
+  `END.bas`'s own mission-scoring question (there wasn't one — see
+  "Combat integration"/"Shore Leave" above for what `END.bas` and
+  `SHORE LEAVE.bas`'s "BUY WEAPONS" actually turned out to be instead).
 - Hook the converted shape data up to actual sprites/meshes for the
   player's own ship and planet surfaces in the flight scene — combat VFX
   now uses real shape data (see above), but flight still uses a plain
   mesh placeholder.
-- Wire the combat VFX into an actual encounter — needs tracing when/why a
-  fighter encounter or incoming-fire pattern starts during flight, and
-  (for `ship_destruction.gd`) a real hull/health system to trigger off.
 - ~~Decide a real starting troop/transport count~~ — done (2026-11-09):
   traced both `START.bas`'s new-game MISC FILE write (line 2050:
   `PRINT 100.3: PRINT 2000: PRINT 10000`, i.e. real

@@ -115,9 +115,15 @@ var target_planet: int = 0         # $38163 (travel target)
 # `START.bas` line 2020 BLOADs to $9506 (=38150 decimal, the base of
 # this entire shared-register range) on every new game.
 var gf_enemy_strength: float = 0.0   # SP, $38150 (blob: 0)
-var gf_victory_progress: float = 1.0 # VP, $38160 (blob: 1 — overwritten to
-	# 0 by ground_forces.gd before every battle anyway, so this only
-	# matters if something reads it before a first attack)
+var gf_victory_progress: float = 1.0 # VP, $38160 (blob: 1). Real reset
+	# point is H_D.bas line 93, system arrival (galaxy_map.gd), NOT the
+	# start of a ground attack — GROUND FORCES.bas's own attack code
+	# never touches it, and flight-combat laser fire
+	# (flight_combat.gd, STARSHIP SIMULATOR.bas lines 1535-1550)
+	# contributes to this SAME counter before you ever reach Ground
+	# Forces. ground_forces.gd used to incorrectly zero this at every
+	# Attack press — fixed 2026-11-09 while wiring flight combat in,
+	# since that would have silently erased flight-combat progress.
 var gf_fighters: float = 75.0        # P, $38156 (blob: 75)
 var gf_transports: float = 6.0       # TP, $38155 (blob: 6)
 var gf_tanks: float = 0.0            # T, $38154 (blob: 0)
@@ -127,6 +133,21 @@ var gf_missiles: float = 0.0         # M, $38153 (blob: 0) — ground-combat
 	# value the real source also happens to call "MISSILES")
 var gf_reserve_troops: float = 0.0   # T9 (held back when transport capacity is exceeded)
 var gf_planet_surrendered: bool = false # $38208
+
+# --- Flight combat (STARSHIP SIMULATOR.bas lines 1500-1570/3000-3381,
+# "GOSUB 1500"/"GOSUB 3000") — see scripts/flight/flight_combat.gd ---
+var defender_damage_points: float = 0.0      # DP, $38152 — damage dealt
+	# toward destroying the current orbital defender ship, separate
+	# from gf_victory_progress (which is damage toward the PLANET's
+	# ground-invasion surrender; firing contributes to both at once)
+var defender_damage_threshold: float = 0.0   # $38204 — set alongside
+	# gf_enemy_strength at system arrival (both `tech*60`, H_D.bas line
+	# 93), but tracked independently afterward in the real source
+var damage_alert_active: bool = false        # $38393 — set the first
+	# time the ambient incoming-fire tick lands a hit this trip
+	# (STARSHIP SIMULATOR.bas line 3360's "RUN DMG", a one-line HUD
+	# flash in the real source, not a full screen — see DMG.bas);
+	# cleared by Repair/Restock completing (SHORE LEAVE.bas line 2555)
 
 # --- Ship system health (SHORE LEAVE.bas lines 2500-2545, "REPAIR
 # SHIP") ---
@@ -309,6 +330,10 @@ func start_new_game() -> void:
 	gf_reserve_troops = 0.0
 	gf_planet_surrendered = false
 
+	defender_damage_points = 0.0
+	defender_damage_threshold = 0.0
+	damage_alert_active = false
+
 	ship_shield = 100.0
 	ship_energy = 63.0
 	ship_engine1 = 100.0
@@ -369,6 +394,11 @@ func save_to_disk() -> void:
 		"loot": loot,
 		"gf_fighters": gf_fighters, "gf_transports": gf_transports,
 		"gf_tanks": gf_tanks, "gf_missiles": gf_missiles,
+		"gf_enemy_strength": gf_enemy_strength, "gf_victory_progress": gf_victory_progress,
+		"gf_planet_surrendered": gf_planet_surrendered,
+		"defender_damage_points": defender_damage_points,
+		"defender_damage_threshold": defender_damage_threshold,
+		"damage_alert_active": damage_alert_active,
 		"ship_shield": ship_shield, "ship_energy": ship_energy,
 		"ship_engine1": ship_engine1, "ship_engine2": ship_engine2,
 		"ship_computer": ship_computer, "ship_radar": ship_radar,
@@ -407,6 +437,12 @@ func load_from_disk() -> void:
 	gf_transports = data.get("gf_transports", gf_transports)
 	gf_tanks = data.get("gf_tanks", gf_tanks)
 	gf_missiles = data.get("gf_missiles", gf_missiles)
+	gf_enemy_strength = data.get("gf_enemy_strength", gf_enemy_strength)
+	gf_victory_progress = data.get("gf_victory_progress", gf_victory_progress)
+	gf_planet_surrendered = data.get("gf_planet_surrendered", gf_planet_surrendered)
+	defender_damage_points = data.get("defender_damage_points", defender_damage_points)
+	defender_damage_threshold = data.get("defender_damage_threshold", defender_damage_threshold)
+	damage_alert_active = data.get("damage_alert_active", damage_alert_active)
 	ship_shield = data.get("ship_shield", ship_shield)
 	ship_energy = data.get("ship_energy", ship_energy)
 	ship_engine1 = data.get("ship_engine1", ship_engine1)

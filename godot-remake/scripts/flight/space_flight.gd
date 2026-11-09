@@ -28,6 +28,11 @@ extends Node3D
 ## `[G] Ground Forces` is now actually gated on the same proximity check
 ## — the HUD text has said "(when in range)" since this scene was
 ## scaffolded, but nothing enforced it until now.
+##
+## Flight combat (ambient incoming damage, laser fire, the orbital
+## defender's own destruction sequence, player-ship destruction) is
+## wired in via the `FlightCombat` child under `HUD` — see
+## `flight_combat.gd`'s doc comment for the full source trace.
 
 const A2_3D1_Model = preload("res://scripts/shapes/a2_3d1_model.gd")
 const PLANET_VISUAL_RADIUS := 400.0 # matches the old placeholder's footprint
@@ -36,8 +41,11 @@ const REENTRY_RANGE := 500.0
 
 @onready var _debug_label: Label = $HUD/DebugLabel
 @onready var _planet: MeshInstance3D = $Planet
+@onready var _flight_combat = $HUD/FlightCombat
 
 var _reentering: bool = false
+var _status_message: String = ""
+var _status_timer: float = 0.0
 
 
 func _ready() -> void:
@@ -48,17 +56,34 @@ func _ready() -> void:
 		_planet.scale = Vector3.ONE * (PLANET_VISUAL_RADIUS / radius)
 	assert(_planet.position.is_equal_approx(PLANET_WORLD_POSITION), "Planet node moved — update PLANET_WORLD_POSITION to match")
 
+	_flight_combat.player_destroyed.connect(func():
+		GameState.goto_scene("res://scenes/player_destroyed.tscn")
+	)
+	_flight_combat.status_message.connect(func(text: String):
+		_status_message = text
+		_status_timer = 3.0
+	)
+
 
 func _process(delta: float) -> void:
 	_planet.rotate_y(0.05 * delta)
 
+	if Input.is_action_just_pressed("fire_laser"):
+		_flight_combat.fire_laser()
+
+	if _status_timer > 0.0:
+		_status_timer -= delta
+
 	var in_range := _is_in_range()
+	var damage_line := "\nDAMAGE ALERT" if GameState.damage_alert_active else ""
+	var status_line := ("\n" + _status_message) if _status_timer > 0.0 else ""
 	_debug_label.text = (
-		"PITCH %d   BANK %d   HEADING %d   THROTTLE %.2f\nPOS %s\n\n[C] Command Console   [G] Ground Forces (%s)   [R] Radar"
+		"PITCH %d   BANK %d   HEADING %d   THROTTLE %.2f\nPOS %s\n\n[C] Command Console   [G] Ground Forces (%s)   [R] Radar   [SPACE] Fire%s%s"
 		% [
 			int(GameState.pitch_deg), int(GameState.bank_deg), int(GameState.heading_deg),
 			GameState.throttle, GameState.ship_position,
 			"in range" if in_range else "out of range",
+			damage_line, status_line,
 		]
 	)
 

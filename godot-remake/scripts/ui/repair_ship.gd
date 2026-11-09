@@ -63,6 +63,11 @@ func _ready() -> void:
 	var repaired_text := "\n".join(lines) if not lines.is_empty() else "NOTHING WAS DAMAGED."
 	var header := "  REPAIR SHIP\n\nALL REPAIRS ARE\nCOMPLETE, SIR.\n\n%s\n\n" % repaired_text
 
+	# Line 2555: cleared unconditionally once repairs complete, before
+	# the billing/payment branch below — not tied to whether you can
+	# or choose to pay.
+	GameState.damage_alert_active = false
+
 	if GameState.credits < _bill:
 		GameState.credits = 0.0
 		_anger_government()
