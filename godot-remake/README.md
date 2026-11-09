@@ -206,7 +206,17 @@ keeps them separate, same as the already-existing pay-troops flow):
 - **Enlist** (`scripts/ui/enlist.gd`) — 1 credit/troop, capped so total
   troops can't exceed 20000. Input is a `SpinBox`, standing in for the
   original's digit-by-digit numeric-entry subroutine — same ultimate
-  effect, not a byte-exact port of that subroutine.
+  effect, not a byte-exact port of that subroutine. Genuinely
+  surprising find confirmed directly from source: line 2290's
+  `GOSUB 3000` means a successful enlist always continues straight into
+  **Buy Weapons** (`scripts/ui/buy_weapons.gd`, `SHORE LEAVE.bas` lines
+  3000-3110) before returning to the menu — not Repair/Restock, despite
+  that other menu option's name; Repair/Restock's own flow never calls
+  it. Buy Weapons steps through FIGHTERS/TRANSPORTS/TANKS/MISSILES in
+  that fixed order, re-rolling each category's unit cost fresh
+  (`INT((RND(1)+.2) * 4 * multiplier)`, multipliers 50/75/40/30),
+  capped at 255 per category and gated on credits; entering 0 just
+  moves on to the next category.
 - **Sell Loot** (`scripts/ui/sell_loot.gd`) — the exact 13-category
   multiplier table from `SHORE LEAVE.bas` lines 2400-2406
   (`GameState.compute_loot_value()`), including the one category whose

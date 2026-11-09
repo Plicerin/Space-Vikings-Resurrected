@@ -13,6 +13,12 @@ extends Control
 ## 20000 (line 2285) — this port just lets you pick a smaller number
 ## without the restart, since nothing else on this screen can change
 ## in between to make that distinction observable.
+##
+## Surprising but confirmed directly from source: line 2290's
+## `GOSUB 3000` means a successful enlist always continues straight
+## into "BUY WEAPONS" (`buy_weapons.gd`) before returning to the menu —
+## not Repair/Restock, despite that other menu option's name. Repair/
+## Restock's own flow never calls it.
 
 const MAX_TOTAL_TROOPS := 20000.0
 
@@ -21,6 +27,8 @@ const MAX_TOTAL_TROOPS := 20000.0
 @onready var _spin: SpinBox = $VBox/InputRow/SpinBox
 @onready var _enlist_btn: Button = $VBox/InputRow/EnlistButton
 @onready var _continue_btn: Button = $VBox/ContinueButton
+
+var _went_to_buy_weapons: bool = false
 
 
 func _ready() -> void:
@@ -66,10 +74,17 @@ func _on_enlist() -> void:
 	GameState.credits -= requested
 	_input_row.visible = false
 	_continue_btn.visible = true
+	_continue_btn.text = "CONTINUE TO BUY WEAPONS"
 	_body.text = "ENLISTED %d TROOPS.\nYOU NOW HAVE %d TROOPS\nAND %d CREDITS." % [
 		int(requested), int(GameState.troops), int(GameState.credits),
 	]
+	_went_to_buy_weapons = true
 
 
 func _return() -> void:
-	GameState.goto_scene("res://scenes/ground_forces.tscn")
+	if _went_to_buy_weapons:
+		# Line 2290's GOSUB 3000 — a successful enlist always continues
+		# straight into Buy Weapons, never straight back to the menu.
+		GameState.goto_scene("res://scenes/buy_weapons.tscn")
+	else:
+		GameState.goto_scene("res://scenes/ground_forces.tscn")
