@@ -58,6 +58,27 @@ func _make_select_callback(index: int) -> Callable:
 		# system marks it scouted, gating the Galaxy Directory's detail
 		# view (galaxy_directory.gd).
 		GameState.planet_scouted[index] = true
+		# 2026-11-10 fix: a real playtest reported "the planet and ship
+		# disappeared" right after a hyperspace jump. Root cause:
+		# ship_position/pitch/bank/heading/throttle were only ever reset
+		# at a brand-new game (game_state.gd's new-game init) — arriving
+		# at a *new* system via hyperspace left the player's ship sitting
+		# wherever it happened to be at the end of whatever they were
+		# doing in the *previous* system's flight scene (mid-combat,
+		# past the planet, facing away, etc.), since every system shares
+		# the one space_flight.tscn and its one fixed PLANET_WORLD_POSITION.
+		# A hyperdrive arrival is a real reset point in spirit even
+		# though the original's own engine doesn't track position the
+		# same way (see space_flight.gd's own doc comment) — so this
+		# port resets flight state here, matching the new-game defaults,
+		# so every arrival drops you at the same sane starting point
+		# relative to the new system's planet instead of carrying over
+		# stale state from the last one.
+		GameState.ship_position = Vector3.ZERO
+		GameState.pitch_deg = 0.0
+		GameState.bank_deg = 0.0
+		GameState.heading_deg = 0.0
+		GameState.throttle = 0.0
 		# 2026-11-09 fix: this used to go straight to the Command
 		# Console with zero visual feedback -- a real playtest
 		# reported "hyperspace animation is absent" (and the jump

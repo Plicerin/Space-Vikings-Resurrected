@@ -29,9 +29,25 @@ extends MultiMeshInstance3D
 const PLANET_MODEL_PATH := "res://assets/models/PLANET no 0.json"
 
 
+## CORRECTION (2026-11-10, a real playtest reported the starfield as
+## "either I'm too fast or it is too small"): two compounding bugs, not
+## a speed-tuning issue. (1) `space_flight.tscn`'s Camera never set its
+## own `far` clip, so it sat at Godot's default of 4000 units -- but
+## this field's real data spans -10000..10000 per axis, so most of the
+## 195 points were being frustum-culled outright, and the ones inside
+## that radius got clipped away within ~2.7 real seconds at full
+## throttle (max_speed 1500 * 2.7 ~= 4000). Fixed by setting the
+## Camera's `far` to 20000 in the scene, comfortably past the field's
+## own farthest corner (10000*sqrt(3) ~= 17320). (2) Each point's quad
+## was 4x4 units -- at the field's own distances (hundreds to ~17000
+## units) that subtends well under a pixel for most of the field, so
+## even an unclipped point was often invisible. Bumped to 24x24, sized
+## so a point near the field's far edge still reads as a few pixels
+## (matching a vector engine's bright dot, not a to-scale 24-unit
+## object) without ballooning into a visible disc up close.
 func _ready() -> void:
 	var mesh := QuadMesh.new()
-	mesh.size = Vector2(4, 4)
+	mesh.size = Vector2(24, 24)
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.albedo_color = Color.WHITE
