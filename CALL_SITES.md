@@ -32,17 +32,51 @@ liberty · ⚠️ gap found by this pass, not yet fixed · ⬜ infrastructure,
 no 1:1 port needed (Godot's own stack covers it) · ❓ mechanics unresolved
 (needs more tracing or a live MAME check)
 
+**Line numbers** in every table are BASIC line numbers. (Until the
+2026-11-10 reconcile the flight-loop table used each line's position in
+the detokenized text file instead, so its "69" was BASIC line 500.)
+A ✅ with no date carries over from an earlier pass and was not
+re-checked against the port in the reconcile.
+
+---
+
+## Layers, and the 2026-11-10 reconcile
+
+This file is hand-written interpretation. Underneath it now sits a
+machine-generated structural map that covers all 23 programs:
+
+| What | Where |
+|---|---|
+| Every DOS command, `CALL` site, vector install, PEEK/POKE address and branch | `analysis/BASIC_CALL_MAP.md` (+ `basic_callmap.json`), written by `tools/basic_callmap.py` from the tokenized programs in `extracted/*.bas` |
+| Independent re-count of that map, and the key-dispatch block run once per key through a small Applesoft interpreter | `tools/verify_callmap.py` |
+| 6502 disassembler used for the machine-code side | `tools/dis6502.py` (`tools/disassemble_simple.py` gets instruction lengths wrong; listings made with it are not reliable) |
+| Live check in MAME of the keys and the record copy | `tools/mame/keys_live.lua`, reference log `analysis/keys_live.log` |
+| The new-game data tables | `tools/newgame_data.py` |
+
+The map was built without reading this file, then compared with it.
+Five things earlier versions of this file stated as settled were wrong:
+
+| Earlier claim here | What is true | How it was checked |
+|---|---|---|
+| The in-flight hyperdrive key (line 209) is dead code, so having no such key in the port is faithful | **`H` is a live key.** `IF K<34 THEN 207` sends it to line 207, and 209 is two lines *after* 207, not skipped by it | interpreter run per key; live: `H` with a course set spends energy and changes planet; manual p. 8 ("Use the H key to engage the hyperdrive engines") |
+| `CALL 38402` is a cosmetic HUD flicker with six chained modes | It is the **A / B / S / W key handler**: four gameplay toggles (autopilot, condition, shields, weapon) that also draw their panel lights. Nothing chains | full disassembly; live: each key flips its own byte; manual p. 8 |
+| `CALL 38825`'s callee is unresolved (guessed: a ship-sprite init) | It **copies one planet's record** between the `P/F` table and the working registers 38204-38219 | full disassembly; live: registers change to the new planet's record on arrival |
+| `$38205` (defender type) is a transient global nothing sets, so re-rolling it on travel is the right port | It is **byte 1 of the per-planet record**: fixed per planet, persistent between visits | same as above; the data in `P/F-M` |
+| The planet coordinates don't look real (`1,1,255,255` repeating) | That was `PLANET FILE`, this disk's **saved-game slot**. The new-game galaxy is in the `-M` master files and is ordinary data | `START.bas` 2000-2020 loads the `-M` files; `tools/newgame_data.py` |
+
+Also corrected: `38210` is the **in-atmosphere flag** (`RE.bas` sets it,
+`ORBIT.bas` clears it; it drives the panel's ORBIT light), not an
+"in combat" flag.
+
 ---
 
 ## 6502/DOS asm-level call tricks — mechanisms the surface syntax hides
 
-Everything above still only covers Applesoft's own explicit call
-keywords (`GOSUB`, `CALL`, `ON...GOTO`). This pass went looking
-specifically for calls that *aren't spelled that way* — the kind of
-thing a 1MHz 6502 running a real-time flight loop has every reason to
-use instead of a generic call: no spare cycles for "dispatch on type"
-when a raw memory convention does the same job for free. Found three,
-and they explain several things the rest of this file had marked ❓.
+Applesoft's own call keywords (`GOSUB`, `CALL`, `ON...GOTO`) are only
+part of how these programs hand control around. A 1 MHz 6502 running a
+real-time flight loop has every reason to use something cheaper than a
+general call, and the game does, in four ways. None of them is spelled
+as a call, so a reader following `GOSUB`s and `CALL`s misses them.
 
 ### 1. `PRINT CHR$(4)"<cmd>"` — DOS 3.3 command injection as a chain-load "call"
 
@@ -72,8 +106,7 @@ statement underneath — it's BASIC code typing at DOS through the
 character-output hook, disguised as print statements. A line-by-line
 read that doesn't know this convention misreads every one of these as
 inert text, which is exactly how `H_D.bas`'s own star-burst went
-unnoticed for so long, and exactly what's going on with line 209
-below.
+unnoticed for so long.
 
 **This is the real scene-transition graph** — nothing in Applesoft's
 own `GOTO`/`GOSUB` reaches across file boundaries, so this hidden
@@ -83,7 +116,7 @@ hubs:
 
 | From | `RUN`s to |
 |---|---|
-| `STARSHIP SIMULATOR.bas` (main flight) | `RE` (re-entry, 156), `ORBIT` (158), `H/D` (209 — **see below, unreachable**), `COM` (319), `RADAR` (320), `EX` (explosion/destroyed, 1560), `S/X` (ship destroyed, 3350), `DMG` (damage-control overlay, 3360) |
+| `STARSHIP SIMULATOR.bas` (main flight) | `RE` (re-entry, 156), `ORBIT` (158), `H/D` (209, the `H` key), `COM` (319), `RADAR` (320), `EX` (explosion/destroyed, 1560), `S/X` (ship destroyed, 3350), `DMG` (damage-control overlay, 3360) |
 | `COM.bas` (command console hub) | `GROUND FORCES` (98/115/127), `STARSHIP SIMULATOR` (130), `END` (132), `RADAR` (133), `GALAXY MAP` (1172/3000), `STATUS` (1200), `SUPPLY` (20000) |
 
 Plus a ground-campaign loop (`GROUND FORCES` ↔ `COLLECT`/`RECALL`/
@@ -94,171 +127,270 @@ scene tree already replaces 1:1 (`GameState.goto_scene`) — ⬜, no
 action needed — but it's worth having the real graph written down once
 rather than re-deriving it piecemeal per file.
 
-**Resolves the H_D.bas trigger-key question with much higher
-confidence than the earlier hand-trace** (previously ❓ in this file):
-line 209's `PRINT CHR$(4)"RUNH/D"` is real, working chain-load code,
-not dead text — but it's still unreachable in practice. Tracing the
-*entire* key-dispatch block (`STARSHIP SIMULATOR.bas` lines 200-210,
-traced exhaustively this time, not just spot-checked around line 209)
-end to end:
+Two more spellings of the same thing, both tracked by the mapper:
+five programs (`COLLECT`, `GROUND FORCES`, `H_D`, `RECALL`, `SHORE
+LEAVE`) set `D$ = CHR$(4)` and write `PRINT D$;"RUN COM"`, with no
+Ctrl-D in the string at all; and `RADAR.bas` 5005 builds the name at
+run time (`"RUN SHIP # ";J;" I.D."`). The whole corpus holds 169 DOS
+commands. The non-`RUN` ones are in section 2 of the generated map;
+the ones that matter for state are the `MISC FILE` reads and writes
+(stardate, troops, credits as three text lines): written by `START`
+2050, `H_D` 6, `GROUND FORCES` 670/800/1120 and `SHORE LEAVE`
+2096/2160/2290/2460/2620, read by `GROUND FORCES` 11, `RECALL` 11,
+`SHORE LEAVE` 11, `STATUS` 5000, `SUPPLY` 5000 and `H_D` 6.
+
+**The flight loop's key dispatch** (`STARSHIP SIMULATOR.bas` lines
+200-210, 311-321, 500). This table is computed, not traced by eye:
+`tools/verify_callmap.py` runs those lines once for each of the 128
+key codes and groups the outcomes.
+
+| Key | Lines taken | Effect | Port |
+|---|---|---|---|
+| `1` `2` `3` `4` | 201 → `GOSUB` 311-314 → 207-210 | speed −3 / +3 / −15 / +15, clamped to 0..120 | ✅ throttle axis in `ship_controller.gd` (remapped) |
+| `A` | 203 → 317 → 500 | `POKE LT,4: CALL 38402` — autopilot on/off | ⚠️ not ported |
+| `B` | 203 → 318 → 500 | `POKE LT,3: CALL 38402` — step the condition | ⚠️ not ported |
+| `C` | 203 → 319 | `RUN COM` | ✅ `open_com` |
+| `H` | 204 → 207 → 208 → 209 | `RUN H/D` — hyperdrive | ⚠️ not ported (the port jumps from the Galaxy Map instead) |
+| `R` | 206 → 320 | `RUN RADAR` | ✅ `open_radar` |
+| `S` | 206 → 321 → 500 | `POKE LT,1: CALL 38402` — shields on/off | ⚠️ not ported |
+| `W` | 205 → 500 | `POKE LT,2: CALL 38402` — missile/laser | ✅ `toggle_weapon` |
+| any other key | … → 210 | nothing | ⬜ |
+
+Line 500 is `CALL 38402: GOTO 1`, so each of the four toggles also
+restarts the flight program from its first line.
+
+The real navigation flow is therefore three steps, all working in the
+original: set a course in the Navigation Computer (`COM.bas` 860-897,
+`POKE 38163,n`), return to flight, press `H`. `H_D.bas` line 1 sends
+you straight back to flight if you are in the atmosphere, have no
+course, or are already there. Live: `H` with no course changed nothing;
+after `38163=2`, `H` took energy 63 → 59, marked planet 2 scouted and
+changed the current planet 1 → 2.
+
+### 2. `POKE 38167,n` (`LT`) then `CALL 38402` — the panel-toggle handler
+
+`CALL 38402` always enters `TRANLIT.OBJ0` at `$9602`. Which of four
+routines runs is chosen by a byte BASIC pokes first, so a reader who
+only follows `CALL` targets sees one opaque call where there are four
+different actions. Disassembled in full with `tools/dis6502.py`
+(`tools/dis6502.py extracted/TRANLIT.OBJ0.payload.bin 9600`):
 
 ```
-K = raw keycode (PEEK(-16384), high bit set, 128-255) or exit if no key
-IF K-176 > 0:                        # digit keys 1-9 after the +128/+176 offset
-    K -= 176; clear keyboard strobe
-    ON K GOSUB [throttle -3,+3,-15,+15][K]   # only K=1..4 valid, else no-op
-IF K < 17: GOTO clamp                # (reduced K from above, or raw K<17 — never happens, raw is >=128)
-ON K-16 GOTO ['A'->mode4, 'B'->mode3, 'C'->RUN COM][K-16]   # K=17,18,19 only
-IF K < 34: GOTO clamp                # <-- catches K=20..33 UNCONDITIONALLY
-IF K == 39: POKE LT,2: CALL TRANLIT  # 'W'
-ON K-33 GOTO ['S'->mode1, (nothing)][K-33]
-clamp:
-IF K == 24: PRINT CHR$(4)"RUNH/D"    # <-- K=24 is 'H' (176+24=200=ASCII 72), but
-                                      #     K=24 satisfies "K<34" two lines above,
-                                      #     so execution already left for `clamp`
-                                      #     before this line is ever reached.
-```
-
-'H' (K=24) always gets intercepted by the `IF K<34 THEN 207` guard
-several lines *before* reaching the `IF K=24` check — this is a
-genuine shipped bug in the original, not an unidentified-but-working
-key: **the hyperdrive in-flight trigger key is dead code in the real
-game.** That also means the Godot port's current choice to have *no*
-flight-triggered hyperdrive key at all (`space_flight.gd`'s
-`_unhandled_input` wires `C`→Command Console and `R`→Radar, matching
-the two live `ON K-16 GOTO`/`ON K-33 GOTO` targets exactly, and
-nothing for hyperdrive) is **already the faithful port**, not a gap —
-confirmed checked against `space_flight.gd` this pass. Worth one live
-MAME keypress sweep to rule out an interrupt-driven secondary key
-reader this static trace can't see, but confidence is now high, not
-speculative. Downgrade this item from "needs a live MAME check" to
-"nice-to-have confirmation, not blocking."
-
-### 2. `POKE 38167,n` (`LT`) then `CALL 38402` — one fixed address standing in for up to 6 real routines
-
-`CALL 38402` always jumps to the same machine address
-(`TRANLIT.OBJ0`'s entry point, confirmed via Ghidra decompile). What it
-actually *does* depends entirely on two bytes BASIC pokes first — the
-call address never changes; the "which function" selection happens
-through shared memory, which is the part a reader tracking only
-`CALL`/`GOSUB` targets will never see:
-
-```
-TRANLIT_DISPATCH():                      # CALL 38402/38400, always this one address
-    if PEEK(38189) == 10:                # one-time cold-init sentinel ('\n')
-        POKE 38189, 0                    # self-clearing, so it only fires once
-        mode1(); mode2(); mode3(); mode4(); mode5(); mode6()   # run the whole chain
+TRANLIT($9602):
+    if PEEK(38189) == 10:              # $952D, "redraw everything"
+        POKE 38189, 0
+        mode1(); mode2(); mode3(); mode4(); orbit_light(); damage_light()
         return
-    mode = PEEK(38167)                   # LT -- the real "argument"
-    next = mode
-    if next == 1: next = mode1()         # FUN_9643, may chain into mode2
-    if next == 2: next = mode2()         # FUN_966a, may chain into mode3
-    if next == 3: next = mode3()         # FUN_96a5, may chain into mode4
-    if next == 4: mode4()                # FUN_96df, terminal, no further chain
+    match PEEK(38167):                 # $9517 = LT
+        1: mode1()                     # $9643
+        2: mode2()                     # $966A
+        3: mode3()                     # $96A5
+        4: mode4()                     # $96DF
+
+mode1():  shields   $9539 (38201):  0 -> 1, 1 -> 0;       draw SHIELD light
+mode2():  weapon    $953A (38202):  0 -> 1, 1 -> 0;       draw MISSILE and LASER lights
+mode3():  condition $9515 (38165):  2 -> 3, 3 -> 1, else -> 2;  draw COND light
+mode4():  autopilot $9514 (38164):  0 -> 1, 1 -> 0;       draw MANUAL and AUTO lights
+orbit_light():   draw ORBIT light from $9542 (38210), no state change
+damage_light():  draw DAMAGE light from $95F9 (38393), no state change
 ```
 
-Each `modeN()` toggles a small flag byte of its own (`$9539`, `$953A`,
-`$9515` — 3-valued, `$9514`) and calls a shared 5-byte table-copy
-routine (`FUN_9754`) with a small constant, which blits one of two
-parallel 5-entry tables (`$9789-$978D` vs `$978E-$9792`) depending on
-the flag — reads as a small HUD/character-cell flicker toggle (which
-of two glyph variants to show), not a gameplay mechanic. `FUN_9754`
-itself writes into `$9773`, an address Ghidra's own decompile flags as
-"read-only (code) being written" — self-modifying code again,
-consistent with this project's already-confirmed self-modifying-opcode
-pattern in `LO-HI A2-3D1` (see
-[[space_vikings_a2_3d1_opcodes_8_9_12_confirmed]]) — not re-disassembled
-byte-for-byte this pass, flagged ❓ only on the exact visual effect, not
-on the dispatch mechanism itself, which is now fully traced.
+The four `CMP`/`BNE` tests run one after another without reloading
+the mode, which is what an earlier decompile read as "chaining"; no
+routine returns a value that matches a later test. The shared drawer
+at `$9754` writes a 2-byte-wide, 5-row colour bar straight into hi-res
+page 1 through a self-modified `STA` operand (`$9773/$9774`), taking
+bar patterns from `$9793-$97A6`. The lights sit in the two panel rows
+the manual's screenshot shows: MANUAL, AUTO, ORBIT, DAMAGE at y ≈
+153-157 and MISSILE, LASER, COND, SHIELD at y ≈ 161-165. `GALAXY
+MAP.bas` 5000-5160 redraws the same six lights in BASIC without
+touching the flags.
 
-**Who actually calls this, and with what mode** (all in `STARSHIP
-SIMULATOR.bas`'s key-dispatch block above): `'A'`→mode 4 (line 317),
-`'B'`→mode 3 (318), `'S'`→mode 1 (321, no `GOTO 500` — relies on
-fall-through), `'W'`→mode 2 (205). Plus `INSTRUMENTS.bas` line 210
-pokes the cold-init sentinel directly (`PEEK(38391)<>77`, i.e. "has
-this boot run TRANLIT's init yet") rather than a mode number, forcing
-the full six-step chain once per fresh boot before handing off to
-`STARSHIP SIMULATOR`. | ⬜ — reads as cosmetic HUD-icon flicker, not a
-gameplay system; no 1:1 port needed, consistent with this project's
-"A2-3D1 internals don't need to survive the port" precedent. Noted here
-mainly so the *existing* catalog row for `CALL 38402` (below) isn't
-read as "one opaque call" when it's actually a 6-routine dispatch keyed
-on a side-channel byte — the thing this whole file exists to prevent.
+What each flag gates in the flight program:
 
-### 3. `POKE 38823,<arg>: POKE 38824,<mode>: CALL 38825` — the 2-argument calling convention
+| Flag | Values | Read at | Effect | Port |
+|---|---|---|---|---|
+| shields `38201` | 1 = up | 3205 | a hit always wears the shield (`38200`) down; with shields up and shield strength above 10 it stops there, otherwise the other systems and the hull take damage | ⚠️ `flight_combat.gd` behaves as if shields were always up |
+| weapon `38202` | 1 = missile | 1501 | the fire button launches a missile (line 1000) instead of the laser | ✅ `missile_mode_active` |
+| condition `38165` | 1 GREEN, 2 BLUE, 3 RED | 5200; `STATUS.bas` 1280-1294 | only at RED do the turrets shoot at an incoming fighter attack (5200-5251: 30% to destroy it, costing the enemy one fighter) | ⚠️ the port's shoot-down runs unconditionally |
+| autopilot `38164` | 1 = auto | 15 | skips line 19, so the paddles are not read and `38397/38398` keep their last values | ⚠️ not ported |
 
-Applesoft's `CALL` takes no parameters, so wherever the original needs
-to pass arguments into a shared machine routine, the convention is:
-poke them into two fixed scratch bytes immediately before the call.
-`CALL 38825` ($97A9) is used this way from **four** sites, not the two
-this file previously tracked under `H_D.bas` alone:
+**The redraw-all path changes state.** `INSTRUMENTS.bas` 210 pokes the
+sentinel and calls once on a new game (`PEEK(38391)<>77`; a loaded
+game and the return from the star chart go through `GALAXY MAP.bas`
+5000 instead, which only draws). Because that path runs the four toggle routines, it
+flips all four flags as it draws them. Live on a fresh boot:
+autopilot 1 → 0, condition 2 → 3, shields 1 → 0, weapon 0 → 1. So a
+new game enters flight under manual control, at condition RED, with
+**shields down** and **missile selected**. Whether that was intended or
+is a side effect of reusing the toggles to draw, it is what the game
+does. Port: ✅ the weapon start state (`start_new_game()`); the other
+three wait on the toggles above.
 
-| Site | `POKE 38823,` (arg0) | `POKE 38824,` (mode) |
+One oddity left ❓: `STATUS.bas` 1386 reads `38167` (the mode byte) as
+the high byte of a troop count.
+
+### 3. `POKE 38823,<planet>: POKE 38824,<mode>: CALL 38825` — the per-planet record copy
+
+Applesoft's `CALL` takes no parameters; this routine takes two through
+fixed bytes poked just before the call. Disassembled (`$97A9`-`$97E0`):
+
+```
+PLANET_RECORD(planet = PEEK(38823), mode = PEEK(38824)):
+    record = table[planet - 1]           # 21 pointers at $9931: $97E1, $97F1, ... 16 apart
+    for i in 0..16:                      # 17 bytes, one more than a record holds
+        if mode == 0: POKE 38204 + i, record[i]      # load
+        else:         record[i] = PEEK(38204 + i)    # store
+```
+
+The table is the `P/F` file (`BLOAD ...,A$97E1`). Four call sites:
+
+| Site | Planet | Mode | Meaning |
+|---|---|---|---|
+| `START.bas` 220 | `PEEK(38392)` | 0 | load the planet the game starts or resumes at |
+| `H_D.bas` 12 | `PEEK(38209)` (current) | 1 | store the planet being left |
+| `H_D.bas` 25 | `PEEK(38163)` (target) | 0 | load the planet being entered |
+| `END.bas` 210 | `PEEK(38209)` | 1 | store before the three `BSAVE`s |
+
+The record, by the register each byte lands in:
+
+| Byte | Register | Meaning |
 |---|---|---|
-| `START.bas` line 220 (new game) | `PEEK(38392)` | `0` |
-| `H_D.bas` line 25 (arrival, new planet) | `PEEK(38163)` (target/current planet) | `0` |
-| `H_D.bas` line 12 (arrival, old planet) | `PEEK(38209)` | `1` |
-| `END.bas` line 210 (game-save, right before the `BSAVE`s) | `PEEK(38209)` | `1` |
+| 0 | 38204 | defender destruction threshold (line 1560: `DP > PEEK(38204)` → `RUN EX`). `H_D.bas` 93 replaces it with tech × 60 on arrival when tech > 1 |
+| 1 | 38205 | orbital defender type: 0 none, 1 space lab, 3 light cruiser, 4 heavy cruiser. A stored 2 is drawn and described as 3 everywhere (`START` 230, `H_D` 38, `ORBIT` 31, `RADAR` 5002). `EX.bas` 30 zeroes it when the ship is destroyed |
+| 2 | 38206 | × 500 = enemy ground troops (`GROUND FORCES.bas` 500). `H_D.bas` 105 zeroes it after every arrival, so the stored values only apply at the starting planet ❓ |
+| 3 | 38207 | enemy fighters (gates incoming attacks at 190/192; `EX.bas` 56 halves it; 5250 takes one) |
+| 4 | 38208 | planet has surrendered |
+| 5 | 38209 | planet number (`H_D.bas` 26 pokes it as well) |
+| 6 | 38210 | in-atmosphere flag |
+| 7-15 | 38211-38219 | ship position and attitude (`29467-29475`), filled only by `END.bas` 200-202 before a save and read back by `START.bas` 225 |
 
-Mode `0` sites always pass a *planet index about to become current*;
-mode `1` sites always pass the *outgoing* planet right before a
-BSAVE/departure. Reads as a `SHIP_SPRITE_INIT(planet_index, mode)` —
-mode 0 = load/select for arrival, mode 1 = flush/commit before leaving
-or saving — which matches this file's existing guess for the two
-`H_D.bas` sites, but the `END.bas` site is new: **the save-game flow
-also depends on this routine's side effects**, not just hyperdrive
-arrival. The callee's exact bytecode is still unresolved (`$97A9` falls
-inside `TRANLIT.OBJ0`'s last decompiled function, `FUN_9754`, per
-Ghidra's function-boundary detection, but that's a heuristic, not a
-confirmed deliberate secondary entry point — not treated as settled).
-| ❓ unresolved on exact effect, but the **calling convention and full
-site list are now settled**, upgrading this from "two call sites,
-opaque" to "four call sites, known argument shapes, opaque callee."
+**So the defender, its fighters and the surrendered state belong to the
+planet**, and come back as you left them. Live: arriving at planet 2
+changed the defender 3 → 2, the threshold 150 → 100 (then 180 from
+line 93) and surrendered 1 → 0. Port: ✅ 2026-11-10,
+`GameState.store_planet_record()` / `load_planet_record()` for bytes
+0, 1, 3 and 4, called from `galaxy_map.gd`, `start_new_game()` and
+`save_to_disk()`; the random re-roll is gone.
+
+**An original bug, not ported:** the 17th byte copied is 38220, which
+is `38219+1` — planet 1's entry in the secured array — and on the
+record side it is byte 0 of the *next* planet's record. Every load
+overwrites SOL's secured flag with the next planet's threshold, and
+every store writes it back over that threshold. Live: SOL's flag went
+1 → 100 the moment `START` loaded record 1, and 100 → 150 on arrival
+at planet 2. `GALAXY MAP.bas` 3066 tests `= 1` and `COM.bas` 1120
+tests `= 0`, so the visible effect is SOL losing its "secured" colour
+on the chart. The saved-game slot on this disk shows the store side:
+record 2's byte 0 is 1.
+
+**New-game data** (`tools/newgame_data.py`; `PLANET FILE-M` arrays are
+read as base + planet number, `P/F-M` is the record table):
+
+```
+ P name              tech  pop  sec  sct base    x    y    z  def  thr  gnd  ftr surr
+ 1 SOL                  3  125    1    1    1   15   15   15    3  150  100   30    1
+ 2 ALPHA CENTAURI       3   70    0    0    0   13   13   12    2  100   50   20    0
+ 3 BARNARD'S STAR       3  175    0    0    0   14    9   15    3  150  120   22    0
+ 4 WOLF 359             0    0    0    0    0    8   16   12    0    0    0    0    1
+ 5 LUYTEN               2   90    0    0    0   22   14   19    1   20   20    0    0
+ 6 LALANDE 21185        1    3    0    0    0   13   22   19    0    0    5    0    0
+ 7 SIRIUS               4  200    0    0    0   17   23   12    4  200  150   20    0
+ 8 VARCAR               2  150    0    0    0   14    8    9    1   20  100    0    0
+ 9 XANADON              3   85    0    0    0   19   13   25    2  100  100   40    0
+10 EPSILON ERIDANA      4  157    0    0    0   20   22   10    3  150  120   25    0
+11 CYGNI                0    0    0    0    0    9   23   20    0    0    0    0    1
+12 PROCYON              1    1    0    0    0    7   23   14    0    0    0    0    1
+13 TAU CETI             4  165    0    0    0   25   21   13    4  200  200   50    0
+14 LACAILLE 9352        2    6    0    0    0   25   15   21    1   20    7    0    0
+15 LARSEN-C             0    0    0    0    0    9   21   19    0    0    0    0    1
+16 GROOMBRIDGE 1618     3   80    0    0    0   25    5   11    2  100   95   20    0
+17 KRUGER 60            3  130    0    0    0   24   10   10    3  150  100   40    0
+18 EPSILON INDI         3  155    0    0    0   11   18   27    3  150  115   26    0
+19 ARGO                 1    2    0    0    0   18   27   11    0    0    5    0    0
+20 SHIVANDA             2    7    0    0    0   11   11   25    1   20   15    0    0
+```
+
+tech `38282+P`, pop `38261+P` (× 35294 for display), sec(ured)
+`38219+P`, sc(ou)t(ed) `38240+P`, base `38303+P`, x/y/z `38366+P` /
+`38345+P` / `38324+P`; def, thr, gnd, ftr, surr are record bytes 1, 0,
+2, 3, 4. Port: ✅ 2026-11-10 as `GameState.NEW_GAME_*` and
+`PLANET_X/Y/Z`. **Before this the port had no galaxy data at all**:
+every planet was tech 0 with population 1, which made every planet
+"non habitable" to Ground Forces and ineligible for flight combat.
+
+### 4. A `POKE`d vector — installing a routine with no `CALL` at all
+
+Two sites hand control to machine code or data by writing a two-byte
+pointer the firmware follows from then on:
+
+| Site | Vector | Points at | Effect |
+|---|---|---|---|
+| `START.bas` 75 (`POKE 54,0: POKE 55,147`) | CSW, the character-output hook | `$9300`, `HI-RES CHARACTER GENERATOR` | from here on every `PRINT` in every program is drawn on the hi-res screen by that routine. `POKE 973/974` are its mode bytes |
+| `STARSHIP SIMULATOR.bas` 2 (`POKE 232/233`) | shape-table pointer | `$7FFF`, the `ENEMY` table | `DRAW`/`XDRAW` use it |
+
+⬜ Godot's own text and drawing replace both. The mapper checks for
+the other vectors too (KSW, `&`, `USR`, RESET); none is used.
 
 ---
 
 ## STARSHIP SIMULATOR.bas — the main flight loop
 
-Source: `detokenized/STARSHIP SIMULATOR.bas`. Port: `godot-remake/scripts/flight/{space_flight,ship_controller}.gd`, `scripts/combat/flight_combat.gd`.
+Source: `detokenized/STARSHIP SIMULATOR.bas`. Port: `godot-remake/scripts/flight/{space_flight,ship_controller}.gd`, `scripts/flight/flight_combat.gd`.
+
+The loop is lines 15-210: `FOR OO = 0 TO 1` draws alternately into the
+two hi-res pages, and every pass ends at the keyboard check in line
+200.
 
 | Line | Target | What it actually does | Status |
 |---|---|---|---|
-| 4 | `GOSUB 6600` ×3 | 16-bit sign-extend helper: combines a PEEKed low/high byte pair into a signed world-position component. | ⬜ Godot stores `ship_position` as a native `Vector3`; no byte-packing needed. |
-| 31 | `GOSUB 6000` ×3 | Inverse of 6600 — splits a signed value back into low/high bytes for POKEing back to the position pointers. | ⬜ same reason. |
-| 45 | `GOSUB 1500` | **Surrender check.** If the orbital defender's "fire" flag is up (`PEEK(38208)=0`) and in weapons range, rolls for taking a draw-the-laser-crosshair hit animation (lines 1500-1535), then accumulates damage into `$38160`(defender)/`$38152`(?) by `J1/J2` scaled by tech (`TE`); if accumulated damage crosses `$38150` (tech×60 threshold) prints "THE PLANET HAS SURRENDERED" and sets `38208=1`/`38219+planet=1`. | ✅ `flight_combat.gd`'s `defender_damage_points`/`defender_damage_threshold`/surrender text — confirmed in a prior session's MAME trace. |
-| 47-48 | `GOSUB 3000` | **Ambient incoming-fire roll.** Only fires if `38205<>0` (a defender exists) or `38210=1` (actively hostile); further gated by position-box checks. Inside: ~40-60% chance of nothing, else a hit-flash VFX (`GOSUB 4110`/`4120` set draw mode, `CALL SG` plays a sound) and a `DMG=1` flag. | ✅ ambient damage in `flight_combat.gd`, confirmed earlier via live MAME. |
-| 47-48 | `GOSUB 5000` (conditional, 50-60% within the 3000 branch) | **Missile-visual effect** — draws an incoming missile shape (`XDRAW M AT X1,Y1`) moving across the HUD from a random edge toward center, optionally triggering a hit-flash (`GOSUB 5098`/`5200`) if it's close to the ship's own reticle. | ✅ `missile_strike.gd` — this is the shape/flicker already confirmed authentic against `ENEMY` shape-table point counts. |
-| 60-68 | `ON K GOSUB 311,312,313,314` | Speed nudge (±3/±15) from specific raw keycodes, after the 176-offset remap. | ✅ throttle input via `Input.get_axis` in `ship_controller.gd` — modern remap, not byte-exact, already documented as a liberty. |
-| 69 | `CALL 38402` | **Not one routine — a 6-routine dispatch keyed on `PEEK(38167)`/`PEEK(38189)`, set by `POKE LT,n` a few lines above.** See "6502/DOS asm-level call tricks" §2 above for the full mechanism; reads as cosmetic HUD-icon flicker, not gameplay. | ⬜ no Godot equivalent needed — confirmed cosmetic, not just assumed. |
-| 70-91 | `GOSUB 1200`, `1100` (from `1085`/`1088`) | **Defender destruction sequence** — `1200`/`1220` draw an explosion flip-book (`XDRAW 2` at increasing `SCALE`, then `XDRAW 15-18`), `1100` is the smaller "hit, not destroyed" flash variant. | ✅ `flight_combat.gd`'s destruction VFX, built on the same `vector_shape_2d.gd` the zero-length-segment fix (2026-11-09) applies to. |
-| 97 | `GOSUB 3380` (repeated ~8×, lines 99-103) | **Damage-floor clamp** — `IF J<0 THEN J=0:RETURN`, called once per repairable system after subtracting a random damage amount. Not a mechanic on its own, just a shared clamp. | ⬜ Godot's repair system (`repair_ship.gd`) already floors at 0 via `clampf`/`max`; no separate port needed. |
-| 104-105 | (inline, not a call) | If hull (`38193`) hits exactly 0, `PRINT "RUNS/X"` — **ship destroyed, straight to the S/X ending**, no further flight. If `38393=0`, sets it and prints `RUNDMG` (damage-control overlay) once. | ❓ confirmed to exist in source; **not checked yet** whether `flight_combat.gd`'s `player_destroyed` signal fires specifically off hull reaching 0 the same way, or off some other accumulated-damage condition. Needs a direct read of `flight_combat.gd`'s destruction trigger against this exact line. |
-| 111-126 | `GOSUB 5098`→`3205`, `5200`→`5250`→`1100` | Missile-effect sub-paths: a near-miss triggers a sound+hull-tick (`L=7:GOSUB3205` forces a hull-only damage roll), and (gated on `PEEK(38165)=3`, a mode flag) a full hit draws crosshair lines and, 30% of the time, recurses into the explosion sequence (`GOSUB 1100`) with the missile's own position as the detonation point. | ✅ matches `missile_strike.gd` + `flight_combat.gd`'s hit handling, per the already-confirmed authenticity note in `missile_strike.gd`. |
-
-**Open items from this file:** the hull==0→`RUNS/X` destruction trigger (line 104) needs a direct check against `flight_combat.gd`'s own player-destroyed condition — flagged ❓, not fixed in this pass.
+| 2 | `POKE 232/233` | Points the shape-table vector at `$7FFF` (§4). | ⬜ |
+| 8 | `GOSUB 6600` ×3 | Joins a low/high byte pair into a signed position component. | ⬜ Godot stores `ship_position` as a `Vector3`. |
+| 9, 182 | `POKE 38149,7` … `IF PEEK(38149)=7 THEN POKE 38149,0: GOTO 200` | The first pass after the program starts (or restarts through line 500's `GOTO 1`) skips the fire button and incoming fire and goes straight to the keyboard. | ⬜ |
+| 15, 19 | (inline) | **Autopilot.** `IF PEEK(38164)=1 THEN 20` skips the paddle read and the `POKE 38397/38398` that passes it to the flight-control routine, so the ship holds its last stick input. | ⚠️ not ported (§2). |
+| 21-128 | `CALL CSN` (24582), `CALL SN` (24585) | A2-3D1's cosine and sine entries. The angle goes in by `POKE M1` (24588) and the 16-bit result comes back in `M1/M2` — the same poke-then-call convention as §3. Eight calls a pass turn pitch and heading into the movement vector of line 129. | ⬜ Godot's `Basis` math. |
+| 133-138 | (inline) | Position wraps at ±20000 on each axis. | ⬜ the port's space is not bounded this way; not re-checked. |
+| 140 | `GOSUB 6000` ×3 | Inverse of 6600, for poking the position back. | ⬜ |
+| 147 | (inline) | In the atmosphere (`38210=1`) the ship sinks by `6 − S/10` a pass, floored at 20 with pitch and bank zeroed. | ⬜ the port has no free flight in atmosphere (`planet_approach.gd`). |
+| 150-153 | `CALL CA` (36899), `CALL 37936` / `CALL 37888` | The per-frame flight-control and render call, then the page flip for whichever page was just drawn. | ⬜ Godot's renderer. |
+| 156 | (inline) | Within 900 units of the origin on all axes and not in atmosphere → `RUN RE` (re-entry). | ✅ `planet_approach.gd`. |
+| 158 | (inline) | In atmosphere and `Y > 4000` → `RUN ORBIT` (back to orbit). | ⬜ same reason as 147. |
+| 185 | `GOSUB 1500` | Fire button. 1500: firing at a surrendered planet re-arms it (`POKE 38208,0: POKE 38150,100`). 1501: missile selected (`38202=1`) → 1000. Otherwise the laser, if `38186 > 0`: draws the beams, then 1535 adds `10/(TE+1)` to the surrender counter `38160` and, in orbit, `1/(TE+1)` to the defender damage `38152`. 1550: counter ≥ `38150` → "THE PLANET HAS SURRENDERED", `38208=1`, planet marked secured. 1560: defender damage > `38204` with a defender present → `RUN EX`. | ✅ `flight_combat.gd`. |
+| 1000-1090 | missile | Needs stock (`38187 > 0`), costs 2 per shot. The shot flies 16 steps; a hit is the defender's box around `X9,Y9,Z9` in orbit, or the ground in atmosphere. Hit → explosion (1200) and 1535 with `J2=120`, so one missile hit is worth 120 laser hits on the defender. Miss → the small flash (1100). | ✅ `flight_combat.gd`, `missile_trail.gd`. |
+| 189-192 | `GOSUB 3000`, `GOSUB 5000` | Incoming fire, only at tech ≥ 2 planets that have not surrendered: every pass while in atmosphere (190), or while inside a box around the defender (192). Each calls the damage roll (3000) and then, 50% / 60% of the time and only while the planet has fighters (`38207 > 0`), the fighter attack (5000). | ✅ `flight_combat.gd`, `incoming_fire.gd`. |
+| 3000-3032 | damage roll | Returns at once if there is no defender and the ship is in orbit. Otherwise two independent rolls, 16% (40% × 40%) and 30%, each setting `DMG=1` with a screen flash and sound. | ✅ |
+| 3200-3350 | damage | `DMG=1`: shield strength `38200` loses up to 1.1. **If shields are up (`38201=1`) and strength is above 10, that is all.** Otherwise five systems lose up to 5 each and the hull (`38193`) up to 4. Hull 0 → `RUN S/X`. | ⚠️ shields switch not ported: the port always takes the "shields up" branch, while a new game in the original starts with them down (§2). ✅ hull 0 → `player_destroyed` (`flight_combat.gd`; closes the old ❓). |
+| 3360 | (inline) | First damage of a visit: `POKE 38393,1` (the DAMAGE light) and `RUN DMG`. | ✅ `GameState.damage_alert_active`. |
+| 200-321 | key dispatch | See §1's table. | see §1 |
+| 500 | `CALL 38402: GOTO 1` | The panel toggle (§2), then the program restarts from line 1. | W ✅; A, B, S ⚠️ |
+| 5000-5096 | fighter attack | A fighter shape crosses the view from a random edge. Each step has a 30% chance of `GOSUB 5098` then `GOSUB 5200`. | ✅ `incoming_fire.gd`. |
+| 5098 | `GOSUB 3205` with `L=7` | A strafing hit that only wears the shield (`3207 IF L=7 THEN RETURN`), whatever the shields switch says. | ✅ not re-checked. |
+| 5200-5251 | point defence | **Only at condition RED** (`38165=3`): the turrets fire at the fighter; 30% of the time it is destroyed (`38207 − 1`, explosion 1100) at a cost of 2 missile stock (1090). | ⚠️ the port's shoot-down runs at any time; condition is not ported (§2). |
 
 ---
 
 ## H_D.bas — the hyperdrive jump itself
 
-Source: `detokenized/H_D.bas`. Port: `godot-remake/scripts/ui/hyperspace.gd`, `scripts/ui/galaxy_map.gd`'s arrival callback.
+Source: `detokenized/H_D.bas`. Port: `godot-remake/scripts/ui/hyperspace.gd`, `scripts/ui/galaxy_map.gd`'s arrival callback. Reached only from the flight loop's `H` key.
 
 | Line | Target/branch | What it actually does | Status |
 |---|---|---|---|
-| 2 | (inline) | **Abort gate.** If `38210=1` (actively in combat) OR `38209=38163` (target equals current planet) OR `38163=0` (no course set at all) → `RUN STARSHIP SIMULATOR` instead, i.e. the jump never happens. | ⚠️ **gap.** Nothing in the Godot port enforces any of these three — `galaxy_map.gd`'s callback unconditionally starts the hyperspace sequence for whatever was clicked, including re-clicking the current system. |
-| 2-5 | (inline) | **Energy gate.** If ship energy (`PEEK(38199)`) is exactly 0: prints "OUT OF ENERGY" / "ORBIT DECAYING", then `PRINT "RUN S/X"` — **the jump destroys the ship** (`S_X.bas` is the ship-destroyed ending: explosion animation, "YOUR SHIP HAS BEEN DESTROYED!!", reboot). Otherwise falls through to line 5. | ⚠️ **gap, confirmed real.** `ship_energy` already exists in `GameState` (used by the repair system) but nothing gates a jump on it, and there's no zero-energy failure path wired to `player_destroyed.tscn`. |
-| 6 | `GOSUB 10000` | **Jump cost.** Computes `D1` = a "distance" between current and target planet, then: opens/rereads/rewrites a save-state block advancing `SD` (stardate) by `D1+0.3`, and at line 14, `P = PEEK(38199) - D1` — **energy is spent proportional to the computed distance.** The distance formula itself (line 10010) is written identically for all three axes — `X1=Y1=Z1 = ABS(PEEK(38366+current)) - ABS(PEEK(38366+target))` — i.e. it only ever reads the *X*-position byte array (`$38366+planet_index`), never the real Y/Z blocks `GALAXY MAP.bas` uses at offsets `-21`/`-42` from the same base. This reads as a genuine formula bug in the original (always `D1 = sqrt(3)·|ΔX|`, not a true 3D distance) — faithful porting means keeping that quirk, not "fixing" it to real 3D distance. | ⚠️ **gap, not yet ported** (no energy/stardate cost on any jump today) — **and blocked on real data**: the per-planet X-position byte array at `$38366+n` was checked against `extracted/PLANET FILE.payload.bin` directly (offsets 147-166 for n=1..20) and came back as a suspiciously regular 4-value repeating pattern (`1,1,255,255` cycling) rather than distinct per-system values — more consistent with an unrandomized master-template default than real per-game galaxy layout. Don't hardcode these as real coordinates without resolving that; see note below. |
-| 11 | (inline) | `IF PEEK(38166)=0 OR 3 THEN POKE 38158,PEEK(38163)` — updates "last planet troops are on" tracking only if troops are aboard or in cryo (not mid-transit). | ✅ already the basis of `GameState.troops_stationed_at`, confirmed in the 2026-11-09 troop-tracking fix. |
-| 12 | `CALL 38825` | **2-argument call, not opaque on convention anymore** — `POKE 38823,<planet>: POKE 38824,<mode>` immediately before every call site. Four real sites, not two: here (mode 1, outgoing planet), line 25 below (mode 0, arrival planet), plus `START.bas` (new game, mode 0) and `END.bas` (game-save, mode 1, right before the `BSAVE`s). See "6502/DOS asm-level call tricks" §3 above. | ❓ exact callee bytecode still unresolved, but the calling convention and full site list (incl. the save-game dependency) are now settled — upgraded from a 2-site to a 4-site, known-argument-shape finding. |
-| 12-13 | (inline) | Landing-morale decrement (`$38170=17` flag → troop morale −1). | ✅ already confirmed and ported — see `FLIGHT_CONTROL_AND_PROGRESSION_ANALYSIS.md`'s "Landing and the troop-morale mechanic" section. |
-| 16 | (inline) | `POKE 38240+PEEK(38163),1` — marks the destination scouted. | ✅ `GameState.planet_scouted[index] = true`, `galaxy_map.gd`. |
-| 18, 20 | `CALL NOISE` ×250, then ×175 inside the star-burst loop | Continuous engine-whine sound during the "clearing" pause and during the star-burst draw. | 🟡 intentionally silent — `AudioManager` has no continuous-whine cue yet; documented liberty in `hyperspace.gd`. |
-| 20 | (inline, the star-burst itself) | 175 lines from screen-center to random points, accumulating, never erased. | ✅ ported 2026-11-09 as the real star-burst — this was the single biggest "entirely unported mechanic" finding before this pass. |
-| 25, 30-40 | `CALL 38825` (mode 1, new planet), then the `ET=PEEK(38205)` ship-sprite-select branch | Picks which `SHIP # n` (or `DEBRIS`, or blank) to load for the arrival view, based on `$38205`'s current value — **reads it, never writes a fresh random value here or anywhere else in BASIC** (confirmed again by this pass's own grep — the only write anywhere in `detokenized/*.bas` is `EX.bas`'s `POKE 38205,0` after a destruction). `ET=2` is specifically remapped to load `SHIP # 3`'s art (a real, consistently-applied quirk — the same `IF J=2 THEN J=3` substitution also appears verbatim in `START.bas` line 230 and `ORBIT.bas` line 31, so it's a real convention, not a one-off). | 🟡 **already correctly handled** — `game_state.gd`'s own doc comment for `orbital_defender_tier` independently reached the same conclusion (single transient global, no per-planet array, real set-site unreachable in available disassembly) and documents re-rolling on travel as a deliberate, flagged liberty. The `ET=2→SHIP#3` remap is captured in `a2_3d1_model.gd`'s tier handling — not re-verified line-by-line in this pass, worth a quick confirm but not flagged as broken. |
-| 90, 93 | (inline) | Tech-gated threshold reset (`TECH<2` → no threat; else `38150`/`38204` = tech×60). | ✅ `galaxy_map.gd`'s arrival callback, already ported (and already noted there as moved from ground-forces to arrival-time to match this). |
-| 53-56 | `GOSUB 10000` body | See line 6 above — same routine. | (see above) |
-
-**Open items from this file:** the abort-gate (line 2) and energy-gate/jump-cost (lines 2-6) are real, currently entirely unported mechanics — not implemented in this pass pending the per-planet-position data question and a product call on whether a run-ending failure mode belongs in the port as-is. See summary below.
+| 1 | (inline) | **Abort gate.** In atmosphere (`38210=1`), or target = current planet, or no course set (`38163=0`) → `RUN STARSHIP SIMULATOR`; nothing happens. Live: `H` with no course changed nothing. | ⚠️ not ported. `galaxy_map.gd` travels to whatever is clicked, the current system included. |
+| 2-4 | (inline) | **Energy gate.** Energy (`38199`) exactly 0: "OUT OF ENERGY", "ORBIT DECAYING", `RUN S/X` — the ship is lost. | ⚠️ not ported. |
+| 5, 10000-10020 | `GOSUB 10000` | **Distance.** `D1 = INT(SQR(X1² + Y1² + Z1²) + .6)`, but all three terms read the X array (`38366+planet`), so `D1 = INT(√3·|ΔX| + .6)`. Two systems with the same X are distance 0 apart. `GALAXY MAP.bas` 3300 shows the true 3-D distance, so the chart and the drive disagree. Then `POKE 301,0`. | ⚠️ distance not ported; the coordinates now are (`GameState.PLANET_X`). ✅ `loot_collected_this_visit` reset. |
+| 6 | `MISC FILE` read, write | Stardate `+= D1 + .3`. | ⚠️ not ported. |
+| 11 | (inline) | Troops aboard or in cryo → `POKE 38158,` target (their location follows the ship). | ✅ `GameState.troops_stationed_at`. |
+| 12 | `CALL 38825`, mode 1 | Store the working registers into the record of the planet being left (§3). | ✅ 2026-11-10 `store_planet_record()`. |
+| 12-13 | (inline) | Landing-morale decrement (`38170=17` → troop morale − 1). | ✅ |
+| 14-15 | (inline) | **Energy `−= D1`**, floored at 0. Live: SOL → Alpha Centauri (ΔX = 2, D1 = 4) took energy 63 → 59. | ⚠️ not ported. |
+| 16 | (inline) | `POKE 38152,0` (defender damage), destination marked scouted. | ✅ `galaxy_map.gd`. |
+| 18, 20 | `CALL NOISE` | Engine noise through the pause and the star-burst. | 🟡 silent, documented in `hyperspace.gd`. |
+| 20, 76-80 | star-burst | 175 lines from screen centre to random points. It runs twice: line 80 loops back with `R=2` after the arrival work, and the second pass draws in black (line 76), wiping most of the first. | ✅ first pass ported 2026-11-09; the black second pass is not. |
+| 25-26 | `CALL 38825`, mode 0 | Load the destination's record into the working registers (§3), set the current planet. | ✅ 2026-11-10 `load_planet_record()`. |
+| 30-40 | `BLOAD … ,A30841` | Model for the thing in orbit: tech ≥ 2 with defender 0 → `DEBRIS`; defender 0 otherwise → an empty model; 2 → `SHIP # 3`; else `SHIP # n`. | ✅ `a2_3d1_model.gd` for 1/3/4 and the 2 → 3 remap (now in `load_planet_record()`). ⚠️ debris for a destroyed defender is not drawn. |
+| 50-75 | `GOSUB 6000` | Random arrival position: X ±10000, Y ±5000, Z ±10000 with \|Z\| ≥ 7000, random heading, level pitch and bank. | 🟡 the port arrives at a fixed point (`galaxy_map.gd`, documented). |
+| 90-93 | (inline) | Tech < 2: `38150 = 0`. Tech ≥ 2: `38150` and `38204` = tech × 60, surrender counter zeroed. | ✅ `galaxy_map.gd`. The port zeroes the counter at every arrival, the original only at tech ≥ 2. |
+| 105 | (inline) | `POKE 38206,0` (ground strength), `38389`, `38149`. | ⬜ record byte 2 is not modelled (§3). |
 
 ---
 
@@ -266,27 +398,22 @@ Source: `detokenized/H_D.bas`. Port: `godot-remake/scripts/ui/hyperspace.gd`, `s
 
 Source: `detokenized/GALAXY MAP.bas`. Port: `godot-remake/scripts/ui/galaxy_map.gd`.
 
-**Headline finding, not a call-site table entry:** this screen is real, and
-it is *not* what `galaxy_map.gd` currently is. The actual `GALAXY MAP.bas`
-is a non-committal info browser — move a paddle-controlled cursor over a
-2D star chart (`DRAW PL AT X,Y` per system, `X=X(P)*10, Y=Y(P)*5` from the
-real per-planet position array), press a button near a system to see its
-name/coordinates/distance-from-here (`GOSUB 3300`: real 3D Euclidean
-distance, using the *correct* Y/Z blocks — contrast with `H_D.bas`'s own
-buggy X-only version above), then optionally jump to its full directory
-page (`COM.bas` line 978 territory). **It never sets a course or travels
-anywhere.** Setting a course is `COM.bas`'s separate "NAVIGATION
-COMPUTER → SET COURSE" numeric-entry screen (see below); actually
-traveling is a *third*, still-unresolved step (a specific in-flight key
-press reaching `H_D.bas`, gated on a course being set and not being in
-combat).
+This screen is an information browser. A paddle-driven cursor moves
+over a 2-D chart; the button on a star shows its name, coordinates and
+distance and offers its directory page. **It never sets a course or
+travels.** Setting a course is `COM.bas`'s Navigation Computer;
+travelling is the `H` key in flight. The port's `galaxy_map.gd` is a
+button list that travels on click, which folds all three steps into
+one.
 
 | Line | Target | What it actually does | Status |
 |---|---|---|---|
-| 2 | `GOSUB 5000` | Redraws the Instruments HUD icon row (repair-state indicators) before handing off — pure visual, not gameplay. | ⬜ Godot's HUD updates reactively; no port needed. |
-| 7-18 | (inline) | Real per-system chart: `X(P)/Y(P)/Z(P)` from `$38366` ±21/42 offsets, icon choice by `Z(P)` banding, a highlight box around the current system (`P=PEEK(38209)`), a filled marker for secured systems (`PEEK(38219+P)=1`). | ⚠️ **not ported** — `galaxy_map.gd` is a plain button list, explicitly flagged as such in its own doc comment ("not ported yet, this is list-selection only") from before this pass; this pass didn't change that, just confirmed the real screen's actual mechanics for whenever it is. |
-| 37 | `GOSUB 3300` | Real 3D distance from the *current* system to the one under the cursor, for display only. | ⚠️ not ported (no distance display exists at all today). |
-| 38 | (inline) | "Y" to further-info → `POKE 38388,P` (store the picked index) + `PRINT "RUN COM"` — hands off to the Galaxy *Directory* page, **not** a travel trigger. | 🟡 `galaxy_map.gd`'s current click-to-travel behavior is a deliberate simplification already flagged in `nav_computer.gd`'s own doc comment (quoted above) — this pass independently confirms that's the real divergence, not a new one. |
+| 1-2 | `GOSUB 5000` | Entered from `INSTRUMENTS` with `38391=77` (a loaded game, or the way back out of this chart, which had to redraw the whole panel): redraw the six panel lights in BASIC from the flags, with no toggling, then go to flight or back to `COM`. | ⬜ the port has no panel lights yet (they come with the toggles in §2). |
+| 3020 | (inline) | Reads the coordinates: X `38366+P`, Y `38345+P`, Z `38324+P`. | ✅ 2026-11-10 data ported (`PLANET_X/Y/Z`). |
+| 3025-3080 | (inline) | The chart: each star at `X·10−35, Y·5`, one of three sizes by Z, a different colour when secured (`38219+P = 1`), a box round the current system. | ⚠️ not ported. |
+| 3110-3200 | (inline) | Cursor from the two paddles; any key returns through `INSTRUMENTS`. | ⚠️ not ported. |
+| 3250-3320 | `GOSUB 3300` | Name, coordinates, and the true 3-D distance from the current system in light-years. | ⚠️ not ported. |
+| 3260 | (inline) | "Y" → `POKE 38388,P`, `RUN COM`: opens that system's directory page. | 🟡 the port's click travels instead. |
 
 ---
 
@@ -296,85 +423,63 @@ Source: `detokenized/COM.bas`. Port: `godot-remake/scripts/ui/{com,central_compu
 
 | Line | Target | What it actually does | Status |
 |---|---|---|---|
-| 5 | `GOSUB 15100` | Loads the 20 star names into `S$()`. | ✅ `GameState.STAR_NAMES`, static data, no runtime call needed. |
-| 5 | (inline, `IF PEEK(38388)>0`) | If arriving with a stored directory-page index (set by Galaxy Map's "further info" or by Radar's own ship-ID flow), jump straight to that page instead of the top menu. | ❓ not checked against `com.gd`'s own scene-entry logic in this pass — worth a quick confirm, not flagged broken. |
-| 14-15 | `GOSUB 10000` (inside the status-row draw loop) | Per-row flicker/dim logic for the twelve repair-status readouts, keyed on whether the system is the current selection row (`J1=7`) and its live value. Pure display polish. | ⬜ no 1:1 port needed — `repair_ship.gd`'s UI redraws reactively. |
-| 40 | `ON C GOTO 800,900,30,1200,20000` | Central Computer menu dispatch: 1 Navigation, 2 Galaxy Directory, 3 Galaxy Map (via a `GOSUB 3000` two lines up, not this dispatch), 4 Ship Status, 5 Supplies. | ✅ `central_computer.gd`'s own menu buttons. |
-| 860-897 | (inline, "SET COURSE") | Numeric destination entry (1-20), rejects the current planet ("THAT'S WHERE WE ARE NOW, SIR!"), otherwise `POKE 38163,C` and prints "COURSE SET." **Does not travel.** | 🟡 ported faithfully as data-entry-only in `nav_computer.gd` (`GameState.target_planet = dest`) — already correctly flagged by that script's own doc comment as not yet connected to an actual travel trigger, independently reconfirmed by this pass. |
-| 1005-1170 | (inline, Galaxy Directory detail page) | Per-system info: tech-level text, population (`PEEK(38261+C)*35294`), secured/independent status, repair-base presence. | ✅ `galaxy_directory.gd`, not re-audited line-by-line in this pass but no discrepancy surfaced. |
-
-**Net finding for this file:** confirms, independently of `nav_computer.gd`'s
-own prior self-assessment, that the real navigation chain is **Navigation
-Computer (set course, no travel) → [unresolved in-flight key] → H_D.bas
-(energy/abort-gated jump, real cost) → arrival**, a three-stage process
-the current port collapses into Galaxy Map's single click. This was
-already honestly flagged as a liberty before this pass; what's new here is
-confirming *why* that liberty was taken (the actual trigger key was never
-identified) and finding the specific line (`STARSHIP SIMULATOR.bas` line
-209, `IF K=24 THEN PRINT CHR$(4)"RUNH/D"`) that's supposed to be it — a
-follow-up pass (see "6502/DOS asm-level call tricks" §1) traced the full
-key-dispatch block end to end and confirmed that line is genuinely
-unreachable in the shipped original, not just unidentified.
+| 12 | `GOSUB 15100` | Loads the 20 star names. | ✅ `GameState.STAR_NAMES`. |
+| 12 | (inline) | `38388 > 0` on entry → straight to that system's directory page. | ❓ not checked against the port's scene entry. |
+| 98, 115 | (inline) | `38151 = 7` → `RUN GROUND FORCES`: the return half of a hand-off `GROUND FORCES.bas` 1130 starts. | ⬜ |
+| 120-140 | command menu | 1 computer, 2 ground forces, 3 radar, 4 end, 5 return to flight. Any other key: line 120 prints "PLEASE ENTER YOUR COMMAND AGAIN" but does not loop back, so control falls through to line 140's `GOTO 30` — **a line that does not exist**. Read statically, that raises an error and runs the `ONERR` handler at 63999 (`INT`). ❓ not run live. | ✅ menu buttons (a wrong key cannot happen in the port). |
+| 265-280 | `ON C GOTO 800,900,30,1200,20000` | Central Computer menu. The third target is again the missing line 30, never taken because line 265 handles `C=3` first (`GOSUB 3000`, the Galaxy Map). | ✅ `central_computer.gd`. |
+| 860-897 | Set Course | Number 1-20, refuses the current planet, `POKE 38163,C`, "COURSE SET." | ✅ `nav_computer.gd` sets `GameState.target_planet`; nothing in the port reads it yet because there is no `H` key. |
+| 1005-1170 | directory page | Tech text, population (`PEEK(38261+C)·35294`), secured, base. | ✅ `galaxy_directory.gd`; it now has real data to show (§3). |
 
 ---
 
 ## GROUND FORCES.bas
 
-Already has deep line-by-line coverage in `GROUND_COMBAT_ANALYSIS.md` and
-`FLIGHT_CONTROL_AND_PROGRESSION_ANALYSIS.md` (landing/morale section) —
-not re-walked call-by-call in this pass to avoid duplicating existing,
-already-correct work. Flagged here only so this file's index is honest
-about what it does and doesn't cover yet.
+Covered line by line in `GROUND_COMBAT_ANALYSIS.md` and
+`FLIGHT_CONTROL_AND_PROGRESSION_ANALYSIS.md`; not re-walked here. The
+generated map (`analysis/BASIC_CALL_MAP.md` §6) has its call sites.
+Two things the fresh map re-found that those documents already hold:
+line 1115's `K = 82` makes any key a retreat, and line 500 takes the
+enemy troop count from record byte 2 (`38206`), which `H_D.bas` 105
+has always zeroed by then except at the starting planet.
 
 ---
 
-## Summary: what this pass actually changes vs. what it just surfaces
+## Summary
 
-**Not fixed in this pass (flagged for a decision, not silently shipped):**
+**Ported in the 2026-11-10 reconcile**
 
-1. **Hyperdrive abort/energy gates (`H_D.bas` lines 2-6) are entirely
-   unported.** Right now every Galaxy Map click travels unconditionally —
-   no check for "already here," no check for "in combat," and no energy
-   cost or zero-energy failure state. The zero-energy case is a real
-   ship-destroyed ending (`S_X.bas` → the port's existing
-   `player_destroyed.tscn`), so this is a genuine difficulty/stakes
-   mechanic missing from the port, not a cosmetic gap.
-2. **RESOLVED, not just hand-traced:** the real in-flight hyperdrive
-   trigger key (`STARSHIP SIMULATOR.bas` line 209, `IF K=24 THEN PRINT
-   CHR$(4)"RUNH/D"`) is dead code in the original — a full trace of the
-   key-dispatch block (lines 200-210, see "6502/DOS asm-level call
-   tricks" §1) shows `IF K<34 THEN 207` unconditionally redirects K=24
-   ('H') away before line 209 is ever reached. The Godot port's current
-   choice to have no flight-triggered hyperdrive key at all is already
-   the faithful port (confirmed against `space_flight.gd`'s
-   `_unhandled_input`), not a gap. A live MAME key-sweep would still be
-   nice to rule out an interrupt-driven secondary key reader, but this
-   is no longer blocking or speculative.
-3. **The real per-planet position data (`$38366` ±21/±42 byte arrays,
-   used by both `GALAXY MAP.bas`'s real distance display and `H_D.bas`'s
-   buggy jump-cost formula) doesn't check out as plausible real galaxy
-   coordinates** when read directly from `extracted/PLANET FILE.payload.bin`
-   at the expected offsets — a 4-value repeating pattern, not 20 distinct
-   positions. Either the offset math here is off by something not yet
-   found, or (more likely, consistent with this project's established
-   pattern for `$38205`) the live block gets further mutated by machine
-   code at new-game time from this master template, unresolved in
-   available disassembly. Don't hardcode these bytes as real coordinates.
-4. **`GALAXY MAP.bas`'s actual screen (2D star chart with cursor,
-   distance display, no travel) is still not what `galaxy_map.gd` is** —
-   already known and flagged before this pass, reconfirmed, not rebuilt
-   here since it's a real UX/architecture decision (collapse vs. honor
-   the three-stage original flow), not a bug.
+- The new-game galaxy: tech, population, coordinates, secured, scouted
+  and base flags for all 20 systems (`GameState.NEW_GAME_*`,
+  `PLANET_X/Y/Z`). The port previously started every system at tech 0.
+- The per-planet record (defender type, defender threshold, fighters,
+  surrendered) with store-on-leave and load-on-arrival, replacing the
+  random defender re-roll. Saved games carry the records.
+- New game starts with the missile selected, as the original does.
 
-**Confirmed correct in this pass (no action needed):** the surrender
-check, ambient incoming fire, missile visual, defender destruction
-sequence, landing-morale decrement, troop-location tracking, scouted-flag
-write, tech-gated threshold reset, and the orbital-defender-tier
-re-roll-on-travel liberty (`game_state.gd` had already independently
-reached the same conclusion this pass did, for the same reason — real
-set-site unreachable in available disassembly).
+**Not ported — each is a gameplay change, listed for a decision**
 
-**One unresolved ❓, not a gap by itself:** whether `flight_combat.gd`'s
-player-destruction trigger matches `STARSHIP SIMULATOR.bas` line 104's
-`hull==0 → RUNS/X` condition exactly, or uses a different accumulated
-condition. Worth a direct comparison next time that file is touched.
+1. **The `H` key and the three-step navigation** (set course → fly →
+   `H`), with `H_D.bas`'s gates and costs: no jump in atmosphere or
+   without a course; energy 0 loses the ship; each jump costs energy
+   and stardate by the X-only distance. The data these need is now in
+   the port.
+2. **Shields switch (`S`).** A new game starts with shields down, and
+   with shields down every hit reaches the hull.
+3. **Condition (`B`).** Point defence only works at RED; a new game
+   starts at RED.
+4. **Autopilot (`A`).**
+5. **The six panel lights** that show the above.
+6. **The star chart** (`GALAXY MAP.bas`'s real screen).
+
+**Left as the original has it, on purpose not copied:** the 17-byte
+record copy that overwrites SOL's secured flag (§3).
+
+**Open ❓:** `STATUS.bas` 1386 reading the toggle mode byte as a troop
+count; record byte 2's stored ground strengths being zeroed before
+use; `COM.bas` line 12's directory-page entry against the port.
+
+**Still to do on the machine-code side:** the same treatment for
+A2-3D1 itself (`$6000` jump table, the zero-page save/restore thunk,
+its poked-argument entries). `tools/dis6502.py --calls` lists the
+entry points.

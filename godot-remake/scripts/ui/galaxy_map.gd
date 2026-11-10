@@ -25,17 +25,18 @@ func _ready() -> void:
 
 func _make_select_callback(index: int) -> Callable:
 	return func():
+		# H_D.bas lines 12 and 25: the planet being left gets its record
+		# written back (defender, fighters, surrendered state), and the
+		# one being entered has its own loaded -- see GameState's
+		# per-planet record. A destroyed defender stays destroyed.
+		GameState.store_planet_record(GameState.current_planet)
+		GameState.load_planet_record(index)
 		GameState.current_planet = index
 		GameState.target_planet = index
-		# H_D.bas loads this system's orbital defender (`SHIP # PEEK(38205)`)
-		# right after a hyperdrive jump completes; that register is never
-		# written in BASIC (see GameState.orbital_defender_tier's doc
-		# comment), so this port re-rolls it here instead, at its closest
-		# analog: committing to travel to a new system.
-		GameState.reroll_orbital_defender_tier()
 		# H_D.bas lines 90-93: on arrival, the ground-invasion/flight-
 		# combat thresholds reset together from this planet's tech
-		# (tech<2 planets get no orbital threat at all). Previously this
+		# (tech<2 planets get no orbital threat at all, and keep the
+		# record's own defender threshold). Previously this
 		# was set at the start of a ground attack instead
 		# (ground_forces.gd) — moved here 2026-11-09 while wiring flight
 		# combat in, to match the real arrival-time reset and because
@@ -44,7 +45,6 @@ func _make_select_callback(index: int) -> Callable:
 		var tech: int = GameState.planet_tech[index]
 		if tech < 2:
 			GameState.gf_enemy_strength = 0.0
-			GameState.defender_damage_threshold = 0.0
 		else:
 			GameState.gf_enemy_strength = float(tech) * 60.0
 			GameState.defender_damage_threshold = float(tech) * 60.0

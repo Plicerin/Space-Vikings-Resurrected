@@ -142,9 +142,11 @@ new game.
   literal port: two independent 40%-chance rolls plus an independent
   30%-chance roll can land a hit; SHIELD drains first, and only
   cascades to RADAR/engines/COMPUTER/LASER/HULL once the shield is
-  empty (`$38201`, "shields up," is never toggled anywhere in the
-  available BASIC source, so this port treats it as permanently true
-  rather than modeling a switch that doesn't exist). HULL reaching 0
+  empty. **Not ported:** `$38201` is the shields switch, flipped by the
+  `S` key through `CALL 38402` (machine code, which is why a search of
+  the BASIC found no write). With shields down every hit cascades, and
+  a new game starts with them down. This port still behaves as if they
+  were always up — see `CALL_SITES.md` §2. HULL reaching 0
   triggers `S_X.bas` — a new screen, `scenes/player_destroyed.tscn`,
   a literal port of its expanding radial-burst algorithm (`X1=5 TO 130
   STEP 8`, 15 random lines per step) plus its exact text. The original
@@ -161,16 +163,15 @@ new game.
   (`ShipBlip`, "Radar" below), not this small crossing-the-screen
   raider. Now spawns on its own real independent roll (60%,
   same tick as the ambient check above), gated on
-  `GameState.flight_escort_fighters > 0` — a real register confirmed
-  live (starts at 30, never written anywhere in BASIC, so like
-  `$38205` it must be a machine-code default this port can only match,
-  not derive). Its own internal shootdown sub-mechanic (lines
+  `GameState.flight_escort_fighters > 0` — byte 3 of the current
+  planet's record (30 at SOL; loaded per planet since 2026-11-10, see
+  `GameState.load_planet_record()`). Its own internal shootdown sub-mechanic (lines
   5200-5251) is ported too: firing a tracer (`incoming_fire.gd`'s
   `tracer_fired` signal) rolls a 30% chance to intercept the raider,
   decrementing `flight_escort_fighters` by 1 and `ship_missile_system`
-  by 2 — simplified from the source, which additionally gates this on
-  an unresolved status register (`$38165`) this port treats as
-  always-eligible instead.
+  by 2 — simplified from the source, which only does this at condition
+  RED (`$38165 = 3`, stepped by the `B` key). The condition switch is
+  not ported, so this port treats it as always eligible.
 - **Laser fire** (lines 185/1500-1570, "GOSUB 1500") — firing while
   the current planet is already surrendered re-arms its resistance
   instead of doing nothing (line 1500's own quirk, now ported); gated
@@ -417,20 +418,16 @@ loaded by `scripts/shapes/a2_3d1_model.gd`.
   rather than additive once more of the original is ported.
 - Tier → ship mapping (`GameState.orbital_defender_tier`, values
   0/1/3/4) and each tier's on-screen description are pulled directly
-  from the real `SHIP no N I.D..bas` text. The original's `$38205` is a
-  single transient global register, never once assigned a nonzero
-  value anywhere in the detokenized BASIC source (exhaustively
-  grepped, 2026-11-09) — only read (`H_D.bas`, `ORBIT.bas`,
-  `RADAR.bas`) and reset to 0 after an encounter (`EX.bas`). It must be
-  set by machine code the available linear disassembly dumps don't
-  resolve either. This port can't reproduce the real trigger point or
-  odds, but it does now match the real *shape* of the state — a single
-  current-system value, re-rolled by `galaxy_map.gd` on each system
-  selection (its closest analog to a hyperdrive jump) — rather than its
-  previous shape, a fixed tier picked per planet at new-game time and
-  held for the whole game, which was wrong in a way the real source
-  rules out directly (a per-planet array implies a persisted property;
-  `$38205` demonstrably isn't one).
+  from the real `SHIP no N I.D..bas` text. The original's `$38205` is
+  byte 1 of the current planet's 16-byte record: `CALL 38825` copies
+  the record into the working registers on arrival and back out on
+  departure (`H_D.bas` lines 12 and 25), so each planet has its own
+  fixed defender and a destroyed one stays destroyed. Ported 2026-11-10
+  as `GameState.planet_defender_type` with `store_planet_record()` /
+  `load_planet_record()`, using the real new-game values from `P/F-M`
+  (`tools/newgame_data.py`). An earlier version of this port re-rolled
+  the tier at random on every arrival, on the mistaken reading that
+  nothing ever sets `$38205`; see `CALL_SITES.md` §3.
 - Pressing `X` goes to the real `SHIP # N I.D.` screen now — see
   "Ship I.D." below.
 
@@ -581,8 +578,8 @@ Repair/Restock models and ambient combat damage can zero out):
   range/"THAT'S WHERE WE ARE NOW" gate as the original's numeric-entry
   subroutine) but has no further mechanical effect in this port yet —
   the real source's separate hyperdrive-jump step that would later
-  read `target_planet` (`H_D.bas`, triggered by an in-flight key this
-  port hasn't identified) doesn't exist here; `galaxy_map.gd` already
+  read `target_planet` (`H_D.bas`, run by the `H` key in flight — not
+  wired in this port) doesn't exist here; `galaxy_map.gd` already
   collapses "pick a destination" and "arrive there" into one click, an
   architecture decision from well before this screen existed.
 - **Galaxy Directory** (`galaxy_directory.gd`) — a system list, gated
@@ -708,11 +705,10 @@ on the SHIP-vs-manual evidence this note originally cited.)
   project-wide: every pure-2D scene (this project has quite a few) was
   rendering against the engine's default gray clear color instead of
   black, since nothing had set one — `project.godot` now sets it
-  globally. Also reworked `GameState.orbital_defender_tier` from a
-  fixed-per-planet array to a transient global re-rolled per system
-  arrival, matching the real `$38205`'s actual shape (see "Radar"
-  above) — its real trigger point and odds are still unresolved (not
-  in BASIC, and not in the available disassembly either). Repair/
+  globally. `GameState.orbital_defender_tier` was reworked here from a
+  fixed-per-planet array to a value re-rolled per arrival; that was a
+  mistake, reversed 2026-11-10 (it is per planet in the original, see
+  "Radar" above). Repair/
   Restock and Buy Weapons are also real now (2026-11-09, see "Shore
   Leave" above), which closed out all six Shore Leave options and also
   surfaced the real starting values for several previously-placeholder

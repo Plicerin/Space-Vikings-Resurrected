@@ -65,52 +65,104 @@ var planet_secured: Array[bool] = []
 var planet_has_base: Array[bool] = []
 var planet_scouted: Array[bool] = []
 var planet_population_scale: Array[int] = []
-# Original: $38205 ("ET"), read as a single "current target's orbital
-# defender tech tier" register — the real text per tier, straight from
-# SHIP no N I.D..bas (not a guess): 0 = no ship ("THERE IS NO STARSHIP
-# IN THIS SYSTEM" — an unarmed station), 1 = "SMALL SPACE LAB AND
-# OBSERVATORY, MINIMUM WEAPONS AND ARMOR" (weakest real ship), 3 =
-# "LIGHT CRUISER WITH LASERS, MISSILES AND FIGHTER COVER", 4 = "HEAVY
-# CRUISER WITH PHOTON MISSILES AND HEAVY LASERS, 20-40 FIGHTERS" —
-# a raw ET value of 2 always gets remapped to 3 before use in the
-# original (H_D.bas/ORBIT.bas's tier-correction logic), so 2 itself
-# never appears here. Confirmed live in MAME 2026-11-07: this is
-# exactly which SHIP # N wireframe RADAR.bas renders — see
-# A2-3D1_ENGINE_ANALYSIS.md and scripts/shapes/a2_3d1_model.gd.
+
+# The real new-game galaxy, read from the master files START.bas BLOADs
+# at lines 2000-2010 (`PLANET FILE-M` -> $954C, `P/F-M` -> $97E1) --
+# print them with tools/newgame_data.py. Index 0 = SOL (the original's
+# planet 1). The same-named files without `-M` on the disk image are a
+# saved-game slot, not this.
+const NEW_GAME_TECH: Array[int] = [
+	3, 3, 3, 0, 2, 1, 4, 2, 3, 4, 0, 1, 4, 2, 0, 3, 3, 3, 1, 2,
+]
+const NEW_GAME_POPULATION: Array[int] = [
+	125, 70, 175, 0, 90, 3, 200, 150, 85, 157, 0, 1, 165, 6, 0, 80, 130, 155, 2, 7,
+]
+# Chart position: $38366+P / $38345+P / $38324+P (GALAXY MAP.bas line
+# 3020). Not drawn or used for jump cost yet -- see CALL_SITES.md.
+const PLANET_X: Array[int] = [
+	15, 13, 14, 8, 22, 13, 17, 14, 19, 20, 9, 7, 25, 25, 9, 25, 24, 11, 18, 11,
+]
+const PLANET_Y: Array[int] = [
+	15, 13, 9, 16, 14, 22, 23, 8, 13, 22, 23, 23, 21, 15, 21, 5, 10, 18, 27, 11,
+]
+const PLANET_Z: Array[int] = [
+	15, 12, 15, 12, 19, 19, 12, 9, 25, 10, 20, 14, 13, 21, 19, 11, 10, 27, 11, 25,
+]
+# `P/F-M` record bytes 0, 1, 3 and 4 -- see the per-planet record below.
+const NEW_GAME_DEFENDER_THRESHOLD: Array[int] = [
+	150, 100, 150, 0, 20, 0, 200, 20, 100, 150, 0, 0, 200, 20, 0, 100, 150, 150, 0, 20,
+]
+const NEW_GAME_DEFENDER_TYPE: Array[int] = [
+	3, 2, 3, 0, 1, 0, 4, 1, 2, 3, 0, 0, 4, 1, 0, 2, 3, 3, 0, 1,
+]
+const NEW_GAME_ESCORT_FIGHTERS: Array[int] = [
+	30, 20, 22, 0, 0, 0, 20, 0, 40, 25, 0, 0, 50, 0, 0, 20, 40, 26, 0, 0,
+]
+const NEW_GAME_SURRENDERED: Array[int] = [
+	1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0,
+]
+
+# --- Per-planet record ---
+# Original: 16 bytes per planet at $97E1 (`P/F`). `CALL 38825` ($97A9)
+# copies one record into the working registers 38204-38219 (POKE
+# 38824,0) or back out (POKE 38824,1): START.bas line 220 loads the
+# starting planet's, H_D.bas line 12 stores the planet being left and
+# line 25 loads the one being entered, END.bas line 210 stores before a
+# save. Disassembled with tools/dis6502.py and watched live in MAME
+# 2026-11-10 (tools/mame/keys_live.lua). So each planet keeps its own
+# defender, fighters and surrendered state between visits; the four
+# registers this port models are below, with the working copy each one
+# swaps with. Bytes 2 and 5-15 (ground strength, planet number,
+# atmosphere flag, saved ship position) have no per-planet use here.
+var planet_defender_threshold: Array[float] = [] # byte 0 <-> defender_damage_threshold
+var planet_defender_type: Array[int] = []        # byte 1 <-> orbital_defender_tier
+var planet_escort_fighters: Array[int] = []      # byte 3 <-> flight_escort_fighters
+var planet_surrendered: Array[bool] = []         # byte 4 <-> gf_planet_surrendered
+
+# Original: $38205 ("ET"), the orbital defender at the current planet
+# -- the real text per type, straight from SHIP no N I.D..bas (not a
+# guess): 0 = no ship ("THERE IS NO STARSHIP IN THIS SYSTEM" -- an
+# unarmed station), 1 = "SMALL SPACE LAB AND OBSERVATORY, MINIMUM
+# WEAPONS AND ARMOR" (weakest real ship), 3 = "LIGHT CRUISER WITH
+# LASERS, MISSILES AND FIGHTER COVER", 4 = "HEAVY CRUISER WITH PHOTON
+# MISSILES AND HEAVY LASERS, 20-40 FIGHTERS". The data also holds a
+# raw 2 (planets 2, 9 and 16); every reader that picks art or text
+# substitutes 3 for it (START.bas 230, H_D.bas 38, ORBIT.bas 31,
+# RADAR.bas 5002) and nothing else tells 2 from 3, so
+# load_planet_record() does that substitution once. Confirmed live in
+# MAME 2026-11-07: this is exactly which SHIP # N wireframe RADAR.bas
+# renders -- see A2-3D1_ENGINE_ANALYSIS.md and
+# scripts/shapes/a2_3d1_model.gd.
 #
-# Exhaustively grepped every detokenized .bas file for writes to
-# $38205 (2026-11-09): the ONLY one in the entire BASIC source is
-# EX.bas's post-encounter `POKE 38205,0` reset. It is never assigned a
-# nonzero tier anywhere in BASIC — H_D.bas, ORBIT.bas and RADAR.bas all
-# only ever read it. It must be set by machine code (plausibly inside
-# "SPACE SIMULATOR ASSEMBLY" or another CALL'd overlay reachable only
-# from the hyperdrive-jump path), which the available linear
-# disassembly dumps under disassembly/ don't resolve either — those
-# that were checked either don't reference $953D (its absolute
-# address) at all or decode-truncate well before any plausible site.
-# Confirmed real, NOT per-planet, architecture from this: $38205 is a
-# single transient global, not an array indexed by planet — so this
-# port now models it the same way (see orbital_defender_tier below)
-# instead of fixing one tier per planet for the whole game, which was
-# this field's previous, less faithful shape.
-const DEFENDER_TIERS: Array[int] = [0, 1, 3, 4]
+# The only BASIC write is EX.bas's `POKE 38205,0` when the defender is
+# destroyed; every other value arrives through the record copy above,
+# which is why a grep for POKEs never found a setter.
 const DEFENDER_TIER_LABELS := {
 	0: "THERE IS NO STARSHIP IN THIS SYSTEM.",
 	1: "SMALL SPACE LAB AND OBSERVATORY\nMINIMUM WEAPONS AND ARMOR.",
 	3: "LIGHT CRUISER WITH LASERS,\nMISSILES AND FIGHTER COVER.",
 	4: "HEAVY CRUISER WITH PHOTON\nMISSILES AND HEAVY LASERS.\n20-40 FIGHTERS.",
 }
-# Re-rolled by galaxy_map.gd on each system selection — the real
-# trigger point (somewhere on the hyperdrive-jump path, H_D.bas) isn't
-# reachable from BASIC alone (see note above), so this port re-rolls
-# at its own closest analog: committing to travel to a new system.
-# Uniform pick, same distribution this field always used — only the
-# *when* changed, not the odds.
 var orbital_defender_tier: int = 0 # $38205 ("ET")
 
 
-func reroll_orbital_defender_tier() -> void:
-	orbital_defender_tier = DEFENDER_TIERS.pick_random()
+## `POKE 38824,1: CALL 38825` -- write the working registers back to
+## this planet's record.
+func store_planet_record(index: int) -> void:
+	planet_defender_threshold[index] = defender_damage_threshold
+	planet_defender_type[index] = orbital_defender_tier
+	planet_escort_fighters[index] = flight_escort_fighters
+	planet_surrendered[index] = gf_planet_surrendered
+
+
+## `POKE 38824,0: CALL 38825` -- make this planet's record the working
+## registers.
+func load_planet_record(index: int) -> void:
+	defender_damage_threshold = planet_defender_threshold[index]
+	var type: int = planet_defender_type[index]
+	orbital_defender_tier = 3 if type == 2 else type
+	flight_escort_fighters = planet_escort_fighters[index]
+	gf_planet_surrendered = planet_surrendered[index]
 
 # $38202 -- which weapon the fire button fires at the orbital defender,
 # confirmed live by the real manual's "Missile/Laser" indicator-light
@@ -122,9 +174,9 @@ func reroll_orbital_defender_tier() -> void:
 # any range. true = missile (line 1501's `GOTO 1000`): real
 # aim-and-range-gated, 120x the laser's defender-damage per hit -- see
 # flight_combat.gd's fire_missile() and missile_strike.gd's doc
-# comment for the full source trace. $38202's own machine-code setter
-# was never found in the available BASIC source, but the manual
-# settles who sets it (the player) even without the exact POKE site.
+# comment for the full source trace. The setter is the W key itself:
+# STARSHIP SIMULATOR.bas line 205 `POKE LT,2: CALL 38402`, whose mode 2
+# ($966A in TRANLIT.OBJ0) flips $953A and redraws the panel light.
 var missile_mode_active: bool = false
 
 var current_planet: int = 0        # $38209 ("orbiting" planet)
@@ -174,9 +226,9 @@ var damage_alert_active: bool = false        # $38393 — set the first
 	# cleared by Repair/Restock completing (SHORE LEAVE.bas line 2555)
 var flight_escort_fighters: int = 30         # $38207 — a flight-encounter
 	# escort fighter count, confirmed genuinely real and live 2026-11-09
-	# (booted a fresh game in MAME, read it directly: starts at 30, no
-	# BASIC POKE sets it — like $38205/$38201/$38202, it must be a
-	# machine-code default). NOT the same register as gf_fighters
+	# (booted a fresh game in MAME, read it directly: starts at 30).
+	# That 30 is SOL's own record byte 3, copied in with the rest of
+	# the per-planet record above. NOT the same register as gf_fighters
 	# ($38156, the ground-combat squadron count) — the real source just
 	# happens to use "fighters" for both. Gates whether GOSUB 5000 (the
 	# incoming-fire visual, incoming_fire.gd) can spawn at all; EX.bas
@@ -352,13 +404,25 @@ func start_new_game() -> void:
 	planet_has_base.clear()
 	planet_scouted.clear()
 	planet_population_scale.clear()
+	planet_defender_threshold.clear()
+	planet_defender_type.clear()
+	planet_escort_fighters.clear()
+	planet_surrendered.clear()
 	for i in range(PLANET_COUNT):
-		planet_tech.append(0)
+		planet_tech.append(NEW_GAME_TECH[i])
 		planet_secured.append(false)
 		planet_has_base.append(false)
 		planet_scouted.append(false)
-		planet_population_scale.append(1)
-	orbital_defender_tier = DEFENDER_TIERS.pick_random()
+		planet_population_scale.append(NEW_GAME_POPULATION[i])
+		planet_defender_threshold.append(float(NEW_GAME_DEFENDER_THRESHOLD[i]))
+		planet_defender_type.append(NEW_GAME_DEFENDER_TYPE[i])
+		planet_escort_fighters.append(NEW_GAME_ESCORT_FIGHTERS[i])
+		planet_surrendered.append(NEW_GAME_SURRENDERED[i] == 1)
+	# `PLANET FILE-M`'s secured, scouted and base arrays are each 1 for
+	# SOL and 0 for the other nineteen.
+	planet_secured[0] = true
+	planet_scouted[0] = true
+	planet_has_base[0] = true
 
 	loot.clear()
 	for i in range(13):
@@ -389,20 +453,19 @@ func start_new_game() -> void:
 	gf_tanks = 0.0
 	gf_missiles = 0.0
 	gf_reserve_troops = 0.0
-	# Confirmed live in MAME 2026-11-09 (not the `false` this port
-	# previously assumed): a brand new game starts with $38208 already
-	# TRUE. Makes narrative sense once traced — SOL (current_planet=0)
-	# is your home base, already "yours" — but it's also directly
-	# load-bearing: with the old `false` default, this port's own
-	# combat gates (`not gf_planet_surrendered`, flight_combat.gd)
-	# would have treated a fresh game's home planet as hostile.
-	gf_planet_surrendered = true
-	planet_secured[0] = true
-
 	defender_damage_points = 0.0
-	defender_damage_threshold = 0.0
 	damage_alert_active = false
-	flight_escort_fighters = 30
+	# START.bas line 220: load the starting planet's record. For SOL
+	# that is a surrendered planet (confirmed live in MAME 2026-11-09:
+	# $38208 is already 1 on a brand new game) with a type 3 ship in
+	# orbit, 30 fighters and a 150-point destruction threshold.
+	load_planet_record(current_planet)
+	# INSTRUMENTS.bas line 210 runs TRANLIT's redraw-all once on a new
+	# game, and that path flips every panel flag as it draws it, so
+	# `SHIP'S DATA-M`'s weapon byte 0 becomes 1 before the first flight
+	# frame: a new game starts with MISSILE selected (watched live,
+	# tools/mame/keys_live.lua).
+	missile_mode_active = true
 
 	ship_shield = 100.0
 	ship_energy = 63.0
@@ -452,6 +515,8 @@ func has_save_file() -> bool:
 
 
 func save_to_disk() -> void:
+	# END.bas line 210 stores the current planet's record before the BSAVEs.
+	store_planet_record(current_planet)
 	var data := {
 		"credits": credits, "stardate": stardate,
 		"troops": troops, "troop_morale": troop_morale,
@@ -461,6 +526,10 @@ func save_to_disk() -> void:
 		"planet_tech": planet_tech, "planet_secured": planet_secured,
 		"planet_has_base": planet_has_base, "planet_scouted": planet_scouted,
 		"planet_population_scale": planet_population_scale,
+		"planet_defender_threshold": planet_defender_threshold,
+		"planet_defender_type": planet_defender_type,
+		"planet_escort_fighters": planet_escort_fighters,
+		"planet_surrendered": planet_surrendered,
 		"loot": loot, "loot_collected_this_visit": loot_collected_this_visit,
 		"gf_fighters": gf_fighters, "gf_transports": gf_transports,
 		"gf_tanks": gf_tanks, "gf_missiles": gf_missiles,
@@ -499,11 +568,19 @@ func load_from_disk() -> void:
 	target_planet = data.get("target_planet", target_planet)
 	orbital_defender_tier = data.get("orbital_defender_tier", orbital_defender_tier)
 	missile_mode_active = data.get("missile_mode_active", missile_mode_active)
-	planet_tech.assign(data.get("planet_tech", planet_tech))
+	# A save written before the per-planet records existed also holds
+	# the all-zero tech and population tables of that version; keep the
+	# real ones for those.
+	if data.has("planet_defender_type"):
+		planet_tech.assign(data.get("planet_tech", planet_tech))
+		planet_population_scale.assign(data.get("planet_population_scale", planet_population_scale))
+		planet_defender_threshold.assign(data.get("planet_defender_threshold", planet_defender_threshold))
+		planet_defender_type.assign(data.get("planet_defender_type", planet_defender_type))
+		planet_escort_fighters.assign(data.get("planet_escort_fighters", planet_escort_fighters))
+		planet_surrendered.assign(data.get("planet_surrendered", planet_surrendered))
 	planet_secured.assign(data.get("planet_secured", planet_secured))
 	planet_has_base.assign(data.get("planet_has_base", planet_has_base))
 	planet_scouted.assign(data.get("planet_scouted", planet_scouted))
-	planet_population_scale.assign(data.get("planet_population_scale", planet_population_scale))
 	loot.assign(data.get("loot", loot))
 	loot_collected_this_visit = data.get("loot_collected_this_visit", loot_collected_this_visit)
 	gf_fighters = data.get("gf_fighters", gf_fighters)

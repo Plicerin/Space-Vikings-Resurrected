@@ -12,9 +12,10 @@ extends Control
 ## `GameState.target_planet` here (lines 860-897's numeric entry,
 ## same gates — 1-20 only, "THAT'S WHERE WE ARE NOW" if you pick the
 ## current planet), but doesn't itself trigger travel. In the real
-## source, a separately-triggered hyperdrive jump (`H_D.bas`, an
-## in-flight key this port hasn't identified/wired) later reads
-## `target_planet` to decide where you arrive. This port's
+## source, a separately-triggered hyperdrive jump (`H_D.bas`, run by
+## the H key in flight -- STARSHIP SIMULATOR.bas line 209, not wired
+## in this port) later reads `target_planet` to decide where you
+## arrive. This port's
 ## `galaxy_map.gd` already collapses "pick a destination" and "arrive
 ## there" into one click — an architecture decision from well before
 ## this screen existed — so Set Course here is real data entry with no

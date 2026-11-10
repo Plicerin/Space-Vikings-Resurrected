@@ -33,25 +33,24 @@ extends Node2D
 ## independent 40%-chance rolls can set a hit flag, plus an independent
 ## 30%-chance roll; any hit drains SHIELD a little first, and only
 ## cascades to RADAR/engines/COMPUTER/LASER/HULL if the shield is
-## empty (<=10 -- $38201, "shields up", is never toggled anywhere in
-## the available BASIC source, so this port treats it as permanently
-## true rather than modeling a switch that doesn't exist). HULL
-## reaching 0 triggers S_X.bas (player_destroyed.tscn).
+## empty (<=10). Not ported: $38201 is the shields switch, flipped by
+## the S key through CALL 38402 (CALL_SITES.md section 2). With shields
+## down every hit cascades, and a new game starts with them down; this
+## port still behaves as if they were always up. HULL reaching 0
+## triggers S_X.bas (player_destroyed.tscn).
 ##
 ## The incoming-fire visual (GOSUB 5000) now spawns on its own real
 ## independent roll (60%, the bounding-box variant -- this port doesn't
 ## model the landed-specific 50% variant, same "no landed sub-state"
 ## reasoning as above), gated on GameState.flight_escort_fighters > 0
-## -- a real register this port didn't track until now (confirmed live,
-## starts at 30, never written anywhere in BASIC -- see that field's
-## own doc comment). Its internal shootdown sub-mechanic (lines
+## -- byte 3 of the current planet's record (see that field's own doc
+## comment). Its internal shootdown sub-mechanic (lines
 ## 5200-5251, incoming_fire.gd's tracer_fired signal) rolls a 30%
 ## chance per tracer to intercept the raider, decrementing
 ## flight_escort_fighters by 1 and ship_missile_system by 2 --
-## simplified from the source, which additionally gates this on an
-## unresolved status register ($38165) this port treats as
-## always-eligible instead, the same "no confident analog" reasoning
-## $38202 below gets.
+## simplified from the source, which only does this at condition RED
+## ($38165 = 3, stepped by the B key). The condition switch is not
+## ported, so this port treats it as always eligible.
 ##
 ## Laser fire is a literal port of GOSUB 1500/1535-1560: firing while
 ## already-surrendered re-arms resistance (line 1500's own quirk,
