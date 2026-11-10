@@ -1,0 +1,100 @@
+[5678] == park
+[7178] == space
+[7303] pass space X=0 Y=0 Z=-12000 P=0 B=0 H=0 S=0
+[7475] pass space X=0 Y=0 Z=-12000 P=0 B=0 H=0 S=0
+[7646] pass space X=0 Y=0 Z=-12000 P=0 B=0 H=0 S=0
+[7818] pass space X=0 Y=0 Z=-12000 P=0 B=0 H=0 S=0
+view 0 space X=0 Y=0 Z=-12000 P=0 B=0 H=0 page=1 atmos=0 planet=1 defender=3
+[7818] snap_0 view 0
+[7990] pass space X=0 Y=0 Z=-12000 P=0 B=0 H=16 S=0
+[8165] pass space X=0 Y=0 Z=-12000 P=0 B=0 H=16 S=0
+[8338] pass space X=0 Y=0 Z=-12000 P=0 B=0 H=16 S=0
+view 1 space X=0 Y=0 Z=-12000 P=0 B=0 H=16 page=2 atmos=0 planet=1 defender=3
+[8338] snap_1 view 1
+[8512] pass space X=0 Y=0 Z=-12000 P=0 B=0 H=240 S=0
+[8686] pass space X=0 Y=0 Z=-12000 P=0 B=0 H=240 S=0
+[8860] pass space X=0 Y=0 Z=-12000 P=0 B=0 H=240 S=0
+view 2 space X=0 Y=0 Z=-12000 P=0 B=0 H=240 page=1 atmos=0 planet=1 defender=3
+[8860] snap_2 view 2
+[8999] pass space X=0 Y=0 Z=-12000 P=16 B=0 H=0 S=0
+[9139] pass space X=0 Y=0 Z=-12000 P=16 B=0 H=0 S=0
+[9278] pass space X=0 Y=0 Z=-12000 P=16 B=0 H=0 S=0
+view 3 space X=0 Y=0 Z=-12000 P=16 B=0 H=0 page=2 atmos=0 planet=1 defender=3
+[9278] snap_3 view 3
+[9419] pass space X=0 Y=0 Z=-12000 P=240 B=0 H=0 S=0
+[9559] pass space X=0 Y=0 Z=-12000 P=240 B=0 H=0 S=0
+[9700] pass space X=0 Y=0 Z=-12000 P=240 B=0 H=0 S=0
+view 4 space X=0 Y=0 Z=-12000 P=240 B=0 H=0 page=1 atmos=0 planet=1 defender=3
+[9700] snap_4 view 4
+[9872] pass space X=0 Y=0 Z=-12000 P=0 B=4 H=0 S=0
+[10044] pass space X=0 Y=0 Z=-12000 P=0 B=4 H=0 S=0
+[10216] pass space X=0 Y=0 Z=-12000 P=0 B=4 H=0 S=0
+view 5 space X=0 Y=0 Z=-12000 P=0 B=4 H=0 page=2 atmos=0 planet=1 defender=3
+[10216] snap_5 view 5
+[10389] pass space X=0 Y=0 Z=-12000 P=0 B=252 H=0 S=0
+[10560] pass space X=0 Y=0 Z=-12000 P=0 B=252 H=0 S=0
+[10732] pass space X=0 Y=0 Z=-12000 P=0 B=252 H=0 S=0
+view 6 space X=0 Y=0 Z=-12000 P=0 B=252 H=0 page=1 atmos=0 planet=1 defender=3
+[10732] snap_6 view 6
+[10869] pass space X=0 Y=0 Z=-12000 P=0 B=0 H=64 S=0
+[11009] pass space X=0 Y=0 Z=-12000 P=0 B=0 H=64 S=0
+[11148] pass space X=0 Y=0 Z=-12000 P=0 B=0 H=64 S=0
+view 7 space X=0 Y=0 Z=-12000 P=0 B=0 H=64 page=2 atmos=0 planet=1 defender=3
+[11148] snap_7 view 7
+[11289] pass space X=0 Y=0 Z=-12000 P=0 B=0 H=128 S=0
+[11430] pass space X=0 Y=0 Z=-12000 P=0 B=0 H=128 S=0
+[11571] pass space X=0 Y=0 Z=-12000 P=0 B=0 H=128 S=0
+view 8 space X=0 Y=0 Z=-12000 P=0 B=0 H=128 page=1 atmos=0 planet=1 defender=3
+[11571] snap_8 view 8
+[11710] pass space X=0 Y=0 Z=-12000 P=0 B=0 H=192 S=0
+[11851] pass space X=0 Y=0 Z=-12000 P=0 B=0 H=192 S=0
+[11990] pass space X=0 Y=0 Z=-12000 P=0 B=0 H=192 S=0
+view 9 space X=0 Y=0 Z=-12000 P=0 B=0 H=192 page=2 atmos=0 planet=1 defender=3
+[11990] snap_9 view 9
+[12130] pass space X=0 Y=0 Z=-12000 P=20 B=4 H=40 S=0
+[12271] pass space X=0 Y=0 Z=-12000 P=20 B=4 H=40 S=0
+[12412] pass space X=0 Y=0 Z=-12000 P=20 B=4 H=40 S=0
+view 10 space X=0 Y=0 Z=-12000 P=20 B=4 H=40 page=1 atmos=0 planet=1 defender=3
+[12412] snap_10 view 10
+[12412] == descend
+before RE: X=300 Y=200 Z=-500 P=0 B=0 H=0
+[13092] atmosphere byte set
+[13092] == atmos
+[13801] pass atmos X=444 Y=1018 Z=-7000 P=0 B=0 H=20 S=0
+[13908] pass atmos X=444 Y=1012 Z=-7000 P=0 B=0 H=20 S=0
+[14014] pass atmos X=444 Y=1006 Z=-7000 P=0 B=0 H=20 S=0
+[14121] pass atmos X=444 Y=1000 Z=-7000 P=0 B=0 H=20 S=0
+view 11 atmos X=444 Y=1006 Z=-7000 P=0 B=0 H=20 page=1 atmos=1 planet=1 defender=3
+[14121] snap_11 view 11
+[14229] pass atmos X=444 Y=994 Z=-7000 P=0 B=0 H=0 S=0
+[14338] pass atmos X=444 Y=988 Z=-7000 P=0 B=0 H=0 S=0
+[14446] pass atmos X=444 Y=982 Z=-7000 P=0 B=0 H=0 S=0
+view 12 atmos X=444 Y=988 Z=-7000 P=0 B=0 H=0 page=2 atmos=1 planet=1 defender=3
+[14446] snap_12 view 12
+[14545] pass atmos X=444 Y=976 Z=-7000 P=0 B=0 H=64 S=0
+[14643] pass atmos X=444 Y=970 Z=-7000 P=0 B=0 H=64 S=0
+[14742] pass atmos X=444 Y=964 Z=-7000 P=0 B=0 H=64 S=0
+view 13 atmos X=444 Y=970 Z=-7000 P=0 B=0 H=64 page=1 atmos=1 planet=1 defender=3
+[14742] snap_13 view 13
+[14841] pass atmos X=444 Y=958 Z=-7000 P=20 B=0 H=20 S=0
+[14942] pass atmos X=444 Y=952 Z=-7000 P=20 B=0 H=20 S=0
+[15042] pass atmos X=444 Y=946 Z=-7000 P=20 B=0 H=20 S=0
+view 14 atmos X=444 Y=952 Z=-7000 P=20 B=0 H=20 page=2 atmos=1 planet=1 defender=3
+[15042] snap_14 view 14
+[15139] pass atmos X=444 Y=940 Z=-7000 P=40 B=0 H=20 S=0
+[15234] pass atmos X=444 Y=934 Z=-7000 P=40 B=0 H=20 S=0
+[15330] pass atmos X=444 Y=928 Z=-7000 P=40 B=0 H=20 S=0
+view 15 atmos X=444 Y=934 Z=-7000 P=40 B=0 H=20 page=1 atmos=1 planet=1 defender=3
+[15330] snap_15 view 15
+[15424] pass atmos X=444 Y=922 Z=-7000 P=240 B=0 H=20 S=0
+[15518] pass atmos X=444 Y=916 Z=-7000 P=240 B=0 H=20 S=0
+[15610] pass atmos X=444 Y=910 Z=-7000 P=240 B=0 H=20 S=0
+view 16 atmos X=444 Y=916 Z=-7000 P=240 B=0 H=20 page=2 atmos=1 planet=1 defender=3
+[15610] snap_16 view 16
+[15719] pass atmos X=444 Y=904 Z=-7000 P=10 B=4 H=20 S=0
+[15827] pass atmos X=444 Y=898 Z=-7000 P=10 B=4 H=20 S=0
+[15937] pass atmos X=444 Y=892 Z=-7000 P=10 B=4 H=20 S=0
+view 17 atmos X=444 Y=898 Z=-7000 P=10 B=4 H=20 page=1 atmos=1 planet=1 defender=3
+[15937] snap_17 view 17
+[15937] == done
+done
