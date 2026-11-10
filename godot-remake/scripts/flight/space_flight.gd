@@ -56,7 +56,10 @@ extends Node3D
 ## an empty model. Orbit position/speed are idiomatic-Godot liberties,
 ## not in the original (whose 6502 bytecode interpreter does its own
 ## rotate/clip/perspective-divide per frame rather than tracking an
-## orbit) -- see README.md's "What's real vs. stubbed" table.
+## orbit) -- see README.md's "What's real vs. stubbed" table. Re-tuned
+## 2026-11-09 to a slow, discrete step grounded in the real engine's
+## live-measured redraw cadence -- see SHIP_BLIP_STEP_INTERVAL_SEC's own
+## doc comment below for the full reasoning and the MAME measurement.
 
 const A2_3D1_Model = preload("res://scripts/shapes/a2_3d1_model.gd")
 const PLANET_VISUAL_RADIUS := 400.0 # matches the old placeholder's footprint
@@ -65,8 +68,32 @@ const REENTRY_RANGE := 500.0
 
 const SHIP_BLIP_VISUAL_RADIUS := 120.0 # smaller than the planet -- see doc comment above
 const SHIP_BLIP_ORBIT_RADIUS := 650.0
-const SHIP_BLIP_ORBIT_SPEED := 0.15 # radians/sec, liberty -- see doc comment above
-const SHIP_BLIP_SPIN_SPEED := 0.3 # matches radar_screen.gd's own spin liberty
+
+## Re-tuned 2026-11-09 after a real playtest ("the game still moves too
+## fast... it should be for all intents and purposes still... sub-second
+## fps on the Apple II, so 20-60fps is like warp speed"). The old version
+## animated continuously every frame at 0.15 rad/sec orbit + 0.3 rad/sec
+## self-spin -- numbers picked for a smooth 60fps feel with no reference
+## to the original's own pacing, and the self-spin (independent of the
+## orbit direction) is also what read as "twisting in space" rather than
+## orbiting.
+##
+## Live-measured this session to ground the retune in something real
+## rather than a second guess: a MAME write-tap on $6CE0 (the confirmed
+## once-per-redraw double-buffer flip byte -- see
+## A2-3D1_ENGINE_ANALYSIS.md) during ordinary ambient flight with no
+## input sent at all shows the real A2-3D1 engine completing one full
+## redraw roughly every 374-380 video frames at MAME's 60fps -- about
+## 6.3 real seconds per frame, i.e. well under 1fps, exactly matching
+## the user's own memory of the hardware.
+##
+## Re-modeled as a discrete step at that measured cadence instead of
+## smooth per-frame interpolation, so the blip genuinely sits still
+## between steps rather than gliding -- and facing the tangent of its
+## own orbit instead of spinning independently, so each step reads as
+## "moved to a new point in its orbit," not "spun in place."
+const SHIP_BLIP_STEP_INTERVAL_SEC := 6.3
+const SHIP_BLIP_ORBIT_STEP_RAD := 0.02 # ~314 steps, ~33 real minutes per full orbit
 
 @onready var _debug_label: Label = $HUD/DebugLabel
 @onready var _planet: MeshInstance3D = $Planet
@@ -78,6 +105,7 @@ var _reentering: bool = false
 var _status_message: String = ""
 var _status_timer: float = 0.0
 var _ship_blip_orbit_angle: float = 0.0
+var _ship_blip_step_timer: float = 0.0
 var _ship_blip_tier: int = -1
 
 
@@ -117,6 +145,23 @@ func _setup_ship_blip() -> void:
 	var ship_radius: float = built["radius"]
 	if ship_radius > 0.0:
 		_ship_blip.scale = Vector3.ONE * (SHIP_BLIP_VISUAL_RADIUS / ship_radius)
+	_update_ship_blip_transform()
+
+
+## Places the blip at its current orbit angle, facing the orbit's own
+## tangent direction rather than spinning independently -- see
+## SHIP_BLIP_STEP_INTERVAL_SEC's doc comment above. Called once up front
+## (so the blip isn't sitting at the planet's own origin for the first
+## full step interval) and again every time a step actually advances.
+func _update_ship_blip_transform() -> void:
+	var offset := Vector3(
+		cos(_ship_blip_orbit_angle) * SHIP_BLIP_ORBIT_RADIUS,
+		0.0,
+		sin(_ship_blip_orbit_angle) * SHIP_BLIP_ORBIT_RADIUS,
+	)
+	_ship_blip.position = PLANET_WORLD_POSITION + offset
+	var tangent := Vector3(-sin(_ship_blip_orbit_angle), 0.0, cos(_ship_blip_orbit_angle))
+	_ship_blip.look_at(_ship_blip.position + tangent, Vector3.UP)
 
 
 func _process(delta: float) -> void:
@@ -125,13 +170,11 @@ func _process(delta: float) -> void:
 	if GameState.orbital_defender_tier != _ship_blip_tier:
 		_setup_ship_blip()
 
-	_ship_blip_orbit_angle += SHIP_BLIP_ORBIT_SPEED * delta
-	_ship_blip.position = PLANET_WORLD_POSITION + Vector3(
-		cos(_ship_blip_orbit_angle) * SHIP_BLIP_ORBIT_RADIUS,
-		0.0,
-		sin(_ship_blip_orbit_angle) * SHIP_BLIP_ORBIT_RADIUS,
-	)
-	_ship_blip.rotate_y(SHIP_BLIP_SPIN_SPEED * delta)
+	_ship_blip_step_timer += delta
+	if _ship_blip_step_timer >= SHIP_BLIP_STEP_INTERVAL_SEC:
+		_ship_blip_step_timer = 0.0
+		_ship_blip_orbit_angle += SHIP_BLIP_ORBIT_STEP_RAD
+		_update_ship_blip_transform()
 
 	if Input.is_action_just_pressed("fire_laser"):
 		_flight_combat.fire_weapon()
