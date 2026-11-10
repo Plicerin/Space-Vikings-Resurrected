@@ -4,20 +4,29 @@ extends Node3D
 ## line ~150/200-210) — remapped to modern keys via autoload/input_setup.gd
 ## rather than the original's raw PDL()/key-code checks.
 ##
-## The `Planet` node used to be a plain placeholder SphereMesh. It's now
-## built from PLANET # 0's real data — the same file ORBIT.bas actually
-## loads for this exact "deep space, not yet landing" view. It's
-## genuinely just 195 floating points with zero connecting edges — not
-## a bug in this port, that's what the original data is. The slow
-## constant spin on it is an idiomatic-Godot liberty, not in the
-## original (which has no camera-relative planet rotation at all in
-## this view) — purely so a static screenshot doesn't read as "nothing
-## rendered."
+## CORRECTION (2026-11-09, a real playtest reported "the planet is
+## rendered twice"): the `Planet` node used to be built from PLANET # 0's
+## real data, scaled down small and parked at the destination as a
+## visible foreground object. That data isn't a planet at all -- it's
+## confirmed (see A2-3D1_ENGINE_ANALYSIS.md) to be the exact same
+## 195-point field the real A2-3D1 engine renders every frame during
+## ordinary flight, i.e. the *starfield* (now `starfield.gd`'s own real
+## data, not a synthetic placeholder -- see its doc comment). Using it
+## a second time here, shrunk into a small blob, is what actually
+## produced the "tight inner cluster" next to the starfield's own
+## "box-like" scattering. The original never renders a visible planet
+## object during ordinary flight at all -- `STARSHIP SIMULATOR.bas`
+## navigates by position/heading alone, with the real radar screen
+## (confirmed real, see README.md) as the actual in-flight navigation
+## aid, not a 3D object floating in the flight view. `Planet` is now
+## kept meshless, purely as the scene-authored position reference
+## `PLANET_WORLD_POSITION` is asserted against below.
 ##
 ## Getting close to the planet now triggers `scenes/planet_approach.tscn`
 ## (RE.bas's "REENTRY SEQUENCE", with the real per-world terrain map —
-## PLANET # 1-20, genuinely modeled line-connected data, a different
-## visual from this scene's own point-field `Planet`). Ported as a
+## PLANET # 1-20, genuinely modeled line-connected data -- the first
+## time this scene actually shows a planet-shaped object at all, see
+## `Planet` node's own doc comment above). Ported as a
 ## world-space distance check rather than the original's byte-exact
 ## `ABS(X)<900 AND ABS(Y)<900 AND ABS(Z)<900` box test (`STARSHIP
 ## SIMULATOR.bas` line 156) — this port's flight model doesn't track
@@ -62,7 +71,6 @@ extends Node3D
 ## doc comment below for the full reasoning and the MAME measurement.
 
 const A2_3D1_Model = preload("res://scripts/shapes/a2_3d1_model.gd")
-const PLANET_VISUAL_RADIUS := 400.0 # matches the old placeholder's footprint
 const PLANET_WORLD_POSITION := Vector3(0, 0, -3000) # must match the Planet node's transform below
 const REENTRY_RANGE := 500.0
 
@@ -110,11 +118,6 @@ var _ship_blip_tier: int = -1
 
 
 func _ready() -> void:
-	var built: Dictionary = A2_3D1_Model.build_planet_mesh(0)
-	_planet.mesh = built["mesh"]
-	var radius: float = built["radius"]
-	if radius > 0.0:
-		_planet.scale = Vector3.ONE * (PLANET_VISUAL_RADIUS / radius)
 	assert(_planet.position.is_equal_approx(PLANET_WORLD_POSITION), "Planet node moved — update PLANET_WORLD_POSITION to match")
 
 	_setup_ship_blip()
@@ -165,8 +168,6 @@ func _update_ship_blip_transform() -> void:
 
 
 func _process(delta: float) -> void:
-	_planet.rotate_y(0.05 * delta)
-
 	if GameState.orbital_defender_tier != _ship_blip_tier:
 		_setup_ship_blip()
 
