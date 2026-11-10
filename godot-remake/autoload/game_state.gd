@@ -20,6 +20,55 @@ var bank_deg: float = 0.0
 var heading_deg: float = 0.0
 var throttle: float = 0.0
 
+# --- The machine the hi-res programs share ---
+# The original's programs hand each other more than variables: the two
+# hi-res pages, the 3D engine's display list at $7300 (with the ship's
+# position and attitude inside it) and the character generator's cursor
+# all stay as the last program left them. STARSHIP SIMULATOR relies on
+# it (the instrument panel is drawn once, by INSTRUMENTS.bas, and only
+# copied from page to page afterwards), so they live here and not in a
+# scene.
+const A2View = preload("res://scripts/shapes/a2_3d1_view.gd")
+const CharGenerator = preload("res://scripts/shapes/char_generator.gd")
+
+## A2-3D1 with its 64K and hi-res pages 1 and 2 (`view3d.pages`).
+## Applesoft's HCOLOR, ROT and SCALE are page 1's fields: BASIC only
+## ever draws on page 1.
+var view3d: A2View = A2View.new()
+## `HI-RES CHARACTER GENERATOR` and the cursor.
+var chargen: CharGenerator = CharGenerator.new(view3d.pages[0], view3d.pages[1])
+
+## Ship position: three signed 16-bit words at 29467/29469/29471, inside
+## the display list's eye record. BASIC keeps its own floats (see
+## flight_core.gd) and stores them here once a pass.
+var ship_x: int:
+	get: return view3d.peek_signed(A2View.EYE)
+	set(value): view3d.poke_word(A2View.EYE, value)
+var ship_y: int:
+	get: return view3d.peek_signed(A2View.EYE + 2)
+	set(value): view3d.poke_word(A2View.EYE + 2, value)
+var ship_z: int:
+	get: return view3d.peek_signed(A2View.EYE + 4)
+	set(value): view3d.poke_word(A2View.EYE + 4, value)
+## Pitch, bank, heading: bytes 29473-29475, 256 to the circle.
+var ship_pitch: int:
+	get: return view3d.peek(A2View.EYE + 6)
+	set(value): view3d.poke(A2View.EYE + 6, value)
+var ship_bank: int:
+	get: return view3d.peek(A2View.EYE + 7)
+	set(value): view3d.poke(A2View.EYE + 7, value)
+var ship_heading: int:
+	get: return view3d.peek(A2View.EYE + 8)
+	set(value): view3d.poke(A2View.EYE + 8, value)
+var ship_speed: int = 120        # $38157, 0..120 units a pass
+var loop_flip: int = 0           # $952F: 1 while the nose is past vertical
+var paddle_pitch: int = 128      # $38397, what the stick routine reads
+var paddle_bank: int = 128       # $38398
+var in_atmosphere: bool = false  # $38210
+## START.bas line 260 / GALAXY MAP.bas line 3125: INSTRUMENTS.bas has to
+## draw the panel before the flight program runs.
+var instruments_due: bool = true
+
 # --- Economy ---
 # Original: credits/stardate/troops were persisted via the "MISC FILE"
 # disk file (SD/TR/CR), not a fixed memory address. Real starting
@@ -164,10 +213,22 @@ func load_planet_record(index: int) -> void:
 	flight_escort_fighters = planet_escort_fighters[index]
 	gf_planet_surrendered = planet_surrendered[index]
 
+
+## START.bas lines 230-250: what is in orbit here goes behind the star
+## field, at $7879. A world with industry and no defender left has the
+## wreck of one.
+func load_orbit_ship() -> void:
+	if planet_tech[current_planet] > 1 and orbital_defender_tier == 0:
+		view3d.load_debris()
+	else:
+		view3d.load_ship(orbital_defender_tier)
+
 # --- The four panel switches (CALL_SITES.md section 2). Each is a byte
-# the flight program flips through `POKE 38167,n: CALL 38402`; the new-
-# game values are the ones watched live after INSTRUMENTS.bas line 210
-# has run TRANLIT's redraw-all, which flips all four as it draws them. ---
+# the flight program flips through `POKE 38167,n: CALL 38402`. The
+# values here are `SHIP'S DATA-M`'s and START.bas line 2030's; a new
+# game then runs INSTRUMENTS.bas, whose line 210 has TRANLIT redraw the
+# whole panel, and that path flips all four as it draws them. So the
+# first flight frame has the opposite of each (watched live). ---
 #
 # $38202, key W: which weapon the fire button fires. false = laser
 # (STARSHIP SIMULATOR.bas line 1505), true = missile (line 1000) --
@@ -175,17 +236,19 @@ func load_planet_record(index: int) -> void:
 var missile_mode_active: bool = false
 # $38201, key S. Line 3205: a hit always wears the shield strength
 # ($38200, ship_shield) down; only with the shields up AND that strength
-# above 10 does the hit stop there. A new game starts with them down.
-var shields_up: bool = false
+# above 10 does the hit stop there.
+var shields_up: bool = true
 # $38165, key B: 1 GREEN, 2 BLUE, 3 RED, stepped 2 -> 3 -> 1 -> 2. Only
 # at RED do the turrets fire on an attacking fighter (line 5200).
-var condition: int = 3
+var condition: int = 2
 # $38164, key A: on autopilot the flight loop skips reading the
 # paddles (line 15), so the ship holds its last stick position.
-var autopilot_active: bool = false
+var autopilot_active: bool = true
 
-var current_planet: int = 0        # $38209 ("orbiting" planet)
-var target_planet: int = 0         # $38163 (travel target)
+var current_planet: int = 0        # $38209 ("orbiting" planet) - 1
+var target_planet: int = -1        # $38163 (travel target) - 1. A new
+	# game has 0 there: no course is set, and H_D.bas line 1 sends the
+	# ship straight back to the flight program.
 
 # --- Ground battle state (GROUND_COMBAT_ANALYSIS.md, GROUND FORCES.bas
 # lines 500-690) ---
@@ -439,7 +502,7 @@ func start_new_game() -> void:
 	troop_location = 3
 	troops_stationed_at = 1
 	current_planet = 0
-	target_planet = 0
+	target_planet = -1
 	enlisted_this_trip = false
 	base_built_this_trip = false
 	loot_collected_this_visit = false
@@ -464,16 +527,36 @@ func start_new_game() -> void:
 	# $38208 is already 1 on a brand new game) with a type 3 ship in
 	# orbit, 30 fighters and a 150-point destruction threshold.
 	load_planet_record(current_planet)
-	# INSTRUMENTS.bas line 210 runs TRANLIT's redraw-all once on a new
-	# game, and that path flips every panel flag as it draws it, so
-	# `SHIP'S DATA-M`'s weapon byte 0 becomes 1 before the first flight
-	# frame: a new game starts with MISSILE selected (watched live,
-	# tools/mame/keys_live.lua). The same pass leaves the shields down,
-	# the condition at RED and the autopilot off.
-	missile_mode_active = true
-	shields_up = false
-	condition = 3
-	autopilot_active = false
+	# `SHIP'S DATA-M` and line 2030. INSTRUMENTS.bas line 210 then runs
+	# TRANLIT's redraw-all, which flips every panel flag as it draws it:
+	# the first flight frame has MISSILE selected, the shields down, the
+	# condition at RED and the autopilot off (watched live,
+	# tools/mame/keys_live.lua and pass_live.lua).
+	missile_mode_active = false
+	shields_up = true
+	condition = 2
+	autopilot_active = true
+	instruments_due = true
+
+	# START.bas lines 40-250: the machine as a new game finds it.
+	view3d.pages[0].clear()
+	view3d.pages[1].clear()
+	view3d.pages[0].rot = 1 # line 40: ROT= 1: SCALE= 1
+	view3d.pages[0].shape_scale = 1
+	view3d.reset_engine()
+	view3d.load_planet(0) # line 100
+	ship_x = 700 # line 190
+	ship_y = 200
+	ship_z = -7000
+	ship_heading = 0 # line 195
+	load_orbit_ship()
+	chargen.page = 1 # line 2036: POKE 974,64
+	chargen.mode = 0
+	ship_speed = 120
+	loop_flip = 0
+	paddle_pitch = 128
+	paddle_bank = 128
+	in_atmosphere = false
 
 	ship_shield = 100.0
 	ship_energy = 63.0

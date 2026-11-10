@@ -33,7 +33,7 @@
 -- pass_live.log: "ev" = a line-147 event with the machine state at that
 -- moment, "act" = what the script did there, "t974" / "show" = timing.
 -- ev_<n>_p1.bin / _p2.bin: the two pages, 192 rows of 40 bytes.
--- tools/pass_vectors.py turns the directory into the port's test file.
+-- The port's test reads the directory as it is (analysis/live/pass/).
 
 local DIR = (os.getenv("SV_OUT") or ".") .. "/"
 local f = assert(io.open(DIR .. "pass_live.log", "w"))

@@ -73,6 +73,7 @@ extends Node3D
 ## doc comment below for the full reasoning and the MAME measurement.
 
 const A2_3D1_Model = preload("res://scripts/shapes/a2_3d1_model.gd")
+const FlightProgram = preload("res://scripts/flight/flight_program.gd")
 const PLANET_WORLD_POSITION := Vector3(0, 0, -3000) # must match the Planet node's transform below
 const REENTRY_RANGE := 500.0
 const CONDITION_NAMES := ["", "GREEN", "BLUE", "RED"]
@@ -120,6 +121,13 @@ var _ship_blip_tier: int = -1
 
 func _ready() -> void:
 	assert(_planet.position.is_equal_approx(PLANET_WORLD_POSITION), "Planet node moved — update PLANET_WORLD_POSITION to match")
+
+	# INSTRUMENTS.bas runs once before the flight program and its redraw
+	# of the lamps is what flips the four switches to their starting
+	# positions (flight_program.gd). This scene does not show that panel
+	# yet; the switches still have to be flipped.
+	if GameState.instruments_due:
+		FlightProgram.new().instruments()
 
 	_setup_ship_blip()
 

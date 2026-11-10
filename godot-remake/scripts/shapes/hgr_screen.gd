@@ -210,8 +210,28 @@ func xdraw(table: ShapeTable, shape: int, x: int, y: int) -> void:
 		_touch(py)
 
 
+## One glyph of `CHARACTER TABLE` into the text cell (column, row), both
+## 0-based, 40 x 24 cells of 7 x 8 pixels. `mode` is POKE 973: 0 stores
+## the glyph, 255 stores it inverted, anything else XORs it. The cursor
+## belongs to the caller (char_generator.gd).
+func put_char(code: int, column: int, row: int, mode: int) -> void:
+	if column < 0 or column >= COLUMNS or row < 0 or row >= 24:
+		return
+	var glyph_at := (code & 0x7F) * 8
+	for r in range(8):
+		var glyph: int = _font[glyph_at + r] if glyph_at + r < _font.size() else 0
+		var i := (row * 8 + r) * COLUMNS + column
+		if mode == 0:
+			mem[i] = glyph
+		elif mode == 0xFF:
+			mem[i] = 0xFF ^ glyph
+		else:
+			mem[i] = mem[i] ^ glyph
+		_touch(row * 8 + r)
+
+
 ## `VTAB vtab: HTAB htab: PRINT text;` through the character generator
-## (both 1-based, 40 x 24 cells of 7 x 8 pixels).
+## (both 1-based), for a screen that keeps no cursor of its own.
 func print_at(text: String, htab: int, vtab: int) -> void:
 	var column := htab - 1
 	var row := vtab - 1
@@ -221,17 +241,7 @@ func print_at(text: String, htab: int, vtab: int) -> void:
 			row += 1
 		if row < 0 or row >= 24:
 			return
-		var glyph_at := (ch & 0x7F) * 8
-		for r in range(8):
-			var glyph: int = _font[glyph_at + r] if glyph_at + r < _font.size() else 0
-			var i := (row * 8 + r) * COLUMNS + column
-			if text_mode == 0:
-				mem[i] = glyph
-			elif text_mode == 0xFF:
-				mem[i] = 0xFF ^ glyph
-			else:
-				mem[i] = mem[i] ^ glyph
-			_touch(row * 8 + r)
+		put_char(ch, column, row, text_mode)
 		column += 1
 
 

@@ -56,6 +56,16 @@ func _init(start_x: int = 0, start_y: int = 0, start_z: int = 0) -> void:
 	z = float(start_z)
 
 
+## Line 8 again without a RUN. The lamp keys leave the loop through
+## `CALL 38402: GOTO 1` (line 500): X, Y and Z are read back from the
+## stored integers, so the fractions are lost, but no variable is
+## cleared and the four factors keep their values.
+func reload(start_x: int, start_y: int, start_z: int) -> void:
+	x = float(start_x)
+	y = float(start_y)
+	z = float(start_z)
+
+
 ## Lines 123-128: CALL CSN, read as "minus 256" when the angle is over 127.
 static func basic_sin(angle: int) -> float:
 	var word := Trig.sin_raw(angle)
