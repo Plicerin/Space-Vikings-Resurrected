@@ -41,16 +41,18 @@ extends Node2D
 ## the draw loop even finishes) and calls `start_hit()`/`start_miss()`
 ## accordingly.
 ##
-## Left as-is, not yet confirmed correct (2026-11-07, inherited from
-## the file's previous life as fighter_encounter.gd): the flip-book
-## shape index (3, 4, 5, 6...) lands on genuinely detailed art at the
-## odd indices and on a near-blank 2-pixel shape at the even ones in
-## the corrected ENEMY table, so the trail visibly flickers between
-## "small scattered shape" and "almost invisible" every couple of
-## frames. That might be authentic to the real game, or might mean this
-## mechanic (which specific indices the flip-book should actually hit,
-## or the step rate) still isn't fully right. Kept faithful to the
-## decoded data for now rather than smoothed over.
+## CONFIRMED AUTHENTIC (2026-11-09, resolving the 2026-11-07 doubt
+## below): checked directly against `detokenized/STARSHIP SIMULATOR.bas`
+## line 1000 (`M3 = 3`) and line 1060 (`M3 = M3 + .32`) -- the real
+## BASIC code uses this exact same start value and increment, and
+## Applesoft's `XDRAW M3 AT ...` truncates to an integer shape index just
+## like this port's `int(_m3)` does. The ENEMY table's own even indices
+## (4, 6, 8...) genuinely are near-blank 2-4 point shapes in the decoded
+## data (checked directly against `assets/shapes/ENEMY I.A24580.L68.payload.json`),
+## so the flicker between "detailed ship art" and "almost invisible" is
+## the real original's behavior, not a decoding or step-rate bug. A real
+## player on a real Apple II would have seen the exact same flicker.
+## Left exactly as-is -- this is matched, not a bug to fix.
 
 const ShapeTable = preload("res://scripts/shapes/shape_table.gd")
 const MissileTrail = preload("res://scripts/combat/missile_trail.gd")

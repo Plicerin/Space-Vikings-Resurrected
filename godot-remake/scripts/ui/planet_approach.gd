@@ -60,7 +60,15 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed:
+	# `event.is_echo()` matters here: a flight key held down across the
+	# scene transition (very likely -- this sequence is reached mid-flight,
+	# usually while still holding pitch/bank/throttle) generates repeated
+	# OS auto-repeat "pressed" events with no new physical keypress. Without
+	# this guard, that alone exits the sequence within one repeat interval
+	# of it starting, which read as "booted back into space" almost
+	# instantly during a real playtest (2026-11-09). A genuine fresh
+	# keypress (not echoed) still skips the timer as intended.
+	if event is InputEventKey and event.pressed and not event.is_echo():
 		_return_to_flight()
 
 

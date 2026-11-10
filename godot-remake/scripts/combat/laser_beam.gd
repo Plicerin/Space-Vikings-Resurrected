@@ -14,6 +14,15 @@ const BASE_INNER := Vector2(94, 123)
 const FLICKER_COUNT := 3
 const FLICKER_INTERVAL := 0.05
 
+## True (default) for combat_demo.tscn's standalone usage, where this
+## node is the only thing listening for the fire-laser action. False for
+## flight_combat.tscn's instance (2026-11-09 fix): there, flight_combat.gd
+## already owns fire-button handling (damage math, ammo, etc.) and calls
+## fire() on this node directly -- if this were also polling the same
+## action itself, every real shot would double-fire (two AudioManager
+## calls, the tween restarting mid-flicker).
+@export var self_fire: bool = true
+
 var _tween: Tween
 
 
@@ -44,7 +53,7 @@ func _process(_delta: float) -> void:
 	# combat-VFX test, see README — doesn't dispatch a real InputEvent, and
 	# a focused UI Button would otherwise have first claim on a real
 	# spacebar press anyway.
-	if Input.is_action_just_pressed("fire_laser"):
+	if self_fire and Input.is_action_just_pressed("fire_laser"):
 		fire()
 
 

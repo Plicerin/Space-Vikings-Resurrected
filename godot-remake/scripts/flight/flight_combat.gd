@@ -99,6 +99,7 @@ extends Node2D
 const ShipDestructionScript = preload("res://scripts/combat/ship_destruction.gd")
 const IncomingFireScript = preload("res://scripts/combat/incoming_fire.gd")
 const MissileStrikeScript = preload("res://scripts/combat/missile_strike.gd")
+const LaserBeamScript = preload("res://scripts/combat/laser_beam.gd")
 const ShapeTable = preload("res://scripts/shapes/shape_table.gd")
 const ENEMY_SHAPES := "res://assets/shapes/ENEMY I.A24580.L68.payload.json"
 
@@ -144,6 +145,7 @@ signal status_message(text: String)
 @onready var _ship_destruction: ShipDestructionScript = $HGRCanvas/ShipDestruction
 @onready var _incoming_fire: IncomingFireScript = $HGRCanvas/IncomingFire
 @onready var _missile_strike: MissileStrikeScript = $HGRCanvas/MissileStrike
+@onready var _laser_beam: LaserBeamScript = $HGRCanvas/LaserBeam
 @onready var _tick_timer: Timer = $TickTimer
 
 
@@ -174,7 +176,13 @@ func fire_laser() -> void:
 	_rearm_if_surrendered()
 	if GameState.ship_laser <= 0.0:
 		return
-	AudioManager.play_laser()
+	# 2026-11-09 fix: this used to only play the sound and run the damage
+	# math with no visual at all -- a real playtest reported firing as
+	# "completely unusable" because nothing appeared onscreen. _laser_beam
+	# already implements the real twin-beam draw (line 1505) and plays the
+	# sound itself; see laser_beam.gd's self_fire flag for why this is a
+	# direct call rather than that node polling input on its own here.
+	_laser_beam.fire()
 	var tech: int = GameState.planet_tech[GameState.current_planet]
 	GameState.gf_victory_progress = minf(GameState.gf_victory_progress + 10.0 / (tech + 1.0), 255.0)
 	GameState.defender_damage_points = minf(GameState.defender_damage_points + 1.0 / (tech + 1.0), 255.0)
