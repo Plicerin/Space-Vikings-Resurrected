@@ -47,8 +47,7 @@ new script that needs a type name.
 | Starfield during flight | Placeholder (`MultiMeshInstance3D`), deliberately finite — the original's own starfield is a bounded sphere you can fly through, not infinite/regenerating, so this isn't a bug to fix | `FLIGHT_CONTROL_AND_PROGRESSION_ANALYSIS.md` |
 | Planet during flight (deep-space view) | Real — `PLANET # 0`'s actual 195-point field, same file `ORBIT.bas` loads for this view | `A2-3D1_ENGINE_ANALYSIS.md` |
 | Planet during re-entry (per-world terrain map) | Real — `scenes/planet_approach.tscn`, triggered automatically by proximity to the planet during flight | `A2-3D1_ENGINE_ANALYSIS.md` |
-| Combat VFX: fighter approach/retreat/explosion, laser beam, EX.bas ship destruction, incoming-fire pattern | Real — see "Combat VFX" below | `COMBAT_VFX_ANALYSIS.md` |
-| Combat integration (ambient incoming damage, laser fire, orbital defender destruction, player ship destruction) | Real — `scripts/flight/flight_combat.gd`, wired into `space_flight.tscn`; see "Combat integration" below | `COMBAT_VFX_ANALYSIS.md` |
+| Flight combat (laser, missile, defender fire, fighter passes, turrets, shields / condition / weapon / autopilot switches, defender and player destruction) | Real — rules in `scripts/flight/flight_combat.gd`, drawing in `scripts/combat/combat_fx.gd` on a software hi-res page; see "Flight combat" below | `CALL_SITES.md` |
 
 Every stub was deliberately kept navigable (not a dead end) so the full
 original overlay graph — Start → Galaxy Map → Command Console → Ground
@@ -71,257 +70,101 @@ captured and visually inspected) to confirm they actually look right, not
 just that they run without erroring. Still worth a manual pass in a real
 windowed session before trusting the feel of anything.
 
-## Combat VFX
+## Flight combat
 
-`scripts/combat/` ports `COMBAT_VFX_ANALYSIS.md`'s trace of
-`STARSHIP SIMULATOR.bas`/`EX.bas` — none of which uses the A2-3D1 3D
-engine, all of it flat 2D vector/sprite drawing over the cockpit view in
-the original. `scripts/shapes/hgr_canvas.gd` reproduces the Apple II's
-280x192 hi-res coordinate space (scaled up) so the ported code can use the
-BASIC source's literal pixel coordinates (reticle corners, `M`-loop screen
-Y, etc.) directly instead of re-deriving new ones.
+Two scripts, split the way the original's BASIC is not:
 
-- **Missile strike** (`missile_strike.gd` + `missile_trail.gd`, renamed
-  2026-11-09 from `fighter_encounter.gd`/`fighter_slot.gd` — see
-  "Missile strike" below for the full correction): the twin-trail
-  flip-book approach, the fixed-shape miss/flyby, and the
-  scale-flash + debris-stamp explosion — lines 1000-1222.
-- **Laser beam** (`laser_beam.gd`): the two converging cockpit-corner
-  triangles, flickered 3x — lines 1505-1530. Sound (`CALL LA`, confirmed
-  decoupled from the visual) now plays via `AudioManager.play_laser()` —
-  see "Sound" below.
-- **Ship destruction** (`ship_destruction.gd`): `EX.bas`'s bigger
-  screen-centered version of the same flash+debris, plus a genuine
-  radiating-line particle burst, plus persistent (stand-in) wreckage —
-  now wired to a real trigger, see "Combat integration" below.
-- **Incoming fire** (`incoming_fire.gd`): the separate generic
-  shape-crosses-the-screen pattern, lines 5000-5251, now spawning on
-  its own real independent roll and with its own real shootdown
-  sub-mechanic (see "Combat integration" below). Also fixed
-  2026-11-09: this port originally hardcoded shape index 2 for the
-  whole pattern — wrong. The real source's own shape pick (lines
-  5050-5080) depends on which third of the screen the spawn point
-  falls in: the right third draws shape **9** (23 real path commands,
-  genuinely detailed); the other two both draw shapes **10**/**8**
-  (2 commands each, a near-invisible dash — same "odd=detailed,
-  even=blank" pattern already confirmed in `missile_strike.gd`'s
-  own doc comment). Shape 2 was never one of these three.
+- `scripts/flight/flight_combat.gd` — the rules of `STARSHIP
+  SIMULATOR.bas` lines 185-192, 1500-1570, 3000-3381 and 5200-5251.
+- `scripts/combat/combat_fx.gd` — what those lines draw, on a software
+  copy of the hi-res page (`scripts/shapes/hgr_screen.gd`, shown by
+  `hgr_view.gd`): the same `XDRAW`/`HPLOT` calls at the same
+  coordinates in the same order, through a port of the ROM's shape
+  drawing (`shape_table.gd`), with the pauses taken from the real
+  machine.
 
-All four remain reachable standalone from the Start screen's "Combat
-VFX Demo" button (the demo's two Missile Strike buttons preview the
-hit and miss outcomes directly, since a live encounter's outcome now
-depends on real aim/range). Ship Destruction, Incoming Fire, and
-Missile Strike are now all wired into real flight (see "Combat
-integration" below); the Laser Beam cockpit-corner visual specifically
-is not yet.
+Each script's doc comment lists its lines and quirks; `CALL_SITES.md`
+has the line-by-line table. The short version:
 
-## Combat integration
+**One loop iteration is the unit of time.** The original is a single
+BASIC loop: about 130 frames of flight rendering, then the fire button
+(line 185), then the enemy's turn (line 192: the defender's fire, then
+a fighter pass 60% of the time). Every effect stops the loop while it
+runs. The port keeps that order and those lengths. One liberty: a fire
+press during the quiet part starts the iteration at once instead of
+waiting up to two seconds for the loop to come round; the enemy's turn
+still follows every shot.
 
-`scripts/flight/flight_combat.gd`, wired into `space_flight.tscn`'s HUD
-layer, ports `STARSHIP SIMULATOR.bas`'s three real combat mechanisms.
+**Panel switches** (`CALL 38402`, keys as in the original):
 
-**Combat gate** (lines 189/190/192, `_is_combat_eligible()`): current
-planet's tech >= 2, the planet NOT surrendered
-(`GameState.gf_planet_surrendered`), and an orbital defender present
-within range (`orbital_defender_tier != 0` and `COMBAT_RANGE` of the
-planet — a liberty standing in for the original's landed-OR-bounding-
-box test, since this port's flight scene has no "landed" sub-state).
-The surrendered check was missing until 2026-11-09, found by a live
-MAME investigation driven by the user pushing back on an earlier wrong
-conclusion here — see "Next steps" below for the full story. Without
-it, this port's combat could never fire at all, since every automated
-test happens to start at the one planet (SOL, the home base) where
-`gf_planet_surrendered` is genuinely true from the first frame of a
-new game.
+| Key | Switch | New game |
+|---|---|---|
+| `S` | shields up / down | down |
+| `B` | condition BLUE → RED → GREEN → BLUE | RED |
+| `W` | missile / laser | missile |
+| `A` | autopilot (the stick is not read) | manual |
 
-- **Ambient incoming damage** (lines 3000-3381, "GOSUB 3000") — runs
-  on a tuned timer (the original rolls this every main-loop pass; a
-  real-time per-frame roll would land damage far faster than BASIC's
-  own effective frame rate, so this is tuned to feel similarly
-  occasional rather than ported byte-exact). Per-hit formula is a
-  literal port: two independent 40%-chance rolls plus an independent
-  30%-chance roll can land a hit; SHIELD drains first, and only
-  cascades to RADAR/engines/COMPUTER/LASER/HULL once the shield is
-  empty. **Not ported:** `$38201` is the shields switch, flipped by the
-  `S` key through `CALL 38402` (machine code, which is why a search of
-  the BASIC found no write). With shields down every hit cascades, and
-  a new game starts with them down. This port still behaves as if they
-  were always up — see `CALL_SITES.md` §2. HULL reaching 0
-  triggers `S_X.bas` — a new screen, `scenes/player_destroyed.tscn`,
-  a literal port of its expanding radial-burst algorithm (`X1=5 TO 130
-  STEP 8`, 15 random lines per step) plus its exact text. The original
-  then `PR#6`s (reboots from the disk's boot sector) after two
-  keypresses; this port's closest real equivalent is returning to the
-  start screen on any key or Continue.
-- **The incoming-fire enemy sprite** (lines 190/192/5000-5251,
-  "GOSUB 5000") — a small raider, found and fixed earlier in this
-  investigation. CORRECTION (2026-11-09): this bullet used to claim it
-  was the ship the manual's Flight Training cockpit screenshot shows —
-  that's very likely wrong. Given "Missile strike" below (the manual's
-  own "use your lasers... then your missiles to finish him off"), the
-  screenshot almost certainly depicts the large orbital defender
-  (`ShipBlip`, "Radar" below), not this small crossing-the-screen
-  raider. Now spawns on its own real independent roll (60%,
-  same tick as the ambient check above), gated on
-  `GameState.flight_escort_fighters > 0` — byte 3 of the current
-  planet's record (30 at SOL; loaded per planet since 2026-11-10, see
-  `GameState.load_planet_record()`). Its own internal shootdown sub-mechanic (lines
-  5200-5251) is ported too: firing a tracer (`incoming_fire.gd`'s
-  `tracer_fired` signal) rolls a 30% chance to intercept the raider,
-  decrementing `flight_escort_fighters` by 1 and `ship_missile_system`
-  by 2 — simplified from the source, which only does this at condition
-  RED (`$38165 = 3`, stepped by the `B` key). The condition switch is
-  not ported, so this port treats it as always eligible.
-- **Laser fire** (lines 185/1500-1570, "GOSUB 1500") — firing while
-  the current planet is already surrendered re-arms its resistance
-  instead of doing nothing (line 1500's own quirk, now ported); gated
-  on LASER health > 0, always adds to `GameState.gf_victory_progress`
-  (the SAME ground-invasion-surrender counter `GROUND FORCES.bas`
-  uses — firing from orbit genuinely helps soften a planet toward
-  surrender before you ever reach Ground Forces) and to
-  `defender_damage_points`/`defender_damage_threshold` (toward
-  destroying the current orbital defender ship, `EX.bas` — which also
-  halves `flight_escort_fighters`, line 56, now ported). Neither is
-  gated on proximity — the original checks the fire button every
-  main-loop pass regardless of position, so firing always "counts"
-  against whatever system you're currently at.
-- **Missile fire** (line 1501's other branch, `IF PEEK(38202)=1 THEN
-  1000`, lines 1000-1222) — the real *aimable* weapon, and a correction
-  to how this port previously read that code. See "Missile strike"
-  below for the full story.
+The stick is the arrow keys and the throttle is `Q`/`E`, so that these
+four letters stay free. The panel lights are not drawn yet; the debug
+line at the top of the flight view shows the four states.
 
-Found and fixed three real pre-existing gaps while wiring this in:
-- `gf_planet_surrendered` defaulted to `false` in this port; the real
-  value at new-game start is `true` (confirmed live — SOL,
-  `current_planet=0`, is your home base, already "yours"). This was
-  the actual root cause of combat never firing in testing, not a
-  missing feature.
-- `gf_enemy_strength`/`defender_damage_threshold`/`gf_victory_progress`
-  reset at system arrival in the real source (`H_D.bas` lines 90-93),
-  not at the start of a ground attack — moved from
-  `ground_forces.gd`'s `_on_attack_pressed()` to `galaxy_map.gd`'s
-  system-selection callback (this port's arrival-equivalent).
-  `ground_forces.gd` was also zeroing `gf_victory_progress` on every
-  Attack press, which would have silently erased any progress flight
-  combat had already made toward the same shared counter.
+**Rules that are easy to get wrong**, all ported and all checked either
+live in MAME (`tools/mame/fight_live.lua`, logs in
+`analysis/fight_live_*.log`) or against the source:
 
-Not yet wired in, documented rather than silently dropped:
-- A proper live, interactive re-entry — see "Next steps" below;
-  `RE.bas` turns out not to be a static display at all.
+- Every result is POKEd, so it is cut down to a whole number. The laser
+  adds `1/(tech+1)` to the defender's damage, which is lost at tech 1
+  or more: **the laser never damages a defender there** (live at tech
+  3: victory points 1 → 3 → 5 → 7, damage 0). It still moves the planet
+  towards surrender. A missile hit adds `120/(tech+1)`.
+- A missile costs 2 points of the missile system, except the one that
+  destroys the defender (`RUN EX` leaves before line 1090).
+- With shields down (the new-game state) every hit goes through to
+  radar, engines, computer, laser and hull. With shields up and above
+  10 a hit only wears the shield.
+- BASIC's `DMG` flag is only cleared when damage goes through. Once
+  raised shields have absorbed one hit, every later iteration in range
+  wears them by another point whether or not anything is seen to hit
+  (live: 14 iterations in a row).
+- The turrets answer a strafing fighter only at condition RED.
+- Fighters keep attacking after the defender is destroyed; the
+  defender's own fire stops.
+- Hull 0 is not death by itself: the test is made before the value is
+  cut down, so a hull of 0.4 is stored as 0 and the next hit kills.
 
-**The orbital defender's own 3D model, rendered in flight next to the
-planet** — distinct from everything above. The incoming-fire sprite
-resolved earlier (previous bullet list, and the "Next steps" entry
-below) is a small raider that crosses the screen and fires tracers;
-the user explicitly disambiguated it from *this*, a separate "large
-ship in orbit around the planet... it is the ship you see on the
-radar" — i.e. the actual `SHIP # N` A2-3D1 model (`GameState.
-orbital_defender_tier`), already correctly rendered on the radar
-screen (see "Radar" below) but, until now, nowhere in the flight scene
-itself. Confirmed live in MAME 2026-11-09 with a genuine hyperdrive
-jump (earlier jump tests had silently no-op'd from an off-by-one bug
-in the test script itself — the real game is 1-indexed, `S$(1)="SOL"`
-— so they never actually left SOL; fixed, then re-run: `current_planet`
-genuinely went 1→2 and `orbital_defender_tier` organically changed
-3→2 on arrival). Post-jump screenshots show a compact, solid
-silhouette near the horizon, absent at SOL and absent during the warp
-transit itself — and ruled out as just this scene's own `Planet` node
-by checking `PLANET # 0`'s raw data directly: it's a genuine but
-*sparse* 195-point field spanning a ±10000-unit volume, which would
-read as scattered dots across a wide area, not one small dense blob.
-Wired in as `ShipBlip` (`space_flight.tscn`/`space_flight.gd`), reusing
-the same `A2_3D1_Model.build_ship_mesh(tier)` the radar screen already
-uses, in a slow orbit around the planet; rebuilds itself whenever
-`orbital_defender_tier` changes mid-flight (e.g. destroying the
-defender) rather than only once at scene load.
+**The white flashes are real.** `POKE -16298,0` ... `POKE -16297,0`
+switches the display to lo-res for as long as BASIC takes between the
+two, and the lo-res page is all white during flight. They are
+full-screen and fast; `HgrView.flashes_enabled` turns them off (the
+Combat demo has the switch).
 
-**Missile strike** — a second real weapon against that same ship, and
-a correction to a misreading that stood in this project since the
-Combat VFX Demo was first built. `fighter_encounter.gd`/`fighter_slot.gd`
-(lines 1000-1222) were built under the theory that this was a
-"two-fighter approach minigame," reachable only from the dev-tool demo
-for lack of a confident real trigger. That theory was never confirmed
-against the actual manual and turned out to be wrong. Re-reading the
-manual directly (at the user's prompt) settles it in its own words:
-page 8's "Missile/Laser" indicator-light section says a green light
-shows which weapon is "presently engaged," toggled with the **W**
-key, both fired by the same button; page 13's "Tactical Considerations"
-says "use your lasers on the ship until you come within missile range
-and then use your missiles to finish him off," and that missiles "must
-be within half the range covered by your forward radar scan or your
-missiles will self-destruct before reaching their target... (The
-explosion is smaller than a direct hit.)" That's a direct description
-of lines 1000-1222: line 1501's `IF PEEK(38202)=1 THEN 1000` is the
-weapon-select branch the laser's own line 1505 falls through from, not
-a fighter encounter at all. The smoking gun confirming it targets the
-SAME orbital defender rather than a separate enemy: a successful hit
-(line 1085) calls the exact same `GOSUB 1535` the laser uses — the
-victory-progress/defender-damage/surrender/destroy routine — with
-`J2=120` where the laser's own call uses `J2=1`. A real missile hit
-deals **120x** the laser's defender-damage per shot, which is exactly
-the "finish him off" framing: soften from any range and angle with the
-weak, unconditional laser, then land one well-aimed, close-range
-missile to actually end it.
+**Measured and estimated timing.** Measured on the real machine:
+iteration length, fighter pass, turret fire, the line-1100 burst, the
+laser, the missile's flight, hi-res text speed. Estimated from those
+costs, not captured yet: the missile's direct hit (1200-1222), the
+damage flashes (3019/3032) and `EX.bas`.
 
-Renamed 2026-11-09 (`fighter_encounter.gd`→`missile_strike.gd`,
-`fighter_slot.gd`→`missile_trail.gd`, scenes and node names to match)
-rather than just correcting the doc comments in place, since the
-semantic recharacterization is total — these files were never about
-fighters. `missile_strike.gd`'s own doc comment carries the full
-correction for anyone who finds the old names in history. Also fixed
-in the same pass: `start_retreat()`/`start_explosion()` (now
-`start_miss()`/`start_hit()`) both played the `NOISE_MEDIUM` preset —
-wrong, since lines 1100/1200 explicitly call `GOSUB 4100` (the
-`NOISE_HEAVY` preset) before their own `CALL SG`, unlike the bare
-line-1010 tick this project's "bare `CALL SG` = MEDIUM" convention
-actually applies to.
+**Still approximate**, waiting on the flight model's own port: the
+combat box of line 192 is a distance from the planet, the missile's
+hit test (line 1050) is a forward cone, and there is no flight in
+atmosphere (line 190, where the ship is rolled against twice per
+iteration).
 
-Wired into real flight as `flight_combat.gd`'s `fire_missile()`, now a
-genuinely *aimable* mechanic — the thing the laser's own "always
-counts, no matter where you're pointed" mechanic structurally can't
-be. Unlike the laser, hit-or-miss is resolved before the visual plays
-(matching the original's own line 1085, which branches on `HIT` before
-the draw loop even finishes): a real 3D check against `ShipBlip`'s
-live orbiting position — forward-cone angle (`MISSILE_AIM_TOLERANCE_DEG`,
-a feel-tuned liberty approximating line 1050's fixed bounding box,
-since this port's world units/camera don't match the original's 1:1)
-and range (`MISSILE_RANGE`, half of the existing `COMBAT_RANGE`
-liberty, directly matching the manual's own stated "half the range
-covered by your forward radar scan" ratio rather than inventing an
-unrelated constant). `GameState.missile_mode_active` (`$38202`) is
-toggled by the new `toggle_weapon` action — TAB, not the real W key,
-since this port's W is already claimed by WASD pitch-up
-(`ship_controller.gd`) — and `flight_combat.gd`'s new `fire_weapon()`
-dispatches a fire-button press to `fire_missile()` or `fire_laser()`
-accordingly, matching line 1501's own branch. Missile health
-(`ship_missile_system`, `$38187`) is consumed on every shot, hit or
-miss, same as the source's own unconditional `GOSUB 1090` decrement.
-Verified end-to-end with a headless Godot harness, not just read: a
-correctly-aimed in-range shot deals exactly 120x a laser shot's
-defender-damage, an out-of-range or off-aim shot deals none (while
-still consuming a missile), and a missile hit that crosses the
-destroy threshold zeroes `orbital_defender_tier`, halves
-`flight_escort_fighters`, and makes `ShipBlip` actually disappear next
-frame, same as a laser kill already did.
+**The orbital defender** is the `SHIP # N` A2-3D1 model
+(`GameState.orbital_defender_tier`), the ship the radar shows. It is
+drawn in flight as `ShipBlip` (`space_flight.tscn`) with the same
+`A2_3D1_Model.build_ship_mesh(tier)` the radar uses, and is rebuilt
+when the tier changes (destroying it removes it). The small ships that
+cross the view and strafe are the planet's fighters
+(`flight_escort_fighters`, `$38207`), shapes 8-10 of the `ENEMY` table.
 
-**Live-confirmed, not just manual+source cross-referenced** (2026-11-09):
-until this point the whole mechanic above rested on the manual's text
-and the `GOSUB 1535`/`J2=120` source evidence converging — strong, but
-never actually watched executing. Scripted the real disk live in MAME:
-forced the ship's position to the exact center of line 1050's hit box
-via direct memory poke (a RADAR.bas round-trip — press R, then X — is
-what forces a resync, since `X`'s fall-through to a fresh `RUN
-STARSHIP SIMULATOR` is what re-reads the poked position bytes into the
-live X/Y/Z variables), forced the planet hostile, and held the real
-fire button. Watched live: `defender_damage_points` jumped 0→30,
-exactly matching `120/(TE+1)` with the real tech value read off
-memory; that crossed the threshold and the game's own `PRINT "RUNEX"`
-chain fired *on its own* — `orbital_defender_tier` zeroed itself
-without being poked, and the real `EX.bas` explosion rendered on
-screen. One real timing gotcha worth keeping: a single missile-fire
-cycle takes roughly 420 emulated frames (~7 real seconds) in
-interpreted Applesoft BASIC — a scripted test with a shorter hold
-window just looks like a broken mechanic, not a miss.
+**Checked headless**, not only read: every effect run to its end with
+the page dumped along the way, and the flight scene run against a
+forced hostile planet with shields down, with shields up and the laser
+held, and with the missile lined up (two hits at tech 3: damage 0 → 30
+→ 60, defender destroyed, fighters halved, no missile cost on the
+kill). The combat demo (Start screen → "Combat VFX Demo") plays each
+effect on its own.
 
 ## Sound
 
@@ -362,30 +205,25 @@ unported — so their much longer call counts (not a specific leftover
 parameter state) are what this port actually reproduces, as the
 NOISE_EXPLOSION/NOISE_DESTRUCTION presets, scaled up proportionally.
 
-Wired into every real call site found by grepping the source for
-`CALL SG`/`CALL LA`/`CALL NOISE`/`CALL EX`: `laser_beam.gd` and
-`flight_combat.gd`'s own `fire_laser()` (the laser sweep — both play
-it, since one is the cockpit visual and the other is the actual flight
-mechanic, not yet wired to each other — see "Combat integration"
-above), `flight_combat.gd`'s ambient damage tick (light/medium presets
-per branch, same as the source calling both independently),
-`incoming_fire.gd`'s tracer fire (light), `fighter_encounter.gd`'s
-approach start and `fighter_slot.gd`'s retreat/explosion (medium —
-all three are bare `CALL SG` sites with no preceding `GOSUB 4100/4110/
-4120`, so this port just picks MEDIUM for all of them rather than
-tracking real leftover state), `ship_destruction.gd` (EX.bas's
-explosion), and `player_destroyed.gd` (S_X.bas's destruction — the
-longest burst in the game).
+Wired into the call sites of `CALL SG`/`CALL LA`/`CALL NOISE`/`CALL
+EX`: all the flight-combat ones are in `combat_fx.gd` (the laser's
+`CALL LA`; heavy for the missile's burst and direct hit; light for the
+light damage flashes and a fighter's strafing hit; medium for the
+heavier damage flash; the explosion for `EX.bas`), and
+`player_destroyed.gd` plays S_X.bas's destruction, the longest burst
+in the game. Measured live, the first `CALL SG` after a `GOSUB
+4100/4110` preset lasts 13 / 11 frames and later calls without a new
+preset only 1-2 frames (the routine counts its duration bytes down).
+The port plays the first and leaves the ticks out: the missile's
+launch (line 1010), the repeats inside the burst and the turrets'
+(line 5230).
 
 Not wired, documented rather than silently dropped: `H_D.bas`'s own
 ~426-call noise burst during a hyperdrive jump (lines 17-20, the
 "warp" sequence) — this port's `galaxy_map.gd` doesn't have a visual
 counterpart for that sequence (travel is instant), so adding just the
 sound without anything on screen to tie it to would likely read as a
-stray, unexplained noise rather than an actual warp effect. Also not
-ported: the simpler incoming-fire pattern's own internal
-random-shootdown sub-mechanic's sound (line 5230, part of the
-already-deferred 5200-5251 mechanic — see "Combat integration" above).
+stray, unexplained noise rather than an actual warp effect.
 
 ## Radar
 
@@ -616,11 +454,18 @@ a simplification.
 
 ## The shape-table viewer
 
-Only the 21 `PLANET no N`/`SHIP no N` files are included — `PLANET FILE`
-and `PLANET FILE-M` are save-state data (the undeciphered `FF FF 01 01`
-pattern noted in `README_COMPLETE.md`), not shape tables; the original
-converter ran them through the shape parser anyway and produced 256
-garbage "shapes," so they're deliberately left out here.
+Start screen → "Shape Data Viewer". `scripts/shape_view.gd` draws all
+26 shapes of the game's one Applesoft shape table (`ENEMY`, loaded at
+`$7FFF`) on a hi-res page, numbered as BASIC numbers them. LEFT/RIGHT
+changes `ROT`, UP/DOWN changes `SCALE`, ESC goes back.
+`scripts/contact_sheet.gd` writes the same sheet to a PNG headless
+(`godot --headless --path . res://scenes/contact_sheet.tscn -- --out=sheet.png`).
+
+`ENEMY` is an ordinary Applesoft shape table and is drawn by a port of
+the ROM's `DRAW`/`XDRAW` (`scripts/shapes/shape_table.gd`). Earlier
+versions of this project decoded it with an invented "custom" format
+and also ran the `PLANET # N` and `SHIP # N` files through it; those
+files are A2-3D1 data, not shape tables, and their JSONs are gone.
 
 ## Opening
 
@@ -629,55 +474,11 @@ from the editor's project manager; the project now boots to
 `scenes/start.tscn`, with a button through to the shape viewer rather
 than opening directly into it.
 
-## How it works
-
-`scripts/shape_view.gd` parses the shape JSON directly (no Godot-native
-resource conversion yet) and draws each shape's `path_commands` as a
-polyline — `move` starts a new subpath (pen up), `line` extends the current
-one (pen down) — via `_draw()`. A shape with no `path_commands` at all
-(it never actually plots anything) is drawn as a single debug dot so the
-viewer can tell "exists but draws nothing" apart from "doesn't exist" —
-this is common and correct for planet files specifically: planets are
-drawn as a deliberately abstract scatter of short dash shapes, not a
-circle (confirmed against the real game's manual — see
-`tools/shape_table_decoder.py`'s docstring).
-
-By default it draws one shape at a time (`shape_index`, starting at 0) —
-use the arrow keys while the scene is running to step through every shape
-in the file. Apple II shape tables are usually a set of independently-drawn
-elements rather than pieces of one combined image, so overlaying all of
-them (`shape_index = -1`) is mostly noise; stepping through them one at a
-time is how you actually tell what each one is.
-
-Swap to a different shape file at runtime or in the inspector via the
-`shape_file_path` export on the `PlanetTest` node, or call
-`load_shape_file(path)` on it from code.
-
-## Vertical orientation
-
-The `flip_y` export defaults to `false` (render the JSON's y values as-is).
-Godot's 2D coordinate system is y-down, same as the Apple II's, so this
-is correct without inversion.
-
-(Correction, 2026-11-07, same day: the original version of this note
-cited decoding `SHIP no 1`'s shape 2 under *this* shape-table viewer
-and comparing it to the manual's cockpit-view screenshot as the
-confirming evidence. That comparison is no longer trustworthy as
-stated — `SHIP # N` turned out not to be shape-table data at all, it's
-real `A2-3D1` 3D-engine bytecode (see the "Radar" section above); the
-match was a coincidental alternate parse, the same pattern that also
-tripped up `PLANET # N` — see `A2-3D1_ENGINE_ANALYSIS.md`'s "Resolved"
-sections. The `flip_y=false` conclusion itself is still believed
-correct — it's confirmed independently via `ENEMY`'s live SHTAB memory
-match in MAME, which genuinely is this shape-table format — just not
-on the SHIP-vs-manual evidence this note originally cited.)
-
 ## Next steps
 
 - **Re-entry should be live, interactive flight, not a static
   display.** Found 2026-11-09 while re-investigating "does a ship ever
-  render during flight" (see "Combat integration" above for the full
-  story): `RE.bas` doesn't show a 3-second terrain view and then
+  render during flight"): `RE.bas` doesn't show a 3-second terrain view and then
   return control — it resets ship position, BLOADs the real per-world
   terrain, sets `$38210=1` (atmosphere), and immediately hands back
   into the SAME live `STARSHIP SIMULATOR.bas` loop. You keep flying,
@@ -719,15 +520,14 @@ on the SHIP-vs-manual evidence this note originally cited.)
   port's first real persistence (`end_game.gd`,
   `GameState.save_to_disk()`/`load_from_disk()`, a Load Game option on
   the start screen) alongside it. Combat integration is also real now
-  (2026-11-09, see "Combat integration" above) — ambient incoming
+  (2026-11-09, see "Flight combat" above) — ambient incoming
   damage, laser fire shared with ground-invasion surrender, orbital
   defender destruction, and player-ship destruction (`S_X.bas`, a new
   `player_destroyed.tscn`) are all wired into actual flight; Repair/
   Restock now has something that actually damages the fields it
   repairs. Left for later: a real "weapon fired" flag so the re-entry
   trigger can port the original's full condition instead of proximity
-  alone, and the two items noted as deliberately not-yet-wired at the
-  end of "Combat integration" above.
+  alone.
 - Re-verified against the corrected `ENEMY`/`EXPL` data (2026-11-07): the
   explosion and EX.bas destruction sequences still look solid (shape 15
   carries the debris, 16-18 are blank in the real data — that's fine,
@@ -750,7 +550,7 @@ on the SHIP-vs-manual evidence this note originally cited.)
   unported loot diminishing-returns mechanic (`COLLECT.bas` lines
   920-921). The "What's real vs. stubbed" table above is now fully
   real except End/scoring's own non-existence (there wasn't one — see
-  "Combat integration"/"Shore Leave" above for what `END.bas` and
+  "Shore Leave" above for what `END.bas` and
   `SHORE LEAVE.bas`'s "BUY WEAPONS" actually turned out to be instead).
   Sound is real now too (2026-11-09, see "Sound" above) — every real
   sound cue in the game reduces to exactly two machine-code routines

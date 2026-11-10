@@ -1,128 +1,170 @@
 #!/usr/bin/env python3
 """
-Standalone Apple II shape-table decoder.
+Applesoft shape-table decoder (ENEMY I, the game's only shape table).
 
-2026-11-07: rewritten twice in one session. The format isn't stock
-Applesoft -- Space Vikings (subLOGIC, 1982, by Mitchell Robbins per the
-manual's title page) uses its own custom shape-table encoding, close to
-but not identical to Applesoft's.
+`ENEMY I.A24580.L68` is BLOADed at $7FFF (START.bas 180), selected with
+`POKE 232,255: POKE 233,127` (STARSHIP SIMULATOR.bas 2) and drawn with
+Applesoft's own DRAW / XDRAW, so it is a stock Applesoft shape table:
 
-Confirmed empirically, by decoding and rendering shapes until they
-matched the real game's ship/planet art shown in the manual
-(archive.org item Space_Vikings_manual_subLOGIC, page 7's cockpit-view
-screenshot -- a swept wedge-shaped ship silhouette, and planets drawn as
-a deliberately abstract scatter of short dash marks, not a circle):
+  +00       number of shapes (26)
+  +01       unused
+  +02..     one 16-bit little-endian offset per shape, from table start;
+            shape N (1-based, the number BASIC passes to DRAW) is entry N-1
 
-  +00     number of shapes
-  +01..   one 1-byte offset per shape (from table start)
+Each shape is a byte stream ended by a $00 byte.  A byte holds up to
+three vectors, low bits first: bits 0-2, bits 3-5, bits 6-7.  In a
+vector, bits 0-1 are the direction (0 up, 1 right, 2 down, 3 left) and
+bit 2 says "plot the current point before moving".  The third vector
+has no plot bit.  The ROM shifts the byte right three bits after each
+vector and stops as soon as the rest is zero, so a trailing "move up
+without plotting" is not executed.
 
-2026-11-07, later the same day: confirmed live in MAME that this format
-is the real one for ENEMY/EXPL specifically (SHTAB live memory dump
-matched this decoder's output byte-for-byte during an actual fighter
-encounter). It is NOT what SHIP # N or PLANET # N actually are, even
-though both "decode" under this format without erroring -- that's a
-coincidental alternate parse. Both are real A2-3D1 3D-engine bytecode
-instead (vertex/line-draw opcodes, not shape vectors) -- see
-tools/a2_3d1_model_decoder.py and A2-3D1_ENGINE_ANALYSIS.md's "Resolved"
-sections. Don't retarget this decoder at SHIP/PLANET files again without
-re-checking that doc first.
+`rasterise()` below is the ROM routine itself (DRAW1, $F601 in the
+Apple II+ ROM, disassembled with tools/dis6502.py from a live MAME
+memory dump), including ROT and SCALE:
 
-Each shape is a byte stream ending at a $00 terminator (not three
-"do nothing" vectors -- $00 is reserved as the terminator). Every other
-byte packs three vectors:
+  quadrant = rot >> 4
+  dx = COS[rot & 15];  dy = COS[(rot & 15 ^ 15) + 1] + 1   (8 bit)
+  for each vector:
+      ex = ey = $80
+      repeat SCALE times:
+          ex += dx + 1;  on carry: plot-if-flag, step in (dir + quadrant)
+          ey += dy;      on carry: plot-if-flag, step in (dir + quadrant + 1)
 
-  bits 0-2 (AAA): vector 1 -- bit 0 = plot flag, bits 1-2 = direction
-  bits 3-5 (BBB): vector 2 -- same layout as AAA
-  bits 6-7 (CC):  vector 3 -- only 2 bits, both direction: can never
-                  plot, and a direction of 0 is a true no-op
+With ROT a multiple of 16 that is a plain 90-degree turn.  Anything in
+between makes a vector step in two directions, so `ROT=25` (the missile
+miss flash, STARSHIP SIMULATOR.bas 1100) turns every vector into a
+diagonal step of the next quadrant.
 
-Direction (2 bits), diagonal rather than cardinal: 0=NE, 1=SE, 2=SW,
-3=NW (CC's 0 is a no-op instead of NE). The cursor advances one diagonal
-step every vector regardless of the plot flag; when the flag is set, a
-pixel is plotted at the position the cursor was at *before* that step.
+Checked against the real screen 2026-11-10 (tools/mame/shapes_live.lua):
+the gauge markers (13, 14), the star-chart stars (1, 5, 6) and cursor
+(12) and the missile flip-book (3..8) all match this decode.
 
-This diverges from stock Applesoft (which uses 2-byte offsets, puts the
-plot flag at bit 2, and moves in the 4 cardinal directions) on all three
-points -- plausible for a commercial game's own hand-rolled, more
-compact format rather than a direct use of Applesoft's shape tables.
+HISTORY: until 2026-11-10 this file decoded a made-up "custom subLOGIC
+format" (1-byte offsets, plot flag in bit 0, diagonal moves).  It read
+the high bytes of the 16-bit offsets as separate shapes, which is where
+the documented "odd shapes detailed, even shapes blank" pattern came
+from.  The earlier "confirmed live" note only showed that the bytes in
+memory equal the file.  `EXPL` was run through it too; EXPL is 6502 code
+(the sound routine), not shapes.  PLANET/SHIP files are A2-3D1 models
+(tools/a2_3d1_model_decoder.py).
 
 Usage: python3 shape_table_decoder.py <input.bin> <output.json>
+       python3 shape_table_decoder.py --ascii <input.bin> [rot [scale]]
 """
 import sys, os, json
 
-DIRECTIONS = [(1, -1), (1, 1), (-1, 1), (-1, -1)]  # NE, SE, SW, NW
+COS = [0xFF, 0xFE, 0xFA, 0xF4, 0xEC, 0xE1, 0xD4, 0xC5,
+       0xB4, 0xA1, 0x8D, 0x78, 0x61, 0x49, 0x31, 0x18, 0xFF]
+DIRECTIONS = [(0, -1), (1, 0), (0, 1), (-1, 0)]  # up, right, down, left (screen y is down)
 
-def _step(bits, is_c, x, y):
-    d = (bits >> 1) & 0x03  # skip the plot-flag bit (bit 0) to get direction
-    if is_c and d == 0:
-        return x, y
-    dx, dy = DIRECTIONS[d]
-    return x + dx, y + dy
+
+def shape_offsets(data):
+    count = data[0]
+    return [data[2 + 2 * i] | (data[3 + 2 * i] << 8) for i in range(count)]
+
+
+def shape_bytes(data, offset):
+    end = offset
+    while end < len(data) and data[end] != 0:
+        end += 1
+    return data[offset:end]
+
+
+def rasterise(stream, rot=0, scale=1):
+    """Run the ROM's DRAW loop; return the plotted points in plot order
+    (a point can repeat) relative to the DRAW ... AT position."""
+    quadrant = (rot & 0xFF) >> 4
+    frac = rot & 0x0F
+    dx = COS[frac]
+    dy = (COS[(frac ^ 0x0F) + 1] + 1) & 0xFF
+    count = scale & 0xFF or 256  # SCALE 0 loops 256 times, like the ROM
+    x = y = 0
+    plotted = []
+    for byte in stream:
+        while True:
+            plot = bool(byte & 4)
+            ex = ey = 0x80
+            for _ in range(count):
+                ex += dx + 1
+                if ex > 0xFF:
+                    ex &= 0xFF
+                    if plot:
+                        plotted.append((x, y))
+                    sx, sy = DIRECTIONS[(byte + quadrant) & 3]
+                    x += sx; y += sy
+                ey += dy
+                if ey > 0xFF:
+                    ey &= 0xFF
+                    if plot:
+                        plotted.append((x, y))
+                    sx, sy = DIRECTIONS[(byte + quadrant + 1) & 3]
+                    x += sx; y += sy
+            byte >>= 3
+            if byte == 0:
+                break
+    return plotted
+
 
 def process_shape_table(data):
-    if len(data) < 2:
+    if len(data) < 4:
         return {"shapes": [], "error": "Data too short"}
-    num_shapes = data[0] + 1
-    offsets = [data[1 + i] for i in range(num_shapes) if 1 + i < len(data)]
-
+    offsets = shape_offsets(data)
     shapes = []
-    for shape_idx, offset in enumerate(offsets):
-        x, y = 0, 0
-        points = [(0, 0)]
-        pen_down = False
-        path_commands = []
-        i = offset
-        while i < len(data):
-            byte = data[i]
-            i += 1
-            if byte == 0x00:
-                break
-            for bits, is_c in (
-                (byte & 0x07, False),
-                ((byte >> 3) & 0x07, False),
-                ((byte >> 6) & 0x03, True),
-            ):
-                plots = bool(bits & 0x01) and not is_c
-                if plots:
-                    if not pen_down:
-                        path_commands.append({"type": "move", "x": x, "y": -y})
-                        pen_down = True
-                    # Plots at the pre-step position -- append before _step.
-                    path_commands.append({"type": "line", "x": x, "y": -y})
-                else:
-                    pen_down = False
-                x, y = _step(bits, is_c, x, y)
-                points.append((x, -y))
-        xs = [p[0] for p in points]; ys = [p[1] for p in points]
+    for i, offset in enumerate(offsets):
+        stream = shape_bytes(data, offset)
+        pixels = sorted(set(rasterise(stream)))
+        xs = [p[0] for p in pixels] or [0]
+        ys = [p[1] for p in pixels] or [0]
         shapes.append({
-            "id": shape_idx,
+            "id": i + 1,
             "offset": offset,
-            "points": points,
-            "path_commands": path_commands,
+            "bytes": list(stream),
+            "pixels": [list(p) for p in pixels],
             "bounding_box": {
                 "min_x": min(xs), "max_x": max(xs),
                 "min_y": min(ys), "max_y": max(ys),
-                "width": max(xs) - min(xs), "height": max(ys) - min(ys),
             },
-            "raw_bytes": data[offset:i].hex(),
         })
-    return {"shapes": shapes, "num_shapes": num_shapes, "offsets": offsets}
+    return {"format": "applesoft-shape-table", "num_shapes": len(offsets), "shapes": shapes}
+
+
+def ascii_dump(data, rot, scale):
+    for i, offset in enumerate(shape_offsets(data)):
+        pts = set(rasterise(shape_bytes(data, offset), rot, scale))
+        print(f"shape {i + 1}  offset ${offset:03X}  {len(pts)} points")
+        if not pts:
+            continue
+        xs = [p[0] for p in pts] + [0]; ys = [p[1] for p in pts] + [0]
+        for y in range(min(ys), max(ys) + 1):
+            row = ""
+            for x in range(min(xs), max(xs) + 1):
+                row += "#" if (x, y) in pts else ("+" if (x, y) == (0, 0) else ".")
+            print("  " + row)
+
 
 def main():
-    in_path = sys.argv[1]
-    out_path = sys.argv[2]
+    if sys.argv[1] == "--ascii":
+        with open(sys.argv[2], "rb") as f:
+            data = f.read()
+        rot = int(sys.argv[3]) if len(sys.argv) > 3 else 0
+        scale = int(sys.argv[4]) if len(sys.argv) > 4 else 1
+        ascii_dump(data, rot, scale)
+        return
+    in_path, out_path = sys.argv[1], sys.argv[2]
     with open(in_path, "rb") as f:
         data = f.read()
     result = process_shape_table(data)
     result["filename"] = os.path.basename(in_path)
     result["file_size"] = len(data)
-    result["hex_preview"] = data[:50].hex()
     with open(out_path, "w") as f:
-        json.dump(result, f, indent=2)
+        json.dump(result, f, separators=(",", ":"))
+        f.write("\n")
     if "error" in result:
         print(f"{in_path}: {result['error']} -> {out_path}")
     else:
         print(f"{in_path}: {result['num_shapes']} shapes -> {out_path}")
+
 
 if __name__ == "__main__":
     main()

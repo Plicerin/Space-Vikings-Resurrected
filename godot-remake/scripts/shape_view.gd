@@ -1,88 +1,63 @@
 extends Node2D
-
-## Renders a converted Apple II shape-table file (see
-## modern/shapes_json/*.payload.json in the main repo) as plain
-## lines and dots. One shape = one subpath list; a "move" command
-## starts a new subpath (pen up), a "line" command extends the
-## current one (pen down). Shapes with no path_commands and a
-## single point are drawn as dots (texture/crater detail).
-
-@export_file("*.json") var shape_file_path: String = "res://assets/shapes/PLANET no 0.payload.json"
-## -1 draws every shape in the file overlaid at its own origin (noisy —
-## Apple II shape tables are usually a set of independently-drawn
-## elements, not pieces of one combined image). >= 0 draws only that
-## shape index, which is what you want for checking one shape at a time.
-@export var shape_index: int = 0
-@export var scale_factor: float = 3.0
-@export var stroke_color: Color = Color.WHITE
-@export var stroke_width: float = 1.0
-@export var dot_radius: float = 1.5
-@export var flip_y: bool = false
+## The game's shape table (`ENEMY I`, 26 shapes) as a contact sheet on a
+## hi-res page: every shape XDRAWn by the ROM's own algorithm
+## (shape_table.gd) under its number, the number being the one the BASIC
+## source passes to DRAW / XDRAW. LEFT/RIGHT step ROT, UP/DOWN step
+## SCALE, ESC goes back. Reachable from the Start screen.
 
 const ShapeTable = preload("res://scripts/shapes/shape_table.gd")
+const HgrScreen = preload("res://scripts/shapes/hgr_screen.gd")
+const HgrView = preload("res://scripts/shapes/hgr_view.gd")
 
-var _table: ShapeTable
-var _subpaths: Array[PackedVector2Array] = []
-var _dots: Array[Vector2] = []
+const ENEMY_SHAPES := "res://assets/shapes/ENEMY I.A24580.L68.payload.json"
+const COLUMNS := 7
+const CELL := Vector2i(40, 40)
+
+@onready var _view: HgrView = $HGRCanvas/HgrView
+
+var _table := ShapeTable.new()
+var _rot := 0
+var _scale := 1
+
 
 func _ready() -> void:
-	_load_shapes()
-	queue_redraw()
+	_table.load_shapes(ENEMY_SHAPES)
+	_redraw()
+
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not event.is_pressed():
+	if event.is_action_pressed("ui_right"):
+		_rot = (_rot + 1) % 64
+	elif event.is_action_pressed("ui_left"):
+		_rot = (_rot + 63) % 64
+	elif event.is_action_pressed("ui_up"):
+		_scale = mini(_scale + 1, 4)
+	elif event.is_action_pressed("ui_down"):
+		_scale = maxi(_scale - 1, 1)
+	elif event.is_action_pressed("ui_cancel"):
+		GameState.goto_scene("res://scenes/start.tscn")
 		return
-	var shape_count: int = _table.shape_count if _table else 0
-	if event.is_action_pressed("ui_right") or event.is_action_pressed("ui_down"):
-		shape_index = (max(shape_index, 0) + 1) % max(shape_count, 1)
-		_load_shapes()
-		queue_redraw()
-	elif event.is_action_pressed("ui_left") or event.is_action_pressed("ui_up"):
-		shape_index = (max(shape_index, 0) - 1 + shape_count) % max(shape_count, 1)
-		_load_shapes()
-		queue_redraw()
-
-func _to_local(p: Vector2) -> Vector2:
-	var yy := -p.y if flip_y else p.y
-	return Vector2(p.x, yy) * scale_factor
-
-func _load_shapes() -> void:
-	_subpaths.clear()
-	_dots.clear()
-
-	_table = ShapeTable.new()
-	_table.load_shapes(shape_file_path)
-	if _table.shape_count == 0:
-		return
-
-	var indices: Array[int] = []
-	if shape_index >= 0:
-		indices.append(shape_index)
 	else:
-		for i in range(_table.shape_count):
-			indices.append(i)
+		return
+	_redraw()
 
-	for i in indices:
-		for subpath in _table.get_subpaths(i):
-			var local_subpath := PackedVector2Array()
-			for p in subpath:
-				local_subpath.append(_to_local(p))
-			_subpaths.append(local_subpath)
-		for dot in _table.get_dots(i):
-			_dots.append(_to_local(dot))
 
-func _draw() -> void:
-	for subpath in _subpaths:
-		draw_polyline(subpath, stroke_color, stroke_width)
-	for dot in _dots:
-		draw_circle(dot, dot_radius, stroke_color)
+func _redraw() -> void:
+	draw_sheet(_view.screen, _table, _rot, _scale)
 
-	var shape_count: int = _table.shape_count if _table else 0
-	var label := "%s — shape %d/%d (←/→ to cycle)" % [shape_file_path.get_file(), shape_index, shape_count - 1]
-	draw_string(ThemeDB.fallback_font, Vector2(-150, -120), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 16)
 
-## Swap in a different converted shape file at runtime and redraw.
-func load_shape_file(path: String) -> void:
-	shape_file_path = path
-	_load_shapes()
-	queue_redraw()
+## Clears `screen` and draws the whole table on it. Also used by
+## contact_sheet.gd.
+static func draw_sheet(screen: HgrScreen, table: ShapeTable, rot: int, shape_scale: int) -> void:
+	screen.clear()
+	screen.text_mode = 0
+	screen.rot = rot
+	screen.shape_scale = shape_scale
+	for id in range(1, table.shape_count + 1):
+		var cell := Vector2i((id - 1) % COLUMNS, (id - 1) / COLUMNS)
+		# The label goes on a text row; rows are 8 pixels, columns 7.
+		screen.print_at(str(id), cell.x * CELL.x / 7 + 1, cell.y * CELL.y / 8 + 1)
+		screen.xdraw(table, id, cell.x * CELL.x + CELL.x / 2, cell.y * CELL.y + CELL.y / 2 + 4)
+	screen.rot = 0
+	screen.shape_scale = 1
+	screen.print_at("ROT=%d SCALE=%d   ARROWS CHANGE, ESC BACK" % [rot, shape_scale], 1, 23)

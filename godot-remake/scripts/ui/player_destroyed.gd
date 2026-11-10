@@ -1,6 +1,6 @@
 extends Control
 ## Ports `S_X.bas` — the player's OWN ship being destroyed (distinct
-## from `EX.bas`/`ship_destruction.gd`, which is the *enemy* orbital
+## from `EX.bas` / `combat_fx.gd`'s `destroy_defender()`, which is the *enemy* orbital
 ## defender exploding). Reached when the ambient incoming-fire damage
 ## tick (`flight_combat.gd`, `STARSHIP SIMULATOR.bas` lines 3000-3381)
 ## drives `GameState.ship_hull` to exactly 0 (line 3350's

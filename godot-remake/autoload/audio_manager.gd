@@ -78,29 +78,21 @@ func play_laser() -> void:
 	_play(_laser)
 
 
-## GOSUB 4110 preset — the lighter of the two ambient incoming-damage
-## "hit" flashes (STARSHIP SIMULATOR.bas line 3019), also the
-## incoming-fire pattern's own tracer-fire moment (line 5098, same
-## preset).
+## GOSUB 4110 preset: the light damage flashes (STARSHIP SIMULATOR.bas
+## line 3019), a fighter's strafing hit (line 5098) and the turrets'
+## answer to it (line 5230, which reuses 5098's preset).
 func play_hit_light() -> void:
 	_play(_noise_light)
 
 
 ## GOSUB 4120 preset — the heavier ambient incoming-damage flash
-## (line 3032), and the bare `CALL SG` sites with no preceding GOSUB
-## (the fighter-approach step tick and retreat/explosion flourishes,
-## which reuse whatever preset was last set — this port just picks
-## MEDIUM for all of those rather than tracking real leftover state).
+## (line 3032).
 func play_hit_medium() -> void:
 	_play(_noise_medium)
 
 
 ## GOSUB 4100 preset -- lines 1100/1200's own call before their `CALL
-## SG`, i.e. the missile strike's miss (`missile_trail.gd`'s
-## start_miss()) and hit (start_hit()) sounds. Found 2026-11-09: both
-## previously played NOISE_MEDIUM (the bare-CALL-SG convention used
-## elsewhere in this project), which was wrong here specifically since
-## lines 1100/1200 explicitly set this preset first. Also the base unit
+## SG`, i.e. the missile's miss and hit (combat_fx.gd). Also the base unit
 ## the two explosion sounds below scale up from.
 func play_hit_heavy() -> void:
 	_play(_noise_heavy)

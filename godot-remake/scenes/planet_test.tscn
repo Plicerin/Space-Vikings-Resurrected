@@ -1,16 +1,14 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/shape_view.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/shapes/hgr_canvas.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/shapes/hgr_view.gd" id="3"]
 
-[node name="PlanetTest" type="Node2D"]
+[node name="ShapeView" type="Node2D"]
 script = ExtResource("1")
-shape_file_path = "res://assets/shapes/PLANET no 0.payload.json"
-scale_factor = 3.0
-stroke_color = Color(1, 1, 1, 1)
-stroke_width = 1.0
-dot_radius = 1.5
-flip_y = false
 
-[node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(150, 100)
-zoom = Vector2(1.5, 1.5)
+[node name="HGRCanvas" type="Node2D" parent="."]
+script = ExtResource("2")
+
+[node name="HgrView" type="Node2D" parent="HGRCanvas"]
+script = ExtResource("3")

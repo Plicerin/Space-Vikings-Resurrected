@@ -1,60 +1,39 @@
 extends Control
-## Standalone combat-VFX demo: the missile strike against the orbital
-## defender (hit/miss), the laser-fire visual, the EX.bas
-## ship-destruction sequence, and the separate incoming-fire pattern —
-## see COMBAT_VFX_ANALYSIS.md for the source trace each one ports.
-## Reachable from the Start screen like the shape-table viewer. The
-## missile strike is now also wired into real flight (see
-## `flight_combat.gd`'s `fire_missile()`) — this demo lets you preview
-## both outcomes directly instead of having to actually aim/range a
-## live encounter.
+## Developer preview of every flight-combat effect in combat_fx.gd, one
+## button each, on an empty hi-res page. Reachable from the Start
+## screen. Effects run one at a time, as in the original; a button
+## pressed while one is running does nothing.
 
-const ShapeTable = preload("res://scripts/shapes/shape_table.gd")
-const ENEMY_SHAPES := "res://assets/shapes/ENEMY I.A24580.L68.payload.json"
+const CombatFx = preload("res://scripts/combat/combat_fx.gd")
 
-@onready var _spawn_missile_hit_btn: Button = $VBox/Buttons/SpawnMissileHitButton
-@onready var _spawn_missile_miss_btn: Button = $VBox/Buttons/SpawnMissileMissButton
-@onready var _spawn_incoming_btn: Button = $VBox/Buttons/SpawnIncomingButton
-@onready var _destroy_ship_btn: Button = $VBox/Buttons/DestroyShipButton
-@onready var _back_btn: Button = $VBox/Buttons/BackButton
+@onready var _fx: CombatFx = $CombatFx
 @onready var _status: Label = $VBox/Status
-
-@onready var _missile_strike = $HGRCanvas/MissileStrike
-@onready var _incoming_fire = $HGRCanvas/IncomingFire
-@onready var _ship_destruction = $HGRCanvas/ShipDestruction
+@onready var _buttons: HBoxContainer = $VBox/Buttons
 
 
 func _ready() -> void:
-	var table := ShapeTable.new()
-	table.load_shapes(ENEMY_SHAPES)
-	_missile_strike.table = table
-	_incoming_fire.table = table
-	_ship_destruction.table = table
+	_bind("LaserButton", "Laser: three pulses (lines 1505-1530).", func() -> bool: return _fx.fire_laser())
+	_bind("MissileHitButton", "Missile, direct hit (lines 1010-1060, 1200).", func() -> bool: return _fx.fire_missile(true))
+	_bind("MissileMissButton", "Missile, miss (lines 1010-1060, 1100).", func() -> bool: return _fx.fire_missile(false))
+	_bind("FighterButton", "Fighter pass, turrets silent (lines 5000-5098).", func() -> bool: return _fx.fighter_pass(false))
+	_bind("FighterRedButton", "Fighter pass at condition RED (lines 5000-5251).", func() -> bool: return _fx.fighter_pass(true))
+	_bind("DamageButton", "Defender fire: light flashes, then the heavier one (lines 3019, 3032).", func() -> bool: return _fx.damage(randi_range(1, 4), true))
+	_bind("SurrenderButton", "Line 1550.", func() -> bool: return _fx.print_message("THE PLANET HAS SURRENDERED", 8, 13))
+	_bind("DestroyButton", "EX.bas: the orbital defender is destroyed.", func() -> bool: return _fx.destroy_defender())
+	var flash_toggle: CheckButton = _buttons.get_node("FlashToggle")
+	flash_toggle.toggled.connect(func(on: bool) -> void: _fx.view.flashes_enabled = on)
+	_buttons.get_node("BackButton").pressed.connect(func() -> void: GameState.goto_scene("res://scenes/start.tscn"))
 
-	_spawn_missile_hit_btn.pressed.connect(func() -> void:
-		_status.text = "Missile strike incoming — in range and aimed."
-		_missile_strike.start_strike(true)
-	)
-	_spawn_missile_miss_btn.pressed.connect(func() -> void:
-		_status.text = "Missile strike incoming — out of range or off-aim."
-		_missile_strike.start_strike(false)
-	)
-	_spawn_incoming_btn.pressed.connect(func() -> void:
-		_status.text = "Incoming-fire pattern running."
-		_incoming_fire.start()
-	)
-	_destroy_ship_btn.pressed.connect(func() -> void:
-		_status.text = "EX.bas ship-destruction sequence."
-		_ship_destruction.play()
-	)
-	_back_btn.pressed.connect(func() -> void: GameState.goto_scene("res://scenes/start.tscn"))
+	_fx.fighter_strafed.connect(func() -> void: _status.text = "Strafing hit.")
+	_fx.fighter_shot_down.connect(func() -> void: _status.text = "Fighter shot down.")
+	_fx.idle.connect(func() -> void: _status.text += "  Done.")
 
-	_missile_strike.strike_resolved.connect(func(hit: bool) -> void:
-		_status.text = "Direct hit on the orbital defender." if hit else "Missile missed/self-destructed — no hit."
-	)
-	_incoming_fire.finished.connect(func() -> void:
-		_status.text = "Incoming-fire pattern finished."
-	)
-	_ship_destruction.finished.connect(func() -> void:
-		_status.text = "EX.bas sequence finished — wreckage left behind."
+
+func _bind(button_name: String, text: String, start: Callable) -> void:
+	var button: Button = _buttons.get_node(button_name)
+	button.pressed.connect(func() -> void:
+		# A fresh page each time: nothing redraws the window here.
+		_fx.clear_window()
+		if start.call():
+			_status.text = text
 	)

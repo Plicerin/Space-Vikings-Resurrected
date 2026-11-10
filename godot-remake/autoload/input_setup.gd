@@ -4,21 +4,26 @@ extends Node
 ## table instead of a serialized InputEventKey blob. Loaded as an
 ## autoload before anything that reads these actions (see project.godot).
 
+## The letter keys are the original's own (STARSHIP SIMULATOR.bas lines
+## 200-210; CALL_SITES.md has the full dispatch table): A autopilot, B
+## condition, C command console, H hyperdrive, R radar, S shields, W
+## missile/laser. The paddles and their button become the arrow keys and
+## SPACE. G is this port's own shortcut.
 const ACTIONS := {
-	"pitch_up": [KEY_UP, KEY_W],
-	"pitch_down": [KEY_DOWN, KEY_S],
-	"bank_left": [KEY_LEFT, KEY_A],
-	"bank_right": [KEY_RIGHT, KEY_D],
+	"pitch_up": [KEY_UP],
+	"pitch_down": [KEY_DOWN],
+	"bank_left": [KEY_LEFT],
+	"bank_right": [KEY_RIGHT],
 	"throttle_up": [KEY_E, KEY_PAGEUP],
 	"throttle_down": [KEY_Q, KEY_PAGEDOWN],
 	"open_com": [KEY_C],
 	"open_ground_forces": [KEY_G],
 	"open_radar": [KEY_R],
 	"fire_laser": [KEY_SPACE, KEY_CTRL],
-	# Real key is W (manual page 8, "Missile/Laser... Use the W key to
-	# toggle between weapon systems") -- unusable here since this port's
-	# W is already WASD pitch-up (ship_controller.gd); TAB is free.
-	"toggle_weapon": [KEY_TAB],
+	"toggle_weapon": [KEY_W, KEY_TAB],
+	"toggle_shields": [KEY_S],
+	"toggle_condition": [KEY_B],
+	"toggle_autopilot": [KEY_A],
 }
 
 func _init() -> void:

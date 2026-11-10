@@ -3,8 +3,7 @@ extends Node2D
 ## lines 12-14 (border/grid, literal HPLOT coordinates) and lines
 ## 1000-1050 (the silhouette itself, decoded by
 ## tools/decode_ship_id.py — see scripts/shapes/ship_id_silhouette.gd).
-## Draw inside an HgrCanvas parent, same convention as laser_beam.gd/
-## radar_hud.gd.
+## Draw inside an HgrCanvas parent, same convention as radar_hud.gd.
 
 const ShipIdSilhouette = preload("res://scripts/shapes/ship_id_silhouette.gd")
 

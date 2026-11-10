@@ -146,13 +146,13 @@ key codes and groups the outcomes.
 
 | Key | Lines taken | Effect | Port |
 |---|---|---|---|
-| `1` `2` `3` `4` | 201 → `GOSUB` 311-314 → 207-210 | speed −3 / +3 / −15 / +15, clamped to 0..120 | ✅ throttle axis in `ship_controller.gd` (remapped) |
-| `A` | 203 → 317 → 500 | `POKE LT,4: CALL 38402` — autopilot on/off | ⚠️ not ported |
-| `B` | 203 → 318 → 500 | `POKE LT,3: CALL 38402` — step the condition | ⚠️ not ported |
+| `1` `2` `3` `4` | 201 → `GOSUB` 311-314 → 207-210 | speed −3 / +3 / −15 / +15, clamped to 0..120 | ✅ throttle axis in `ship_controller.gd` (remapped to Q/E; the stick is the arrow keys, so that W, S, A and B keep their original meanings) |
+| `A` | 203 → 317 → 500 | `POKE LT,4: CALL 38402` — autopilot on/off | ✅ `toggle_autopilot` |
+| `B` | 203 → 318 → 500 | `POKE LT,3: CALL 38402` — step the condition | ✅ `toggle_condition` |
 | `C` | 203 → 319 | `RUN COM` | ✅ `open_com` |
 | `H` | 204 → 207 → 208 → 209 | `RUN H/D` — hyperdrive | ⚠️ not ported (the port jumps from the Galaxy Map instead) |
 | `R` | 206 → 320 | `RUN RADAR` | ✅ `open_radar` |
-| `S` | 206 → 321 → 500 | `POKE LT,1: CALL 38402` — shields on/off | ⚠️ not ported |
+| `S` | 206 → 321 → 500 | `POKE LT,1: CALL 38402` — shields on/off | ✅ `toggle_shields` |
 | `W` | 205 → 500 | `POKE LT,2: CALL 38402` — missile/laser | ✅ `toggle_weapon` |
 | any other key | … → 210 | nothing | ⬜ |
 
@@ -210,10 +210,10 @@ What each flag gates in the flight program:
 
 | Flag | Values | Read at | Effect | Port |
 |---|---|---|---|---|
-| shields `38201` | 1 = up | 3205 | a hit always wears the shield (`38200`) down; with shields up and shield strength above 10 it stops there, otherwise the other systems and the hull take damage | ⚠️ `flight_combat.gd` behaves as if shields were always up |
+| shields `38201` | 1 = up | 3205 | a hit always wears the shield (`38200`) down; with shields up and shield strength above 10 it stops there, otherwise the other systems and the hull take damage | ✅ `GameState.shields_up`, `flight_combat.gd::_apply_damage()` |
 | weapon `38202` | 1 = missile | 1501 | the fire button launches a missile (line 1000) instead of the laser | ✅ `missile_mode_active` |
-| condition `38165` | 1 GREEN, 2 BLUE, 3 RED | 5200; `STATUS.bas` 1280-1294 | only at RED do the turrets shoot at an incoming fighter attack (5200-5251: 30% to destroy it, costing the enemy one fighter) | ⚠️ the port's shoot-down runs unconditionally |
-| autopilot `38164` | 1 = auto | 15 | skips line 19, so the paddles are not read and `38397/38398` keep their last values | ⚠️ not ported |
+| condition `38165` | 1 GREEN, 2 BLUE, 3 RED | 5200; `STATUS.bas` 1280-1294 | only at RED do the turrets shoot at an incoming fighter attack (5200-5251: 30% to destroy it, costing the enemy one fighter) | ✅ `GameState.condition`, `combat_fx.gd::fighter_pass(turrets_armed)` |
+| autopilot `38164` | 1 = auto | 15 | skips line 19, so the paddles are not read and `38397/38398` keep their last values | ✅ `GameState.autopilot_active`, `ship_controller.gd` |
 
 **The redraw-all path changes state.** `INSTRUMENTS.bas` 210 pokes the
 sentinel and calls once on a new game (`PEEK(38391)<>77`; a loaded
@@ -224,8 +224,7 @@ autopilot 1 → 0, condition 2 → 3, shields 1 → 0, weapon 0 → 1. So a
 new game enters flight under manual control, at condition RED, with
 **shields down** and **missile selected**. Whether that was intended or
 is a side effect of reusing the toggles to draw, it is what the game
-does. Port: ✅ the weapon start state (`start_new_game()`); the other
-three wait on the toggles above.
+does. Port: ✅ all four start states (`start_new_game()`).
 
 One oddity left ❓: `STATUS.bas` 1386 reads `38167` (the mode byte) as
 the high byte of a troop count.
@@ -347,7 +346,7 @@ two hi-res pages, and every pass ends at the keyboard check in line
 | 2 | `POKE 232/233` | Points the shape-table vector at `$7FFF` (§4). | ⬜ |
 | 8 | `GOSUB 6600` ×3 | Joins a low/high byte pair into a signed position component. | ⬜ Godot stores `ship_position` as a `Vector3`. |
 | 9, 182 | `POKE 38149,7` … `IF PEEK(38149)=7 THEN POKE 38149,0: GOTO 200` | The first pass after the program starts (or restarts through line 500's `GOTO 1`) skips the fire button and incoming fire and goes straight to the keyboard. | ⬜ |
-| 15, 19 | (inline) | **Autopilot.** `IF PEEK(38164)=1 THEN 20` skips the paddle read and the `POKE 38397/38398` that passes it to the flight-control routine, so the ship holds its last stick input. | ⚠️ not ported (§2). |
+| 15, 19 | (inline) | **Autopilot.** `IF PEEK(38164)=1 THEN 20` skips the paddle read and the `POKE 38397/38398` that passes it to the flight-control routine, so the ship holds its last stick input. | ✅ `ship_controller.gd`. |
 | 21-128 | `CALL CSN` (24582), `CALL SN` (24585) | A2-3D1's cosine and sine entries. The angle goes in by `POKE M1` (24588) and the 16-bit result comes back in `M1/M2` — the same poke-then-call convention as §3. Eight calls a pass turn pitch and heading into the movement vector of line 129. | ⬜ Godot's `Basis` math. |
 | 133-138 | (inline) | Position wraps at ±20000 on each axis. | ⬜ the port's space is not bounded this way; not re-checked. |
 | 140 | `GOSUB 6000` ×3 | Inverse of 6600, for poking the position back. | ⬜ |
@@ -355,17 +354,17 @@ two hi-res pages, and every pass ends at the keyboard check in line
 | 150-153 | `CALL CA` (36899), `CALL 37936` / `CALL 37888` | The per-frame flight-control and render call, then the page flip for whichever page was just drawn. | ⬜ Godot's renderer. |
 | 156 | (inline) | Within 900 units of the origin on all axes and not in atmosphere → `RUN RE` (re-entry). | ✅ `planet_approach.gd`. |
 | 158 | (inline) | In atmosphere and `Y > 4000` → `RUN ORBIT` (back to orbit). | ⬜ same reason as 147. |
-| 185 | `GOSUB 1500` | Fire button. 1500: firing at a surrendered planet re-arms it (`POKE 38208,0: POKE 38150,100`). 1501: missile selected (`38202=1`) → 1000. Otherwise the laser, if `38186 > 0`: draws the beams, then 1535 adds `10/(TE+1)` to the surrender counter `38160` and, in orbit, `1/(TE+1)` to the defender damage `38152`. 1550: counter ≥ `38150` → "THE PLANET HAS SURRENDERED", `38208=1`, planet marked secured. 1560: defender damage > `38204` with a defender present → `RUN EX`. | ✅ `flight_combat.gd`. |
-| 1000-1090 | missile | Needs stock (`38187 > 0`), costs 2 per shot. The shot flies 16 steps; a hit is the defender's box around `X9,Y9,Z9` in orbit, or the ground in atmosphere. Hit → explosion (1200) and 1535 with `J2=120`, so one missile hit is worth 120 laser hits on the defender. Miss → the small flash (1100). | ✅ `flight_combat.gd`, `missile_trail.gd`. |
-| 189-192 | `GOSUB 3000`, `GOSUB 5000` | Incoming fire, only at tech ≥ 2 planets that have not surrendered: every pass while in atmosphere (190), or while inside a box around the defender (192). Each calls the damage roll (3000) and then, 50% / 60% of the time and only while the planet has fighters (`38207 > 0`), the fighter attack (5000). | ✅ `flight_combat.gd`, `incoming_fire.gd`. |
-| 3000-3032 | damage roll | Returns at once if there is no defender and the ship is in orbit. Otherwise two independent rolls, 16% (40% × 40%) and 30%, each setting `DMG=1` with a screen flash and sound. | ✅ |
-| 3200-3350 | damage | `DMG=1`: shield strength `38200` loses up to 1.1. **If shields are up (`38201=1`) and strength is above 10, that is all.** Otherwise five systems lose up to 5 each and the hull (`38193`) up to 4. Hull 0 → `RUN S/X`. | ⚠️ shields switch not ported: the port always takes the "shields up" branch, while a new game in the original starts with them down (§2). ✅ hull 0 → `player_destroyed` (`flight_combat.gd`; closes the old ❓). |
+| 185 | `GOSUB 1500` | Fire button. 1500: firing at a surrendered planet re-arms it (`POKE 38208,0: POKE 38150,100`). 1501: missile selected (`38202=1`) → 1000. Otherwise the laser, if `38186 > 0`: draws the beams, then 1535 adds `10/(TE+1)` to the surrender counter `38160` and, in orbit, `1/(TE+1)` to the defender damage `38152`. Both sums are POKEd, so they are cut to whole numbers: at tech 1 or more the laser's `1/(TE+1)` is always lost and **the laser never damages a defender** (live at tech 3: three volleys took `38160` 1 → 3 → 5 → 7 and left `38152` at 0). 1550: counter ≥ `38150` → "THE PLANET HAS SURRENDERED", `38208=1`, planet marked secured. 1560: defender damage > `38204` with a defender present → `RUN EX`. | ✅ `flight_combat.gd`. |
+| 1000-1090 | missile | Needs stock (`38187 > 0`), costs 2 per shot (line 1090) — except the shot that destroys the defender, because 1560's `RUN EX` leaves from inside the `GOSUB` and 1090 is never reached. The shot flies 16 steps; a hit is the defender's box around `X9,Y9,Z9` in orbit, or the ground in atmosphere. Hit → explosion (1200) and 1535 with `J2=120`, so at tech 0 one missile hit is worth 120 laser volleys on the defender, and above tech 0 the missile is the only thing that hurts it. Miss → the small burst (1100). | ✅ rules in `flight_combat.gd`, drawing in `combat_fx.gd`. ⚠️ the hit test is still a forward cone, not line 1050's box. |
+| 189-192 | `GOSUB 3000`, `GOSUB 5000` | Incoming fire, only at tech ≥ 2 planets that have not surrendered: every pass while in atmosphere (190), or while inside a box around the defender (192). Each calls the damage roll (3000) and then, 50% / 60% of the time and only while the planet has fighters (`38207 > 0`), the fighter attack (5000). In atmosphere and inside the box both lines run, so the ship is rolled against twice a pass (live, `analysis/fight_live_shields_down.log`: that run drifted into the re-entry box, came back in atmosphere, and from there took 36 damage cascades in 45 passes — 8 passes outside the box and 37 inside it are 82 rolls at 0.41, about 34; one roll a pass would give about 19. The log does not record `38210` itself). | ✅ line 192 in `flight_combat.gd` (the box is a distance for now); ⬜ line 190, no atmosphere flight yet. |
+| 3000-3032 | damage roll | Returns at once if there is no defender and the ship is in orbit. Otherwise two independent rolls, 16% (40% × 40%) and 30%, each setting `DMG=1` with a screen flash and sound. | ✅ `flight_combat.gd::_defender_fire()`, `combat_fx.gd::damage()`. |
+| 3200-3350 | damage | `DMG=1`: shield strength `38200` loses up to 1.1. **If shields are up (`38201=1`) and strength is above 10, that is all.** Otherwise five systems lose up to 5 each and the hull (`38193`) up to 4. Hull 0 → `RUN S/X`. **`DMG` is only cleared at 3350**, so after one hit has been absorbed by raised shields every later `GOSUB 3000` wears the shield again, hit or no hit (live, `analysis/fight_live_shields_up_laser.log`: 14 passes in a row, one shield point each). The death test is on `J` before the POKE cuts it down, so a hull of 0.4 is stored as 0 and the ship lives until the next hit. | ✅ `flight_combat.gd::_apply_damage()`, including both quirks. |
 | 3360 | (inline) | First damage of a visit: `POKE 38393,1` (the DAMAGE light) and `RUN DMG`. | ✅ `GameState.damage_alert_active`. |
 | 200-321 | key dispatch | See §1's table. | see §1 |
-| 500 | `CALL 38402: GOTO 1` | The panel toggle (§2), then the program restarts from line 1. | W ✅; A, B, S ⚠️ |
-| 5000-5096 | fighter attack | A fighter shape crosses the view from a random edge. Each step has a 30% chance of `GOSUB 5098` then `GOSUB 5200`. | ✅ `incoming_fire.gd`. |
-| 5098 | `GOSUB 3205` with `L=7` | A strafing hit that only wears the shield (`3207 IF L=7 THEN RETURN`), whatever the shields switch says. | ✅ not re-checked. |
-| 5200-5251 | point defence | **Only at condition RED** (`38165=3`): the turrets fire at the fighter; 30% of the time it is destroyed (`38207 − 1`, explosion 1100) at a cost of 2 missile stock (1090). | ⚠️ the port's shoot-down runs at any time; condition is not ported (§2). |
+| 500 | `CALL 38402: GOTO 1` | The panel toggle (§2), then the program restarts from line 1. | ✅ the four toggles; ⬜ the restart (it only matters for line 9's skipped first pass). |
+| 5000-5096 | fighter attack | A fighter shape crosses the view from a random edge. Each step has a 30% chance of `GOSUB 5098` then `GOSUB 5200`. | ✅ `combat_fx.gd::fighter_pass()`. |
+| 5098 | `GOSUB 3205` with `L=7` | A strafing hit that only wears the shield (`3207 IF L=7 THEN RETURN`), whatever the shields switch says. | ✅ `flight_combat.gd::_wear_shield()`. |
+| 5200-5251 | point defence | **Only at condition RED** (`38165=3`): the turrets fire at the fighter; 30% of the time it is destroyed (`38207 − 1`, explosion 1100) at a cost of 2 missile stock (1090). | ✅ `combat_fx.gd`, `flight_combat.gd::_on_fighter_shot_down()`. |
 
 ---
 
@@ -457,20 +456,31 @@ has always zeroed by then except at the starting planet.
   random defender re-roll. Saved games carry the records.
 - New game starts with the missile selected, as the original does.
 
-**Not ported — each is a gameplay change, listed for a decision**
+**Ported after it (the user's decision: keep fidelity with the original)**
+
+- The four panel switches on their real keys: shields (`S`, down on a
+  new game), condition (`B`, RED on a new game), weapon (`W`), autopilot
+  (`A`). The stick moved to the arrow keys to free the letters.
+- Flight combat rebuilt on the loop-iteration model with the POKE
+  truncation, the shields branch, RED-only turrets and the sticky `DMG`
+  flag (`flight_combat.gd`), and its drawing rebuilt on a software
+  hi-res page from the real shape table (`combat_fx.gd`). See the
+  STARSHIP SIMULATOR table above.
+
+**Not ported yet**
 
 1. **The `H` key and the three-step navigation** (set course → fly →
    `H`), with `H_D.bas`'s gates and costs: no jump in atmosphere or
    without a course; energy 0 loses the ship; each jump costs energy
    and stardate by the X-only distance. The data these need is now in
    the port.
-2. **Shields switch (`S`).** A new game starts with shields down, and
-   with shields down every hit reaches the hull.
-3. **Condition (`B`).** Point defence only works at RED; a new game
-   starts at RED.
-4. **Autopilot (`A`).**
-5. **The six panel lights** that show the above.
-6. **The star chart** (`GALAXY MAP.bas`'s real screen).
+2. **The instrument panel and its six lights** (`INSTRUMENTS.bas`,
+   `DMG.bas`'s DAMAGE lamp). The switches work; nothing shows them but
+   the debug line.
+3. **The star chart** (`GALAXY MAP.bas`'s real screen).
+4. **The original's coordinate frame**: the combat box of line 192,
+   the missile's box test of line 1050, flight in atmosphere (lines
+   147, 158, 190).
 
 **Left as the original has it, on purpose not copied:** the 17-byte
 record copy that overwrites SOL's secured flag (§3).

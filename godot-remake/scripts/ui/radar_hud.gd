@@ -1,7 +1,7 @@
 extends Node2D
 ## RADAR.bas lines 2005-2042: the radar screen's border/crosshair/reticle
 ## overlay. Literal HPLOT coordinates ported straight from the BASIC
-## source, same convention as laser_beam.gd — draw inside an HgrCanvas
+## source, same convention as ship_id_drawing.gd — draw inside an HgrCanvas
 ## parent so these numbers match the cited line numbers directly.
 ##
 ## HCOLOR=2 reads as violet/magenta on real HGR hardware (confirmed

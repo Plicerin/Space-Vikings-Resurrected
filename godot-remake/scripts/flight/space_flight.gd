@@ -38,10 +38,12 @@ extends Node3D
 ## — the HUD text has said "(when in range)" since this scene was
 ## scaffolded, but nothing enforced it until now.
 ##
-## Flight combat (ambient incoming damage, laser fire, the orbital
-## defender's own destruction sequence, player-ship destruction) is
-## wired in via the `FlightCombat` child under `HUD` — see
-## `flight_combat.gd`'s doc comment for the full source trace.
+## Flight combat (the ship's weapon, the defender's fire, fighter
+## passes, both destructions) is the `FlightCombat` child under `HUD` —
+## see `flight_combat.gd`. This script handles the four panel switches,
+## which use the original's own keys (STARSHIP SIMULATOR.bas lines
+## 203-206, CALL_SITES.md section 2): S shields, W missile/laser, B
+## condition, A autopilot.
 ##
 ## `ShipBlip`: the orbital defender itself, rendered in open-space
 ## flight next to the planet -- not just on the radar screen. This was
@@ -73,6 +75,7 @@ extends Node3D
 const A2_3D1_Model = preload("res://scripts/shapes/a2_3d1_model.gd")
 const PLANET_WORLD_POSITION := Vector3(0, 0, -3000) # must match the Planet node's transform below
 const REENTRY_RANGE := 500.0
+const CONDITION_NAMES := ["", "GREEN", "BLUE", "RED"]
 
 const SHIP_BLIP_VISUAL_RADIUS := 120.0 # smaller than the planet -- see doc comment above
 const SHIP_BLIP_ORBIT_RADIUS := 650.0
@@ -110,8 +113,6 @@ const SHIP_BLIP_ORBIT_STEP_RAD := 0.02 # ~314 steps, ~33 real minutes per full o
 @onready var _flight_combat = $HUD/FlightCombat
 
 var _reentering: bool = false
-var _status_message: String = ""
-var _status_timer: float = 0.0
 var _ship_blip_orbit_angle: float = 0.0
 var _ship_blip_step_timer: float = 0.0
 var _ship_blip_tier: int = -1
@@ -127,10 +128,6 @@ func _ready() -> void:
 
 	_flight_combat.player_destroyed.connect(func():
 		GameState.goto_scene("res://scenes/player_destroyed.tscn")
-	)
-	_flight_combat.status_message.connect(func(text: String):
-		_status_message = text
-		_status_timer = 3.0
 	)
 
 
@@ -180,21 +177,19 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("fire_laser"):
 		_flight_combat.fire_weapon()
 
-	if _status_timer > 0.0:
-		_status_timer -= delta
-
 	var in_range := _is_in_range()
 	var damage_line := "\nDAMAGE ALERT" if GameState.damage_alert_active else ""
-	var status_line := ("\n" + _status_message) if _status_timer > 0.0 else ""
-	var weapon_label := "MISSILE" if GameState.missile_mode_active else "LASER"
 	_debug_label.text = (
-		"PITCH %d   BANK %d   HEADING %d   THROTTLE %.2f\nPOS %s\n\n[C] Command Console   [G] Ground Forces (%s)   [R] Radar   [SPACE] Fire %s   [TAB] Switch Weapon%s%s"
+		"PITCH %d   BANK %d   HEADING %d   THROTTLE %.2f\nPOS %s\nSHIELDS %s (%d)   CONDITION %s   %s   %s%s\n\n[SPACE] Fire   [W] Missile/Laser   [S] Shields   [B] Condition   [A] Autopilot\n[C] Command Console   [R] Radar   [G] Ground Forces (%s)"
 		% [
 			int(GameState.pitch_deg), int(GameState.bank_deg), int(GameState.heading_deg),
 			GameState.throttle, GameState.ship_position,
+			"UP" if GameState.shields_up else "DOWN", int(GameState.ship_shield),
+			CONDITION_NAMES[clampi(GameState.condition, 1, 3)],
+			"MISSILE" if GameState.missile_mode_active else "LASER",
+			"AUTO" if GameState.autopilot_active else "MANUAL",
+			damage_line,
 			"in range" if in_range else "out of range",
-			weapon_label,
-			damage_line, status_line,
 		]
 	)
 
@@ -215,5 +210,16 @@ func _unhandled_input(event: InputEvent) -> void:
 			GameState.goto_scene("res://scenes/ground_forces.tscn")
 	elif event.is_action_pressed("open_radar"):
 		GameState.goto_scene("res://scenes/radar.tscn")
+	# TRANLIT.OBJ0's four toggle routines ($9643, $966A, $96A5, $96DF).
 	elif event.is_action_pressed("toggle_weapon"):
 		GameState.missile_mode_active = not GameState.missile_mode_active
+	elif event.is_action_pressed("toggle_shields"):
+		GameState.shields_up = not GameState.shields_up
+	elif event.is_action_pressed("toggle_condition"):
+		# 2 -> 3, 3 -> 1, anything else -> 2
+		match GameState.condition:
+			2: GameState.condition = 3
+			3: GameState.condition = 1
+			_: GameState.condition = 2
+	elif event.is_action_pressed("toggle_autopilot"):
+		GameState.autopilot_active = not GameState.autopilot_active

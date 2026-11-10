@@ -164,20 +164,25 @@ func load_planet_record(index: int) -> void:
 	flight_escort_fighters = planet_escort_fighters[index]
 	gf_planet_surrendered = planet_surrendered[index]
 
-# $38202 -- which weapon the fire button fires at the orbital defender,
-# confirmed live by the real manual's "Missile/Laser" indicator-light
-# section (page 8): a green light shows which weapon is "presently
-# engaged," toggled by the W key (`flight.gd`'s `toggle_weapon`
-# action -- remapped off a real key, since this port's W is already
-# WASD pitch-up). false = laser (STARSHIP SIMULATOR.bas line
-# 1501's fallthrough to 1505): weak, unconditional ambient damage at
-# any range. true = missile (line 1501's `GOTO 1000`): real
-# aim-and-range-gated, 120x the laser's defender-damage per hit -- see
-# flight_combat.gd's fire_missile() and missile_strike.gd's doc
-# comment for the full source trace. The setter is the W key itself:
-# STARSHIP SIMULATOR.bas line 205 `POKE LT,2: CALL 38402`, whose mode 2
-# ($966A in TRANLIT.OBJ0) flips $953A and redraws the panel light.
+# --- The four panel switches (CALL_SITES.md section 2). Each is a byte
+# the flight program flips through `POKE 38167,n: CALL 38402`; the new-
+# game values are the ones watched live after INSTRUMENTS.bas line 210
+# has run TRANLIT's redraw-all, which flips all four as it draws them. ---
+#
+# $38202, key W: which weapon the fire button fires. false = laser
+# (STARSHIP SIMULATOR.bas line 1505), true = missile (line 1000) --
+# see flight_combat.gd.
 var missile_mode_active: bool = false
+# $38201, key S. Line 3205: a hit always wears the shield strength
+# ($38200, ship_shield) down; only with the shields up AND that strength
+# above 10 does the hit stop there. A new game starts with them down.
+var shields_up: bool = false
+# $38165, key B: 1 GREEN, 2 BLUE, 3 RED, stepped 2 -> 3 -> 1 -> 2. Only
+# at RED do the turrets fire on an attacking fighter (line 5200).
+var condition: int = 3
+# $38164, key A: on autopilot the flight loop skips reading the
+# paddles (line 15), so the ship holds its last stick position.
+var autopilot_active: bool = false
 
 var current_planet: int = 0        # $38209 ("orbiting" planet)
 var target_planet: int = 0         # $38163 (travel target)
@@ -230,11 +235,10 @@ var flight_escort_fighters: int = 30         # $38207 — a flight-encounter
 	# That 30 is SOL's own record byte 3, copied in with the rest of
 	# the per-planet record above. NOT the same register as gf_fighters
 	# ($38156, the ground-combat squadron count) — the real source just
-	# happens to use "fighters" for both. Gates whether GOSUB 5000 (the
-	# incoming-fire visual, incoming_fire.gd) can spawn at all; EX.bas
-	# halves it when the orbital defender is destroyed; the
-	# incoming-fire pattern's own internal shootdown sub-mechanic
-	# (lines 5200-5251) can decrement it by 1 per successful intercept.
+	# happens to use "fighters" for both. Gates whether GOSUB 5000 (a fighter
+	# pass, combat_fx.gd) runs at all; EX.bas halves it when the
+	# orbital defender is destroyed; the turrets (lines 5200-5251,
+	# condition RED only) take one off it per fighter shot down.
 
 # --- Ship system health (SHORE LEAVE.bas lines 2500-2545, "REPAIR
 # SHIP") ---
@@ -464,8 +468,12 @@ func start_new_game() -> void:
 	# game, and that path flips every panel flag as it draws it, so
 	# `SHIP'S DATA-M`'s weapon byte 0 becomes 1 before the first flight
 	# frame: a new game starts with MISSILE selected (watched live,
-	# tools/mame/keys_live.lua).
+	# tools/mame/keys_live.lua). The same pass leaves the shields down,
+	# the condition at RED and the autopilot off.
 	missile_mode_active = true
+	shields_up = false
+	condition = 3
+	autopilot_active = false
 
 	ship_shield = 100.0
 	ship_energy = 63.0
@@ -523,6 +531,7 @@ func save_to_disk() -> void:
 		"troop_location": troop_location, "troops_stationed_at": troops_stationed_at,
 		"current_planet": current_planet, "target_planet": target_planet,
 		"orbital_defender_tier": orbital_defender_tier, "missile_mode_active": missile_mode_active,
+		"shields_up": shields_up, "condition": condition, "autopilot_active": autopilot_active,
 		"planet_tech": planet_tech, "planet_secured": planet_secured,
 		"planet_has_base": planet_has_base, "planet_scouted": planet_scouted,
 		"planet_population_scale": planet_population_scale,
@@ -568,6 +577,9 @@ func load_from_disk() -> void:
 	target_planet = data.get("target_planet", target_planet)
 	orbital_defender_tier = data.get("orbital_defender_tier", orbital_defender_tier)
 	missile_mode_active = data.get("missile_mode_active", missile_mode_active)
+	shields_up = data.get("shields_up", shields_up)
+	condition = int(data.get("condition", condition))
+	autopilot_active = data.get("autopilot_active", autopilot_active)
 	# A save written before the per-planet records existed also holds
 	# the all-zero tech and population tables of that version; keep the
 	# real ones for those.

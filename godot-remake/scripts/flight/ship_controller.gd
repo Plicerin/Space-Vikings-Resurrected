@@ -30,11 +30,18 @@ extends Node3D
 @export var max_speed: float = 1500.0           # world units/sec at full throttle
 
 var _inverted_flip_armed: bool = false
+var _pitch_input := 0.0
+var _bank_input := 0.0
 
 
 func _physics_process(delta: float) -> void:
-	var pitch_input := Input.get_axis("pitch_down", "pitch_up")
-	var bank_input := Input.get_axis("bank_left", "bank_right")
+	# Autopilot (STARSHIP SIMULATOR.bas line 15): the loop skips reading
+	# the paddles, so the stick stays where it was when A was pressed.
+	if not GameState.autopilot_active:
+		_pitch_input = Input.get_axis("pitch_down", "pitch_up")
+		_bank_input = Input.get_axis("bank_left", "bank_right")
+	var pitch_input := _pitch_input
+	var bank_input := _bank_input
 	var throttle_input := Input.get_axis("throttle_down", "throttle_up")
 
 	GameState.pitch_deg = wrapf(GameState.pitch_deg + pitch_input * pitch_rate_deg * delta, 0.0, 360.0)
