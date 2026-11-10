@@ -34,6 +34,189 @@ no 1:1 port needed (Godot's own stack covers it) · ❓ mechanics unresolved
 
 ---
 
+## 6502/DOS asm-level call tricks — mechanisms the surface syntax hides
+
+Everything above still only covers Applesoft's own explicit call
+keywords (`GOSUB`, `CALL`, `ON...GOTO`). This pass went looking
+specifically for calls that *aren't spelled that way* — the kind of
+thing a 1MHz 6502 running a real-time flight loop has every reason to
+use instead of a generic call: no spare cycles for "dispatch on type"
+when a raw memory convention does the same job for free. Found three,
+and they explain several things the rest of this file had marked ❓.
+
+### 1. `PRINT CHR$(4)"<cmd>"` — DOS 3.3 command injection as a chain-load "call"
+
+Every line in every `.bas` file that looks like `PRINT "RUNCOM"` or
+`PRINT "RUNH/D"` is not a debug print. Hexdumping the raw bytes (not
+just reading the detokenized text) shows each one actually starts with
+an invisible `\004` byte — Ctrl-D — that the detokenizer preserved
+faithfully but that renders as *nothing* in a terminal, an editor, or
+a plain-text read of the file:
+
+```
+$ sed -n '58p' "STARSHIP SIMULATOR.bas" | od -c
+...  "  004   R   U   N   H   /   D   "
+```
+
+`CHR$(4)` is DOS 3.3's own command-prefix byte. Printing it mid-stream
+hands the rest of that line to DOS's command interpreter instead of
+the screen — `PRINT CHR$(4)"RUN COM"` really does **chain-load and run
+`COM.bas`**, exactly like typing `RUN COM` at the DOS prompt by hand
+(DOS 3.3 doesn't require a space between a command word and its
+argument, so `"RUNCOM"` and `"RUN COM"` are the same command). Every
+`BLOAD`, `BSAVE`, `OPEN`/`WRITE`/`CLOSE MISC FILE`, and the identical
+`PRINT CHR$(4)"INT"` that ends *every single `.bas` file at line
+63999* (DOS's "drop to interactive BASIC on any runtime error" trap)
+all go through this exact convention. None of it is a real Applesoft
+statement underneath — it's BASIC code typing at DOS through the
+character-output hook, disguised as print statements. A line-by-line
+read that doesn't know this convention misreads every one of these as
+inert text, which is exactly how `H_D.bas`'s own star-burst went
+unnoticed for so long, and exactly what's going on with line 209
+below.
+
+**This is the real scene-transition graph** — nothing in Applesoft's
+own `GOTO`/`GOSUB` reaches across file boundaries, so this hidden
+chain-load convention *is* the entire state machine the game runs on.
+Extracted mechanically from every file's hidden-byte strings, the two
+hubs:
+
+| From | `RUN`s to |
+|---|---|
+| `STARSHIP SIMULATOR.bas` (main flight) | `RE` (re-entry, 156), `ORBIT` (158), `H/D` (209 — **see below, unreachable**), `COM` (319), `RADAR` (320), `EX` (explosion/destroyed, 1560), `S/X` (ship destroyed, 3350), `DMG` (damage-control overlay, 3360) |
+| `COM.bas` (command console hub) | `GROUND FORCES` (98/115/127), `STARSHIP SIMULATOR` (130), `END` (132), `RADAR` (133), `GALAXY MAP` (1172/3000), `STATUS` (1200), `SUPPLY` (20000) |
+
+Plus a ground-campaign loop (`GROUND FORCES` ↔ `COLLECT`/`RECALL`/
+`SHORE LEAVE`), a boot chain (`START` → `INSTRUMENTS` → `STARSHIP
+SIMULATOR`), and `GALAXY MAP`/`RADAR`/`H_D` each chaining back to
+`COM`/`STARSHIP SIMULATOR` on exit. This is infrastructure Godot's own
+scene tree already replaces 1:1 (`GameState.goto_scene`) — ⬜, no
+action needed — but it's worth having the real graph written down once
+rather than re-deriving it piecemeal per file.
+
+**Resolves the H_D.bas trigger-key question with much higher
+confidence than the earlier hand-trace** (previously ❓ in this file):
+line 209's `PRINT CHR$(4)"RUNH/D"` is real, working chain-load code,
+not dead text — but it's still unreachable in practice. Tracing the
+*entire* key-dispatch block (`STARSHIP SIMULATOR.bas` lines 200-210,
+traced exhaustively this time, not just spot-checked around line 209)
+end to end:
+
+```
+K = raw keycode (PEEK(-16384), high bit set, 128-255) or exit if no key
+IF K-176 > 0:                        # digit keys 1-9 after the +128/+176 offset
+    K -= 176; clear keyboard strobe
+    ON K GOSUB [throttle -3,+3,-15,+15][K]   # only K=1..4 valid, else no-op
+IF K < 17: GOTO clamp                # (reduced K from above, or raw K<17 — never happens, raw is >=128)
+ON K-16 GOTO ['A'->mode4, 'B'->mode3, 'C'->RUN COM][K-16]   # K=17,18,19 only
+IF K < 34: GOTO clamp                # <-- catches K=20..33 UNCONDITIONALLY
+IF K == 39: POKE LT,2: CALL TRANLIT  # 'W'
+ON K-33 GOTO ['S'->mode1, (nothing)][K-33]
+clamp:
+IF K == 24: PRINT CHR$(4)"RUNH/D"    # <-- K=24 is 'H' (176+24=200=ASCII 72), but
+                                      #     K=24 satisfies "K<34" two lines above,
+                                      #     so execution already left for `clamp`
+                                      #     before this line is ever reached.
+```
+
+'H' (K=24) always gets intercepted by the `IF K<34 THEN 207` guard
+several lines *before* reaching the `IF K=24` check — this is a
+genuine shipped bug in the original, not an unidentified-but-working
+key: **the hyperdrive in-flight trigger key is dead code in the real
+game.** That also means the Godot port's current choice to have *no*
+flight-triggered hyperdrive key at all (`space_flight.gd`'s
+`_unhandled_input` wires `C`→Command Console and `R`→Radar, matching
+the two live `ON K-16 GOTO`/`ON K-33 GOTO` targets exactly, and
+nothing for hyperdrive) is **already the faithful port**, not a gap —
+confirmed checked against `space_flight.gd` this pass. Worth one live
+MAME keypress sweep to rule out an interrupt-driven secondary key
+reader this static trace can't see, but confidence is now high, not
+speculative. Downgrade this item from "needs a live MAME check" to
+"nice-to-have confirmation, not blocking."
+
+### 2. `POKE 38167,n` (`LT`) then `CALL 38402` — one fixed address standing in for up to 6 real routines
+
+`CALL 38402` always jumps to the same machine address
+(`TRANLIT.OBJ0`'s entry point, confirmed via Ghidra decompile). What it
+actually *does* depends entirely on two bytes BASIC pokes first — the
+call address never changes; the "which function" selection happens
+through shared memory, which is the part a reader tracking only
+`CALL`/`GOSUB` targets will never see:
+
+```
+TRANLIT_DISPATCH():                      # CALL 38402/38400, always this one address
+    if PEEK(38189) == 10:                # one-time cold-init sentinel ('\n')
+        POKE 38189, 0                    # self-clearing, so it only fires once
+        mode1(); mode2(); mode3(); mode4(); mode5(); mode6()   # run the whole chain
+        return
+    mode = PEEK(38167)                   # LT -- the real "argument"
+    next = mode
+    if next == 1: next = mode1()         # FUN_9643, may chain into mode2
+    if next == 2: next = mode2()         # FUN_966a, may chain into mode3
+    if next == 3: next = mode3()         # FUN_96a5, may chain into mode4
+    if next == 4: mode4()                # FUN_96df, terminal, no further chain
+```
+
+Each `modeN()` toggles a small flag byte of its own (`$9539`, `$953A`,
+`$9515` — 3-valued, `$9514`) and calls a shared 5-byte table-copy
+routine (`FUN_9754`) with a small constant, which blits one of two
+parallel 5-entry tables (`$9789-$978D` vs `$978E-$9792`) depending on
+the flag — reads as a small HUD/character-cell flicker toggle (which
+of two glyph variants to show), not a gameplay mechanic. `FUN_9754`
+itself writes into `$9773`, an address Ghidra's own decompile flags as
+"read-only (code) being written" — self-modifying code again,
+consistent with this project's already-confirmed self-modifying-opcode
+pattern in `LO-HI A2-3D1` (see
+[[space_vikings_a2_3d1_opcodes_8_9_12_confirmed]]) — not re-disassembled
+byte-for-byte this pass, flagged ❓ only on the exact visual effect, not
+on the dispatch mechanism itself, which is now fully traced.
+
+**Who actually calls this, and with what mode** (all in `STARSHIP
+SIMULATOR.bas`'s key-dispatch block above): `'A'`→mode 4 (line 317),
+`'B'`→mode 3 (318), `'S'`→mode 1 (321, no `GOTO 500` — relies on
+fall-through), `'W'`→mode 2 (205). Plus `INSTRUMENTS.bas` line 210
+pokes the cold-init sentinel directly (`PEEK(38391)<>77`, i.e. "has
+this boot run TRANLIT's init yet") rather than a mode number, forcing
+the full six-step chain once per fresh boot before handing off to
+`STARSHIP SIMULATOR`. | ⬜ — reads as cosmetic HUD-icon flicker, not a
+gameplay system; no 1:1 port needed, consistent with this project's
+"A2-3D1 internals don't need to survive the port" precedent. Noted here
+mainly so the *existing* catalog row for `CALL 38402` (below) isn't
+read as "one opaque call" when it's actually a 6-routine dispatch keyed
+on a side-channel byte — the thing this whole file exists to prevent.
+
+### 3. `POKE 38823,<arg>: POKE 38824,<mode>: CALL 38825` — the 2-argument calling convention
+
+Applesoft's `CALL` takes no parameters, so wherever the original needs
+to pass arguments into a shared machine routine, the convention is:
+poke them into two fixed scratch bytes immediately before the call.
+`CALL 38825` ($97A9) is used this way from **four** sites, not the two
+this file previously tracked under `H_D.bas` alone:
+
+| Site | `POKE 38823,` (arg0) | `POKE 38824,` (mode) |
+|---|---|---|
+| `START.bas` line 220 (new game) | `PEEK(38392)` | `0` |
+| `H_D.bas` line 25 (arrival, new planet) | `PEEK(38163)` (target/current planet) | `0` |
+| `H_D.bas` line 12 (arrival, old planet) | `PEEK(38209)` | `1` |
+| `END.bas` line 210 (game-save, right before the `BSAVE`s) | `PEEK(38209)` | `1` |
+
+Mode `0` sites always pass a *planet index about to become current*;
+mode `1` sites always pass the *outgoing* planet right before a
+BSAVE/departure. Reads as a `SHIP_SPRITE_INIT(planet_index, mode)` —
+mode 0 = load/select for arrival, mode 1 = flush/commit before leaving
+or saving — which matches this file's existing guess for the two
+`H_D.bas` sites, but the `END.bas` site is new: **the save-game flow
+also depends on this routine's side effects**, not just hyperdrive
+arrival. The callee's exact bytecode is still unresolved (`$97A9` falls
+inside `TRANLIT.OBJ0`'s last decompiled function, `FUN_9754`, per
+Ghidra's function-boundary detection, but that's a heuristic, not a
+confirmed deliberate secondary entry point — not treated as settled).
+| ❓ unresolved on exact effect, but the **calling convention and full
+site list are now settled**, upgrading this from "two call sites,
+opaque" to "four call sites, known argument shapes, opaque callee."
+
+---
+
 ## STARSHIP SIMULATOR.bas — the main flight loop
 
 Source: `detokenized/STARSHIP SIMULATOR.bas`. Port: `godot-remake/scripts/flight/{space_flight,ship_controller}.gd`, `scripts/combat/flight_combat.gd`.
@@ -46,7 +229,7 @@ Source: `detokenized/STARSHIP SIMULATOR.bas`. Port: `godot-remake/scripts/flight
 | 47-48 | `GOSUB 3000` | **Ambient incoming-fire roll.** Only fires if `38205<>0` (a defender exists) or `38210=1` (actively hostile); further gated by position-box checks. Inside: ~40-60% chance of nothing, else a hit-flash VFX (`GOSUB 4110`/`4120` set draw mode, `CALL SG` plays a sound) and a `DMG=1` flag. | ✅ ambient damage in `flight_combat.gd`, confirmed earlier via live MAME. |
 | 47-48 | `GOSUB 5000` (conditional, 50-60% within the 3000 branch) | **Missile-visual effect** — draws an incoming missile shape (`XDRAW M AT X1,Y1`) moving across the HUD from a random edge toward center, optionally triggering a hit-flash (`GOSUB 5098`/`5200`) if it's close to the ship's own reticle. | ✅ `missile_strike.gd` — this is the shape/flicker already confirmed authentic against `ENEMY` shape-table point counts. |
 | 60-68 | `ON K GOSUB 311,312,313,314` | Speed nudge (±3/±15) from specific raw keycodes, after the 176-offset remap. | ✅ throttle input via `Input.get_axis` in `ship_controller.gd` — modern remap, not byte-exact, already documented as a liberty. |
-| 69 | `CALL 38402` | TRANLIT's new-game dispatch entry (per `CATALOG_FINDINGS.md`'s own address table) — re-run on returning from an overlay. | ⬜ no Godot equivalent needed; scene re-entry is Godot's own job. |
+| 69 | `CALL 38402` | **Not one routine — a 6-routine dispatch keyed on `PEEK(38167)`/`PEEK(38189)`, set by `POKE LT,n` a few lines above.** See "6502/DOS asm-level call tricks" §2 above for the full mechanism; reads as cosmetic HUD-icon flicker, not gameplay. | ⬜ no Godot equivalent needed — confirmed cosmetic, not just assumed. |
 | 70-91 | `GOSUB 1200`, `1100` (from `1085`/`1088`) | **Defender destruction sequence** — `1200`/`1220` draw an explosion flip-book (`XDRAW 2` at increasing `SCALE`, then `XDRAW 15-18`), `1100` is the smaller "hit, not destroyed" flash variant. | ✅ `flight_combat.gd`'s destruction VFX, built on the same `vector_shape_2d.gd` the zero-length-segment fix (2026-11-09) applies to. |
 | 97 | `GOSUB 3380` (repeated ~8×, lines 99-103) | **Damage-floor clamp** — `IF J<0 THEN J=0:RETURN`, called once per repairable system after subtracting a random damage amount. Not a mechanic on its own, just a shared clamp. | ⬜ Godot's repair system (`repair_ship.gd`) already floors at 0 via `clampf`/`max`; no separate port needed. |
 | 104-105 | (inline, not a call) | If hull (`38193`) hits exactly 0, `PRINT "RUNS/X"` — **ship destroyed, straight to the S/X ending**, no further flight. If `38393=0`, sets it and prints `RUNDMG` (damage-control overlay) once. | ❓ confirmed to exist in source; **not checked yet** whether `flight_combat.gd`'s `player_destroyed` signal fires specifically off hull reaching 0 the same way, or off some other accumulated-damage condition. Needs a direct read of `flight_combat.gd`'s destruction trigger against this exact line. |
@@ -66,7 +249,7 @@ Source: `detokenized/H_D.bas`. Port: `godot-remake/scripts/ui/hyperspace.gd`, `s
 | 2-5 | (inline) | **Energy gate.** If ship energy (`PEEK(38199)`) is exactly 0: prints "OUT OF ENERGY" / "ORBIT DECAYING", then `PRINT "RUN S/X"` — **the jump destroys the ship** (`S_X.bas` is the ship-destroyed ending: explosion animation, "YOUR SHIP HAS BEEN DESTROYED!!", reboot). Otherwise falls through to line 5. | ⚠️ **gap, confirmed real.** `ship_energy` already exists in `GameState` (used by the repair system) but nothing gates a jump on it, and there's no zero-energy failure path wired to `player_destroyed.tscn`. |
 | 6 | `GOSUB 10000` | **Jump cost.** Computes `D1` = a "distance" between current and target planet, then: opens/rereads/rewrites a save-state block advancing `SD` (stardate) by `D1+0.3`, and at line 14, `P = PEEK(38199) - D1` — **energy is spent proportional to the computed distance.** The distance formula itself (line 10010) is written identically for all three axes — `X1=Y1=Z1 = ABS(PEEK(38366+current)) - ABS(PEEK(38366+target))` — i.e. it only ever reads the *X*-position byte array (`$38366+planet_index`), never the real Y/Z blocks `GALAXY MAP.bas` uses at offsets `-21`/`-42` from the same base. This reads as a genuine formula bug in the original (always `D1 = sqrt(3)·|ΔX|`, not a true 3D distance) — faithful porting means keeping that quirk, not "fixing" it to real 3D distance. | ⚠️ **gap, not yet ported** (no energy/stardate cost on any jump today) — **and blocked on real data**: the per-planet X-position byte array at `$38366+n` was checked against `extracted/PLANET FILE.payload.bin` directly (offsets 147-166 for n=1..20) and came back as a suspiciously regular 4-value repeating pattern (`1,1,255,255` cycling) rather than distinct per-system values — more consistent with an unrandomized master-template default than real per-game galaxy layout. Don't hardcode these as real coordinates without resolving that; see note below. |
 | 11 | (inline) | `IF PEEK(38166)=0 OR 3 THEN POKE 38158,PEEK(38163)` — updates "last planet troops are on" tracking only if troops are aboard or in cryo (not mid-transit). | ✅ already the basis of `GameState.troops_stationed_at`, confirmed in the 2026-11-09 troop-tracking fix. |
-| 12 | `CALL 38825` | Opaque machine-code "per-ship init" (per `CATALOG_FINDINGS.md`'s address table, `$97C9`) — re-run once for the *old* planet (`PEEK(38163)` mode 0 at line 19) and once implicitly for the new one. Not resolved byte-for-byte; the disassembly dumps checked don't cover this address as executable (`disassembly/TRANLIT.OBJ0.disasm.txt` truncates well before it). | ❓ unresolved — flagged, not blocking: nothing currently observable in BASIC depends on its *side effects* beyond what's already modeled (ship sprite selection, below). |
+| 12 | `CALL 38825` | **2-argument call, not opaque on convention anymore** — `POKE 38823,<planet>: POKE 38824,<mode>` immediately before every call site. Four real sites, not two: here (mode 1, outgoing planet), line 25 below (mode 0, arrival planet), plus `START.bas` (new game, mode 0) and `END.bas` (game-save, mode 1, right before the `BSAVE`s). See "6502/DOS asm-level call tricks" §3 above. | ❓ exact callee bytecode still unresolved, but the calling convention and full site list (incl. the save-game dependency) are now settled — upgraded from a 2-site to a 4-site, known-argument-shape finding. |
 | 12-13 | (inline) | Landing-morale decrement (`$38170=17` flag → troop morale −1). | ✅ already confirmed and ported — see `FLIGHT_CONTROL_AND_PROGRESSION_ANALYSIS.md`'s "Landing and the troop-morale mechanic" section. |
 | 16 | (inline) | `POKE 38240+PEEK(38163),1` — marks the destination scouted. | ✅ `GameState.planet_scouted[index] = true`, `galaxy_map.gd`. |
 | 18, 20 | `CALL NOISE` ×250, then ×175 inside the star-burst loop | Continuous engine-whine sound during the "clearing" pause and during the star-burst draw. | 🟡 intentionally silent — `AudioManager` has no continuous-whine cue yet; documented liberty in `hyperspace.gd`. |
@@ -128,7 +311,10 @@ the current port collapses into Galaxy Map's single click. This was
 already honestly flagged as a liberty before this pass; what's new here is
 confirming *why* that liberty was taken (the actual trigger key was never
 identified) and finding the specific line (`STARSHIP SIMULATOR.bas` line
-209, `IF K=24 THEN PRINT "RUNH/D"`) that's supposed to be it.
+209, `IF K=24 THEN PRINT CHR$(4)"RUNH/D"`) that's supposed to be it — a
+follow-up pass (see "6502/DOS asm-level call tricks" §1) traced the full
+key-dispatch block end to end and confirmed that line is genuinely
+unreachable in the shipped original, not just unidentified.
 
 ---
 
@@ -153,15 +339,17 @@ about what it does and doesn't cover yet.
    ship-destroyed ending (`S_X.bas` → the port's existing
    `player_destroyed.tscn`), so this is a genuine difficulty/stakes
    mechanic missing from the port, not a cosmetic gap.
-2. **The real in-flight hyperdrive trigger key is still unidentified.**
-   Hand-tracing `STARSHIP SIMULATOR.bas`'s key-dispatch block (lines
-   200-210) against the literal `IF K=24 THEN PRINT "RUNH/D"` check at
-   line 209 suggests that check may be unreachable given how `K` gets
-   reduced/redirected earlier in the same block — but this is exactly the
-   kind of thing that's unsafe to conclude by hand from 8-bit control
-   flow alone. Needs a live MAME key-sweep (same technique already used
-   this project for the ship-blip cadence and missile timing) rather than
-   further manual tracing.
+2. **RESOLVED, not just hand-traced:** the real in-flight hyperdrive
+   trigger key (`STARSHIP SIMULATOR.bas` line 209, `IF K=24 THEN PRINT
+   CHR$(4)"RUNH/D"`) is dead code in the original — a full trace of the
+   key-dispatch block (lines 200-210, see "6502/DOS asm-level call
+   tricks" §1) shows `IF K<34 THEN 207` unconditionally redirects K=24
+   ('H') away before line 209 is ever reached. The Godot port's current
+   choice to have no flight-triggered hyperdrive key at all is already
+   the faithful port (confirmed against `space_flight.gd`'s
+   `_unhandled_input`), not a gap. A live MAME key-sweep would still be
+   nice to rule out an interrupt-driven secondary key reader, but this
+   is no longer blocking or speculative.
 3. **The real per-planet position data (`$38366` ±21/±42 byte arrays,
    used by both `GALAXY MAP.bas`'s real distance display and `H_D.bas`'s
    buggy jump-cost formula) doesn't check out as plausible real galaxy
