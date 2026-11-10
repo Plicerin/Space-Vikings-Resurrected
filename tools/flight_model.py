@@ -11,6 +11,10 @@ the stick routine CALL CA ($9023), for checking against a live run.
         pass's position step and attitude from the previous pass and report
         the passes that differ
 
+    python3 -I tools/flight_model.py vectors <out.json>
+        test vectors for the port (godot-remake/scripts/flight/flight_core.gd,
+        checked by godot-remake/tests/check_flight_core.gd)
+
 The trig routines are A2-3D1's ($64F8 sine, $64FB cosine). BASIC calls the
 sine "CSN" and the cosine "SN". Two things in them are not what a clean
 implementation would do, and both are copied here:
@@ -23,7 +27,9 @@ implementation would do, and both are copied here:
     still holds the previous pass's factor, and line 129 divides it by
     32768 a second time, so the factor is as good as zero.
 """
+import json
 import math
+import random
 import re
 import sys
 from pathlib import Path
@@ -112,6 +118,16 @@ class Flight:
             if v > 20000:
                 v = -20000.0
             setattr(self, name, v)
+
+    def sink(self, speed):
+        """Line 147 in the atmosphere, after the position has been stored:
+        the ship loses 6 - S/10 a pass and stops at 20, where BASIC also
+        zeroes pitch and bank. Returns True when it stopped there."""
+        self.y -= 6 - (speed / 10)
+        if self.y < 20:
+            self.y = 20.0
+            return True
+        return False
 
     def stored(self):
         return tuple(math.floor(v) for v in (self.x, self.y, self.z))
@@ -279,9 +295,57 @@ def table():
         print(f"  {a:3d}: {c:+.5f} {s:+.5f}   {ic:+.5f} {isn:+.5f}{note}")
 
 
+def vectors(path):
+    """Flights of 40 passes from random starts (every pass: pitch, heading,
+    speed, atmosphere flag, then the position BASIC stores, its three
+    floats and whether line 147 grounded the ship), every angle's factors,
+    and the stick routine over random and edge-case inputs."""
+    rng = random.Random(1982)
+    edge = [0, 1, 59, 62, 63, 64, 65, 126, 127, 128, 129, 189, 190, 191, 192, 195, 255]
+    flights = []
+    for n in range(40):
+        start = [rng.randint(-20000, 20000), rng.randint(-20000, 20000), rng.randint(-20000, 20000)]
+        if n % 4 == 0:
+            start[1] = rng.randint(20, 400)
+        atmosphere = n % 2
+        flight = Flight(*start)
+        passes = []
+        pitch, heading = rng.choice(edge), rng.choice(edge)
+        for i in range(40):
+            if rng.random() < 0.5:
+                pitch = rng.choice(edge) if rng.random() < 0.5 else rng.randrange(256)
+            if rng.random() < 0.5:
+                heading = rng.choice(edge) if rng.random() < 0.5 else rng.randrange(256)
+            speed = rng.choice([0, 3, 15, 57, 60, 117, 120, rng.randrange(121)])
+            flight.step(pitch, heading, speed)
+            stored = flight.stored()
+            grounded = flight.sink(speed) if atmosphere else False
+            passes.append([pitch, heading, speed, *stored, flight.x, flight.y, flight.z, int(grounded)])
+        flights.append({"start": start, "atmosphere": atmosphere, "passes": passes})
+    factors = [[basic_cos(a, 0.25), basic_sin(a)] for a in range(256)]
+    sticks = []
+    values = sorted(set(edge + [4, 5, 0x10, 0x11, 0x20, 0x21, 0x2F, 0x30, 0x31, 0x3F, 0x40, 0x7E, 0x7F,
+                                0xBF, 0xC0, 0xCF, 0xD0, 0xDF, 0xE0, 0xEF, 0xF0, 0xFA, 0xFB]))
+    paddles = [0, 0x1D, 0x1E, 0x1F, 0x31, 0x32, 0x45, 0x46, 0x59, 0x5A, 0x80, 0xA9, 0xAA, 0xBD, 0xBE,
+               0xD1, 0xD2, 0xE5, 0xE6, 0xFF]
+    for i in range(4000):
+        args = [rng.choice(values), rng.choice(values), rng.choice(values), rng.randrange(2),
+                rng.choice(paddles), rng.choice(paddles)]
+        if i % 3 == 0:
+            args = [rng.randrange(256), rng.randrange(256), rng.randrange(256), rng.randrange(2),
+                    rng.randrange(256), rng.randrange(256)]
+        sticks.append(args + list(stick(*args)))
+    clamps = [basic_pitch_clamp(p) for p in range(256)]
+    Path(path).write_text(json.dumps(
+        {"flights": flights, "factors": factors, "sticks": sticks, "clamps": clamps}, separators=(",", ":")))
+    print(f"{len(flights)} flights of 40 passes, {len(sticks)} stick cases -> {path}")
+
+
 if __name__ == "__main__":
     if len(sys.argv) >= 2 and sys.argv[1] == "table":
         table()
+    elif len(sys.argv) >= 3 and sys.argv[1] == "vectors":
+        vectors(sys.argv[2])
     elif len(sys.argv) >= 3 and sys.argv[1] == "check":
         sys.exit(1 if check(sys.argv[2]) else 0)
     else:
