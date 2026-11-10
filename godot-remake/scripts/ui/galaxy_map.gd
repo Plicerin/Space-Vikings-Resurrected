@@ -58,4 +58,10 @@ func _make_select_callback(index: int) -> Callable:
 		# system marks it scouted, gating the Galaxy Directory's detail
 		# view (galaxy_directory.gd).
 		GameState.planet_scouted[index] = true
-		GameState.goto_scene("res://scenes/com.tscn")
+		# 2026-11-09 fix: this used to go straight to the Command
+		# Console with zero visual feedback -- a real playtest
+		# reported "hyperspace animation is absent" (and the jump
+		# itself was easy to miss). hyperspace.gd ports H_D.bas's
+		# real line-20 star-burst visual, then continues to com.tscn
+		# itself.
+		GameState.goto_scene("res://scenes/hyperspace.tscn")
