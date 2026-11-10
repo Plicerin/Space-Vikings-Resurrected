@@ -105,6 +105,33 @@ func _touch(y: int) -> void:
 	_any_dirty = true
 
 
+## OR `mask` into one byte of the page: how A2-3D1 lights its dots (it
+## never erases; it clears the whole page first).
+func or_byte(y: int, column: int, mask: int) -> void:
+	if y < 0 or y >= HEIGHT or column < 0 or column >= COLUMNS:
+		return
+	mem[y * COLUMNS + column] |= mask
+	_touch(y)
+
+
+## Store one byte of the page, as machine code does with `STA (page),Y`.
+func set_byte(y: int, column: int, value: int) -> void:
+	if y < 0 or y >= HEIGHT or column < 0 or column >= COLUMNS:
+		return
+	mem[y * COLUMNS + column] = value & 0xFF
+	_touch(y)
+
+
+## Rows `first`..`last` copied from another page ("MEM TRANSFER A":
+## CALL 37888 and CALL 37936 carry the instrument panel, rows 126..189,
+## from the page on show to the page just drawn).
+func copy_rows_from(other: RefCounted, first: int, last: int) -> void:
+	for y in range(maxi(first, 0), mini(last, HEIGHT - 1) + 1):
+		for i in range(y * COLUMNS, (y + 1) * COLUMNS):
+			mem[i] = other.mem[i]
+		_touch(y)
+
+
 func is_lit(x: int, y: int) -> bool:
 	if x < 0 or x >= WIDTH or y < 0 or y >= HEIGHT:
 		return false
