@@ -13,7 +13,7 @@ const AMBER := Color(1.0, 0.75, 0.15)
 const RED := Color(1.0, 0.25, 0.2)
 const TARGET := Color(1.0, 0.6, 0.2)
 const GAUGE_RADIUS := 52.0
-const PANEL_HEIGHT := 118.0
+const PANEL_HEIGHT := 150.0
 
 var camera: Camera3D
 var target: Node3D ## null when there is none
@@ -102,8 +102,8 @@ func _draw_panel() -> void:
 	draw_rect(Rect2(0.0, top, size.x, PANEL_HEIGHT), Color(0.02, 0.03, 0.05, 0.92))
 	draw_rect(Rect2(0.0, top, size.x, PANEL_HEIGHT), Color(0.9, 0.9, 0.9), false, 2.0)
 	var w := size.x
-	_bar(font, "SPEED", Rect2(w * 0.015, top + 30.0, w * 0.165, 16.0), speed / 120.0, false)
-	_bar(font, "TURN", Rect2(w * 0.21, top + 30.0, w * 0.13, 16.0), (bank + 48.0) / 95.0, true)
+	_bar(font, "SPEED", Rect2(w * 0.015, top + 34.0, w * 0.165, 8.0), speed / 120.0, false)
+	_bar(font, "TURN", Rect2(w * 0.21, top + 34.0, w * 0.13, 8.0), (bank + 48.0) / 95.0, true)
 	# VERT: the nose up is the top
 	var vert := Rect2(w * 0.35, top + 14.0, 14.0, 50.0)
 	draw_string(font, Vector2(vert.end.x + 8.0, vert.get_center().y + 4.0), "VERT", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, GREEN)
@@ -111,7 +111,7 @@ func _draw_panel() -> void:
 	draw_line(Vector2(vert.position.x - 3.0, vert.get_center().y), Vector2(vert.end.x + 3.0, vert.get_center().y), GREEN, 1.0)
 	var nose := clampf((-pitch + 61.0) / 120.0, 0.0, 1.0)
 	draw_rect(Rect2(vert.position.x - 3.0, vert.position.y + nose * vert.size.y - 2.0, vert.size.x + 6.0, 4.0), GREEN)
-	_bar(font, "ENERGY", Rect2(w * 0.42, top + 30.0, w * 0.15, 16.0), energy / 63.0, false)
+	_bar(font, "ENERGY", Rect2(w * 0.42, top + 34.0, w * 0.15, 8.0), energy / 63.0, false)
 	var lines := readout.split("\n")
 	for i in lines.size():
 		draw_string(font, Vector2(w * 0.015, top + 78.0 + i * 18.0), lines[i], HORIZONTAL_ALIGNMENT_LEFT, -1, 12, GREEN)
@@ -122,11 +122,37 @@ func _draw_panel() -> void:
 	var lamps := ComRules.lamps()
 	for i in lamps.size():
 		var lamp: Array = lamps[i]
-		var cell := box.position + Vector2(10.0 + (i % 4) * (box.size.x - 14.0) / 4.0, 36.0 + (i / 4) * 28.0)
+		var centre := box.position + Vector2(box.size.x * (0.125 + 0.25 * (i % 4)), 54.0 + (i / 4) * 32.0)
 		var colour := RED if lamp[2] else GREEN
-		draw_circle(cell + Vector2(5.0, -4.0), 5.0, colour if lamp[2] else Color(colour, 0.7))
-		draw_string(font, cell + Vector2(14.0, -8.0), lamp[0].strip_edges(), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, colour)
-		draw_string(font, cell + Vector2(14.0, 4.0), lamp[1].strip_edges(), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, colour)
+		draw_circle(centre, 6.0, colour if lamp[2] else Color(colour, 0.7))
+		_arc_text(font, _lamp_name(i, lamp), centre, 15.0, colour)
+
+
+## What a lamp is called: COM's top line (the engines' number after ENG);
+## the colour says the rest (NO/GO, DMG, LOW).
+func _lamp_name(index: int, lamp: Array) -> String:
+	var first: String = lamp[0].strip_edges()
+	return "ENG %s" % first if index < 2 else first
+
+
+## `text` along the top of a circle: its middle straight above `centre`, each
+## letter turned to stand on the arc.
+func _arc_text(font: Font, text: String, centre: Vector2, radius: float, colour: Color) -> void:
+	var size_px := 8
+	var widths := []
+	var total := 0.0
+	for character in text:
+		var width := font.get_string_size(character, HORIZONTAL_ALIGNMENT_LEFT, -1, size_px).x
+		widths.append(width)
+		total += width
+	var angle := -PI / 2.0 - total / radius / 2.0
+	for i in text.length():
+		var half: float = widths[i] / radius / 2.0
+		angle += half
+		draw_set_transform(centre + Vector2(cos(angle), sin(angle)) * radius, angle + PI / 2.0, Vector2.ONE)
+		draw_string(font, Vector2(-widths[i] / 2.0, 0.0), text[i], HORIZONTAL_ALIGNMENT_LEFT, -1, size_px, colour)
+		angle += half
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
 ## A gauge: its name above, an outlined track, filled from the left to
