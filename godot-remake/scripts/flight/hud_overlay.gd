@@ -286,12 +286,13 @@ func _icon_missile(c: Vector2, colour: Color) -> void:
 
 
 func _icon_laser(c: Vector2, colour: Color) -> void:
-	draw_line(c + Vector2(-14, 10), c + Vector2(6, -6), colour, 3.0, true)
-	var tip := c + Vector2(10, -10)
-	for angle in [0.0, PI / 4.0, PI / 2.0, 3.0 * PI / 4.0]:
-		var spoke := Vector2(cos(angle), sin(angle)) * 7.0
-		draw_line(tip - spoke, tip + spoke, colour, 2.0, true)
-	draw_circle(tip, 2.5, colour)
+	# a point of light: a bright core and rays of two lengths
+	for i in 8:
+		var angle := TAU * i / 8.0
+		var length := 14.0 if i % 2 == 0 else 8.0
+		draw_line(c + Vector2(cos(angle), sin(angle)) * 4.0, c + Vector2(cos(angle), sin(angle)) * length, colour, 2.0 if i % 2 == 0 else 1.5, true)
+	draw_circle(c, 3.5, colour)
+	draw_circle(c, 6.0, Color(colour, colour.a * 0.3))
 
 
 func _icon_shield(c: Vector2, colour: Color) -> void:
@@ -325,8 +326,8 @@ func _draw_rolling(at: Vector2) -> void:
 		frame.shadow_size = 9
 	var box := Rect2(at - Vector2(14.0, 11.0), Vector2(count * 15.0 + 12.0, 44.0))
 	draw_style_box(frame, box)
-	# the shield's icon sits in the upper left corner, over the border
-	var corner := box.position + Vector2(16.0, 0.0)
+	# the shield's icon sits in the lower right corner, over the border
+	var corner := box.end - Vector2(16.0, 0.0)
 	draw_circle(corner, 11.0, Color(0.03, 0.035, 0.04))
 	var scale := 0.55
 	draw_set_transform(corner, 0.0, Vector2(scale, scale))
