@@ -59,5 +59,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event.physical_keycode == KEY_X:
 		GameState.goto_scene("res://scenes/ship_id.tscn")
+	elif GameState.handover > 0:
+		# RADAR.bas line 2058: COM ran it (38388 = 2), and gets it back
+		GameState.handover = 0
+		GameState.goto_scene("res://scenes/com.tscn")
 	else:
 		GameState.goto_scene("res://scenes/flight/space_flight.tscn")

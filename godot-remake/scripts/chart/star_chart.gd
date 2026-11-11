@@ -20,11 +20,8 @@ extends Control
 ##  - A mouse click or ENTER is the button. A press is remembered until
 ##    the program next looks (line 3130).
 ##
-## COM is not on the hi-res page yet, so the two ends are stopgaps: the
-## picture stays dark until the chart's own form feed clears the page
-## (the original shows COM's screen while GALAXY MAP loads), and on the
-## way out the scene goes to the COM menu once the lamps are repainted,
-## with the text window put back the way COM's line 128 would have it.
+## While GALAXY MAP loads the screen still shows what COM left on the
+## page, as the original's does. Both ways out run COM (scenes/com.tscn).
 
 const ChartLoop = preload("res://scripts/chart/chart_loop.gd")
 const HgrView = preload("res://scripts/shapes/hgr_view.gd")
@@ -45,7 +42,6 @@ var _button := false
 
 
 func _ready() -> void:
-	_view.visible = false
 	_show_page()
 	_point(_view.get_local_mouse_position())
 	_loop.wait = _wait
@@ -56,9 +52,8 @@ func _ready() -> void:
 
 
 func _chart() -> void:
-	await _loop.run()
-	GameState.chargen.set_window(0, 40, 0, 24) # COM.bas line 128
-	GameState.goto_scene("res://scenes/com.tscn")
+	if await _loop.run() == ChartLoop.Left.COM:
+		GameState.goto_scene("res://scenes/com.tscn")
 
 
 func _process(delta: float) -> void:
@@ -81,12 +76,9 @@ func _wait(frames: float) -> void:
 
 
 func _watch(what: String) -> void:
-	match what:
-		"clear":
-			_view.visible = true
-		"turn":
-			_turn_paddle(0, "stick_left", "stick_right", ARROW_STEP_X)
-			_turn_paddle(1, "stick_forward", "stick_back", ARROW_STEP_Y)
+	if what == "turn":
+		_turn_paddle(0, "stick_left", "stick_right", ARROW_STEP_X)
+		_turn_paddle(1, "stick_forward", "stick_back", ARROW_STEP_Y)
 
 
 func _turn_paddle(paddle: int, down: String, up: String, step: int) -> void:

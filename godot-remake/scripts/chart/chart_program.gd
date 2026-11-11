@@ -26,8 +26,9 @@ extends RefCounted
 ##    5000-5500), not TRANLIT's lamp pictures, and no switch is flipped.
 ##    They stay like that until a lamp key is pressed in flight.
 ##
-## The directory page that "Y" leads to is COM.bas's (lines 8, 12 and
-## 978-1172). It is here until COM itself is on the hi-res page.
+## The directory page that "Y" leads to is COM.bas's: the chart leaves
+## the star's number in 38388 and runs COM (com_program.gd), which shows
+## the page and runs the chart again.
 ##
 ## No `class_name` (see shape_table.gd); preload into a local const.
 
@@ -286,6 +287,7 @@ func question() -> void:
 ## 8 goes into the byte that is SHORE LEAVE's once-a-trip flag when it
 ## holds a 1.
 func further() -> void:
+	GameState.handover = p
 	GameState.base_built_this_trip = false
 	text.print_line(" ")
 
@@ -308,101 +310,3 @@ func lamp_blocks() -> Array:
 ## Line 5500.
 func lamp_block(block: Array) -> void:
 	flight.lamp_block(block)
-
-
-# -- COM.bas lines 8, 12 and 978-1172: the directory page ----------------
-
-
-## COM.bas line 8: the speed and energy markers painted out, wherever
-## they would be. Over the chart it only cuts notches in whatever is on
-## row 133.
-func com_open() -> void:
-	text.page = 0
-	text.mode = 0
-	flight.view.shown = 0
-	page.hcolor = 0
-	for x in range(200, 261, 5):
-		page.draw(shapes, 25, x, 133)
-	for x in range(13, 74, 5):
-		page.draw(shapes, 25, x, 133)
-
-
-## Lines 979-980, one row of it (`row` 2 to 15), then the cursor home.
-func detail_window() -> void:
-	text.window_left = 1
-	text.window_width = 39
-
-
-func detail_clear_row(row: int) -> void:
-	text.vtab(row)
-	text.htab(2)
-	text.print_line(" ".repeat(38))
-
-
-## Line 990.
-func detail_title() -> void:
-	text.htab(2)
-	text.vtab(2)
-	_tab(5)
-	text.print_line(star_name(p) + " STAR SYSTEM")
-	text.new_line()
-
-
-## Lines 1005-1160 as the PRINTs they come to, each a Callable.
-func detail_lines() -> Array:
-	var star := p - 1
-	if not GameState.planet_scouted[star]: # 1005
-		return [
-			func() -> void: text.print_line("NO INFORMATION AVAILABLE AT THIS TIME."),
-			func() -> void: text.new_line(),
-		]
-	var name_ := star_name(p)
-	var tech: int = GameState.planet_tech[star]
-	var lines: Array = []
-	var say := func(line: String) -> void:
-		lines.append(func() -> void: text.print_line(line))
-	say.call("TECHNOLOGICAL DEVELOPMENT:") # 1010
-	match tech: # 1030-1070
-		0:
-			say.call("NO INTELLIGENT LIFEFORMS INDICATED.")
-		1:
-			say.call("PRIMITIVE PSEUDO SOCIETY ONLY.")
-		2:
-			say.call("LIMITED ATOMIC DEVELOPMENT")
-		3:
-			say.call("SOPHISTICATED TECHNOLOGY WITH")
-			say.call("STARSHIP CAPABILITY.")
-		4:
-			say.call("ADVANCED CAPABILITY-SUPERIOR TO  OURS!")
-	say.call("") # 1080
-	if tech >= 2: # 1090
-		say.call("ORBITING DEFENSE CAPABILITY --")
-		say.call("FIGHTER PROTECTION PROBABLE.")
-	say.call("POPULATION = APPROX. %d" % (GameState.planet_population_scale[star] * 35294)) # 1110
-	if GameState.planet_secured[star] != 0: # 1120-1140
-		say.call(name_ + " HAS BEEN SECURED")
-	else:
-		say.call(name_ + " IS INDEPENDENT.")
-	say.call("") # 1150
-	if GameState.planet_has_base[star]: # 1160
-		say.call("THERE IS AN OPERATIONAL REPAIR BASE")
-		say.call("ON THE PLANET.")
-	return lines
-
-
-## Line 1170 up to its GET.
-func detail_ready() -> void:
-	text.vtab(15)
-	text.print_text("READY ")
-
-
-## Line 1172, with the chart's flag set: back to the chart.
-func detail_close() -> void:
-	text.mode = 0
-	text.print_line(" ")
-
-
-## `PRINT TAB(n);`: spaces through the output hook up to column n.
-func _tab(n: int) -> void:
-	while text.column < n - 1:
-		text.put(0x20)

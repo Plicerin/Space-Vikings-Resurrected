@@ -445,13 +445,21 @@ the whole list; the distance takes a quarter of a second, most of it
 | 3025-3080 | (inline) | The chart: each star at `X·10−35, Y·5`, one of three sizes by Z, a different colour when secured (`38219+P = 1`), a box round the current system. | ✅ `chart_program.gd::star()`. SOL is white at SOL in a new game: its flag holds 100 (§3). |
 | 3110-3200 | (inline) | Cursor from the two paddles; any key returns through `INSTRUMENTS`. | ✅ `chart_loop.gd::_turn()`. Any key leaves, not only the space asked for. The cross is taken off with a black `DRAW` (3210), which takes the star under it off too. |
 | 3250-3320 | `GOSUB 3300` | Name, coordinates, and the true 3-D distance from the current system in light-years. | ✅ `found_name()`, `found_place()`, `distance()`. |
-| 3260 | (inline) | "Y" → `POKE 38388,P`, `RUN COM`: opens that system's directory page. | ✅ `further()`, then `COM.bas`'s directory page drawn over what is left of the chart (`detail_*()`). The line also pokes 8 into 38149, the once-a-trip base flag's byte; `COM.bas` 1007 zeroes it. |
+| 3260 | (inline) | "Y" → `POKE 38388,P`, `RUN COM`: opens that system's directory page. | ✅ `further()`, then the scene hands over to COM (`GameState.handover`), which draws its directory page over what is left of the chart (`com_program.gd::page_*()`). The line also pokes 8 into 38149, the once-a-trip base flag's byte; `COM.bas` 1007 zeroes it. |
 
 ---
 
 ## COM.bas — the command console hub
 
-Source: `detokenized/COM.bas`. Port: `godot-remake/scripts/ui/{com_menu,central_computer,nav_computer,galaxy_directory}.gd`, which are Godot buttons and labels with the original's rules, not yet the hi-res screen. The one part on the hi-res page is the directory page reached from the chart (`chart_program.gd`).
+Source: `detokenized/COM.bas`. Port: `godot-remake/scripts/com/com_program.gd`
+(the statements, drawn on hi-res page 1 with the game's character
+generator), `com_loop.gd` (the GOTOs and the measured time) and
+`com_console.gd` (the scene: a clock, the page and the keyboard).
+Recorded live with `tools/mame/com_live.lua` (`analysis/live/com/`):
+35 stops for a key over two routes, every one compared byte for byte
+with the port's page, cursor, text window and the 973/974 switches by
+`tests/check_com.tscn` and `check_com_damaged.tscn`, and the page once
+more when each route is back in flight.
 
 Found while matching the chart's way out: line 20 (`POKE 32,0: HOME:
 FOR J = 1 TO 14: PRINT " ": NEXT`) runs with whatever text window the
@@ -461,13 +469,29 @@ spaces wipe the first column of the instrument panel's lower half
 
 | Line | Target | What it actually does | Status |
 |---|---|---|---|
-| 12 | `GOSUB 15100` | Loads the 20 star names. | ✅ `GameState.STAR_NAMES`. |
-| 12 | (inline) | `38388 > 0` on entry → straight to that system's directory page. | ✅ from the chart (`chart_loop.gd::_directory()`), compared live (`com_detail`). The Godot directory screen is entered from the menus only. |
-| 98, 115 | (inline) | `38151 = 7` → `RUN GROUND FORCES`: the return half of a hand-off `GROUND FORCES.bas` 1130 starts. | ⬜ |
-| 120-140 | command menu | 1 computer, 2 ground forces, 3 radar, 4 end, 5 return to flight. Any other key: line 120 prints "PLEASE ENTER YOUR COMMAND AGAIN" but does not loop back, so control falls through to line 140's `GOTO 30` — **a line that does not exist**. Read statically, that raises an error and runs the `ONERR` handler at 63999 (`INT`). ❓ not run live. | ✅ menu buttons (a wrong key cannot happen in the port). |
-| 265-280 | `ON C GOTO 800,900,30,1200,20000` | Central Computer menu. The third target is again the missing line 30, never taken because line 265 handles `C=3` first (`GOSUB 3000`, the Galaxy Map). | ✅ `central_computer.gd`. |
-| 860-897 | Set Course | Number 1-20, refuses the current planet, `POKE 38163,C`, "COURSE SET." | ✅ `nav_computer.gd` sets `GameState.target_planet`, which `H` in flight reads. ⚠️ its entry box numbers the stars from 0, the original from 1. |
-| 1005-1170 | directory page | Tech text, population (`PEEK(38261+C)·35294`), secured, base. | ✅ `galaxy_directory.gd`; it now has real data to show (§3). |
+| 8 | (inline) | Page 1 on show and drawn on; the speed and energy markers painted out with black `DRAW 25`s. | ✅ `open()`. |
+| 12 | `GOSUB 15100` | Loads the 20 star names. | ✅ `star_name()`. |
+| 12 | (inline) | `38388 > 0` on entry → straight to that system's directory page (line 978), over whatever is on the screen. | ✅ `chart_star()` (`GameState.handover`), compared live from the chart (`com_detail`). |
+| 20-80 | `GOSUB 10000` | The console: rows 0-123 painted blue an `HPLOT` at a time (four seconds), the left half cleared, twelve two-line labels read from `DATA`, each plain or inverse by its system's byte (`ST()`, line 15140). Power goes inverse under 16, the others at 0; the last label reads 38185, which nothing writes. | ✅ `fill_row()`, `clear_row()`, `label()`, `title()`; the inverse labels compared live (`damaged`). |
+| 21-35 | `GOSUB 21` | Text window full, the left half's fourteen rows cleared; returns only when `R = 1`. | ✅ `full_window()`, `clear_row()`. |
+| 98, 115 | (inline) | `38151 = 7` → `RUN GROUND FORCES`: the return half of a hand-off `GROUND FORCES.bas` 1130 starts. Line 115 is the same test again and never true. | ✅ `ground_forces_due()`. ⚠️ nothing in the port sets the flag yet (GROUND FORCES and COLLECT are still Godot screens). |
+| 120 | `GOSUB 21`, `GOSUB 390` | "COMMAND?" and a `GET`. Any key but 1-5: "PLEASE ENTER YOUR / COMMAND AGAIN." at `SPEED= 127`, a 3000-count wait, the left half cleared and back to line 90. The menu comes back without line 80, so the text window is left 39 wide. | ✅ compared live (`menu_wrong`). Line 140's `GOTO 30` (a line that does not exist) is never reached: an earlier reading here that a wrong key falls into it was wrong. |
+| 121-135 | (inline) | 1 → line 200. 2 → `RUN GROUND FORCES` (its `PRINT " "` goes to page 2). 3 → `POKE 38388,2`, `RUN RADAR`. 4 → `RUN END`. 5 → text rows 1-16 wiped (dots 0-127: the top two rows of the panel go with the view), the lo-res screen filled behind it, `RUN STARSHIP SIMULATOR`. | ✅ `command_taken()`, `command_window()`, `wipe_row()`, `command_leave()`; "5" compared live to three passes into flight (`flying`). The radar stand-in now honours 38388 (`RADAR.bas` 2058: back to COM, not to flight). |
+| 200-280 | `GOSUB 21`, `GOSUB 3000` | Central computer. `38196 = 0` → "COMPUTER NOT FUNCTIONING.", a 4000-count wait, back to line 12. Else six choices: 1 → 800, 2 → 900, 3 → `RUN GALAXY MAP`, 4 → `RUN STATUS`, 5 → `RUN SUPPLY`, 6 → line 12. `ON C GOTO`'s third target is the missing line 30, never taken because line 265 has caught 3. | ✅ `_central()`; compared live (`central`, `central_wrong`, `damaged_menu_again`). |
+| 800-850 | `GOSUB 21` | Navigation computer: 1 → 900, 2 → 860, 3 → line 20. | ✅ `_navigation()`. |
+| 860-897 | `GOSUB 21` | Set course. Two characters, each a digit or RETURN (RETURN is printed and counts as a place: "7", RETURN is 7), the left arrow takes one back. 0 or over 20 → "<ERROR>" and a 5000-count wait; the star we are at → "THAT'S WHERE WE / ARE NOW, SIR!"; else `POKE 38163,C`, the name, "COURSE SET." Lines 873 and 897 are never reached. | ✅ `_course()`, `entry_key()`; sets `GameState.target_planet`, which `H` in flight reads. Compared live: 25, 01, a digit taken back, 05, and 7 with RETURN. |
+| 900-969 | `GOSUB 20` | Galaxy directory: orange, the twenty names in inverse, 1 → line 970, 2 → `R = 2: GOSUB 20: GOTO 810`. Line 35 only returns for `R = 1`, so "2) RETURN" never gets to its `GOTO 810`: it falls through into the command menu, whether the directory was asked for from the central or the navigation computer. Any other key paints the whole directory again. | ✅ `_list()`; compared live (`after_directory` is the command menu). ❓ each such return leaves a `GOSUB` on the stack; some thirty of them in one stay in COM should end in `?OUT OF MEMORY` and the `ONERR` line 63999 (`INT`). Not run live, not ported. |
+| 970-978 | (inline) | "WHICH SYSTEM" and the same two-character entry. Out of 1-20: "TRY AGAIN PLEASE." | ✅ `_which()`; compared live (30, then 02 and 01). |
+| 979-1180 | (inline) | A star system's page: nothing known until scouted (`38240+C`); else tech text, defenders for tech 2 and up, population (`PEEK(38261+C)·35294`), secured or independent, base. Any key: back to the chart if it asked (`38388 > 0`, zeroed), else to line 900. Line 1175 is never reached (`R` is 0 again by then). | ✅ `page_lines()`, `page_close()`; compared live for a scouted and an unscouted system and from the chart. |
+| 63999 | `ONERR` | Any error runs `INT` (DOS's switch to Integer BASIC). | ⬜ no error is known to be reachable but the stack one above. |
+
+Measured, in video frames, and in `com_loop.gd`: from the flight's "C" to
+the command menu's `GET` is 14 s on the real machine, 7.2 of them the
+floppy; every return to the command menu costs the blue fill again
+(124 rows × 1.91). `tests/check_com.tscn -- --times` prints the port's
+time from stop to stop next to the recording's: all within two frames
+once the recorder's own seven are taken off (its RETURN key takes ten
+more to arrive than a digit does).
 
 ---
 

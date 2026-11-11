@@ -120,7 +120,16 @@ func _remove_file() -> void:
 func _to_end() -> void:
 	_tap(KEY_C, "c")
 	await _scene_is(COM)
-	await _press("VBox/EndButton")
+	var asked := [false]
+	get_tree().current_scene._loop.watch = func(what: String) -> void:
+		if what == "command":
+			asked[0] = true
+	for i in range(TIMEOUT_FRAMES):
+		if asked[0]:
+			break
+		await get_tree().process_frame
+	_check("the command console asks for a command", asked[0])
+	_tap(KEY_4, "4")
 	await _scene_is(END)
 
 

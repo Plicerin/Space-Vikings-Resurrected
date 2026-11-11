@@ -62,6 +62,18 @@ var instruments_due: bool = true
 ## as they are. Without it INSTRUMENTS calls TRANLIT, which flips all
 ## four switches as it draws them.
 var saved_marker: bool = false
+## $38388: a byte the programs hand each other when one runs the next.
+## The star chart leaves the star asked about (1-20) for COM, which then
+## shows that star's page and runs the chart again; COM leaves a 2 for
+## RADAR. 0 is nothing.
+var handover: int = 0
+## $38151 = 7: COLLECT and GROUND FORCES run COM to have the console
+## drawn, and COM runs GROUND FORCES straight back (COM.bas line 98).
+var ground_forces_due: bool = false
+## The floppy drive is still turning from the last load, which takes
+## about a second off the next one. Set by a program that runs another
+## straight after being loaded itself.
+var drive_spinning: bool = false
 
 # --- Economy ---
 # Original: credits/stardate/troops were persisted via the "MISC FILE"
@@ -564,6 +576,9 @@ func start_new_game() -> void:
 	autopilot_active = true
 	instruments_due = true
 	saved_marker = false
+	handover = 0
+	ground_forces_due = false
+	drive_spinning = false
 
 	# START.bas lines 40-250: the machine as a new game finds it.
 	view3d.pages[0].clear()

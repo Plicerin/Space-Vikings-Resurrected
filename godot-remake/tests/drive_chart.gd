@@ -4,7 +4,8 @@ extends Node
 ## scene's own clock, and a look at what came of them. What the chart
 ## draws is held to the real game in check_chart.gd; this is for the
 ## scene round it, that the mouse and the keys reach the program as
-## paddles, button and keyboard, and that the way out leads somewhere.
+## paddles, button and keyboard, and that its two ways out lead to the
+## command console (scenes/com.tscn) and, from a star's page there, back.
 ##
 ##   godot --headless --fixed-fps 60 --path godot-remake res://tests/drive_chart.tscn
 ##
@@ -51,18 +52,9 @@ func _drive() -> void:
 	flight.instruments()
 	GameState.goto_scene(CHART)
 	await _scene_is(CHART)
-	var scene := get_tree().current_scene
+	var scene := _hook()
 	var view: Node2D = scene.get_node("HGRCanvas/HgrView")
-	var theirs: Callable = scene._loop.watch
-	scene._loop.watch = func(what: String) -> void:
-		theirs.call(what)
-		_seen[what] = _seen.get(what, 0) + 1
-		if what == "turn" or what == "cross" or what == "question":
-			_page_at[what] = GameState.view3d.pages[0].mem.duplicate()
 
-	_check("the picture is dark while GALAXY MAP loads", not view.visible)
-	await _seen_more("drawn")
-	_check("and on once the chart has cleared the page", view.visible)
 	await _seen_more("turn")
 	_check("the chart is the real one's", _page_at["turn"] == _live("chart_clean"))
 
@@ -101,14 +93,49 @@ func _drive() -> void:
 	await _seen_more("turn")
 	_check("and the message goes", _page_at["turn"] == _live("chart_clean"))
 
+	_mouse_to(view, SIRIUS)
+	await _seen_more("cross", 2)
+	_click()
+	await _seen_more("question")
+	_tap(KEY_Y, "y")
+	await _scene_is(COM)
+	_check("Y runs the command console", _current_path() == COM)
+	_hook()
+	await _seen_more("page")
+	_check("for SIRIUS's page, the real one's", GameState.view3d.pages[0].mem == _live("com_detail"))
+	_shot("4_page")
+
+	_tap(KEY_X, "x")
+	await _scene_is(CHART)
+	_check("a key there runs the chart again", _current_path() == CHART)
+	_hook()
+	await _seen_more("turn")
+	_check("drawn as it was", _page_at["turn"] == _live("chart_clean"))
+
 	_tap(KEY_SPACE, " ")
 	await _seen_more("panel")
-	_shot("4_panel")
+	_shot("5_panel")
 	await _scene_is(COM)
 	_check("SPACE leaves for the command console", _current_path() == COM)
+	_hook()
+	await _seen_more("command")
+	_check("at its command menu, the real one's", GameState.view3d.pages[0].mem == _live("leaving_6000"))
+	_shot("6_command")
 
 	print("chart scene driven: %d wrong" % _bad)
 	get_tree().quit(1 if _bad > 0 else 0)
+
+
+## Listens in on the current scene's loop.
+func _hook() -> Node:
+	var scene := get_tree().current_scene
+	var theirs: Callable = scene._loop.watch
+	scene._loop.watch = func(what: String) -> void:
+		theirs.call(what)
+		_seen[what] = _seen.get(what, 0) + 1
+		if what == "turn" or what == "cross" or what == "question":
+			_page_at[what] = GameState.view3d.pages[0].mem.duplicate()
+	return scene
 
 
 func _check(what: String, ok: bool) -> void:
@@ -142,7 +169,7 @@ func _seen_more(what: String, times: int = 1) -> void:
 		if _seen.get(what, 0) >= until:
 			return
 		await get_tree().process_frame
-	print("WRONG  the chart never came to \"%s\"" % what)
+	print("WRONG  the program never came to \"%s\"" % what)
 	_bad += 1
 	get_tree().quit(1)
 

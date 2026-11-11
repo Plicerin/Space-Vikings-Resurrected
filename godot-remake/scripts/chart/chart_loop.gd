@@ -2,7 +2,8 @@ extends RefCounted
 ## The star chart on the clock. chart_program.gd is GALAXY MAP.bas's
 ## statements with no time in them; this is the order they run in and
 ## how long the real machine took over each, from `RUN GALAXY MAP` until
-## the chart hands the machine back to COM.
+## the chart runs COM again (com_loop.gd): for the page of the star
+## asked about, or because a key was pressed.
 ##
 ## `run()` is a coroutine. Everything that takes time goes through
 ## `wait`, which the scene (star_chart.gd) points at a real clock and
@@ -44,13 +45,13 @@ const FlightLoop = preload("res://scripts/flight/flight_loop.gd")
 ## How run() ended.
 enum Left {
 	STOPPED, ## `stop` was set
-	COM, ## a key: INSTRUMENTS, the lamps, and `RUN COM`
+	## `RUN COM`: after a "Y" at the question, with the star in
+	## GameState.handover; or after a key, INSTRUMENTS and the lamps
+	COM,
 }
 
 # -- floppy loads --
 const LOAD_GALAXY_MAP := FlightLoop.LOAD_GALAXY_MAP
-const LOAD_COM := 435.0 # from the chart's question
-const LOAD_COM_LEAVING := 380.0 # from line 1, the drive still spinning
 const LOAD_INSTRUMENTS := 171.0
 
 # -- drawing the chart, lines 0-3100: 142 frames in all --
@@ -87,16 +88,6 @@ const NO_STAR_CHARACTER := 2.61 # SPEED= 127
 const NO_STAR_HOLD := 29.8 # FOR J = 1 TO 500: NEXT
 const NO_STAR_CLEAR := 2.7
 
-# -- COM.bas's directory page --
-const COM_MARKERS := 27.0 # line 8
-const COM_NAMES := 14.0 # lines 10-12, 15100-15140
-const DETAIL_WINDOW := 1.0 # lines 978-979
-const DETAIL_ROW := 2.66 # line 980, a row
-const DETAIL_TITLE := 1.6 # line 990
-## Lines 1005-1160, a PRINT. Measured for line 1005's one line only (51
-## ms); the others are taken to be as quick.
-const DETAIL_LINE := 1.5
-
 # -- the way out --
 ## INSTRUMENTS' lines 205-206 fill the lo-res screen behind the hi-res
 ## one before the program looks at who ran it.
@@ -115,27 +106,21 @@ var read_button: Callable = func() -> bool: return false
 ## the page, "drawn" when the chart is up and the loop is about to
 ## start, "turn" at every paddle read, "cross" when the cross is on and
 ## the button about to be read, "message" when the no-star message is
-## up, "question" and "ready" before the two GETs, "panel" when
-## INSTRUMENTS and the lamps are done.
+## up, "question" before the GET, "panel" when INSTRUMENTS and the lamps
+## are done.
 var watch: Callable = func(_what: String) -> void: pass
 ## Set to make run() come back at the next turn of the loop.
 var stop := false
 
 
 func run() -> Left:
-	while true:
-		await _run(LOAD_GALAXY_MAP)
-		program.open()
-		await wait.call(NAMES)
-		var left: Left = await _chart()
-		if left == Left.COM or stop:
-			return left
-	return Left.STOPPED
+	await _run(LOAD_GALAXY_MAP)
+	program.open()
+	await wait.call(NAMES)
+	return await _chart()
 
 
-## Lines 3000-3270. Comes back with Left.COM when a key ended it and
-## the lamps are repainted, with Left.STOPPED when "Y" went through
-## COM's directory page and GALAXY MAP is to be run again.
+## Lines 3000-3270.
 func _chart() -> Left:
 	while true:
 		await _draw()
@@ -152,8 +137,7 @@ func _chart() -> Left:
 				if asked == Asked.REDRAW:
 					break
 				if asked == Asked.FURTHER:
-					await _directory()
-					return Left.STOPPED
+					return Left.COM
 	return Left.STOPPED
 
 
@@ -238,30 +222,9 @@ func _button() -> Asked:
 	return Asked.REDRAW
 
 
-## COM.bas from the chart's "Y": the directory page of the star asked
-## about, a key, and back.
-func _directory() -> void:
-	await _run(LOAD_COM)
-	program.com_open()
-	await wait.call(COM_MARKERS + COM_NAMES)
-	program.detail_window()
-	await wait.call(DETAIL_WINDOW)
-	for row in range(2, 16):
-		program.detail_clear_row(row)
-		await wait.call(DETAIL_ROW)
-	program.detail_title()
-	await wait.call(DETAIL_TITLE)
-	for line: Callable in program.detail_lines():
-		line.call()
-		await wait.call(DETAIL_LINE)
-	program.detail_ready()
-	watch.call("ready")
-	await _get_key()
-	program.detail_close()
-
-
 ## Line 3125: INSTRUMENTS draws the panel again and comes straight back
-## (its line 220), line 1 paints the lamps and runs COM.
+## (its line 220), line 1 paints the lamps and runs COM, with the drive
+## still turning from its own load.
 func _leave() -> void:
 	await _run(LOAD_INSTRUMENTS)
 	program.flight.instruments_clear()
@@ -276,7 +239,7 @@ func _leave() -> void:
 		program.lamp_block(block)
 		await wait.call(LAMP_BLOCK)
 	watch.call("panel")
-	await _run(LOAD_COM_LEAVING)
+	GameState.drive_spinning = true
 
 
 ## `GET A$`

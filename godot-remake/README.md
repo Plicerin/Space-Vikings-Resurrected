@@ -33,6 +33,7 @@ game running in MAME.
 | `EX`, `DMG`, `S/X` (the ends of a fight) | `flight_combat.gd`, `scripts/combat/combat_fx.gd` | `check_jump` |
 | A2-3D1 (the 3D view, machine code) | `scripts/shapes/a2_3d1_view.gd`, `a2_3d1_trig.gd` | `check_a2_3d1` |
 | `GALAXY MAP` (star chart) | `scripts/chart/chart_program.gd`, `chart_loop.gd` | `check_chart` |
+| `COM` (command console, central computer, navigation computer, galaxy directory) | `scripts/com/com_program.gd`, `com_loop.gd` | `check_com`, `check_com_damaged`, `check_chart` |
 | Planet record copy, new-game data, save and load | `autoload/game_state.gd` | `check_save`, `check_jump` |
 | An old game's way into flight (`START` 3000-3030, `INSTRUMENTS` 210, `GALAXY MAP` 2), and `END`'s CONTINUE | `flight_loop.gd` (`run()`, `lamps()`) | `check_save` |
 
@@ -43,7 +44,6 @@ the first way:
 
 | Original program | Stand-in |
 |---|---|
-| `COM` (command console, central computer, navigation computer, directory) | `scripts/ui/com_menu.gd`, `central_computer.gd`, `nav_computer.gd`, `galaxy_directory.gd` |
 | `STATUS`, `SUPPLY` | `status_screen.gd`, `supply_report.gd` |
 | `RADAR`, `SHIP # N I.D.` | `radar_screen.gd` (a Godot 3D camera on the real model), `ship_id_screen.gd` |
 | `GROUND FORCES`, `COLLECT`, recall | `ground_forces.gd`, `collect.gd`, `recall.gd` |
@@ -57,13 +57,16 @@ Each stand-in's doc comment lists the BASIC lines it follows.
 
 Three files per program:
 
-- **the program** (`flight_program.gd`, `chart_program.gd`): the BASIC
+- **the program** (`flight_program.gd`, `chart_program.gd`,
+  `com_program.gd`): the BASIC
   statements, a function for each stretch between which time passes on
   the real machine. No timing.
-- **the loop** (`flight_loop.gd`, `chart_loop.gd`): a coroutine that
+- **the loop** (`flight_loop.gd`, `chart_loop.gd`, `com_loop.gd`): a
+  coroutine that
   calls those in order with the measured waits between, in video frames.
   Everything that takes time goes through one `wait` callable.
-- **the scene** (`space_flight.gd`, `star_chart.gd`): points `wait` at a
+- **the scene** (`space_flight.gd`, `star_chart.gd`, `com_console.gd`):
+  points `wait` at a
   real clock, shows whichever hi-res page the original would have on
   show, and turns keyboard and mouse into the Apple's keyboard latch,
   paddles and button.
@@ -221,18 +224,26 @@ a difference.
     godot --headless --path . res://tests/check_flight_passes.tscn   # 50 passes of flight, both pages, every byte
     godot --headless --path . res://tests/check_jump.tscn            # 42 passes: fighting, hyperdrive, arrival
     godot --headless --path . res://tests/check_chart.tscn           # the chart at 9 stops, page and text cursor
+    godot --headless --path . res://tests/check_com.tscn             # the console at 33 stops and back in flight: page, cursor, window
+    godot --headless --path . res://tests/check_com_damaged.tscn     # the same with systems out: inverse labels, no computer
     godot --headless --path . res://tests/check_save.tscn            # record copy, save, the boot, an old game's panel
     godot --headless --path . -s res://tests/check_flight_core.gd    # flight arithmetic against the model
     godot --headless --path . -s res://tests/check_a2_3d1.gd         # 200 views against tools/a2_3d1_view.py
     godot --headless --fixed-fps 60 --path . res://tests/drive_flight.tscn   # the flight scene, by key events
     godot --headless --fixed-fps 60 --path . res://tests/drive_chart.tscn    # the chart scene, by mouse and keys
+    godot --headless --fixed-fps 60 --path . res://tests/drive_com.tscn      # the console scene, by keys, and every way out of it
     godot --headless --fixed-fps 60 --path . res://tests/drive_save.tscn     # title, END, save, continue, three boots
 
-The first four need the recordings in `../analysis/live/`. A compared
+The first six need the recordings in `../analysis/live/`. A compared
 byte is never adjusted to make a test pass: both times a test differed
 from the real game by a handful of bytes, the difference was something
 the original does that nobody had noticed (the seventeen-byte copy;
 `COM` printing through the chart's leftover text window).
+
+`COM`'s recording put right two things the listing had been misread
+for: a wrong key at the command menu asks again (it does not fall into
+the missing line 30), and the directory's "2) RETURN" comes out at the
+command menu, not at the navigation computer its `GOTO` names.
 
 ## Liberties
 
@@ -248,7 +259,8 @@ Where the port departs from the original on purpose:
   two to eight seconds. Those waits are kept in proportion and cut to
   15% (`FlightLoop.DISK_WAIT_SCALE`). Nothing the machine computed or
   drew is sped up.
-- **Key hints** on the flight screen, outside the Apple's picture.
+- **Key hints** on the flight, chart and console screens, outside the
+  Apple's picture.
 - **Ground battle retreat.** In the original any key at all retreats.
   The stand-in has a Retreat button.
 - **Radar** shows the defender's real A2-3D1 model through a Godot
@@ -259,14 +271,21 @@ Where the port departs from the original on purpose:
 
 ## Not ported, estimated, or unverified
 
-- `COM` and everything under it on the hi-res page, with its timing.
-  Until then the chart starts dark where the original still shows
-  `COM`'s screen while `GALAXY MAP` loads, and so does flight after
-  `END`'s CONTINUE.
-- The time each line of the directory page takes to print is measured
-  for one line and assumed for the rest.
-- The navigation computer's stand-in numbers stars from 0; the
-  original's from 1.
+- The programs `COM` runs other than flight and the chart (`GROUND
+  FORCES`, `RADAR`, `END`, `STATUS`, `SUPPLY`) are still stand-ins. A
+  stand-in leaves the hi-res page as it found it, so on the way back
+  `COM` and flight start over the console's last screen, not over what
+  the original's program would have left; and no stand-in sets the
+  marker (38151 = 7) that makes `COM` draw its console and go straight
+  back to `GROUND FORCES`.
+- `COM`'s waits are fitted to its recording, not timed statement by
+  statement: each stop for a key comes within two frames of the real
+  machine's, the stretches between are shared out by the characters
+  drawn.
+- "2) RETURN" in the galaxy directory leaves a `GOSUB` on BASIC's stack
+  each time. Some thirty in one stay should run the original out of
+  stack and into its error line (`INT`); the port has no such end, and
+  it has not been tried on the real game.
 - `GROUND FORCES` never sets the "fought and not paid" marker
   (`morale_flag`) that `H_D` punishes on the next jump.
 - The load of `STARSHIP SIMULATOR` after an old game's or CONTINUE's
