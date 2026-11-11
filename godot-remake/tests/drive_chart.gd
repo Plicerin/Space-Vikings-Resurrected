@@ -100,12 +100,12 @@ func _drive() -> void:
 	_tap(KEY_Y, "y")
 	await _scene_is(COM)
 	_check("Y runs the command console", _current_path() == COM)
-	_hook()
-	await _seen_more("page")
-	_check("for SIRIUS's page, the real one's", GameState.view3d.pages[0].mem == _live("com_detail"))
+	await _frames(3)
+	var console := get_tree().current_scene.get_node("Center/Columns/Console/VBox")
+	_check("for SIRIUS's page", (console.get_node("Title") as Label).text == "SIRIUS STAR SYSTEM")
 	_shot("4_page")
 
-	_tap(KEY_X, "x")
+	(console.get_node("Buttons").get_child(0) as Button).pressed.emit()
 	await _scene_is(CHART)
 	_check("a key there runs the chart again", _current_path() == CHART)
 	_hook()
@@ -117,9 +117,8 @@ func _drive() -> void:
 	_shot("5_panel")
 	await _scene_is(COM)
 	_check("SPACE leaves for the command console", _current_path() == COM)
-	_hook()
-	await _seen_more("command")
-	_check("at its command menu, the real one's", GameState.view3d.pages[0].mem == _live("leaving_6000"))
+	await _frames(3)
+	_check("at its command menu", (get_tree().current_scene.get_node("Center/Columns/Console/VBox/Title") as Label).text == "COMMAND MODE")
 	_shot("6_command")
 
 	print("chart scene driven: %d wrong" % _bad)
@@ -216,3 +215,8 @@ func _shot(name_: String) -> void:
 	var drawn: Image = page.image()
 	picture.blend_rect(drawn, Rect2i(0, 0, 280, 192), Vector2i.ZERO)
 	picture.save_png(_shots.path_join("%s.png" % name_))
+
+
+func _frames(n: int) -> void:
+	for i in n:
+		await get_tree().process_frame

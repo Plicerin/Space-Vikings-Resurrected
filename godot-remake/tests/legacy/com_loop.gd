@@ -24,7 +24,7 @@ extends RefCounted
 ##
 ## No `class_name` (see shape_table.gd); preload into a local const.
 
-const ComProgram = preload("res://scripts/com/com_program.gd")
+const ComProgram = preload("res://tests/legacy/com_program.gd")
 const FlightLoop = preload("res://scripts/flight/flight_loop.gd")
 
 ## How run() ended: the program COM ran.

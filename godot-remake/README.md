@@ -33,6 +33,7 @@ that count, waits a key can cut short.
 |---|---|---|---|
 | `GROUND FORCES`, `RECALL`, `COLLECT` | `scripts/rules/ground_rules.gd` | `scripts/ui/ground_forces.gd` | `check_ground_rules` (the rules), `drive_ground_forces` (the scene) |
 | `SHORE LEAVE` (shore leave, enlisting and weapons, loot, repairs, a base, cryogenics) | `scripts/rules/shore_rules.gd` | `scripts/ui/shore_leave.gd`, one panel over the ground forces menu | `check_shore_rules`, `drive_shore_leave` |
+| `COM` (command console, central and navigation computers, galaxy directory, damage-control lamps) | `scripts/rules/com_rules.gd` | `scripts/com/com_console.gd` | `check_com_rules`, `drive_com` |
 | `STATUS`, `SUPPLY` (the central computer's two reports) | `scripts/rules/report_rules.gd` | `scripts/reports/report_console.gd`, one panel each | `check_report_rules`, `drive_reports` |
 
 **Ported faithfully.** The screen is a software copy of the Apple's
@@ -49,7 +50,6 @@ game running in MAME.
 | `EX`, `DMG`, `S/X` (the ends of a fight) | `flight_combat.gd`, `scripts/combat/combat_fx.gd` | `check_jump` |
 | A2-3D1 (the 3D view, machine code) | `scripts/shapes/a2_3d1_view.gd`, `a2_3d1_trig.gd` | `check_a2_3d1` |
 | `GALAXY MAP` (star chart) | `scripts/chart/chart_program.gd`, `chart_loop.gd` | `check_chart` |
-| `COM` (command console, central computer, navigation computer, galaxy directory) | `scripts/com/com_program.gd`, `com_loop.gd` | `check_com`, `check_com_damaged`, `check_chart` |
 | `END` (save, continue, end game) | `scripts/end/end_program.gd`, `end_loop.gd` | `check_end`, `check_end_atmosphere` |
 | DOS's error routine (SYSTEM ERROR, reboot) | `scripts/dos/system_error.gd`, `scripts/shapes/text_screen.gd` | `check_end` |
 | `RADAR` | `scripts/radar/radar_program.gd`, `radar_loop.gd` | `check_radar` and the six beside it |
@@ -90,14 +90,14 @@ ledger's open items are the two COLLECT lines no recording runs: 820
 Three files per program:
 
 - **the program** (`flight_program.gd`, `chart_program.gd`,
-  `com_program.gd`): the BASIC
+  `end_program.gd`): the BASIC
   statements, a function for each stretch between which time passes on
   the real machine. No timing.
-- **the loop** (`flight_loop.gd`, `chart_loop.gd`, `com_loop.gd`): a
+- **the loop** (`flight_loop.gd`, `chart_loop.gd`, `end_loop.gd`): a
   coroutine that
   calls those in order with the measured waits between, in video frames.
   Everything that takes time goes through one `wait` callable.
-- **the scene** (`space_flight.gd`, `star_chart.gd`, `com_console.gd`):
+- **the scene** (`space_flight.gd`, `star_chart.gd`, `end_console.gd`):
   points `wait` at a
   real clock, shows whichever hi-res page the original would have on
   show, and turns keyboard and mouse into the Apple's keyboard latch,
@@ -284,8 +284,7 @@ a difference.
     godot --headless --path . res://tests/check_flight_passes.tscn   # 50 passes of flight, both pages, every byte
     godot --headless --path . res://tests/check_jump.tscn            # 42 passes: fighting, hyperdrive, arrival
     godot --headless --path . res://tests/check_chart.tscn           # the chart at 9 stops, page and text cursor
-    godot --headless --path . res://tests/check_com.tscn             # the console at 34 stops and back in flight: page, cursor, window
-    godot --headless --path . res://tests/check_com_damaged.tscn     # the same with systems out: inverse labels, no computer
+    godot --headless --path . res://tests/check_com_rules.tscn       # COM: 5 recorded routes through the rules, 201 screens rebuilt from the characters it drew
     godot --headless --path . res://tests/check_end.tscn             # END at 20 stops and back in flight; its keys; SYSTEM ERROR dot for dot
     godot --headless --path . res://tests/check_end_atmosphere.tscn  # END's refusal in an atmosphere, 6 stops
     godot --headless --path . res://tests/check_radar.tscn           # RADAR from flight, and X back to it
@@ -303,14 +302,14 @@ a difference.
     godot --headless --path . -s res://tests/check_a2_3d1.gd         # 200 views against tools/a2_3d1_view.py
     godot --headless --fixed-fps 60 --path . res://tests/drive_flight.tscn   # the flight scene, by key events
     godot --headless --fixed-fps 60 --path . res://tests/drive_chart.tscn    # the chart scene, by mouse and keys
-    godot --headless --fixed-fps 60 --path . res://tests/drive_com.tscn      # the console scene, by keys, every way out of it, and both reports through and back
+    godot --headless --fixed-fps 60 --path . res://tests/drive_com.tscn      # the console scene, by keys: the lamps, every menu, a course, the directory, every way out of it
     godot --headless --fixed-fps 60 --path . res://tests/drive_radar.tscn    # the radar scene, by keys: from flight, from the console, an I.D. and back, no radar
     godot --headless --fixed-fps 60 --path . res://tests/drive_save.tscn     # title, END, save, continue, SYSTEM ERROR, three boots, END GAME
     godot --headless --fixed-fps 60 --path . res://tests/drive_ground_forces.tscn   # the ground forces scene, by keys: refusals, recall, a win, a retreat, a loss
     godot --headless --fixed-fps 60 --path . res://tests/drive_reports.tscn         # the two report panels: what is on show, and the way back to the console
     godot --headless --fixed-fps 60 --path . res://tests/drive_shore_leave.tscn     # commands 3 to 8, by keys: every question, every refusal, what each leaves behind
 
-The first eighteen need the recordings in `../analysis/live/`. A compared
+The first seventeen need the recordings in `../analysis/live/`. A compared
 byte is never adjusted to make a test pass: both times a test differed
 from the real game by a handful of bytes, the difference was something
 the original does that nobody had noticed (the seventeen-byte copy;
@@ -383,6 +382,14 @@ Where the port departs from the original on purpose:
   drew is sped up.
 - **Key hints** on the flight, chart, console, radar and END screens,
   outside the Apple's picture. END's says what a wrong key costs.
+- **The console** is one panel with the lamps always beside it, not a
+  screen painted over the flight panel a row at a time. A wrong key is
+  not scolded and waited out; only the keys offered do anything. The
+  directory's stars are buttons as well as the number asked for. As in
+  the original, "2) RETURN" there comes out at the command menu, not at
+  the navigation computer its `GOTO` names. The original's `GOSUB` it
+  leaves on BASIC's stack each time (thirty would end in SYSTEM ERROR)
+  is not kept.
 - **The reports** (above) show both pages at once, and `STATUS` adds the
   star the troops were left at when they are not aboard: the original's
   says only PLANETSIDE or SHORE LEAVE, never where.
@@ -406,12 +413,6 @@ Where the port departs from the original on purpose:
 
 ## Not ported, estimated, or unverified
 
-- One of the programs `COM` runs, `GROUND FORCES`, is a Godot scene.
-  It leaves the hi-res page as it found it, so on the way back `COM`
-  starts over the console's last screen, not over what the original's
-  program would have left. Every command of the original's ends by
-  running `COM` with a marker (38151 = 7) that sends it straight back
-  to `GROUND FORCES`; the scene just stays up.
 - `GROUND FORCES`: two rules rest on the listing alone, as no
   recording reaches them (a retreat with morale already 0; a primitive
   planet whose strength was not 0 already). Line 172 (one escort
@@ -430,15 +431,6 @@ Where the port departs from the original on purpose:
   be some frames out.
 - `RADAR` pokes 38151 with 5 on its way to an I.D. program. Nothing
   found reads a 5 there, and the port does not keep it.
-- `COM`'s waits are fitted to its recording, not timed statement by
-  statement: each stop for a key comes within two frames of the real
-  machine's, the stretches between are shared out by the characters
-  drawn.
-- "2) RETURN" in the galaxy directory leaves a `GOSUB` on BASIC's stack
-  each time. Some thirty in one stay should run the original out of
-  stack and into its error line, which is the SYSTEM ERROR screen; the
-  port's directory has no such end, and it has not been tried on the
-  real game.
 - SYSTEM ERROR has been seen live from `END` only, where the text
   window is the whole screen. The routine writes inside whatever window
   the program left; from a program with a narrower one the message

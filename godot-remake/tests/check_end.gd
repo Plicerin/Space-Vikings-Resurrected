@@ -38,7 +38,7 @@ extends Node
 ## after every key, and four more before a message is seen).
 
 const FlightLoop = preload("res://scripts/flight/flight_loop.gd")
-const ComLoop = preload("res://scripts/com/com_loop.gd")
+const ComLoop = preload("res://tests/legacy/com_loop.gd")
 const EndLoop = preload("res://scripts/end/end_loop.gd")
 const EndProgram = preload("res://scripts/end/end_program.gd")
 const CombatFx = preload("res://scripts/combat/combat_fx.gd")

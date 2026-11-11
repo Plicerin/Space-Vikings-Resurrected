@@ -39,6 +39,16 @@
       ],
       "after_get": "computer",
       "until_get": "console_again"
+    },
+    "COM": {
+      "logs": [
+        "analysis/live/com/com_menus.log",
+        "analysis/live/com/com_damaged.log",
+        "analysis/live/com/com_lamps.log",
+        "analysis/live/com/com_stars.log",
+        "analysis/live/com/com_edges.log"
+      ],
+      "from_key": "C"
     }
   },
   "waive": {
@@ -64,6 +74,24 @@
     },
     "COLLECT": {
       "170": "clears four rows of the text window, and R4 says whether to come back: presentation"
+    },
+    "COM": {
+      "5": "CR$ for the entry's RETURN: the entry is a field now",
+      "8": "clears the lamp rows with DRAW, painting",
+      "10": "DIM of the arrays",
+      "20": "paints the view and clears the window",
+      "21": "text window set",
+      "25": "text window set",
+      "29": "clears the window",
+      "35": "R=1 return: the screens are one panel",
+      "390": "RETURN of GOSUB 21",
+      "15100": "S$() names (the rules' NAMES)",
+      "10000": "the lamp's inverse test (see lamps())",
+      "15000": "DATA, read by the lamps' loop and not run: the lamps' words are in COM_RULES",
+      "15010": "DATA, read by the lamps' loop and not run: the lamps' words are in COM_RULES",
+      "15020": "DATA, read by the lamps' loop and not run: the lamps' words are in COM_RULES",
+      "15030": "DATA, read by the lamps' loop and not run: the lamps' words are in COM_RULES",
+      "897": "never reached: nothing goes to it (the original's own dead line)"
     }
   }
 }

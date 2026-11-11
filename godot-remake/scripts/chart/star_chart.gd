@@ -71,7 +71,7 @@ func _show_page() -> void:
 ## chart_loop.gd's clock; see space_flight.gd.
 func _wait(frames: float) -> void:
 	_due = maxf(_due, _now - 2.0 * FRAME) + frames * FRAME
-	while _now < _due:
+	while _now < _due and is_inside_tree(): # a scene taken down mid-wait stops waiting
 		await get_tree().process_frame
 
 
@@ -125,3 +125,7 @@ func _key(event: InputEventKey) -> void:
 		code = 27
 	if code == 27 or (code >= 32 and code < 127):
 		_loop.program.press(String.chr(code))
+
+
+func _exit_tree() -> void:
+	_loop.stop = true # a scene taken down mid-run has nothing to wait for

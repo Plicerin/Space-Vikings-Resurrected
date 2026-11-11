@@ -21,7 +21,7 @@ extends Node
 ## (port_<name>_p1.bin) for a look at a difference.
 
 const ChartLoop = preload("res://scripts/chart/chart_loop.gd")
-const ComLoop = preload("res://scripts/com/com_loop.gd")
+const ComLoop = preload("res://tests/legacy/com_loop.gd")
 
 const REFERENCE := "../analysis/live/chart/"
 ## Paddle readings of the recording.

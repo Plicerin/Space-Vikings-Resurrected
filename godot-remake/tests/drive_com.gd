@@ -1,29 +1,27 @@
 extends Node
-## Uses the command console scene (scenes/com.tscn) the way a player
-## would: key events put into Godot's input queue, on the scene's own
-## clock, and a look at what came of them. What COM draws is held to the
-## real game in check_com.gd; this is for the scene round it, that the
-## keys reach the program as the Apple's keyboard would have given them,
-## and that every way out of it leads to the scene of the program the
-## original ran.
+## Uses the command console (scenes/com.tscn) the way a player would:
+## keys put into Godot's input queue, and a look at what is on show and
+## where each choice goes. What the console says and does is held to the
+## real game in check_com_rules.gd; this is for the scene round it.
 ##
 ##   godot --headless --fixed-fps 60 --path godot-remake res://tests/drive_com.tscn
 ##
-## Add `-- --shots <directory>` to save the page on show after each step.
-##
-## COM replaces the current scene when it leaves, so the driver is a node
-## of its own under the root (see drive_flight.gd).
+## The scenes replace one another, so the driver is a node of its own
+## under the root (see drive_radar.gd).
 
 const COM := "res://scenes/com.tscn"
 const FLIGHT := "res://scenes/flight/space_flight.tscn"
-const SCENES := "res://scenes/%s.tscn"
-## Frames before a step is given up.
-const TIMEOUT_FRAMES := 60 * 120
+const GROUND_FORCES := "res://scenes/ground_forces.tscn"
+const RADAR := "res://scenes/radar.tscn"
+const END := "res://scenes/end_game.tscn"
+const CHART := "res://scenes/star_chart.tscn"
+const STATUS := "res://scenes/status.tscn"
+const SUPPLY := "res://scenes/supply_report.tscn"
+const CONSOLE := "Center/Columns/Console/VBox/"
+const TIMEOUT_FRAMES := 60 * 30
 
 var _driver := false
-var _seen := {}
 var _bad := 0
-var _shots := ""
 
 
 func _ready() -> void:
@@ -38,253 +36,215 @@ func _ready() -> void:
 
 
 func _drive() -> void:
-	var args := OS.get_cmdline_user_args()
-	if args.size() == 2 and args[0] == "--shots":
-		_shots = args[1]
+	# the command menu and the lamps
+	await _console(func() -> void: GameState.ship_computer = 0.0; GameState.ship_energy = 10.0)
+	_check("the command menu", _title() == "COMMAND MODE" and _buttons() == [
+			"1) COMPUTER", "2) GROUND FORCES", "3) RADAR", "4) END", "5) RETURN"])
+	var lamps: Array = _scene().get_node("Center/Columns/Lamps/VBox/Grid").get_children()
+	_check("twelve lamps, the computer's and the power's out", lamps.size() == 12 and _out(lamps) == [2, 6])
+	_tap(KEY_X)
+	await _frames(3)
+	_check("a key that is not a choice is not a choice", _title() == "COMMAND MODE")
+
+	_tap(KEY_1)
+	await _frames(3)
+	_check("1 with the computer out: said, and the menu again", _title() == "CENTRAL COMPUTER" and _said() == "COMPUTER NOT\nFUNCTIONING.")
+	await _until(func() -> bool: return _title() == "COMMAND MODE")
+	_check("and the command menu is back", _title() == "COMMAND MODE")
+
+	# the central computer, and the navigation computer
+	await _console(func() -> void: pass)
+	_tap(KEY_1)
+	await _frames(3)
+	_check("the central computer", _buttons() == ["1) NAVIGATION COMP.", "2) GALAXY DIRECTORY", "3) GALAXY MAP",
+			"4) SHIP STATUS", "5) SUPPLIES REPORT", "6) RETURN"])
+	_tap(KEY_1)
+	await _frames(3)
+	_check("the navigation computer", _title() == "NAVIGATION COMPUTER" and _buttons() == ["1) DIRECTORY", "2) SET COURSE", "3) RETURN"])
+	_tap(KEY_2)
+	await _frames(3)
+	_check("a course is asked for", _entry().visible and _entry_field().has_focus())
+	_tap(KEY_A)
+	_tap(KEY_7)
+	await _frames(2)
+	_check("digits only", _entry_field().text == "7")
+	_tap(KEY_ENTER)
+	await _frames(3)
+	_check("7: SIRIUS, course set", _said() == "SIRIUS\nCOURSE SET." and GameState.target_planet == 6)
+	await _until(func() -> bool: return _title() == "NAVIGATION COMPUTER" and _buttons().size() == 3)
+	_tap(KEY_2)
+	await _frames(3)
+	_tap(KEY_2)
+	_tap(KEY_1)
+	_tap(KEY_ENTER)
+	await _frames(3)
+	_check("21: <ERROR>, the course as it was", _said() == "<ERROR>" and GameState.target_planet == 6)
+	await _until(func() -> bool: return _entry().visible and _entry_field().text == "")
+	_tap(KEY_1)
+	_tap(KEY_ENTER)
+	await _frames(3)
+	_check("1: where we are", _said() == "THAT'S WHERE WE\nARE NOW, SIR!")
+	await _until(func() -> bool: return _entry().visible and _said() == "")
+
+	# the directory
+	await _console(func() -> void:
+		GameState.planet_scouted[1] = true
+		GameState.planet_tech[1] = 3
+		GameState.planet_has_base[1] = true)
+	_tap(KEY_1)
+	await _frames(3)
+	_tap(KEY_2)
+	await _frames(3)
+	_check("the directory: twenty stars", _title() == "GALAXY DIRECTORY" and _node("Stars").get_child_count() == 20
+			and (_node("Stars").get_child(1) as Button).text == "2) ALPHA CENTAURI")
+	_tap(KEY_3)
+	_tap(KEY_ENTER)
+	await _frames(3)
+	_check("3: BARNARD'S STAR, of which nothing is known",
+			_title() == "BARNARD'S STAR STAR SYSTEM" and _said() == "NO INFORMATION AVAILABLE AT THIS TIME.\n")
+	(_node("Buttons").get_child(0) as Button).pressed.emit()
+	await _frames(3)
+	_check("RETURN is the directory", _title() == "GALAXY DIRECTORY")
+	(_node("Stars").get_child(1) as Button).pressed.emit()
+	await _frames(3)
+	_check("a star's button: what is known of ALPHA CENTAURI", _title() == "ALPHA CENTAURI STAR SYSTEM"
+			and _said().contains("SOPHISTICATED TECHNOLOGY WITH") and _said().contains("ORBITING DEFENSE CAPABILITY --")
+			and _said().contains("THERE IS AN OPERATIONAL REPAIR BASE"))
+	(_node("Buttons").get_child(0) as Button).pressed.emit()
+	await _frames(3)
+	_tap(KEY_3)
+	_tap(KEY_0)
+	_tap(KEY_ENTER)
+	await _frames(3)
+	_check("30 is no star: said, and still asked", _said() == "TRY AGAIN PLEASE." and _title() == "GALAXY DIRECTORY")
+	(_node("Buttons").get_child(0) as Button).pressed.emit()
+	await _frames(3)
+	_check("the directory's RETURN is the command menu", _title() == "COMMAND MODE")
+
+	# on from the menus
+	for case: Array in [[KEY_2, GROUND_FORCES], [KEY_3, RADAR], [KEY_4, END], [KEY_5, FLIGHT]]:
+		await _console(func() -> void: pass)
+		_tap(case[0])
+		await _scene_is(case[1])
+		_check("command %d goes to %s" % [case[0] - KEY_0, case[1]], _path() == case[1])
+		if case[1] == RADAR:
+			_check("RADAR is told who ran it (38388 = 2)", GameState.handover == 2)
+	for case: Array in [[KEY_3, CHART], [KEY_4, STATUS], [KEY_5, SUPPLY]]:
+		await _console(func() -> void: pass)
+		_tap(KEY_1)
+		await _frames(3)
+		_tap(case[0])
+		await _scene_is(case[1])
+		_check("the central computer's %d goes to %s" % [case[0] - KEY_0, case[1]], _path() == case[1])
+
+	# run by the others: the chart's question, and RECALL's and SHORE LEAVE's bounce
+	await _console(func() -> void:
+		GameState.handover = 5
+		GameState.planet_scouted[4] = true)
+	_check("the chart's Y: LUYTEN's page, straight away", _title() == "LUYTEN STAR SYSTEM")
+	(_node("Buttons").get_child(0) as Button).pressed.emit()
+	await _scene_is(CHART)
+	_check("and RETURN runs the chart again, the mark taken", _path() == CHART and GameState.handover == 0)
 	GameState.start_new_game()
-	# as flight leaves the page: the panel, and TRANLIT's four switches
-	var flight: RefCounted = load("res://scripts/flight/flight_program.gd").new()
-	flight.instruments()
-	var text: RefCounted = GameState.chargen
-
-	await _com()
-	await _seen_more("command")
-	_check("COM asks for a command", [text.column, text.row] == [9, 9])
-	_shot("1_command")
-
-	_tap(KEY_Q, "q")
-	await _seen_more("command")
-	_check("a key that is no command: asked again", true)
-
-	_tap(KEY_1, "1")
-	await _seen_more("central")
-	_shot("2_central")
-	_tap(KEY_1, "1")
-	await _seen_more("navigation")
-	_shot("3_navigation")
-
-	_tap(KEY_2, "2")
-	await _seen_more("course")
-	_tap(KEY_1, "1")
-	await _seen_more("course")
-	_tap(KEY_BACKSPACE, "")
-	await _seen_more("course")
-	_check("BACKSPACE takes the digit back", [text.column, text.row] == [1, 5])
-	_tap(KEY_0, "0")
-	await _seen_more("course")
-	_tap(KEY_5, "5")
-	await _seen_more("navigation")
-	_check("05 sets the course for LUYTEN", GameState.target_planet == 4)
-	_shot("4_course_set")
-
-	_tap(KEY_2, "2")
-	await _seen_more("course")
-	_tap(KEY_7, "7")
-	await _seen_more("course")
-	_tap(KEY_ENTER, "")
-	await _seen_more("navigation")
-	_check("7 and ENTER for SIRIUS", GameState.target_planet == 6)
-
-	_tap(KEY_1, "1")
-	await _seen_more("directory")
-	_shot("5_directory")
-	_tap(KEY_1, "1")
-	await _seen_more("which")
-	_tap(KEY_0, "0")
-	await _seen_more("which")
-	_tap(KEY_2, "2")
-	await _seen_more("page")
-	_shot("6_page")
-	_tap(KEY_SPACE, " ")
-	await _seen_more("directory")
-	_check("a star's page, and any key for the directory again", true)
-	_tap(KEY_2, "2")
-	await _seen_more("command")
-	_check("the directory's RETURN comes out at the command menu", true)
-
-	# the ways out
-	_tap(KEY_5, "5")
-	await _scene_is(FLIGHT)
-	_check("5 runs the flight program", _current_path() == FLIGHT)
-	_shot("7_flight")
-	# from the title a game starts in flight, with INSTRUMENTS still to
-	# run; here it has
-	await _passes(2)
-	_tap(KEY_C, "c")
-	await _scene_is(COM)
-	_check("and C there the console", _current_path() == COM)
-	_hook()
-
-	await _seen_more("command")
-	_tap(KEY_3, "3")
-	await _left_for("3", "radar")
-	_check("RADAR is told who ran it (38388 = 2)", GameState.handover == 2)
-	# RADAR's scene makes a loop for each run of it, and has a `watch`
-	# of its own (see drive_radar.gd, which drives the rest of it)
-	get_tree().current_scene.watch = func(what: String) -> void:
-		_seen[what] = _seen.get(what, 0) + 1
-	await _seen_more("radar")
-	_tap(KEY_X, "x")
-	await _scene_is(COM)
-	_check("and comes back to the console, not to flight",
-			_current_path() == COM and GameState.handover == 0)
-	_hook()
-
-	# END is on the hi-res page too, and its way back is the flight program
-	await _seen_more("command")
-	_tap(KEY_4, "4")
-	await _left_for("4", "end_game")
-	_hook()
-	await _seen_more("menu")
-	_check("END asks for a choice", [text.column, text.row] == [15, 9])
-	_shot("8_end")
-	_tap(KEY_2, "2")
-	await _scene_is(FLIGHT)
-	_check("and 2 there runs the flight program", _current_path() == FLIGHT)
-	await _passes(2)
-	_tap(KEY_C, "c")
-	await _scene_is(COM)
-	_hook()
-
-	await _seen_more("command")
-	_tap(KEY_2, "2")
-	await _left_for("2", "ground_forces")
-	await _com()
-
-	await _central()
-	_tap(KEY_3, "3")
-	await _left_for("1 and 3", "star_chart")
-	# its loop is running: out by its own door
-	await _frames(30)
-	_tap(KEY_SPACE, " ")
-	await _scene_is(COM)
-	_hook()
-
-	# STATUS and SUPPLY are native panels (drive_reports.gd): the console
-	# runs them, and Enter brings the console back
-	await _central()
-	_tap(KEY_4, "4")
-	await _left_for("1 and 4", "status")
-	_tap(KEY_ENTER, "")
-	await _scene_is(COM)
-	_check("STATUS and Enter, and the console again", _current_path() == COM)
-	_hook()
-
-	await _central()
-	_tap(KEY_5, "5")
-	await _left_for("1 and 5", "supply_report")
-	_tap(KEY_ENTER, "")
-	await _scene_is(COM)
-	_check("SUPPLY and Enter, and the console again", _current_path() == COM)
-	_hook()
-	await _seen_more("command")
-	_check("which prints on page 1 again", text.page == 0 and [text.column, text.row] == [9, 9])
+	GameState.ground_forces_due = true
+	GameState.goto_scene(COM)
+	await _scene_is(GROUND_FORCES)
+	_check("the bounce goes straight back to GROUND FORCES", _path() == GROUND_FORCES and not GameState.ground_forces_due)
 
 	print("com scene driven: %d wrong" % _bad)
 	get_tree().quit(1 if _bad > 0 else 0)
 
 
-## The central computer's menu, from the command menu.
-func _central() -> void:
-	await _seen_more("command")
-	_tap(KEY_1, "1")
-	await _seen_more("central")
-
-
-## The console run, as the programs under it run it.
-func _com() -> void:
+## A new game with `with` done to it, and the console up.
+func _console(with: Callable) -> void:
+	GameState.start_new_game()
+	with.call()
 	GameState.goto_scene(COM)
-	await _frames(3)
 	await _scene_is(COM)
-	_hook()
+	await _frames(3)
+	_scene().pace = 0.15
 
 
-func _left_for(keys: String, scene: String) -> void:
-	var path := SCENES % scene
-	await _scene_is(path)
-	_check("%s runs %s" % [keys, scene], _current_path() == path)
+func _scene() -> Control:
+	return get_tree().current_scene
+
+
+func _node(path: String) -> Control:
+	return _scene().get_node(CONSOLE + path)
+
+
+func _title() -> String:
+	return (_node("Title") as Label).text
+
+
+func _said() -> String:
+	return (_node("Said") as Label).text
+
+
+func _entry() -> Control:
+	return _node("Entry")
+
+
+func _entry_field() -> LineEdit:
+	return _node("Entry/Field")
+
+
+func _buttons() -> Array:
+	var out := []
+	for button: Button in _node("Buttons").get_children():
+		out.append(button.text)
+	return out
+
+
+func _out(lamps: Array) -> Array:
+	var out := []
+	for i in lamps.size():
+		var style := (lamps[i] as PanelContainer).get_theme_stylebox("panel") as StyleBoxFlat
+		if style.bg_color.r > 0.5:
+			out.append(i)
+	return out
+
+
+func _path() -> String:
+	var scene := get_tree().current_scene
+	return scene.scene_file_path if scene != null else ""
+
+
+func _scene_is(path: String) -> void:
+	for i in TIMEOUT_FRAMES:
+		if _path() == path:
+			return
+		await get_tree().process_frame
+	_check("never reached %s" % path, false)
+
+
+func _until(done: Callable) -> void:
+	for i in TIMEOUT_FRAMES:
+		if done.call():
+			return
+		await get_tree().process_frame
+	_check("waited for too long", false)
 
 
 func _frames(n: int) -> void:
-	for i in range(n):
+	for i in n:
 		await get_tree().process_frame
 
 
-## Waits for the flight scene to have made that many passes.
-func _passes(n: int) -> void:
-	var made := [0]
-	get_tree().current_scene._loop.pass_started = func() -> void: made[0] += 1
-	for i in range(TIMEOUT_FRAMES):
-		if made[0] >= n:
-			return
-		await get_tree().process_frame
-	print("WRONG  the flight program made %d passes" % made[0])
-	_bad += 1
-
-
-## Listens in on the current scene's loop.
-func _hook() -> Node:
-	var scene := get_tree().current_scene
-	var theirs: Callable = scene._loop.watch
-	scene._loop.watch = func(what: String) -> void:
-		theirs.call(what)
-		_seen[what] = _seen.get(what, 0) + 1
-	return scene
+func _tap(keycode: Key) -> void:
+	for down in [true, false]:
+		var event := InputEventKey.new()
+		event.keycode = keycode
+		event.physical_keycode = keycode
+		event.pressed = down
+		if down and keycode >= KEY_0 and keycode <= KEY_9:
+			event.unicode = keycode
+		elif down and keycode >= KEY_A and keycode <= KEY_Z:
+			event.unicode = keycode + 32
+		Input.parse_input_event(event)
 
 
 func _check(what: String, ok: bool) -> void:
 	print("%s  %s" % ["ok   " if ok else "WRONG", what])
 	if not ok:
 		_bad += 1
-
-
-func _current_path() -> String:
-	var scene := get_tree().current_scene
-	return scene.scene_file_path if scene != null else ""
-
-
-func _scene_is(path: String) -> void:
-	for i in range(TIMEOUT_FRAMES):
-		if _current_path() == path:
-			return
-		await get_tree().process_frame
-	print("WRONG  never reached %s" % path)
-	_bad += 1
-
-
-## Waits until the loop has said `what` that many more times.
-func _seen_more(what: String, times: int = 1) -> void:
-	var until: int = _seen.get(what, 0) + times
-	for i in range(TIMEOUT_FRAMES):
-		if _seen.get(what, 0) >= until:
-			return
-		await get_tree().process_frame
-	print("WRONG  the program never came to \"%s\"" % what)
-	_bad += 1
-	get_tree().quit(1)
-
-
-func _key(keycode: Key, down: bool, character: String = "") -> void:
-	var event := InputEventKey.new()
-	event.keycode = keycode
-	event.physical_keycode = keycode
-	event.pressed = down
-	if down and character != "":
-		event.unicode = character.unicode_at(0)
-	Input.parse_input_event(event)
-
-
-func _tap(keycode: Key, character: String) -> void:
-	_key(keycode, true, character)
-	_key(keycode, false)
-
-
-func _shot(name_: String) -> void:
-	if _shots == "":
-		return
-	var page: RefCounted = GameState.view3d.pages[GameState.view3d.shown]
-	var picture := Image.create(280, 192, false, Image.FORMAT_RGBA8)
-	picture.fill(Color.BLACK)
-	var drawn: Image = page.image()
-	picture.blend_rect(drawn, Rect2i(0, 0, 280, 192), Vector2i.ZERO)
-	picture.save_png(_shots.path_join("%s.png" % name_))

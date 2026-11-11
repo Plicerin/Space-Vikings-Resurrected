@@ -102,10 +102,18 @@ def executed(name, spec):
     for pattern in spec["logs"]:
         for path in sorted(glob.glob(os.path.join(ROOT, pattern))):
             lines = set()
-            inside = "after_get" not in spec and "ran" not in spec
+            inside = "after_get" not in spec and "ran" not in spec and "from_key" not in spec
             after_key = False
             with open(path) as f:
-                for text in f:
+                texts = f.read().split("\n")
+            if "from_key" in spec:
+                # from the first key of that name to the last key of the recording
+                keys = [i for i, t in enumerate(texts) if "-- key" in t]
+                start = next((i for i in keys if "-- key '%s'" % spec["from_key"] in texts[i]), 0)
+                texts = texts[start:keys[-1] if keys else len(texts)]
+                inside = True
+            if True:
+                for text in texts:
                     if "-- ran " in text:
                         word = text.split("-- ran ", 1)[1].split()[0]
                         inside = word == spec.get("ran")
@@ -165,7 +173,7 @@ def ledger(name, entry, tags, asm_cites, manifest):
             kind = "waived"
         if kind == "logic" and not who:
             problems.append("line %d is logic and no rule cites it: %s" % (number, listing[number][:70]))
-        if who and number not in ran and spec:
+        if who and kind != "waived" and number not in ran and spec:
             unran.append(number)
         rows.append((number, kind, who, ran.get(number, 0), listing[number]))
     for call in entry["calls"]:

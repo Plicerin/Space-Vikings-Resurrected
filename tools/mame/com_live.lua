@@ -11,6 +11,16 @@
 --   damaged  the same start with the computer, the radar and the power
 --            poked low before C is pressed, for the inverse labels and
 --            "COMPUTER NOT FUNCTIONING"
+--   lamps    each of the eleven systems' bytes poked to 0 in turn (the
+--            power to 15, 16 and 0), and the console redrawn after each
+--   stars    every star poked as scouted, some as secured and with a
+--            base, and the directory's page of each of the twenty
+--
+--   edges    the computer at 1 (still working), a course to star 20 and to
+--            21, the directory asked for 21 and then 20
+--
+-- lamps, stars and edges write no hi-res pages (SV_NOPAGES): only the log and
+-- the characters drawn are used (tests/check_com_rules.gd).
 --
 -- Run on a copy of the disk image, from the repo root:
 --
@@ -61,7 +71,9 @@ local rowbase = {}
 for y = 0, 191 do
 	rowbase[y] = (y & 7) * 0x400 + ((y >> 3) & 7) * 0x80 + (y >> 6) * 0x28
 end
+local NOPAGES = os.getenv("SV_NOPAGES") ~= nil
 local function dump_page(base, name)
+	if NOPAGES then return end
 	local out = assert(io.open(DIR .. name, "wb"))
 	for y = 0, 191 do
 		local a = base + rowbase[y]
@@ -290,6 +302,86 @@ function routes.menus()
 	-- wherever "2) RETURN" comes out
 	get("after_directory", "1")
 	get("central_2", "6")
+	get("menu_back", "5")
+	fly("flying")
+end
+
+local SYSTEMS = {38198, 38197, 38196, 38195, 38194, 38193, 38199, 38200, 38190, 38187, 38186}
+
+function routes.lamps()
+	NOPAGES = true
+	boot()
+	key("C")
+	local function visit(name, address, value)
+		get("menu_" .. name, "1")
+		poke(address, value)
+		get("central_" .. name, "6")
+	end
+	local first = true
+	for _, address in ipairs(SYSTEMS) do
+		local was = mem:read_u8(address)
+		if address == 38199 then
+			visit("power_15", address, 15)
+			visit("power_16", address, 16)
+			visit("power_0", address, 0)
+		else
+			visit(tostring(address), address, 0)
+		end
+		get("menu_restore_" .. address, "1")
+		poke(address, was)
+		get("central_restore_" .. address, "6")
+	end
+	get("menu_last", "5")
+	fly("flying")
+end
+
+function routes.stars()
+	NOPAGES = true
+	boot()
+	for c = 1, 20 do poke(38240 + c, 1) end -- scouted
+	for _, c in ipairs({3, 6, 9, 12}) do poke(38219 + c, 1) end -- secured
+	for _, c in ipairs({2, 6, 13}) do poke(38303 + c, 1) end -- a base
+	key("C")
+	get("menu", "1")
+	get("central", "2")
+	for c = 1, 20 do
+		get("directory_" .. c, "1")
+		get("which_" .. c, string.format("%02d", c):sub(1, 1))
+		get("which_" .. c .. "b", string.format("%02d", c):sub(2, 2))
+		get("page_" .. c, "X")
+	end
+	get("directory_end", "2")
+	get("after", "1")
+	get("central_2", "6")
+	get("menu_back", "5")
+	fly("flying")
+end
+
+function routes.edges()
+	NOPAGES = true
+	boot()
+	poke(38196, 1)
+	key("C")
+	get("menu", "1")
+	get("central", "1")
+	get("nav", "2")
+	get("c20a", "2")
+	get("c20b", "0") -- star 20: set
+	get("nav2", "2")
+	get("c21a", "2")
+	get("c21b", "1") -- 21: <ERROR>
+	get("c20c", "2")
+	get("c20d", "0")
+	get("nav3", "1")
+	get("dir", "1")
+	get("w21a", "2")
+	get("w21b", "1") -- 21: try again
+	get("w20a", "2")
+	get("w20b", "0") -- star 20's page
+	get("page20", "X")
+	get("dir2", "2")
+	get("after", "1")
+	get("central2", "6")
 	get("menu_back", "5")
 	fly("flying")
 end

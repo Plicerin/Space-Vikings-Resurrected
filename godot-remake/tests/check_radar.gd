@@ -51,7 +51,7 @@ extends Node
 ## port's is to be within half a frame of it, every time.
 
 const FlightLoop = preload("res://scripts/flight/flight_loop.gd")
-const ComLoop = preload("res://scripts/com/com_loop.gd")
+const ComLoop = preload("res://tests/legacy/com_loop.gd")
 const RadarLoop = preload("res://scripts/radar/radar_loop.gd")
 const ShipIdLoop = preload("res://scripts/radar/ship_id_loop.gd")
 const ShipIdProgram = preload("res://scripts/radar/ship_id_program.gd")
