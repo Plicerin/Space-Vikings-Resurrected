@@ -98,9 +98,35 @@ func _ready() -> void:
 	if left != expected or (ends_destroyed and _next < _events.size()):
 		print("left the flight program (%d) after pass %d" % [left, _compared])
 		_bad += 1
+	if ends_destroyed:
+		_compare_end()
 
 	print("%d passes compared with the live run: %d different" % [_compared, _bad])
 	get_tree().quit(1 if _bad > 0 else 0)
+
+
+## S_X.bas's last screen (sx_end_p1.bin, sx_end_p2.bin: the pages 2400
+## frames into S/X). The rays of the explosion are random and stay above
+## the instrument panel's rows, so page 1 is compared from there down:
+## the white page and the message. Page 2 is compared whole.
+func _compare_end() -> void:
+	for p in range(2):
+		var live := FileAccess.get_file_as_bytes(_dir.path_join("sx_end_p%d.bin" % (p + 1)))
+		var port: PackedByteArray = GameState.view3d.pages[p].mem
+		if _dump != "":
+			var out := FileAccess.open(_dump.path_join("port_sx_end_p%d.bin" % (p + 1)), FileAccess.WRITE)
+			out.store_buffer(port)
+		if live.size() != PAGE_BYTES:
+			print("no sx_end_p%d.bin in %s" % [p + 1, _dir])
+			_bad += 1
+			continue
+		var different := 0
+		for i in range(WINDOW_ROWS * 40 if p == 0 else 0, PAGE_BYTES):
+			if live[i] != port[i]:
+				different += 1
+		if different > 0:
+			print("S/X's last screen: page %d differs in %d bytes" % [p + 1, different])
+			_bad += 1
 
 
 ## Line 147 of a pass: where the recorder wrote its "ev" line and dumped

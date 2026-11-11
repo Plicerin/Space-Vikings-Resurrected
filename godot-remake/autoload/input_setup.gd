@@ -4,26 +4,16 @@ extends Node
 ## table instead of a serialized InputEventKey blob. Loaded as an
 ## autoload before anything that reads these actions (see project.godot).
 
-## The letter keys are the original's own (STARSHIP SIMULATOR.bas lines
-## 200-210; CALL_SITES.md has the full dispatch table): A autopilot, B
-## condition, C command console, H hyperdrive, R radar, S shields, W
-## missile/laser. The paddles and their button become the arrow keys and
-## SPACE. G is this port's own shortcut.
+## Only what the Apple had and a PC has not: the two paddles and their
+## button (scripts/flight/space_flight.gd). The game's own keys (1-4, A,
+## B, C, H, R, S, W; STARSHIP SIMULATOR.bas lines 200-210) are not
+## actions: they go to the program as typed characters, as they did.
 const ACTIONS := {
-	"pitch_up": [KEY_UP],
-	"pitch_down": [KEY_DOWN],
-	"bank_left": [KEY_LEFT],
-	"bank_right": [KEY_RIGHT],
-	"throttle_up": [KEY_E, KEY_PAGEUP],
-	"throttle_down": [KEY_Q, KEY_PAGEDOWN],
-	"open_com": [KEY_C],
-	"open_ground_forces": [KEY_G],
-	"open_radar": [KEY_R],
-	"fire_laser": [KEY_SPACE, KEY_CTRL],
-	"toggle_weapon": [KEY_W, KEY_TAB],
-	"toggle_shields": [KEY_S],
-	"toggle_condition": [KEY_B],
-	"toggle_autopilot": [KEY_A],
+	"stick_forward": [KEY_UP],
+	"stick_back": [KEY_DOWN],
+	"stick_left": [KEY_LEFT],
+	"stick_right": [KEY_RIGHT],
+	"fire": [KEY_SPACE],
 }
 
 func _init() -> void:

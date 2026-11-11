@@ -757,12 +757,16 @@ func dmg_show() -> void:
 	text.print_line(" ")
 
 
-## S_X.bas lines 2-5: page 1, inverse text, black lines.
+## S_X.bas lines 2-5: page 1, inverse text, black lines. Line 5's
+## `PRINT ""` is not empty: between the quotes is a ctrl-L, which no
+## listing shows. In inverse mode the character generator's form feed
+## turns the whole page white, and the ship ends in black on white.
 func sx_open() -> void:
 	view.shown = 0 # 2
 	text.page = 0 # 4
 	page_1.hcolor = 0 # 5
 	text.mode = 0xFF
+	text.put(0x0C)
 	text.new_line()
 
 

@@ -21,12 +21,12 @@ func _ready() -> void:
 
 func _on_new_game_pressed() -> void:
 	GameState.start_new_game()
-	GameState.goto_scene("res://scenes/galaxy_map.tscn")
+	GameState.goto_scene("res://scenes/flight/space_flight.tscn")
 
 
 func _on_load_game_pressed() -> void:
 	GameState.load_from_disk()
-	GameState.goto_scene("res://scenes/galaxy_map.tscn")
+	GameState.goto_scene("res://scenes/flight/space_flight.tscn")
 
 
 func _on_shape_viewer_pressed() -> void:

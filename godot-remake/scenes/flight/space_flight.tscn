@@ -1,51 +1,45 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/flight/space_flight.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/flight/ship_controller.gd" id="2"]
-[ext_resource type="Script" path="res://scripts/flight/starfield.gd" id="3"]
-[ext_resource type="PackedScene" path="res://scenes/flight/flight_combat.tscn" id="4"]
+[ext_resource type="Script" path="res://scripts/shapes/hgr_canvas.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/shapes/hgr_view.gd" id="3"]
+[ext_resource type="Script" path="res://scripts/combat/combat_fx.gd" id="4"]
 
-[sub_resource type="Sky" id="Sky_1"]
-
-[sub_resource type="Environment" id="Environment_1"]
-background_mode = 2
-sky = SubResource("Sky_1")
-ambient_light_source = 2
-ambient_light_color = Color(0.2, 0.2, 0.25, 1)
-ambient_light_energy = 0.3
-
-[node name="SpaceFlight" type="Node3D"]
+[node name="SpaceFlight" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 script = ExtResource("1")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_1")
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 1)
 
-[node name="Starfield" type="MultiMeshInstance3D" parent="."]
-script = ExtResource("3")
-
-[node name="Ship" type="Node3D" parent="."]
+[node name="HGRCanvas" type="Node2D" parent="."]
 script = ExtResource("2")
 
-[node name="Camera" type="Camera3D" parent="Ship"]
-current = true
-fov = 70.0
-far = 20000.0
+[node name="HgrView" type="Node2D" parent="HGRCanvas"]
+script = ExtResource("3")
 
-[node name="Planet" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3000)
+[node name="CombatFx" type="Node" parent="."]
+script = ExtResource("4")
+view_path = NodePath("../HGRCanvas/HgrView")
 
-[node name="ShipBlip" type="MeshInstance3D" parent="."]
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-rotation_degrees = Vector3(-60, -30, 0)
-
-[node name="HUD" type="CanvasLayer" parent="."]
-
-[node name="DebugLabel" type="Label" parent="HUD"]
-offset_left = 16.0
-offset_top = 16.0
-offset_right = 600.0
-offset_bottom = 120.0
-text = ""
-
-[node name="FlightCombat" parent="HUD" instance=ExtResource("4")]
+[node name="Keys" type="Label" parent="."]
+modulate = Color(1, 1, 1, 0.35)
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -28.0
+offset_bottom = -6.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 13
+text = "ARROWS stick   SPACE fire   1 2 3 4 speed   A autopilot   B condition   S shields   W weapon   C computer   R radar   H hyperdrive"
+horizontal_alignment = 1
