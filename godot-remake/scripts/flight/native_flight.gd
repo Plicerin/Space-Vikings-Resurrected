@@ -61,6 +61,7 @@ var _dead := false
 var _jumping := false
 var _planet: MeshInstance3D
 var _defender: Node3D
+var _shake := 0.0 ## camera shake left, from a burst or a hit; dies away
 var _stick := Vector2.ZERO ## pitch and bank stick, as last read
 var _sky: MultiMeshInstance3D
 var _said_for := 0.0
@@ -93,6 +94,7 @@ func _ready() -> void:
 	_effects = FightEffects.new()
 	_effects.camera = _camera
 	_effects.flashed.connect(_flash_screen)
+	_effects.shaken.connect(func(amount: float) -> void: _shake = maxf(_shake, amount))
 	add_child(_effects)
 	_overlay.camera = _camera
 	_overlay.target = _defender
@@ -481,7 +483,12 @@ func _star_texture() -> GradientTexture2D:
 
 func _update_camera() -> void:
 	var eye := FlightRules.place(Vector3(_rules.x, _rules.y, _rules.z))
-	_camera.transform = Transform3D(FlightRules.camera_basis(_rules.pitch, _rules.bank, _rules.heading), eye)
+	var basis := FlightRules.camera_basis(_rules.pitch, _rules.bank, _rules.heading)
+	if _shake > 0.001:
+		var jolt := Vector3(randf() - 0.5, randf() - 0.5, 0.0) * _shake * 0.06
+		basis = basis * Basis.from_euler(jolt)
+		_shake = move_toward(_shake, 0.0, get_process_delta_time() * 1.6)
+	_camera.transform = Transform3D(basis, eye)
 	if _sky != null:
 		_sky.position = eye
 
