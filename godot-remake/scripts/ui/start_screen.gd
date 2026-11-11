@@ -1,14 +1,23 @@
 extends Control
-## START.bas's "(N)EW GAME OR (O)LD GAME?" prompt (line 60). Load Game
-## is this port's equivalent of the "O" path — real persistence added
-## alongside END.bas's "SAVE GAME" (see end_game.gd / GameState.
-## save_to_disk()'s doc comment for why this isn't a byte-exact
-## BSAVE/BLOAD port).
+## START.bas's "(N)EW GAME OR (O)LD GAME?" prompt (line 60), as buttons.
+## Load Game is the "O" path (see end_game.gd / GameState.save_to_disk()'s
+## doc comment for why this isn't a byte-exact BSAVE/BLOAD port).
+##
+## The original's rule for a saved game is kept (GameState.boot()): it
+## can be taken up at the next boot and at no other, because the boot
+## takes the mark off the disk before it asks. Answer N and it is gone
+## as well. "O" with nothing saved is line 73's message, which stays up
+## for a FOR loop of 3000: 170 frames on the real machine
+## (analysis/live/save/save_none.log).
+
+const NO_GAME_SAVED := "THERE IS NO GAME SAVED"
+const NO_GAME_SAVED_FRAMES := 170.0 # FOR I = 1 TO 3000: NEXT
 
 @onready var _new_game_btn: Button = $VBox/NewGameButton
 @onready var _load_game_btn: Button = $VBox/LoadGameButton
 @onready var _shape_viewer_btn: Button = $VBox/ShapeViewerButton
 @onready var _combat_demo_btn: Button = $VBox/CombatDemoButton
+@onready var _status: Label = $VBox/Status
 
 
 func _ready() -> void:
@@ -16,7 +25,8 @@ func _ready() -> void:
 	_load_game_btn.pressed.connect(_on_load_game_pressed)
 	_shape_viewer_btn.pressed.connect(_on_shape_viewer_pressed)
 	_combat_demo_btn.pressed.connect(_on_combat_demo_pressed)
-	_load_game_btn.disabled = not GameState.has_save_file()
+	if not GameState.booted:
+		GameState.boot()
 
 
 func _on_new_game_pressed() -> void:
@@ -25,6 +35,11 @@ func _on_new_game_pressed() -> void:
 
 
 func _on_load_game_pressed() -> void:
+	if not GameState.old_game: # line 73
+		_status.text = NO_GAME_SAVED
+		await get_tree().create_timer(NO_GAME_SAVED_FRAMES / 60.0).timeout
+		_status.text = ""
+		return
 	GameState.load_from_disk()
 	GameState.goto_scene("res://scenes/flight/space_flight.tscn")
 

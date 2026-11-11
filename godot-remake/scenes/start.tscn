@@ -33,6 +33,10 @@ text = "NEW GAME"
 layout_mode = 2
 text = "LOAD GAME"
 
+[node name="Status" type="Label" parent="VBox"]
+layout_mode = 2
+horizontal_alignment = 1
+
 [node name="ShapeViewerButton" type="Button" parent="VBox"]
 layout_mode = 2
 text = "SHAPE DATA VIEWER (DEV TOOL)"

@@ -299,42 +299,15 @@ func question_clear() -> void:
 # -- lines 1 and 5000-5500: back from INSTRUMENTS ------------------------
 
 
-## GOSUB 5000 as the blocks it paints, in order: [HCOLOR, LX, LY].
+## GOSUB 5000 as the blocks it paints, in order (flight_program.gd has
+## them: a loaded game comes this way too).
 func lamp_blocks() -> Array:
-	var blocks: Array = []
-	blocks.append([1 if GameState.shields_up else 3, 262, 161]) # 5000-5020
-	if not GameState.missile_mode_active: # 5030
-		blocks.append([3, 7, 161])
-		blocks.append([1, 72, 161])
-	else: # 5040
-		blocks.append([3, 72, 161])
-		blocks.append([1, 7, 161])
-	match GameState.condition: # 5050-5080
-		1:
-			blocks.append([1, 200, 161])
-		2:
-			blocks.append([6, 200, 161])
-			blocks.append([6, 200, 161])
-		3:
-			blocks.append([5, 200, 161])
-	if not GameState.autopilot_active: # 5090
-		blocks.append([3, 72, 153])
-		blocks.append([1, 7, 153])
-	else: # 5100
-		blocks.append([3, 7, 153])
-		blocks.append([1, 72, 153])
-	blocks.append([3 if GameState.in_atmosphere else 1, 200, 153]) # 5110-5130
-	blocks.append([5 if GameState.damage_alert_active else 1, 262, 153]) # 5140-5160
-	return blocks
+	return flight.lamp_blocks()
 
 
 ## Line 5500.
 func lamp_block(block: Array) -> void:
-	page.hcolor = block[0]
-	var lx: int = block[1]
-	var ly: int = block[2]
-	for j in range(ly, ly + 5):
-		page.hplot_path([lx, j, lx + 9, j])
+	flight.lamp_block(block)
 
 
 # -- COM.bas lines 8, 12 and 978-1172: the directory page ----------------

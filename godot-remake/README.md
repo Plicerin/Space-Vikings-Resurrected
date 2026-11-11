@@ -34,6 +34,7 @@ game running in MAME.
 | A2-3D1 (the 3D view, machine code) | `scripts/shapes/a2_3d1_view.gd`, `a2_3d1_trig.gd` | `check_a2_3d1` |
 | `GALAXY MAP` (star chart) | `scripts/chart/chart_program.gd`, `chart_loop.gd` | `check_chart` |
 | Planet record copy, new-game data, save and load | `autoload/game_state.gd` | `check_save`, `check_jump` |
+| An old game's way into flight (`START` 3000-3030, `INSTRUMENTS` 210, `GALAXY MAP` 2), and `END`'s CONTINUE | `flight_loop.gd` (`run()`, `lamps()`) | `check_save` |
 
 **Standing in.** The rules are the original's (formulas, gates, order of
 effects, quirks) but the screen is Godot buttons and labels, not the
@@ -174,9 +175,34 @@ The real game's log shows the 100 (`analysis/live/jump/`), and
 ## Save and load
 
 `END.bas` and `START.bas`: saving is refused in an atmosphere ("YOU MUST
-BE IN ORBIT TO SAVE GAME"), the ship's place is saved with the game, and
-a loaded game starts in orbit with the instruments redrawn. The file is
-JSON in `user://`, not the original's three binary files.
+BE IN ORBIT TO SAVE GAME") and the ship's place is saved with the game.
+The file is JSON in `user://`, not the original's three binary files.
+The two screens are stand-ins; what happens round them is the
+original's, recorded with `tools/mame/save_live.lua`:
+
+- **A saved game can be taken up once.** The original's boot loads
+  `PLANET FILE`, and if it finds the saved-game mark it clears it and
+  writes the file straight back, before it asks "(N)EW GAME OR (O)LD
+  GAME?". So the game is there for that boot only, and answering N uses
+  it up as well. `GameState.boot()` does the same to the JSON file when
+  the title screen first comes up (the mark is the file's `"saved"`;
+  the rest of the file is left as it was).
+- "O" with nothing saved: "THERE IS NO GAME SAVED" for 170 frames, then
+  the question again.
+- An old game does not go through TRANLIT. A new game's first
+  `INSTRUMENTS` flips all four panel switches (which is how a new game
+  comes to have shields down and condition RED); an old game's skips
+  that and runs `GALAXY MAP`, which paints the eight lamps as plain
+  blocks and goes on to flight. The switches are as they were saved,
+  and the lamps stay plain blocks until a lamp key is pressed.
+- `END`'s "CONTINUE PRESENT GAME" takes the same road from `GALAXY MAP`
+  on.
+- When the ship is destroyed the original has to be booted again, so
+  the port's way back to the title counts as a boot.
+
+`check_save` loads the game the real machine saved (the ship where it
+was, from the planet's record on the disk) and compares the panel at the
+third pass with the real page, every byte.
 
 ## Sound
 
@@ -195,11 +221,12 @@ a difference.
     godot --headless --path . res://tests/check_flight_passes.tscn   # 50 passes of flight, both pages, every byte
     godot --headless --path . res://tests/check_jump.tscn            # 42 passes: fighting, hyperdrive, arrival
     godot --headless --path . res://tests/check_chart.tscn           # the chart at 9 stops, page and text cursor
-    godot --headless --path . res://tests/check_save.tscn            # record copy, save, load
+    godot --headless --path . res://tests/check_save.tscn            # record copy, save, the boot, an old game's panel
     godot --headless --path . -s res://tests/check_flight_core.gd    # flight arithmetic against the model
     godot --headless --path . -s res://tests/check_a2_3d1.gd         # 200 views against tools/a2_3d1_view.py
     godot --headless --fixed-fps 60 --path . res://tests/drive_flight.tscn   # the flight scene, by key events
     godot --headless --fixed-fps 60 --path . res://tests/drive_chart.tscn    # the chart scene, by mouse and keys
+    godot --headless --fixed-fps 60 --path . res://tests/drive_save.tscn     # title, END, save, continue, three boots
 
 The first four need the recordings in `../analysis/live/`. A compared
 byte is never adjusted to make a test pass: both times a test differed
@@ -234,16 +261,23 @@ Where the port departs from the original on purpose:
 
 - `COM` and everything under it on the hi-res page, with its timing.
   Until then the chart starts dark where the original still shows
-  `COM`'s screen while `GALAXY MAP` loads, and the lamps `END`'s
-  CONTINUE paints are not timed.
+  `COM`'s screen while `GALAXY MAP` loads, and so does flight after
+  `END`'s CONTINUE.
 - The time each line of the directory page takes to print is measured
   for one line and assumed for the rest.
 - The navigation computer's stand-in numbers stars from 0; the
   original's from 1.
 - `GROUND FORCES` never sets the "fought and not paid" marker
   (`morale_flag`) that `H_D` punishes on the next jump.
-- Whether a loaded game's first `INSTRUMENTS` flips the lamp switches
-  the way a new game's does is assumed, not recorded.
+- The load of `STARSHIP SIMULATOR` after an old game's or CONTINUE's
+  lamps (`FlightLoop.LOAD_SIMULATOR_SPINNING`) is worked out from the
+  real game's totals with the drive still turning, not timed on its
+  own; and the lamps are given the speed measured for them on the way
+  out of the chart.
+- The save file keeps the byte after the record table
+  (`planet_record_overrun`, which planet 20's seventeen-byte copy
+  reaches). The original saves `P/F` without it (`L$140`); what an old
+  game finds in that byte has not been looked at.
 - Open questions about the original's own code are marked ❓ in
   `CALL_SITES.md`.
 

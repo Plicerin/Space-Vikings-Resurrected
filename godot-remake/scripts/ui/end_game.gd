@@ -9,7 +9,8 @@ extends Control
 ## CONTINUE is line 120's `POKE 38391,77: RUN GALAXY MAP`, and it is not
 ## the chart that comes up: with that 77, GALAXY MAP.bas's line 2 paints
 ## the eight panel lamps as plain blocks (its GOSUB 5000) and runs
-## STARSHIP SIMULATOR. So it is here: the blocks, then flight.
+## STARSHIP SIMULATOR. The flight loop does that part (flight_loop.gd,
+## run()); here it is only the 77.
 ##
 ## The original BSAVEs raw memory images straight to the Apple II disk
 ## (`GameState.save_to_disk()`'s doc comment has the full citation);
@@ -19,8 +20,6 @@ extends Control
 ## halting the original's BASIC interpreter.
 ##
 ## Line 190: no saving in the atmosphere (`$38210`).
-
-const ChartProgram = preload("res://scripts/chart/chart_program.gd")
 
 @onready var _status: Label = $VBox/Status
 @onready var _save_btn: Button = $VBox/SaveButton
@@ -43,10 +42,7 @@ func _on_save() -> void:
 
 
 func _on_continue() -> void:
-	var chart := ChartProgram.new()
-	for block: Array in chart.lamp_blocks():
-		chart.lamp_block(block)
-	GameState.view3d.shown = 0 # GALAXY MAP.bas line 2: POKE -16300,0
+	GameState.saved_marker = true # line 120
 	GameState.goto_scene("res://scenes/flight/space_flight.tscn")
 
 

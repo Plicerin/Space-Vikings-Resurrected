@@ -26,6 +26,8 @@
 
 local DIR = (os.getenv("SV_OUT") or ".") .. "/"
 local PHASE = os.getenv("SV_PHASE") or "save"
+-- how often, in frames, the boot looks at the text screen (1 to time a message)
+local EVERY = tonumber(os.getenv("SV_EVERY") or "20")
 local f = assert(io.open(DIR .. "save_" .. PHASE .. ".log", "w"))
 local function log(s) f:write(s .. "\n"); f:flush() end
 
@@ -160,7 +162,7 @@ local function boot(answer, most)
 	while passes < 3 do
 		coroutine.yield()
 		n = n + 1
-		if n % 20 == 0 then
+		if n % EVERY == 0 then
 			local text = text_screen()
 			if text ~= last_text and shown < 30 then
 				last_text = text

@@ -491,11 +491,20 @@ of the written disk.
 
 | Line(s) | What it does | Seen live | Port |
 |---|---|---|---|
-| `END` 204-210 | `POKE 38391,77: POKE 38392,PEEK(38209)`, the planet record stored, three `BSAVE`s | `PLANET FILE` on the disk afterwards holds 38391 = 77, 38392 = 1 | ✅ as a JSON file (`GameState.save_to_disk()`); ⬜ the screen itself is a stand-in |
-| `END` 120 | `POKE 38391,77: RUN GALAXY MAP` (continue) | line 2 clears the 77 after 237 frames; no `CALL 38402`, the four switches unchanged | ✅ `end_game.gd` (untimed) |
-| `START` 25-26 | `BLOAD PLANET FILE`, `OG = PEEK(38391): POKE 38391,0`, and if it was 77 `BSAVE PLANET FILE` straight back | **A saved game can be resumed once.** The boot itself clears the marker on the disk, before the question is asked: after a boot answered `O` and after one answered `N` the file holds 38391 = 0 both times. The title takes about 180 frames longer when it has that write to do. | ⚠️ not ported: the port's save file is kept until overwritten |
-| `START` 73 | `O` with `OG <> 77` | a second boot of the same disk answered `O`: "THERE IS NO GAME SAVED" for about 160 frames, the screen cleared, the question again | ⚠️ the port greys the button out |
-| `START` 3000-3030, `INSTRUMENTS` 210-220, `GALAXY MAP` 2 | an old game: the three saved files, `POKE 38391,77`, so `INSTRUMENTS` skips TRANLIT and runs `GALAXY MAP`, whose line 2 paints the lamp blocks and runs the flight program | no `CALL 38402` between the load and flight; shields 0, weapon 1, condition 3, autopilot 0 came back exactly as saved; 38391 = 77 for 613 frames | ⚠️ **wrong in the port**: `flight_loop.gd::run()` runs `instruments(true)` for a loaded game too, which flips all four switches. It should be `instruments(false)`, the wait for `GALAXY MAP`, then `chart_program.gd::lamp_blocks()` |
+| `END` 200-210 | the ship's place (29467-29475) into 38211-38219, which are bytes 7-15 of the planet record's working copy; `POKE 38391,77: POKE 38392,PEEK(38209)`; the record stored (`CALL 38825`); three `BSAVE`s | `PLANET FILE` on the disk afterwards holds 38391 = 77, 38392 = 1. **The ship's place is in `P/F`, inside the record of the planet it is at**: SOL's record on the saved disk is `150 3 100 30 1 1 0 188 2 200 0 15 230 0 0 0 100`, x = 700, y = 200, z = -6641 | ✅ as a JSON file (`GameState.save_to_disk()`); ⬜ the screen itself is a stand-in |
+| `END` 120 | `POKE 38391,77: RUN GALAXY MAP` (continue) | line 2 clears the 77 after 237 frames; no `CALL 38402`, the four switches unchanged; the third pass of flight 791 frames after the clear | ✅ `end_game.gd` sets `GameState.saved_marker`; `flight_loop.gd::run()` does the rest, timed (`LOAD_GALAXY_MAP`, `lamps()`, `LOAD_SIMULATOR_SPINNING`). `drive_save` compares the lamps with the live page |
+| `START` 25-26 | `BLOAD PLANET FILE`, `OG = PEEK(38391): POKE 38391,0`, and if it was 77 `BSAVE PLANET FILE` straight back | **A saved game can be resumed once.** The boot itself clears the marker on the disk, before the question is asked: after a boot answered `O` and after one answered `N` the file holds 38391 = 0 both times. The title takes about 180 frames longer when it has that write to do. | ✅ `GameState.boot()`, called when the title first comes up and again after the ship is destroyed: the file's `"saved"` is the mark (`check_save`, `drive_save`) |
+| `START` 73 | `O` with `OG <> 77` | a second boot of the same disk answered `O`, and a boot of the untouched disk: "THERE IS NO GAME SAVED" for 170 frames (looked at every frame, three times: `analysis/live/save/save_none.log`), the screen cleared, the question again | ✅ `start_screen.gd` (`NO_GAME_SAVED_FRAMES`); the screen is a stand-in |
+| `START` 3000-3030, `INSTRUMENTS` 210-220, `GALAXY MAP` 2 | an old game: the three saved files, `POKE 38391,77`, so `INSTRUMENTS` skips TRANLIT and runs `GALAXY MAP`, whose line 2 paints the lamp blocks and runs the flight program | no `CALL 38402` between the load and flight; shields 0, weapon 1, condition 3, autopilot 0 came back exactly as saved; 38391 = 77 for 613 frames | ✅ `flight_loop.gd::run()`: `instruments(false)`, the wait for `GALAXY MAP`, `lamps()` (`flight_program.gd::lamp_blocks()`, shared with the chart), the wait for the flight program. `check_save` loads the game the real machine saved and compares the whole panel at the third pass with the live page: 0 bytes different. A new game's panel differs from it in 57 bytes, so the comparison tells the two roads apart |
+
+Timing of the road through `GALAXY MAP` line 2, in frames: the 77 poked
+by `START` 3030 at 4913, `INSTRUMENTS` starts at 5201, its last glyph at
+5268, line 2 clears the 77 at 5526 (258 after that glyph, the same as on
+the way out of the chart), third pass of flight at 6318. From the clear
+to the third pass is 792 for an old game and 791 after CONTINUE; a new
+game's TRANLIT-to-third-pass is 824 with a cold load of 400, so the load
+here is taken as 400 − 66 = 334 (`LOAD_SIMULATOR_SPINNING`). That one is
+derived, not timed on its own.
 
 ## Summary
 
@@ -529,7 +538,9 @@ of the written disk.
 - The star chart: the GALAXY MAP table above.
 - The 17-byte record copy and SOL's secured byte (§3).
 - Save and load as `END.bas` and `START.bas` do them: refused in an
-  atmosphere, the ship's place kept, the record stored first.
+  atmosphere, the ship's place kept, the record stored first; a saved
+  game good for one boot; an old game and CONTINUE into flight by way
+  of `GALAXY MAP` line 2, with no TRANLIT (the START/END table above).
 
 **Not ported yet**
 

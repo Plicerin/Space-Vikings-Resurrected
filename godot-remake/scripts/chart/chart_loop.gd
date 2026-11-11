@@ -48,7 +48,7 @@ enum Left {
 }
 
 # -- floppy loads --
-const LOAD_GALAXY_MAP := 235.0
+const LOAD_GALAXY_MAP := FlightLoop.LOAD_GALAXY_MAP
 const LOAD_COM := 435.0 # from the chart's question
 const LOAD_COM_LEAVING := 380.0 # from line 1, the drive still spinning
 const LOAD_INSTRUMENTS := 171.0
@@ -100,8 +100,8 @@ const DETAIL_LINE := 1.5
 # -- the way out --
 ## INSTRUMENTS' lines 205-206 fill the lo-res screen behind the hi-res
 ## one before the program looks at who ran it.
-const LAMPS_START := 1.5 # GALAXY MAP line 1 up to GOSUB 5000
-const LAMP_BLOCK := 4.0 # lines 5000-5500, a lamp: 35 frames for the eight
+const LAMPS_START := FlightLoop.LAMPS_START # GALAXY MAP line 1 up to GOSUB 5000
+const LAMP_BLOCK := FlightLoop.LAMP_BLOCK # lines 5000-5500
 
 var program := ChartProgram.new()
 

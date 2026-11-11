@@ -257,11 +257,58 @@ func instruments_text() -> void:
 
 
 ## Line 210, `POKE 38189,10: CALL 38402`, which the program skips when
-## the star chart ran it (PEEK(38391) = 77): line 220 goes back to
-## GALAXY MAP with the lamp frames empty, and that paints them itself
-## (chart_program.gd, lamp_blocks()).
+## PEEK(38391) = 77 (the star chart ran it, or START.bas with an old
+## game): line 220 goes back to GALAXY MAP with the lamp frames empty,
+## and that paints them itself (lamp_blocks()).
 func instruments_lamps() -> void:
 	tranlit_all()
+
+
+# -- GALAXY MAP.bas lines 1-2 and 5000-5500: the lamps without TRANLIT ----
+#
+# Where GALAXY MAP is run with 38391 = 77 (from INSTRUMENTS on the way
+# out of the star chart or into an old game, from END.bas to go on with
+# the present one) it paints the lamps from the flags and changes none
+# of them. They are plain ten-dot blocks, not TRANLIT's lamps, and stay
+# so until a key in flight has TRANLIT draw one again.
+
+
+## GOSUB 5000 as the blocks it paints, in order: [HCOLOR, LX, LY].
+func lamp_blocks() -> Array:
+	var blocks: Array = []
+	blocks.append([1 if GameState.shields_up else 3, 262, 161]) # 5000-5020
+	if not GameState.missile_mode_active: # 5030
+		blocks.append([3, 7, 161])
+		blocks.append([1, 72, 161])
+	else: # 5040
+		blocks.append([3, 72, 161])
+		blocks.append([1, 7, 161])
+	match GameState.condition: # 5050-5080
+		1:
+			blocks.append([1, 200, 161])
+		2:
+			blocks.append([6, 200, 161])
+			blocks.append([6, 200, 161])
+		3:
+			blocks.append([5, 200, 161])
+	if not GameState.autopilot_active: # 5090
+		blocks.append([3, 72, 153])
+		blocks.append([1, 7, 153])
+	else: # 5100
+		blocks.append([3, 7, 153])
+		blocks.append([1, 72, 153])
+	blocks.append([3 if GameState.in_atmosphere else 1, 200, 153]) # 5110-5130
+	blocks.append([5 if GameState.damage_alert_active else 1, 262, 153]) # 5140-5160
+	return blocks
+
+
+## Line 5500.
+func lamp_block(block: Array) -> void:
+	page_1.hcolor = block[0]
+	var lx: int = block[1]
+	var ly: int = block[2]
+	for j in range(ly, ly + 5):
+		page_1.hplot_path([lx, j, lx + 9, j])
 
 
 # -- TRANLIT ($9600, CALL 38402) ----------------------------------------

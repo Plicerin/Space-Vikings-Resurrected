@@ -56,6 +56,12 @@ var in_atmosphere: bool = false  # $38210
 ## START.bas line 260 / GALAXY MAP.bas line 3125: INSTRUMENTS.bas has to
 ## draw the panel before the flight program runs.
 var instruments_due: bool = true
+## $38391 = 77: the mark START.bas (an old game), GALAXY MAP.bas (leaving
+## the chart) and END.bas (going on with the game) leave for INSTRUMENTS
+## and GALAXY MAP, which then draw the panel's lamps from the flags
+## as they are. Without it INSTRUMENTS calls TRANLIT, which flips all
+## four switches as it draws them.
+var saved_marker: bool = false
 
 # --- Economy ---
 # Original: credits/stardate/troops were persisted via the "MISC FILE"
@@ -557,6 +563,7 @@ func start_new_game() -> void:
 	condition = 2
 	autopilot_active = true
 	instruments_due = true
+	saved_marker = false
 
 	# START.bas lines 40-250: the machine as a new game finds it.
 	view3d.pages[0].clear()
@@ -619,16 +626,44 @@ func show_stub(title: String, note: String, back_scene: String) -> void:
 # instead, to a single JSON file — same real effect (resume where you
 # left off), not a byte-exact format.
 const SAVE_PATH := "user://savegame.json"
+## Where the game is saved; a test points it at a file of its own.
+var save_path: String = SAVE_PATH
+
+## False until START.bas has run: at the first title screen, and again
+## after the ship is destroyed (the original reboots there).
+var booted: bool = false
+## START.bas's OG = 77: a game was saved when the machine booted.
+var old_game: bool = false
 
 
-func has_save_file() -> bool:
-	return FileAccess.file_exists(SAVE_PATH)
+## START.bas lines 25-26, which run at every boot before the question is
+## asked: `OG = PEEK(38391): POKE 38391,0`, and if a game was saved
+## PLANET FILE goes straight back to the disk without the mark. So a
+## saved game can be taken up once, at the next boot, and the mark is
+## gone whether the answer is O or N (watched live on copies of the
+## disk, tools/mame/save_live.lua). The saved state itself stays in the
+## file, as it stays on the disk.
+func boot(path: String = save_path) -> void:
+	booted = true
+	old_game = false
+	if not FileAccess.file_exists(path):
+		return
+	var data = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if not data is Dictionary:
+		return
+	# a file from before the mark was kept counts as a saved game
+	old_game = data.get("saved", true)
+	if old_game:
+		data["saved"] = false
+		var file := FileAccess.open(path, FileAccess.WRITE)
+		file.store_string(JSON.stringify(data))
 
 
-func save_to_disk(path: String = SAVE_PATH) -> void:
+func save_to_disk(path: String = save_path) -> void:
 	# END.bas line 210 stores the current planet's record before the BSAVEs.
 	store_planet_record(current_planet)
 	var data := {
+		"saved": true, # 204  POKE 38391,77
 		"credits": credits, "stardate": stardate,
 		"troops": troops, "troop_morale": troop_morale, "morale_flag": morale_flag,
 		"troop_location": troop_location, "troops_stationed_at": troops_stationed_at,
@@ -667,7 +702,7 @@ func save_to_disk(path: String = SAVE_PATH) -> void:
 	file.store_string(JSON.stringify(data))
 
 
-func load_from_disk(path: String = SAVE_PATH) -> void:
+func load_from_disk(path: String = save_path) -> void:
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
 		return
@@ -745,3 +780,4 @@ func load_from_disk(path: String = SAVE_PATH) -> void:
 		ship_bank = int(ship[4])
 		ship_heading = int(ship[5])
 	load_orbit_ship()
+	saved_marker = true # 3030  POKE 38391,77

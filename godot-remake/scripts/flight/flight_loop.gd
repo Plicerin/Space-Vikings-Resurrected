@@ -72,6 +72,17 @@ const RESTART := 23.0
 ## RUN STARSHIP SIMULATOR up to line 9: 392 to 430 measured.
 const LOAD_INSTRUMENTS := 171.0
 const LOAD_SIMULATOR := 400.0
+## The same from GALAXY MAP's line 2, 35 frames after the last load and
+## the drive still turning. Not timed by itself: an old game's third
+## pass came 66 frames sooner after the lamps than a new game's after
+## INSTRUMENTS (tools/mame/save_live.lua; the same within a frame for
+## END's "continue").
+const LOAD_SIMULATOR_SPINNING := 334.0
+const LOAD_GALAXY_MAP := 235.0
+
+# -- GALAXY MAP.bas lines 1-2 and 5000-5500 (tools/mame/chart_live.lua) --
+const LAMPS_START := 1.5 # up to GOSUB 5000
+const LAMP_BLOCK := 4.0 # a lamp: 35 frames for the eight
 const LOAD_RE := 140.0
 const LOAD_ORBIT := 170.0
 const LOAD_PLANET := 157.0 # BLOAD PLANET # n
@@ -138,8 +149,18 @@ func view_frames() -> float:
 func run() -> Left:
 	if GameState.instruments_due:
 		await _run(LOAD_INSTRUMENTS)
-		await instruments(true)
-	await _run(LOAD_SIMULATOR)
+		await instruments(not GameState.saved_marker) # line 210
+	if GameState.saved_marker:
+		# INSTRUMENTS line 220 for an old game, END.bas line 120 to go
+		# on with this one: RUN GALAXY MAP, which at its line 2 paints
+		# the lamps and runs the flight program. No switch is touched.
+		await _run(LOAD_GALAXY_MAP)
+		GameState.saved_marker = false
+		await lamps()
+		program.view.shown = 0 # POKE -16300,0
+		await _run(LOAD_SIMULATOR_SPINNING)
+	else:
+		await _run(LOAD_SIMULATOR)
 	_start(true)
 	while true:
 		if read_stick.is_valid():
@@ -199,6 +220,14 @@ func instruments(lamps: bool) -> void:
 	await wait.call(INSTRUMENTS_TEXT)
 	if lamps:
 		program.instruments_lamps()
+
+
+## GALAXY MAP.bas's GOSUB 5000 at the speed it paints.
+func lamps() -> void:
+	await wait.call(LAMPS_START)
+	for block: Array in program.lamp_blocks():
+		program.lamp_block(block)
+		await wait.call(LAMP_BLOCK)
 
 
 func _start(run_program: bool) -> void:

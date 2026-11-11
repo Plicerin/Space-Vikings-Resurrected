@@ -1,0 +1,137 @@
+[8] w 973=56 pc=C61A
+[21] text 38391=255
+ 0|               APPLE ][
+[221] text 38391=255
+23|]
+[521] text 38391=255
+22|]
+[859] w 38391=0 pc=ACA3
+[859] w 38392=1 pc=ACA3
+[860] w 38391=0 pc=E781
+[901] text 38391=0
+ 7|           *****************
+ 8|           *               *
+ 9|           * SPACE VIKINGS *
+10|           *               *
+11|           * COPYRIGHT1982 *
+12|           *      BY:      *
+13|           *  G.M. ROBBINS *
+14|           *               *
+15|           *****************
+20|(N)EW GAME OR (O)LD GAME?
+21|`
+[901] key 'O'
+[921] text 38391=0
+ 7|           *****************
+ 8|           *               *
+ 9|           * SPACE VIKINGS *
+10|           *               *
+11|           * COPYRIGHT1982 *
+12|           *      BY:      *
+13|           *  G.M. ROBBINS *
+14|           *               *
+15|           *****************
+20|(N)EW GAME OR (O)LD GAME?
+22|THERE IS NO GAME SAVED
+[1081] text 38391=0
+ 4|(N)EW GAME OR (O)LD GAME?
+ 5|`
+[1221] key 'O'
+[1241] text 38391=0
+ 4|(N)EW GAME OR (O)LD GAME?
+ 6|THERE IS NO GAME SAVED
+[1401] text 38391=0
+ 4|(N)EW GAME OR (O)LD GAME?
+ 5|`
+[1541] key 'O'
+[1561] text 38391=0
+ 4|(N)EW GAME OR (O)LD GAME?
+ 6|THERE IS NO GAME SAVED
+[1721] text 38391=0
+ 4|(N)EW GAME OR (O)LD GAME?
+ 5|`
+[1861] key 'O'
+[1881] text 38391=0
+ 4|(N)EW GAME OR (O)LD GAME?
+ 6|THERE IS NO GAME SAVED
+[2041] text 38391=0
+ 4|(N)EW GAME OR (O)LD GAME?
+ 5|`
+[2181] key 'O'
+[2201] text 38391=0
+ 4|(N)EW GAME OR (O)LD GAME?
+ 6|THERE IS NO GAME SAVED
+[2361] text 38391=0
+ 4|(N)EW GAME OR (O)LD GAME?
+ 5|`
+[2501] key 'O'
+[2521] text 38391=0
+ 4|(N)EW GAME OR (O)LD GAME?
+ 6|THERE IS NO GAME SAVED
+[2681] text 38391=0
+ 4|(N)EW GAME OR (O)LD GAME?
+ 5|`
+[2821] key 'O'
+[2841] text 38391=0
+ 4|(N)EW GAME OR (O)LD GAME?
+ 6|THERE IS NO GAME SAVED
+[3001] text 38391=0
+ 4|(N)EW GAME OR (O)LD GAME?
+ 5|`
+[3141] key 'O'
+[3161] text 38391=0
+ 4|(N)EW GAME OR (O)LD GAME?
+ 6|THERE IS NO GAME SAVED
+[3321] text 38391=0
+ 4|(N)EW GAME OR (O)LD GAME?
+ 5|`
+[3461] key 'O'
+[3481] text 38391=0
+ 4|(N)EW GAME OR (O)LD GAME?
+ 6|THERE IS NO GAME SAVED
+[3641] text 38391=0
+ 4|(N)EW GAME OR (O)LD GAME?
+ 5|`
+[3781] key 'O'
+[3801] text 38391=0
+ 4|(N)EW GAME OR (O)LD GAME?
+ 6|THERE IS NO GAME SAVED
+[3961] text 38391=0
+ 4|(N)EW GAME OR (O)LD GAME?
+ 5|`
+[4101] key 'O'
+[4121] text 38391=0
+ 4|(N)EW GAME OR (O)LD GAME?
+ 6|THERE IS NO GAME SAVED
+[4281] text 38391=0
+ 4|(N)EW GAME OR (O)LD GAME?
+ 5|`
+[4421] key 'O'
+[4441] text 38391=0
+ 4|(N)EW GAME OR (O)LD GAME?
+ 6|THERE IS NO GAME SAVED
+[4601] text 38391=0
+ 4|(N)EW GAME OR (O)LD GAME?
+ 5|`
+[4741] key 'O'
+[4761] text 38391=0
+ 4|(N)EW GAME OR (O)LD GAME?
+ 6|THERE IS NO GAME SAVED
+[4921] text 38391=0
+ 4|(N)EW GAME OR (O)LD GAME?
+ 5|`
+[5061] key 'O'
+[5381] key 'O'
+[5701] key 'O'
+[6021] key 'O'
+[6341] key 'O'
+[6661] key 'O'
+[6981] key 'O'
+[7301] key 'O'
+[7621] key 'O'
+[7941] key 'O'
+[8261] key 'O'
+[8581] key 'O'
+[8901] key 'O'
+[9002] no flight: 38201=255 38202=0 38165=255 38164=0 38210=0 38393=0 38391=0 38392=1 38209=255 38189=255
+done
