@@ -25,9 +25,9 @@ extends RefCounted
 ## two lit ones takes their colour). Checked against MAME's rendering of
 ## the real panel (tools/mame/shapes_live.lua).
 ##
-## Lines use plain Bresenham, not a port of the ROM's HLIN ($F53A); the
-## two agree on horizontal and vertical lines and can differ by a pixel
-## on diagonals.
+## Lines are the ROM's own (HGLIN, $F53A; see hplot_to()), which are not
+## Bresenham's: the panel and the star chart match the Apple's pages
+## byte for byte only because of it (tests/check_chart.gd).
 ##
 ## No `class_name` (see shape_table.gd); preload into a local const.
 
