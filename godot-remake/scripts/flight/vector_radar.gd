@@ -5,8 +5,9 @@ extends Control
 ## from above (the original's units, +-20000 a side, north, the original's +z,
 ## at the top) with the planet, the stars, the firing box, the defender as its
 ## own wire-frame model and the ship as an arrow along its heading; and, with
-## "I", the SHIP I.D.: the defender's wire-frame turning slowly with what the
-## original's I.D. program says of it. What the radar does and where it goes
+## "I", the SHIP I.D.: the defender's wire-frame, large, turning slowly at the
+## side. Everything written goes on the console's display (`console.page`), as
+## what the original's I.D. program says of it does. What the radar does and where it goes
 ## back to is scripts/rules/radar_rules.gd, held to the real game
 ## (tests/check_radar_rules.gd).
 
@@ -18,14 +19,14 @@ const BlockFont = preload("res://scripts/flight/block_font.gd")
 signal closed(to_console: bool)
 
 const WORLD := 20000.0
-const CLUSTER_RADIUS := 1500.0
 const PHOSPHOR := Color(0.7, 1.0, 0.82)
 const AMBER := Color(1.0, 0.62, 0.2)
 const CYAN := Color(0.45, 0.85, 1.0)
 
 var identify := false
 
-var _stars := PackedVector3Array()
+## The flight's display panel (hud_overlay.gd): the radar writes its page there.
+var console: Control
 var _model_lines := PackedVector3Array()
 var _model_scale := 1.0
 var _model_centre := Vector3.ZERO
@@ -36,9 +37,6 @@ var _turn := 0.0
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	visible = false
-	for point in DisplayList.load_file("planet_0.bin").points:
-		if point.length() >= CLUSTER_RADIUS:
-			_stars.append(point)
 
 
 ## @witness RADAR 10
@@ -54,6 +52,7 @@ func open(with_id := false) -> void:
 func close() -> void:
 	visible = false
 	identify = false
+	_release_console()
 	closed.emit(RadarRules.back() == RadarRules.Goes.COM)
 
 
@@ -81,6 +80,7 @@ func _process(delta: float) -> void:
 		position = Vector2.ZERO
 		size = get_viewport_rect().size # a canvas layer has no layout to fill
 		_turn += delta
+		_write_console()
 		queue_redraw()
 
 
@@ -88,18 +88,47 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
-	var area := Rect2(size.x * 0.5 - 470.0, 28.0, 940.0, size.y - PANEL_HEIGHT_CLEAR - 48.0)
+	var width := 960.0 if identify else 600.0
+	var area := Rect2(size.x * 0.5 - width / 2.0, 28.0, width, size.y - PANEL_HEIGHT_CLEAR - 48.0)
 	draw_rect(area, Color(0.0, 0.03, 0.02, 0.78)) # the window's glass, a little darker
 	_brackets(area)
 	var flicker := 1.0 - 0.04 * absf(sin(_turn * 31.0) * sin(_turn * 9.7))
-	var map := Rect2(area.position + Vector2(24.0, 40.0), Vector2.ONE * minf(area.size.y - 64.0, 440.0))
+	var side := minf(area.size.y - 48.0, 440.0)
+	var map := Rect2(area.position + Vector2(24.0, 24.0), Vector2.ONE * side)
+	if not identify:
+		map.position.x = area.get_center().x - side / 2.0
 	_plan(map, flicker)
-	var pane := Rect2(map.end.x + 28.0, map.position.y, area.end.x - map.end.x - 52.0, map.size.y)
-	BlockFont.draw(self, "-RADAR-" if not identify else "-SHIP I.D.-", area.position + Vector2(24.0, 14.0), 1.8, _tint(PHOSPHOR, flicker))
 	if identify:
-		_ship_id(pane, flicker)
+		var big := Rect2(map.end.x + 24.0, area.position.y + 16.0, area.end.x - map.end.x - 48.0, area.size.y - 32.0)
+		_ship_id(big, flicker)
+
+
+## What the radar writes on the console's display: the numbers and the keys, or
+## what the I.D. program says of the ship in orbit.
+func _write_console() -> void:
+	if console == null:
+		return
+	console.hide_target = true
+	if identify:
+		var text: Array = RadarRules.ship_id_text(RadarRules.ship_id_program(GameState.orbital_defender_tier)).duplicate()
+		text.append("I RADAR  X CLOSE")
+		console.page = text
+		return
+	var lines := ["-RADAR-", "X %d Y %d Z %d" % [GameState.ship_x / 2, GameState.ship_y / 2, GameState.ship_z / 2],
+			"HEADING %d" % roundi(GameState.ship_heading * 1.41)]
+	if GameState.orbital_defender_tier != 0 and not GameState.gf_planet_surrendered:
+		var range_units := Vector3(GameState.ship_x, GameState.ship_y, GameState.ship_z).distance_to(CombatRules.DEFENDER) / 2.0
+		lines.append("DEFENDER RANGE %d" % roundi(range_units))
 	else:
-		_readout(pane, flicker)
+		lines.append("NO DEFENDER")
+	lines.append("I SHIP I.D.  X CLOSE")
+	console.page = lines
+
+
+func _release_console() -> void:
+	if console != null:
+		console.page = []
+		console.hide_target = false
 
 
 const PANEL_HEIGHT_CLEAR := 150.0
@@ -160,10 +189,6 @@ func _plan(map: Rect2, flicker: float) -> void:
 	var near: Vector2 = at.call(Vector3(CombatRules.FIRING_X.x, 0, CombatRules.FIRING_Z.y))
 	var far: Vector2 = at.call(Vector3(CombatRules.FIRING_X.y, 0, CombatRules.FIRING_Z.x))
 	_dashed_box(Rect2(near, far - near), _tint(Color(AMBER, 0.55), flicker))
-	for star in _stars:
-		var spot: Vector2 = at.call(star)
-		draw_line(spot - Vector2(1.5, 0), spot + Vector2(1.5, 0), Color(PHOSPHOR, 0.7), 1.0)
-		draw_line(spot - Vector2(0, 1.5), spot + Vector2(0, 1.5), Color(PHOSPHOR, 0.7), 1.0)
 	# the planet: a wire sphere seen from above
 	draw_arc(centre, 9.0, 0.0, TAU, 32, _tint(CYAN, flicker), 1.6, true)
 	draw_arc(centre, 9.0, 0.0, TAU, 32, Color(CYAN, 0.16), 6.0, true)
@@ -221,41 +246,21 @@ func _load_model(program: int) -> void:
 	_model_scale = maxf(1.0, maxf((high - low).x, maxf((high - low).y, (high - low).z)) / 2.0) if not _model_lines.is_empty() else 1.0
 
 
-## The numbers beside the plan, and the keys.
-func _readout(pane: Rect2, flicker: float) -> void:
-	var lines := ["X %d" % (GameState.ship_x / 2), "Y %d" % (GameState.ship_y / 2), "Z %d" % (GameState.ship_z / 2),
-			"HEADING %d" % roundi(GameState.ship_heading * 1.41), ""]
-	if GameState.orbital_defender_tier != 0 and not GameState.gf_planet_surrendered:
-		var range_units := Vector3(GameState.ship_x, GameState.ship_y, GameState.ship_z).distance_to(CombatRules.DEFENDER) / 2.0
-		lines.append_array(["DEFENDER", "RANGE %d" % roundi(range_units)])
-	else:
-		lines.append("NO DEFENDER")
-	for i in lines.size():
-		BlockFont.draw(self, lines[i], pane.position + Vector2(0.0, i * 30.0), 2.0, _tint(PHOSPHOR, flicker))
-	BlockFont.draw(self, "I  SHIP I.D.", pane.position + Vector2(0.0, pane.size.y - 60.0), 1.6, Color(PHOSPHOR, 0.8))
-	BlockFont.draw(self, "X  CLOSE", pane.position + Vector2(0.0, pane.size.y - 30.0), 1.6, Color(PHOSPHOR, 0.8))
-
-
-## The defender's own wire-frame, turning, with what the I.D. program says.
-func _ship_id(pane: Rect2, flicker: float) -> void:
+func _ship_id(box: Rect2, flicker: float) -> void:
 	var program := RadarRules.ship_id_program(GameState.orbital_defender_tier)
 	_load_model(program)
-	var box := Rect2(pane.position, Vector2(pane.size.x, 250.0))
 	_brackets_small(box)
-	if not _model_lines.is_empty():
-		var extent := minf(box.size.x, box.size.y) * 0.42
-		var scale := extent / _model_scale
-		var spin := _turn * 0.6
-		var tilt := 0.42
-		var centre := box.get_center()
-		for i in range(0, _model_lines.size(), 2):
-			var a := _project(_model_lines[i] - _model_centre, spin, tilt) * scale
-			var b := _project(_model_lines[i + 1] - _model_centre, spin, tilt) * scale
-			_vline(centre + a, centre + b, _tint(AMBER, flicker), 1.4)
-	var text: Array = RadarRules.ship_id_text(program)
-	for i in range(1, text.size()):
-		BlockFont.draw(self, text[i], pane.position + Vector2(0.0, 272.0 + (i - 1) * 26.0), 1.7, _tint(PHOSPHOR, flicker))
-	BlockFont.draw(self, "I  RADAR", pane.position + Vector2(0.0, pane.size.y - 30.0), 1.6, Color(PHOSPHOR, 0.8))
+	if _model_lines.is_empty():
+		return
+	var extent := minf(box.size.x, box.size.y) * 0.46
+	var scale := extent / _model_scale
+	var spin := _turn * 0.6
+	var tilt := 0.42
+	var centre := box.get_center()
+	for i in range(0, _model_lines.size(), 2):
+		var a := _project(_model_lines[i] - _model_centre, spin, tilt) * scale
+		var b := _project(_model_lines[i + 1] - _model_centre, spin, tilt) * scale
+		_vline(centre + a, centre + b, _tint(AMBER, flicker), 1.6)
 
 
 func _brackets_small(box: Rect2) -> void:

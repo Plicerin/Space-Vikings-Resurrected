@@ -98,6 +98,7 @@ func _ready() -> void:
 	_effects.shaken.connect(func(amount: float) -> void: _shake = maxf(_shake, amount))
 	add_child(_effects)
 	_radar = VectorRadar.new()
+	_radar.console = $Hud/Overlay
 	$Hud.add_child(_radar)
 	_radar.closed.connect(func(to_console: bool) -> void:
 		if to_console:

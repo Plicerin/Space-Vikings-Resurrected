@@ -283,8 +283,10 @@ filled, drawn live while the flight goes on behind it. A plan of the world
 from above shows the planet as a wire sphere, the stars, the dashed box the
 defender fires from, the defender as its own wire-frame (the original's
 model data), and the ship as an arrow along its heading, with a sweep turning
-round the planet. `I` swaps the plan for the SHIP I.D.: the defender's
-wire-frame turning slowly, and what the original's I.D. program says of it.
+round the planet. `I` shows the SHIP I.D.: the defender's wire-frame, large,
+turning slowly beside the plan. All the writing is on the console's display
+(the numbers and keys for the radar, what the original's I.D. program says of
+the ship for the I.D.).
 `R`, `X` or Escape close it; the console's RADAR shows it over the flight and
 X goes back to the console. With the radar shot away it shows nothing. Whether
 it works, which I.D. text a defender gets (type 2 gets the light cruiser's) and

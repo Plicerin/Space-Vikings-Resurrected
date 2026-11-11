@@ -33,6 +33,8 @@ var speed := 0.0
 var energy := 0.0
 var nav: Array = [0, 0, 0, 0, 0, 0] ## X, Y, Z, heading, pitch, bank, as the panel shows them
 var message := "" ## what the display says, for a while, over its page
+var page: Array = [] ## lines another part of the flight (the radar) has put on the display
+var hide_target := false ## the target bracket is not drawn (the radar is up)
 enum Mode { IDLE, NAV, HELP }
 var mode := Mode.IDLE
 ## World units to the figures the panel shows (the readouts halve the original's).
@@ -98,7 +100,7 @@ func _draw() -> void:
 
 
 func _draw_target() -> void:
-	if camera == null or target == null or not is_instance_valid(target):
+	if hide_target or camera == null or target == null or not is_instance_valid(target):
 		return
 	var at := target.global_position
 	var range_units := camera.global_position.distance_to(at) * range_scale
@@ -463,6 +465,8 @@ func _display(rect: Rect2) -> void:
 	var inner := rect.grow(-14.0)
 	if message != "":
 		_write(BlockFont.wrap(message, 2.0, inner.size.x), inner.position, 2.0, 24.0)
+	elif not page.is_empty():
+		_write(page, inner.position, 1.4, 14.5)
 	elif mode == Mode.NAV:
 		_nav(inner)
 	elif mode == Mode.HELP:
