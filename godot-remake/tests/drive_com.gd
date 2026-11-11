@@ -160,48 +160,22 @@ func _drive() -> void:
 	await _scene_is(COM)
 	_hook()
 
-	# STATUS and SUPPLY are on the hi-res page: a key a page, and COM again
-	GameState.troop_location = 1
-	GameState.troops_stationed_at = 5
+	# STATUS and SUPPLY are native panels (drive_reports.gd): the console
+	# runs them, and Enter brings the console back
 	await _central()
 	_tap(KEY_4, "4")
 	await _left_for("1 and 4", "status")
-	var keys: String = _hook().get_node("Keys").text
-	_check("under STATUS's picture, where the troops are", keys.contains(GameState.STAR_NAMES[4]))
-	await _seen_more("ship")
-	_check("STATUS has the ship's page up", [text.column, text.row] == [1, 13])
-	_shot("9_status_ship")
-	_tap(KEY_SPACE, " ")
-	await _seen_more("troops")
-	_check("a key, and the troops' page", [text.column, text.row] == [1, 10])
-	_shot("10_status_troops")
-	_tap(KEY_X, "x")
+	_tap(KEY_ENTER, "")
 	await _scene_is(COM)
-	_check("another, and the console again", _current_path() == COM)
+	_check("STATUS and Enter, and the console again", _current_path() == COM)
 	_hook()
-	GameState.troop_location = 3
-	GameState.troops_stationed_at = 1
 
 	await _central()
 	_tap(KEY_5, "5")
 	await _left_for("1 and 5", "supply_report")
-	keys = _hook().get_node("Keys").text
-	_check("nothing about the troops under SUPPLY's", not keys.contains("troops"))
-	await _seen_more("first")
-	_check("SUPPLY has its first page up", [text.column, text.row] == [27, 10])
-	_shot("11_supply_first")
-	_tap(KEY_SPACE, " ")
-	await _seen_more("second")
-	_check("a key, and the second", [text.column, text.row] == [32, 11])
-	_shot("12_supply_second")
-	_tap(KEY_1, "1")
-	await _seen_more("first")
-	_check("1 there is the first again", [text.column, text.row] == [27, 10])
-	_tap(KEY_1, "1")
-	await _seen_more("second")
-	_tap(KEY_SPACE, " ")
+	_tap(KEY_ENTER, "")
 	await _scene_is(COM)
-	_check("and any other key the console", _current_path() == COM)
+	_check("SUPPLY and Enter, and the console again", _current_path() == COM)
 	_hook()
 	await _seen_more("command")
 	_check("which prints on page 1 again", text.page == 0 and [text.column, text.row] == [9, 9])

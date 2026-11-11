@@ -1,88 +1,91 @@
 extends Control
-## STATUS and SUPPLY on the screen. Everything the originals do is in
-## status_loop.gd and supply_loop.gd (and the two programs under them),
-## which draw on hi-res page 1; this scene gives one of those loops a
-## clock, a picture and a keyboard, and goes back to COM as they do.
+## STATUS and SUPPLY, the central computer's two reports: what
+## scripts/rules/report_rules.gd says, laid out on one panel each (the
+## original's were two screens, a key apart). Enter, Space, Escape or
+## the button goes back to the console.
 ##
-## The keyboard is the Apple's: every key goes into the latch, and the
-## program makes of it what it will. Neither report asks for more than
-## "a key".
-##
-## While the report loads the screen still shows COM's central computer
-## menu, as the original's does, and then the view is painted green a
-## row at a time before anything is printed.
-##
-## One thing is here that the Apple has not got, and it is outside its
-## picture: when the troops are on a planet, the line of key hints under
-## the screen says which. STATUS prints PLANETSIDE or SHORE LEAVE and
-## not where, and with a jump between landing and recalling them it is
-## easy to lose track; the original expects it written down.
+## The troops' line says which star they are at when they are on a
+## planet; the original's says only PLANETSIDE or SHORE LEAVE, and with
+## a jump between landing and recalling them it is easy to lose track.
 
-const StatusLoop = preload("res://scripts/reports/status_loop.gd")
-const SupplyLoop = preload("res://scripts/reports/supply_loop.gd")
-const HgrView = preload("res://scripts/shapes/hgr_view.gd")
-const HgrScreen = preload("res://scripts/shapes/hgr_screen.gd")
+const ReportRules = preload("res://scripts/rules/report_rules.gd")
 
-const FRAME := 1.0 / 60.0
 const COM := "res://scenes/com.tscn"
 
-## Which program this scene is: "status" or "supply".
+## "status" or "supply".
 @export var report := "status"
 
-@onready var _view: HgrView = $HGRCanvas/HgrView
-
-## A StatusLoop or a SupplyLoop.
-var _loop: RefCounted
-var _now := 0.0
-var _due := 0.0
+@onready var _title: Label = $Center/Panel/VBox/Title
+@onready var _ship: GridContainer = $Center/Panel/VBox/Ship
+@onready var _troops_title: Label = $Center/Panel/VBox/TroopsTitle
+@onready var _troops: GridContainer = $Center/Panel/VBox/Troops
+@onready var _dead: Label = $Center/Panel/VBox/Dead
+@onready var _return: Button = $Center/Panel/VBox/Return
 
 
 func _ready() -> void:
-	_loop = SupplyLoop.new() if report == "supply" else StatusLoop.new()
-	if report != "supply" and (GameState.troop_location == 1 or GameState.troop_location == 2):
-		var star: int = GameState.troops_stationed_at - 1
-		if star >= 0 and star < GameState.STAR_NAMES.size():
-			$Keys.text += "   (the troops are at %s)" % GameState.STAR_NAMES[star]
-	_show_page()
-	_loop.wait = _wait
-	_report()
-
-
-func _report() -> void:
-	# both loops' Left has COM as its 1
-	if await _loop.run() == StatusLoop.Left.COM:
-		GameState.goto_scene(COM)
-
-
-func _process(delta: float) -> void:
-	_now += delta
-	_show_page()
-
-
-func _show_page() -> void:
-	var page: HgrScreen = GameState.view3d.pages[GameState.view3d.shown]
-	if _view.screen != page:
-		_view.screen = page
-		_view.queue_redraw()
-
-
-## The loop's clock; see space_flight.gd.
-func _wait(frames: float) -> void:
-	_due = maxf(_due, _now - 2.0 * FRAME) + frames * FRAME
-	while _now < _due:
-		await get_tree().process_frame
+	_return.pressed.connect(_leave)
+	if report == "supply":
+		_supply()
+	else:
+		_status()
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not event is InputEventKey or not event.pressed or event.echo:
-		return
-	var code: int = event.unicode
-	match event.keycode:
-		KEY_ESCAPE:
-			code = 27
-		KEY_BACKSPACE, KEY_LEFT:
-			code = 8
-		KEY_ENTER, KEY_KP_ENTER:
-			code = 13
-	if code == 8 or code == 13 or code == 27 or (code >= 32 and code < 127):
-		_loop.program.press(String.chr(code))
+	if event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_cancel"):
+		get_viewport().set_input_as_handled()
+		_leave()
+
+
+func _leave() -> void:
+	GameState.goto_scene(COM)
+
+
+func _status() -> void:
+	_title.text = "SHIP STATUS REPORT"
+	_ship.columns = 4
+	for row: Array in ReportRules.ship():
+		for cell: Array in row:
+			_cell(_ship, cell[0], false)
+			_cell(_ship, cell[1], true)
+		if row.size() == 1: # the left of two, alone
+			_cell(_ship, "", false)
+			_cell(_ship, "", false)
+	_troops_title.text = "TROOP STATUS"
+	_troops.columns = 2
+	for entry: Array in ReportRules.troops():
+		_cell(_troops, entry[0], false)
+		_cell(_troops, _with_star(entry), true)
+	_dead.visible = ReportRules.troops_all_dead()
+
+
+func _supply() -> void:
+	_title.text = "SUPPLY REPORT"
+	_ship.columns = 3
+	for row: Array in ReportRules.supply():
+		_cell(_ship, row[0], false)
+		_cell(_ship, row[1], true).horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		_cell(_ship, row[2], false)
+	_cell(_ship, "CREDITS", false)
+	_cell(_ship, ReportRules.supply_credits(), true).horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_cell(_ship, "", false)
+	_troops_title.hide()
+	_troops.hide()
+
+
+func _with_star(entry: Array) -> String:
+	if entry[0] == "TROOP LOCATION" and (GameState.troop_location == 1 or GameState.troop_location == 2):
+		var star: int = GameState.troops_stationed_at - 1
+		if star >= 0 and star < GameState.STAR_NAMES.size():
+			return "%s (%s)" % [entry[1], GameState.STAR_NAMES[star]]
+	return entry[1]
+
+
+## A label in `grid`: green if it is a value.
+func _cell(grid: GridContainer, text: String, value: bool) -> Label:
+	var cell := Label.new()
+	cell.text = text
+	if value:
+		cell.theme_type_variation = &"CrewLabel"
+	grid.add_child(cell)
+	return cell

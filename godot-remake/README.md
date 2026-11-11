@@ -33,6 +33,7 @@ that count, waits a key can cut short.
 |---|---|---|---|
 | `GROUND FORCES`, `RECALL`, `COLLECT` | `scripts/rules/ground_rules.gd` | `scripts/ui/ground_forces.gd` | `check_ground_rules` (the rules), `drive_ground_forces` (the scene) |
 | `SHORE LEAVE` (shore leave, enlisting and weapons, loot, repairs, a base, cryogenics) | `scripts/rules/shore_rules.gd` | `scripts/ui/shore_leave.gd`, one panel over the ground forces menu | `check_shore_rules`, `drive_shore_leave` |
+| `STATUS`, `SUPPLY` (the central computer's two reports) | `scripts/rules/report_rules.gd` | `scripts/reports/report_console.gd`, one panel each | `check_report_rules`, `drive_reports` |
 
 **Ported faithfully.** The screen is a software copy of the Apple's
 hi-res page, drawn by the original's own statements in the original's
@@ -51,8 +52,6 @@ game running in MAME.
 | `COM` (command console, central computer, navigation computer, galaxy directory) | `scripts/com/com_program.gd`, `com_loop.gd` | `check_com`, `check_com_damaged`, `check_chart` |
 | `END` (save, continue, end game) | `scripts/end/end_program.gd`, `end_loop.gd` | `check_end`, `check_end_atmosphere` |
 | DOS's error routine (SYSTEM ERROR, reboot) | `scripts/dos/system_error.gd`, `scripts/shapes/text_screen.gd` | `check_end` |
-| `STATUS` (ship and troop report) | `scripts/reports/status_program.gd`, `status_loop.gd` | `check_status`, `check_status_poked`, `check_status_odd`, `check_status_morale` |
-| `SUPPLY` (supply report) | `scripts/reports/supply_program.gd`, `supply_loop.gd` | `check_supply`, `check_supply_poked` |
 | `RADAR` | `scripts/radar/radar_program.gd`, `radar_loop.gd` | `check_radar` and the six beside it |
 | `SHIP # 0 I.D.`, `# 1`, `# 3`, `# 4` (what is in orbit) | `scripts/radar/ship_id_program.gd`, `ship_id_loop.gd` | `check_radar_ids`, `check_radar_com` |
 | Planet record copy, new-game data, save and load | `autoload/game_state.gd` | `check_save`, `check_jump` |
@@ -167,7 +166,7 @@ Kept from the original:
   once-a-trip base flag in, and the directory page clears it: asking the
   chart about a star gives the base its turn back.
 - Star 16 is "GROOMBRIDGE 168" here and in `COM`, "GROOMBRIDGE 1618" in
-  `STATUS` and `COLLECT`.
+  `STATUS` (and the port's reports) and `COLLECT`.
 - Applesoft's `INT(H * 1.19)` puts paddle readings 100 and 200 one dot
   left of where exact arithmetic would.
 
@@ -270,12 +269,6 @@ a difference.
     godot --headless --path . res://tests/check_com_damaged.tscn     # the same with systems out: inverse labels, no computer
     godot --headless --path . res://tests/check_end.tscn             # END at 20 stops and back in flight; its keys; SYSTEM ERROR dot for dot
     godot --headless --path . res://tests/check_end_atmosphere.tscn  # END's refusal in an atmosphere, 6 stops
-    godot --headless --path . res://tests/check_status.tscn          # STATUS at 6 stops and back in flight, both pages
-    godot --headless --path . res://tests/check_status_poked.tscn    # every number on it changed, and THE TROOPS ARE ALL DEAD!
-    godot --headless --path . res://tests/check_status_odd.tscn      # a condition, a morale and a place with no word
-    godot --headless --path . res://tests/check_status_morale.tscn   # the other morales, places and conditions, 22 stops
-    godot --headless --path . res://tests/check_supply.tscn          # SUPPLY at 8 stops: both pages, "1" and round again
-    godot --headless --path . res://tests/check_supply_poked.tscn    # loot of four and five digits, and what the units do to it
     godot --headless --path . res://tests/check_radar.tscn           # RADAR from flight, and X back to it
     godot --headless --path . res://tests/check_radar_ids.tscn       # RADAR and each of the four I.D. programs, round and round, 14 stops; a type 2
     godot --headless --path . res://tests/check_radar_com.tscn       # RADAR from the console and back to it, and by way of an I.D.
@@ -285,6 +278,7 @@ a difference.
     godot --headless --path . res://tests/check_radar_ship_4.tscn    # with the heavy cruiser
     godot --headless --path . res://tests/check_save.tscn            # record copy, save, the boot, an old game's panel
     godot --headless --path . res://tests/check_ground_rules.tscn    # GROUND FORCES, RECALL, COLLECT: 14 recorded routes through the rules, state and text
+    godot --headless --path . res://tests/check_report_rules.tscn    # STATUS and SUPPLY: 6 recorded routes, 20 pages as the real game printed them
     godot --headless --path . res://tests/check_shore_rules.tscn     # SHORE LEAVE: 7 recorded routes through the rules, state and text
     godot --headless --path . -s res://tests/check_flight_core.gd    # flight arithmetic against the model
     godot --headless --path . -s res://tests/check_a2_3d1.gd         # 200 views against tools/a2_3d1_view.py
@@ -294,9 +288,10 @@ a difference.
     godot --headless --fixed-fps 60 --path . res://tests/drive_radar.tscn    # the radar scene, by keys: from flight, from the console, an I.D. and back, no radar
     godot --headless --fixed-fps 60 --path . res://tests/drive_save.tscn     # title, END, save, continue, SYSTEM ERROR, three boots, END GAME
     godot --headless --fixed-fps 60 --path . res://tests/drive_ground_forces.tscn   # the ground forces scene, by keys: refusals, recall, a win, a retreat, a loss
+    godot --headless --fixed-fps 60 --path . res://tests/drive_reports.tscn         # the two report panels: what is on show, and the way back to the console
     godot --headless --fixed-fps 60 --path . res://tests/drive_shore_leave.tscn     # commands 3 to 8, by keys: every question, every refusal, what each leaves behind
 
-The first twenty-three need the recordings in `../analysis/live/`. A compared
+The first eighteen need the recordings in `../analysis/live/`. A compared
 byte is never adjusted to make a test pass: both times a test differed
 from the real game by a handful of bytes, the difference was something
 the original does that nobody had noticed (the seventeen-byte copy;
@@ -309,30 +304,23 @@ command menu, not at the navigation computer its `GOTO` names.
 
 ### The two reports
 
-`STATUS` and `SUPPLY` are slow and a little broken, and the port is
-both. Each takes some eight seconds to show anything even with the
-floppy cut down: it paints the view green a row at a time, then lays a
-white sheet on it a row at a time, then prints. What the recordings
-show that a tidy report would not:
+`STATUS` and `SUPPLY` are one panel each, not two screens a key apart,
+and nothing is painted or waited for. What the real game printed is the
+rules' (`scripts/rules/report_rules.gd`, held to the recordings by
+`check_report_rules`), but for what the machine got in the way of:
 
-- `HULL DMG` is the damage, so a whole ship reads 0% between rows that
-  read 100%. `ENERGY` is a percentage of 62 and a full ship has 63; the
-  listing caps the 101.
-- `ENV.` and `NAV.COMP.` are always 100%.
-- A condition, morale or place with no word for it prints nothing, not
-  even the end of its line, and the next line runs on after it. A
-  morale of 0 does this, and the hyperdrive can take morale to 0.
-- `THE TROOPS ARE ALL DEAD!` is in the listing and cannot appear: it
-  tests two bytes that are neither of them the troops, and one is never
-  0. (Poked to 0 on the real machine, it prints; the port's does too.)
-- `* ELECTRONIC PARTS` is a letter too wide for its column and reads
-  `* ELECTRONIC PART= 0`.
-- A number has three cells before its unit. 2550 pounds of platinum
-  reads `= 255POUNDS`, and 10000 cases of wine `= 100CASES`. `COLLECT`
-  lets loot get that large.
-- Both read the stardate, the troops and the credits from `MISC FILE`
-  with the output on hi-res page 2, and the three prompts leave three
-  marks there.
+- `HULL DMG` is the damage, so a whole ship reads 0%. `ENERGY` is a
+  percentage of 62 and a full ship has 63; the listing caps the 101.
+  `ENV.` and `NAV.COMP.` are always 100%. All as the original.
+- A condition, morale or place with no word for it prints no word. The
+  original prints nothing, not even the end of its line, and the next
+  line runs on after it.
+- `THE TROOPS ARE ALL DEAD!` is in the original's listing and cannot
+  appear (it tests two bytes that are neither of them the troops). Here
+  it appears when the troops are 0.
+- `* ELECTRONIC PARTS` is not cut short, and 2550 pounds of platinum
+  are not `= 255POUNDS`: the original's numbers have three cells before
+  its unit.
 
 ### The radar
 
@@ -374,11 +362,11 @@ Where the port departs from the original on purpose:
   two to eight seconds. Those waits are kept in proportion and cut to
   15% (`FlightLoop.DISK_WAIT_SCALE`). Nothing the machine computed or
   drew is sped up.
-- **Key hints** on the flight, chart, console, report, radar and END screens,
+- **Key hints** on the flight, chart, console, radar and END screens,
   outside the Apple's picture. END's says what a wrong key costs.
-  `STATUS`'s adds the star the troops were left at when they are not
-  aboard: the original's report says only PLANETSIDE or SHORE LEAVE,
-  never where.
+- **The reports** (above) show both pages at once, and `STATUS` adds the
+  star the troops were left at when they are not aboard: the original's
+  says only PLANETSIDE or SHORE LEAVE, never where.
 - **END GAME closes the application** a second after the screen goes
   black. The original leaves a dead machine to be switched off.
 - **Ground battle retreat.** In the original any key at all retreats.
@@ -423,10 +411,6 @@ Where the port departs from the original on purpose:
   be some frames out.
 - `RADAR` pokes 38151 with 5 on its way to an I.D. program. Nothing
   found reads a 5 there, and the port does not keep it.
-- `STATUS` reads the star's name with one `READ` for each place down
-  its list. That was timed at SOL only (2.8 frames), and the port waits
-  the same for every star: some fraction of a second short at the far
-  end of the list.
 - `COM`'s waits are fitted to its recording, not timed statement by
   statement: each stop for a key comes within two frames of the real
   machine's, the stretches between are shared out by the characters

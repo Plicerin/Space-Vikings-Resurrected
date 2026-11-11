@@ -1,44 +1,63 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://scripts/reports/report_console.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/shapes/hgr_canvas.gd" id="2"]
-[ext_resource type="Script" path="res://scripts/shapes/hgr_view.gd" id="3"]
 
 [node name="Status" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-mouse_filter = 2
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1")
 report = "status"
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Center" type="CenterContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-mouse_filter = 2
-color = Color(0, 0, 0, 1)
-
-[node name="HGRCanvas" type="Node2D" parent="."]
-script = ExtResource("2")
-
-[node name="HgrView" type="Node2D" parent="HGRCanvas"]
-script = ExtResource("3")
-
-[node name="Keys" type="Label" parent="."]
-modulate = Color(1, 1, 1, 0.35)
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -28.0
-offset_bottom = -6.0
 grow_horizontal = 2
-grow_vertical = 0
-mouse_filter = 2
-theme_override_font_sizes/font_size = 13
-text = "any key turns the page, and any key on the second goes back to the console"
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(560, 0)
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_type_variation = &"TitleLabel"
 horizontal_alignment = 1
+
+[node name="Ship" type="GridContainer" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/h_separation = 16
+columns = 4
+
+[node name="TroopsTitle" type="Label" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+horizontal_alignment = 1
+
+[node name="Troops" type="GridContainer" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/h_separation = 16
+columns = 2
+
+[node name="Dead" type="Label" parent="Center/Panel/VBox"]
+visible = false
+layout_mode = 2
+theme_type_variation = &"CrewLabel"
+text = "THE TROOPS ARE ALL DEAD!"
+horizontal_alignment = 1
+
+[node name="Return" type="Button" parent="Center/Panel/VBox"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"OrderButton"
+focus_mode = 0
+text = "RETURN TO CONSOLE"
