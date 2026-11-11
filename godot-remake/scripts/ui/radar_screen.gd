@@ -42,8 +42,7 @@ func _ready() -> void:
 	var distance: float = max(radius * 9.0, 400.0) # see doc comment above
 	_camera.position = Vector3(0.6, 0.45, 1.0).normalized() * distance
 	_camera.look_at(Vector3.ZERO, Vector3.UP)
-	# Defensive, same reasoning as planet_approach.gd's identical line:
-	# Camera3D's default far-clip (4000) would silently clip anything
+	# Defensive: Camera3D's default far-clip (4000) would silently clip anything
 	# auto-framed further out than that.
 	_camera.far = distance * 3.0
 

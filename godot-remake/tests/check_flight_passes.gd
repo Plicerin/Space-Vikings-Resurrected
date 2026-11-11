@@ -323,8 +323,6 @@ func _compare(event: Dictionary) -> void:
 	# Bytes the port keeps as something narrower.
 	if theirs.has("defender"):
 		theirs["defender"] = str(_tier(int(theirs["defender"])))
-	if theirs.has("secured"): # any value but 0 is "secured" to every reader
-		theirs["secured"] = str(int(theirs["secured"] != "0"))
 	if theirs.has("loot"): # only 1 counts (a new game has 255)
 		theirs["loot"] = str(int(theirs["loot"] == "1"))
 	var wrong: Array = []

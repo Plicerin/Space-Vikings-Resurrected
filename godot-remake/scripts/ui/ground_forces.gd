@@ -105,13 +105,13 @@ func _on_attack_pressed() -> void:
 	if tech == 0:
 		# Line 220-240: no enemy at all — instant surrender, no loop.
 		GameState.gf_planet_surrendered = true
-		GameState.planet_secured[GameState.current_planet] = true
+		GameState.planet_secured[GameState.current_planet] = 1
 		_finish_battle("PLANET IS NON-HABITABLE. NO ENEMY TO RESIST — SECURED IMMEDIATELY.", true)
 		return
 
 	# gf_enemy_strength/gf_victory_progress are NOT reset here — the
 	# real source sets them once, at system arrival (H_D.bas lines
-	# 90-93, ported in galaxy_map.gd), and GROUND FORCES.bas's own
+	# 90-93, ported in flight_program.gd), and GROUND FORCES.bas's own
 	# attack code never touches either. Re-zeroing gf_victory_progress
 	# on every Attack press used to be a real bug here: it would
 	# silently erase progress flight combat had already contributed
@@ -179,7 +179,7 @@ func _on_round_tick() -> void:
 	# Line 660/670: surrender or total loss ends the round loop.
 	if GameState.gf_victory_progress >= GameState.gf_enemy_strength:
 		GameState.gf_planet_surrendered = true
-		GameState.planet_secured[GameState.current_planet] = true
+		GameState.planet_secured[GameState.current_planet] = 1
 		_finish_battle("THE PLANET HAS SURRENDERED!", true)
 	elif GameState.troops <= 0.0:
 		_finish_battle("THE BATTLE IS LOST! ALL TROOPS HAVE BEEN DESTROYED!")

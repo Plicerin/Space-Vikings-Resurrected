@@ -25,7 +25,7 @@ func _ready() -> void:
 
 	$VBox/Menu/NavigationButton.pressed.connect(func(): GameState.goto_scene("res://scenes/nav_computer.tscn"))
 	$VBox/Menu/DirectoryButton.pressed.connect(func(): GameState.goto_scene("res://scenes/galaxy_directory.tscn"))
-	$VBox/Menu/GalaxyMapButton.pressed.connect(func(): GameState.goto_scene("res://scenes/galaxy_map.tscn"))
+	$VBox/Menu/GalaxyMapButton.pressed.connect(func(): GameState.goto_scene("res://scenes/star_chart.tscn"))
 	$VBox/Menu/ShipStatusButton.pressed.connect(func(): GameState.goto_scene("res://scenes/status.tscn"))
 	$VBox/Menu/SuppliesButton.pressed.connect(func(): GameState.goto_scene("res://scenes/supply_report.tscn"))
 	$VBox/Menu/ReturnButton.pressed.connect(func(): GameState.goto_scene("res://scenes/com.tscn"))

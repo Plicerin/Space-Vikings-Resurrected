@@ -7,7 +7,7 @@ extends Control
 ##
 ## Gated per-system on `GameState.planet_scouted` ($38240+C, line
 ## 1005's `IF PEEK(38240+C)=0 THEN "NO INFORMATION AVAILABLE"`) — set
-## true on arrival by `galaxy_map.gd`. Tech-tier description text is
+## true on arrival (flight_program.gd, jump_ready()). Tech-tier description text is
 ## this screen's own distinct wording (lines 1030-1070), not the same
 ## strings `GROUND FORCES.bas`/`COLLECT.bas` use for the same tiers.
 ##
@@ -70,7 +70,7 @@ func _show_detail(index: int) -> void:
 			lines.append("ORBITING DEFENSE CAPABILITY --\nFIGHTER PROTECTION PROBABLE.")
 		lines.append("")
 		lines.append("POPULATION = APPROX. %d" % (GameState.planet_population_scale[index] * 35294))
-		if GameState.planet_secured[index]:
+		if GameState.planet_secured[index] != 0:
 			lines.append("%s HAS BEEN SECURED" % GameState.STAR_NAMES[index])
 		else:
 			lines.append("%s IS INDEPENDENT." % GameState.STAR_NAMES[index])

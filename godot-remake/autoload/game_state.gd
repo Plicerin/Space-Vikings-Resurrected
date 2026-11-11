@@ -8,18 +8,6 @@ extends Node
 ## new bookkeeping the port needs that the original didn't need in this
 ## form (e.g. Godot's own scene path instead of `RUN "X"`).
 
-# --- Ship attitude & position ---
-# Original: $7321 (pitch), $7322 (bank), $7323 (heading), each a
-# 0-255 byte representing a full 360° turn; X/Y/Z world-position
-# variables in STARSHIP SIMULATOR.bas. Stored here in degrees/world
-# units directly rather than replicating the byte encoding — see
-# scripts/flight/ship_controller.gd for the behavior this drives.
-var ship_position: Vector3 = Vector3.ZERO
-var pitch_deg: float = 0.0
-var bank_deg: float = 0.0
-var heading_deg: float = 0.0
-var throttle: float = 0.0
-
 # --- The machine the hi-res programs share ---
 # The original's programs hand each other more than variables: the two
 # hi-res pages, the 3D engine's display list at $7300 (with the ship's
@@ -94,9 +82,10 @@ var troops_stationed_at: int = 1   # $38158, real starting value — set by
 	# an explicit `POKE 38158,1` in START.bas's new-game setup (line
 	# 2030), which runs after and overrides the blob's own value there
 # $38389 (enlist) / $38149 (base) — "once per trip" flags, both reset
-# together by H_D.bas line 105 at the start of a fresh orbital
-# engagement. This port's nearest equivalent moment is the re-entry
-# sequence (scripts/ui/planet_approach.gd) — see its _ready().
+# together by H_D.bas line 105 on arriving at a star (flight_program.gd,
+# jump_finish()). The chart's "Y" writes 8 to the second one's byte and
+# COM's directory page puts 0 back (GALAXY MAP.bas 3260, COM.bas 1007),
+# so asking the chart about a star gives the base its turn back.
 var enlisted_this_trip: bool = false
 var base_built_this_trip: bool = false
 
@@ -105,8 +94,9 @@ var base_built_this_trip: bool = false
 # $38261+C population scale, $38240+C scouted/visited (COM.bas
 # lines 1005-1180; GROUND_COMBAT_ANALYSIS.md's source map).
 const PLANET_COUNT := 20
-# Shared by galaxy_map.gd, galaxy_directory.gd, and nav_computer.gd —
-# COLLECT.bas/STATUS.bas/COM.bas's own identical 20-name DATA line.
+# STATUS.bas's and COLLECT.bas's 20-name DATA line. COM.bas and GALAXY
+# MAP.bas have the same list with one name different: star 16 is
+# "GROOMBRIDGE 168" there (chart_program.gd, star_name()).
 const STAR_NAMES := [
 	"SOL", "ALPHA CENTAURI", "BARNARD'S STAR", "WOLF 359", "LUYTEN",
 	"LALANDE 21185", "SIRIUS", "VARCAR", "XANADON", "EPSILON ERIDANA",
@@ -114,7 +104,11 @@ const STAR_NAMES := [
 	"GROOMBRIDGE 1618", "KRUGER 60", "EPSILON INDI", "ARGO", "SHIVANDA",
 ]
 var planet_tech: Array[int] = []
-var planet_secured: Array[bool] = []
+## `PEEK (38219 + planet)`, the byte itself: the programs that set it
+## write 1 and 0, GALAXY MAP.bas 3066 paints a star violet when it is 1
+## and COM.bas 1120 calls it secured when it is not 0. They are not the
+## same thing for SOL: see load_planet_record().
+var planet_secured: Array[int] = []
 var planet_has_base: Array[bool] = []
 var planet_scouted: Array[bool] = []
 var planet_population_scale: Array[int] = []
@@ -199,10 +193,20 @@ const DEFENDER_TIER_LABELS := {
 var orbital_defender_tier: int = 0 # $38205 ("ET")
 
 
+## The byte after the twentieth record ($9921), which the copy reaches
+## when the ship is at SHIVANDA. `P/F-M` has 255 there.
+var planet_record_overrun: int = 255
+
+
 ## `POKE 38824,1: CALL 38825` -- write the working registers back to
 ## this planet's record.
 func store_planet_record(index: int) -> void:
 	planet_defender_threshold[index] = defender_damage_threshold
+	# the seventeenth byte: see load_planet_record()
+	if index + 1 < PLANET_COUNT:
+		planet_defender_threshold[index + 1] = float(planet_secured[0])
+	else:
+		planet_record_overrun = planet_secured[0]
 	planet_defender_type[index] = orbital_defender_tier
 	planet_escort_fighters[index] = flight_escort_fighters
 	planet_surrendered[index] = gf_planet_surrendered
@@ -210,8 +214,24 @@ func store_planet_record(index: int) -> void:
 
 ## `POKE 38824,0: CALL 38825` -- make this planet's record the working
 ## registers.
+##
+## A record is 16 bytes and the routine copies 17 (`CPY #$11` at $97DC),
+## from the table at $97E1 to 38204-38220. The seventeenth is the first
+## byte of the next planet's record, its defender's threshold, and 38220
+## is SOL's secured flag. So that flag is whatever the planet after the
+## one the ship is at has for a threshold: 100 in a new game (ALPHA
+## CENTAURI's), not the 1 that `PLANET FILE-M` loads. The chart, which
+## wants a 1, draws SOL white; COM's directory, which wants anything but
+## 0, says SOL HAS BEEN SECURED. Storing the record puts the byte back
+## where it came from, changed or not. Seen live: 38220 reads 100 at SOL
+## in analysis/live/jump/jump_live.log, and SOL is white in
+## analysis/live/chart/chart_clean_p1.bin.
 func load_planet_record(index: int) -> void:
 	defender_damage_threshold = planet_defender_threshold[index]
+	if index + 1 < PLANET_COUNT:
+		planet_secured[0] = int(planet_defender_threshold[index + 1])
+	else:
+		planet_secured[0] = planet_record_overrun
 	var type: int = planet_defender_type[index]
 	orbital_defender_tier = 3 if type == 2 else type
 	flight_escort_fighters = planet_escort_fighters[index]
@@ -263,7 +283,7 @@ var target_planet: int = -1        # $38163 (travel target) - 1. A new
 # this entire shared-register range) on every new game.
 var gf_enemy_strength: float = 0.0   # SP, $38150 (blob: 0)
 var gf_victory_progress: float = 1.0 # VP, $38160 (blob: 1). Real reset
-	# point is H_D.bas line 93, system arrival (galaxy_map.gd), NOT the
+	# point is H_D.bas line 93, system arrival (jump_finish()), NOT the
 	# start of a ground attack — GROUND FORCES.bas's own attack code
 	# never touches it, and flight-combat laser fire
 	# (flight_combat.gd, STARSHIP SIMULATOR.bas lines 1535-1550)
@@ -437,7 +457,7 @@ const LOOT_SELL_MULTIPLIERS: Array[float] = [
 # system visit (any planet, not just the same one — this is a single
 # global flag) gets J1/J2's multipliers cut to ×0.6; H_D.bas line 5
 # resets it on every fresh system arrival (`POKE 301,0`), same moment
-# galaxy_map.gd already resets the other per-arrival fields at.
+# the other per-arrival fields are reset at (flight_program.gd).
 var loot_collected_this_visit: bool = false # $301
 
 
@@ -481,7 +501,7 @@ func start_new_game() -> void:
 	planet_surrendered.clear()
 	for i in range(PLANET_COUNT):
 		planet_tech.append(NEW_GAME_TECH[i])
-		planet_secured.append(false)
+		planet_secured.append(0)
 		planet_has_base.append(false)
 		planet_scouted.append(false)
 		planet_population_scale.append(NEW_GAME_POPULATION[i])
@@ -491,7 +511,8 @@ func start_new_game() -> void:
 		planet_surrendered.append(NEW_GAME_SURRENDERED[i] == 1)
 	# `PLANET FILE-M`'s secured, scouted and base arrays are each 1 for
 	# SOL and 0 for the other nineteen.
-	planet_secured[0] = true
+	planet_secured[0] = 1
+	planet_record_overrun = 255
 	planet_scouted[0] = true
 	planet_has_base[0] = true
 
@@ -511,12 +532,6 @@ func start_new_game() -> void:
 	enlisted_this_trip = false
 	base_built_this_trip = false
 	loot_collected_this_visit = false
-
-	ship_position = Vector3.ZERO
-	pitch_deg = 0.0
-	bank_deg = 0.0
-	heading_deg = 0.0
-	throttle = 0.0
 
 	gf_enemy_strength = 0.0
 	gf_victory_progress = 1.0
@@ -610,7 +625,7 @@ func has_save_file() -> bool:
 	return FileAccess.file_exists(SAVE_PATH)
 
 
-func save_to_disk() -> void:
+func save_to_disk(path: String = SAVE_PATH) -> void:
 	# END.bas line 210 stores the current planet's record before the BSAVEs.
 	store_planet_record(current_planet)
 	var data := {
@@ -621,6 +636,7 @@ func save_to_disk() -> void:
 		"orbital_defender_tier": orbital_defender_tier, "missile_mode_active": missile_mode_active,
 		"shields_up": shields_up, "condition": condition, "autopilot_active": autopilot_active,
 		"planet_tech": planet_tech, "planet_secured": planet_secured,
+		"planet_record_overrun": planet_record_overrun,
 		"planet_has_base": planet_has_base, "planet_scouted": planet_scouted,
 		"planet_population_scale": planet_population_scale,
 		"planet_defender_threshold": planet_defender_threshold,
@@ -642,19 +658,26 @@ func save_to_disk() -> void:
 		"ship_env_control": ship_env_control, "ship_hull": ship_hull,
 		"ship_hyperdrive": ship_hyperdrive, "ship_missile_system": ship_missile_system,
 		"ship_laser": ship_laser, "ship_nav_computer": ship_nav_computer,
-		"ship_position": [ship_position.x, ship_position.y, ship_position.z],
+		# lines 200-202: the nine bytes at 29467, and what of the flight
+		# program's own is inside SHIP'S DATA (38157, 38191)
+		"ship": [ship_x, ship_y, ship_z, ship_pitch, ship_bank, ship_heading],
+		"ship_speed": ship_speed, "loop_flip": loop_flip,
 	}
-	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	var file := FileAccess.open(path, FileAccess.WRITE)
 	file.store_string(JSON.stringify(data))
 
 
-func load_from_disk() -> void:
-	var file := FileAccess.open(SAVE_PATH, FileAccess.READ)
+func load_from_disk(path: String = SAVE_PATH) -> void:
+	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
 		return
 	var data: Dictionary = JSON.parse_string(file.get_as_text())
 	if data == null:
 		return
+	# START.bas runs the same lines for an old game as for a new one
+	# (the machine set up, INSTRUMENTS to come); only the three files
+	# are different ones.
+	start_new_game()
 	credits = data.get("credits", credits)
 	stardate = data.get("stardate", stardate)
 	troops = data.get("troops", troops)
@@ -680,6 +703,7 @@ func load_from_disk() -> void:
 		planet_escort_fighters.assign(data.get("planet_escort_fighters", planet_escort_fighters))
 		planet_surrendered.assign(data.get("planet_surrendered", planet_surrendered))
 	planet_secured.assign(data.get("planet_secured", planet_secured))
+	planet_record_overrun = int(data.get("planet_record_overrun", planet_record_overrun))
 	planet_has_base.assign(data.get("planet_has_base", planet_has_base))
 	planet_scouted.assign(data.get("planet_scouted", planet_scouted))
 	loot.assign(data.get("loot", loot))
@@ -707,5 +731,17 @@ func load_from_disk() -> void:
 	ship_missile_system = data.get("ship_missile_system", ship_missile_system)
 	ship_laser = data.get("ship_laser", ship_laser)
 	ship_nav_computer = data.get("ship_nav_computer", ship_nav_computer)
-	var pos: Array = data.get("ship_position", [0.0, 0.0, 0.0])
-	ship_position = Vector3(pos[0], pos[1], pos[2])
+	ship_speed = int(data.get("ship_speed", ship_speed))
+	loop_flip = int(data.get("loop_flip", loop_flip))
+	# START.bas lines 220-250, as a new game does them, and 225 between:
+	# the ship back where it was.
+	load_planet_record(current_planet)
+	var ship: Array = data.get("ship", [])
+	if ship.size() == 6:
+		ship_x = int(ship[0])
+		ship_y = int(ship[1])
+		ship_z = int(ship[2])
+		ship_pitch = int(ship[3])
+		ship_bank = int(ship[4])
+		ship_heading = int(ship[5])
+	load_orbit_ship()

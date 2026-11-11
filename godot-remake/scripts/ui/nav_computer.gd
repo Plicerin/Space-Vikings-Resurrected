@@ -8,19 +8,12 @@ extends Control
 ## Computer — a real, literal quirk this screen shares with every
 ## other Central Computer sub-screen (see galaxy_directory.gd).
 ##
-## Liberty, not in the original: "SET COURSE" genuinely sets
-## `GameState.target_planet` here (lines 860-897's numeric entry,
-## same gates — 1-20 only, "THAT'S WHERE WE ARE NOW" if you pick the
-## current planet), but doesn't itself trigger travel. In the real
-## source, a separately-triggered hyperdrive jump (`H_D.bas`, run by
-## the H key in flight -- STARSHIP SIMULATOR.bas line 209, not wired
-## in this port) later reads `target_planet` to decide where you
-## arrive. This port's
-## `galaxy_map.gd` already collapses "pick a destination" and "arrive
-## there" into one click — an architecture decision from well before
-## this screen existed — so Set Course here is real data entry with no
-## further mechanical effect yet; actually traveling still means going
-## to the Galaxy Map and picking a system directly.
+## "SET COURSE" sets `GameState.target_planet` (lines 860-897's numeric
+## entry, same gates — 1-20 only, "THAT'S WHERE WE ARE NOW" if you pick
+## the current planet) and does nothing else, as in the original: the
+## jump is the `H` key in flight (STARSHIP SIMULATOR.bas line 209,
+## `H_D.bas`; flight_program.gd), which reads the course set here. The
+## star chart does not set a course.
 
 @onready var _menu: VBoxContainer = $VBox/Menu
 @onready var _set_course: VBoxContainer = $VBox/SetCourse

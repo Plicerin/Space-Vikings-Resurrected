@@ -99,7 +99,7 @@ func _anger_government() -> void:
 	# Lines 2610/2602-2605: $38208 (global "surrendered") and
 	# $38219+planet (per-planet "secured") reset together.
 	GameState.gf_planet_surrendered = false
-	GameState.planet_secured[GameState.current_planet] = false
+	GameState.planet_secured[GameState.current_planet] = 0
 
 
 func _return() -> void:

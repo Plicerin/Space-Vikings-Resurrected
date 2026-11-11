@@ -47,6 +47,15 @@ enum Left {
 ## Every floppy wait below is multiplied by this (1.0 = the real thing).
 const DISK_WAIT_SCALE := 0.15
 
+# -- INSTRUMENTS.bas (tools/mame/lines_live.lua) --
+## Line 5, HGR. The page goes black at once; this is how long it takes.
+const INSTRUMENTS_CLEAR := 16.8
+## Lines 10-160, the frame and the lamp frames. They are shown here when
+## they are all there, which is at the end of this.
+const INSTRUMENTS_FRAME := 38.5
+## Lines 165-200, the lettering, and lines 205-206.
+const INSTRUMENTS_TEXT := 32.5
+
 # -- the main loop --
 ## Keys read (line 200) to line 147's POKEs of the next pass.
 const KEYS_TO_VIEW := 30.0
@@ -61,6 +70,7 @@ const RESTART := 23.0
 
 # -- floppy loads (scaled) --
 ## RUN STARSHIP SIMULATOR up to line 9: 392 to 430 measured.
+const LOAD_INSTRUMENTS := 171.0
 const LOAD_SIMULATOR := 400.0
 const LOAD_RE := 140.0
 const LOAD_ORBIT := 170.0
@@ -127,7 +137,8 @@ func view_frames() -> float:
 
 func run() -> Left:
 	if GameState.instruments_due:
-		program.instruments()
+		await _run(LOAD_INSTRUMENTS)
+		await instruments(true)
 	await _run(LOAD_SIMULATOR)
 	_start(true)
 	while true:
@@ -175,6 +186,19 @@ func run() -> Left:
 			FlightProgram.Keyed.RADAR:
 				return Left.RADAR
 	return Left.STOPPED
+
+
+## INSTRUMENTS.bas at the speed it draws. `lamps` is line 210's TRANLIT
+## call, which the star chart's way out goes without.
+func instruments(lamps: bool) -> void:
+	program.instruments_clear()
+	await wait.call(INSTRUMENTS_CLEAR)
+	program.instruments_frame()
+	await wait.call(INSTRUMENTS_FRAME)
+	program.instruments_text()
+	await wait.call(INSTRUMENTS_TEXT)
+	if lamps:
+		program.instruments_lamps()
 
 
 func _start(run_program: bool) -> void:

@@ -155,12 +155,24 @@ func press(character: String) -> void:
 # -- INSTRUMENTS.bas ----------------------------------------------------
 
 
-## The whole program: the panel on page 1, then TRANLIT's redraw of every
-## lamp (line 210).
+## The whole program as it runs on the way to the flight: the panel on
+## page 1, then TRANLIT's redraw of every lamp (line 210).
 func instruments() -> void:
+	instruments_clear()
+	instruments_frame()
+	instruments_text()
+	instruments_lamps()
+
+
+## Lines 3-5.
+func instruments_clear() -> void:
 	text.page = 0 # 3
 	page_1.clear() # 5  HGR: POKE -16302,0
 	view.shown = 0
+
+
+## Lines 10-160.
+func instruments_frame() -> void:
 	page_1.hcolor = 1 # 10-60: the frame, in green
 	page_1.hplot_path([123, 145, 1, 145, 1, 128, 279, 128, 279, 145, 157, 145])
 	page_1.hplot_path([123, 128, 123, 183, 133, 183, 133, 189, 147, 189, 147, 183, 157, 183, 157, 128])
@@ -180,6 +192,11 @@ func instruments() -> void:
 		var x: int = corner[0]
 		var y: int = corner[1]
 		page_1.hplot_path([x, y, x + 11, y, x + 11, y + 5, x, y + 5, x, y])
+
+
+## Lines 165-200. (Lines 205-206 then fill the lo-res screen, which
+## nobody is looking at; it takes them a third of a second.)
+func instruments_text() -> void:
 	text.mode = 0xFF # 165
 	text.vtab(18) # 170
 	text.htab(4)
@@ -237,7 +254,14 @@ func instruments() -> void:
 	text.htab(34)
 	text.print_line("YHDNG")
 	GameState.instruments_due = false
-	tranlit_all() # 210  POKE 38189,10: CALL 38402
+
+
+## Line 210, `POKE 38189,10: CALL 38402`, which the program skips when
+## the star chart ran it (PEEK(38391) = 77): line 220 goes back to
+## GALAXY MAP with the lamp frames empty, and that paints them itself
+## (chart_program.gd, lamp_blocks()).
+func instruments_lamps() -> void:
+	tranlit_all()
 
 
 # -- TRANLIT ($9600, CALL 38402) ----------------------------------------

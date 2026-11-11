@@ -218,7 +218,7 @@ func _score(j1: float, j2: float) -> Outcome:
 		text.htab(8)
 		fx.type_text("THE PLANET HAS SURRENDERED", text.put, fx.TEXT_FRAMES)
 		await _finish()
-		GameState.planet_secured[GameState.current_planet] = true
+		GameState.planet_secured[GameState.current_planet] = 1
 		GameState.gf_planet_surrendered = true
 	if dp > int(GameState.defender_damage_threshold) and GameState.orbital_defender_tier != 0: # 1560
 		return Outcome.DEFENDER_DESTROYED
