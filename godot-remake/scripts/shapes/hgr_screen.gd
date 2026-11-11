@@ -159,26 +159,34 @@ func hplot(x: int, y: int) -> void:
 	_touch(y)
 
 
-## HPLOT TO x,y from the last plotted point.
+## HPLOT TO x,y from the last plotted point: Applesoft's HGLIN ($F53A),
+## a step at a time. It never moves diagonally. Each step goes one dot
+## across or one row up or down and plots, so a line is a staircase of
+## |dx| + |dy| + 1 dots, thicker than the usual one dot a row, and not
+## the same line drawn from the other end.
 func hplot_to(x: int, y: int) -> void:
 	var x0 := _last.x
 	var y0 := _last.y
 	var dx := absi(x - x0)
-	var dy := -absi(y - y0)
-	var sx := 1 if x0 < x else -1
-	var sy := 1 if y0 < y else -1
-	var err := dx + dy
-	while true:
-		hplot(x0, y0)
-		if x0 == x and y0 == y:
-			break
-		var e2 := 2 * err
-		if e2 >= dy:
-			err += dy
+	var dy := absi(y - y0)
+	var sx := 1 if x >= x0 else -1
+	var sy := 1 if y > y0 else -1
+	# the error term is 16 bits and the carry of the last sum picks the step
+	var e := dx
+	var across := e >= dy
+	e = (e - dy) & 0xFFFF
+	hplot(x0, y0)
+	for step in range(dx + dy):
+		if across:
 			x0 += sx
-		if e2 <= dx:
-			err += dx
+			across = e >= dy
+			e = (e - dy) & 0xFFFF
+		else:
 			y0 += sy
+			e += dx
+			across = e > 0xFFFF
+			e &= 0xFFFF
+		hplot(x0, y0)
 	_last = Vector2i(x, y)
 
 

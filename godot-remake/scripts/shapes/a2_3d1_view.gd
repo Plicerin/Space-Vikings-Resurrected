@@ -104,9 +104,13 @@ var memory := PackedByteArray()
 var pages: Array = []
 ## The page the last soft switch (opcode 7) put on show: 0 or 1.
 var shown := 0
-## How many dots and line dots the last run() lit (for timing the pass).
+## What the last run() did, for timing the pass (space_flight.gd): dots
+## and line dots lit, records of the list run, perspective divides and
+## clipping steps.
 var dots_drawn := 0
 var records_run := 0
+var projections := 0
+var clip_steps := 0
 
 # These outlive a call: the engine keeps them in its own code.
 var _window := [69, 94, 0, 0] # as the file is on disk
@@ -282,6 +286,8 @@ func run() -> void:
 	_screen_b = Vector2i.ZERO
 	dots_drawn = 0
 	records_run = 0
+	projections = 0
+	clip_steps = 0
 	var at := DATABASE
 	while at < 0xFFF0:
 		var op: int = m[at]
@@ -369,6 +375,7 @@ func _line(a: Point, b: Point, reuse: int) -> void:
 			return
 		while true:
 			clip(b, a)
+			clip_steps += 1
 			if a.out == 0:
 				break
 			if a.out & b.out:
@@ -384,6 +391,7 @@ func _line(a: Point, b: Point, reuse: int) -> void:
 		if _no_clip:
 			return
 		clip(a, b)
+		clip_steps += 1
 		budget -= 1
 		if budget == 0:
 			return
@@ -463,6 +471,7 @@ func _transform(at: int) -> Point:
 ## plot routines take: x from the window centre to the right, y from it
 ## upwards.
 func _project(p: Point) -> Vector2i:
+	projections += 1
 	var x: int = (scale(div(p.x, p.z) >> 8, _window[0]) + _window[2]) & 0xFF
 	var y: int = (scale(div(p.y, p.z) >> 8, _window[1]) + _window[3]) & 0xFF
 	return Vector2i(x, y)

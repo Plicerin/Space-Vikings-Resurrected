@@ -81,6 +81,10 @@ var stardate: float = 100.3
 # --- Troops ---
 var troops: float = 2000.0         # TR, real starting value (see above)
 var troop_morale: int = 6          # $38203, range 1 (AWFUL) - 6 (EXCELLENT)
+## $38170. GROUND FORCES.bas line 14 sets it to 17 when the troops go
+## into a fight; SHORE LEAVE.bas line 2087 sets it to 70. H_D.bas lines
+## 12-13: jumping away with it still at 17 costs a point of morale.
+var morale_flag: int = 0
 var troop_location: int = 3        # $38166: 0=on board 1=planetside 2=shore
 	# leave 3=cryo. Real starting value IS 3 (cryo), confirmed directly
 	# from `SHIP'S DATA-M.payload.bin` (the new-game memory blob) —
@@ -499,6 +503,7 @@ func start_new_game() -> void:
 	stardate = 100.3
 	troops = 2000.0
 	troop_morale = 6
+	morale_flag = 0
 	troop_location = 3
 	troops_stationed_at = 1
 	current_planet = 0
@@ -610,7 +615,7 @@ func save_to_disk() -> void:
 	store_planet_record(current_planet)
 	var data := {
 		"credits": credits, "stardate": stardate,
-		"troops": troops, "troop_morale": troop_morale,
+		"troops": troops, "troop_morale": troop_morale, "morale_flag": morale_flag,
 		"troop_location": troop_location, "troops_stationed_at": troops_stationed_at,
 		"current_planet": current_planet, "target_planet": target_planet,
 		"orbital_defender_tier": orbital_defender_tier, "missile_mode_active": missile_mode_active,
@@ -654,6 +659,7 @@ func load_from_disk() -> void:
 	stardate = data.get("stardate", stardate)
 	troops = data.get("troops", troops)
 	troop_morale = data.get("troop_morale", troop_morale)
+	morale_flag = data.get("morale_flag", morale_flag)
 	troop_location = data.get("troop_location", troop_location)
 	troops_stationed_at = data.get("troops_stationed_at", troops_stationed_at)
 	current_planet = data.get("current_planet", current_planet)

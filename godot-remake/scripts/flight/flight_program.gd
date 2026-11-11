@@ -1,14 +1,14 @@
 extends RefCounted
 ## STARSHIP SIMULATOR.bas, the flight program, a statement at a time,
-## together with the small programs it chains to and back from:
-## INSTRUMENTS.bas (draws the panel), RE.bas and ORBIT.bas (entering and
-## leaving the atmosphere), the first line of H_D.bas (the hyperdrive's
-## refusal) and TRANLIT (the panel lamps, machine code at $9600).
+## together with what the small programs it chains to and back from
+## leave behind: INSTRUMENTS.bas (draws the panel), RE.bas and ORBIT.bas
+## (entering and leaving the atmosphere), H_D.bas (the hyperdrive),
+## EX.bas, DMG.bas and S_X.bas (the ends of a fight) and TRANLIT (the
+## panel lamps, machine code at $9600).
 ##
 ## There is no timing in here. One pass of the original's main loop is
 ## cut into the pieces between which time passes on the real machine,
-## and the scene (scripts/flight/space_flight.gd) calls them with the
-## measured waits in between:
+## and flight_loop.gd calls them with the measured waits in between:
 ##
 ##     begin_pass()   lines 15-147: read the stick, move the ship, tell
 ##                    A2-3D1 which page to show and which to draw on
@@ -16,12 +16,13 @@ extends RefCounted
 ##                    3D view is drawn on the hidden page
 ##     after_view()   lines 150-182: panel copy, read-outs, gunsight,
 ##                    gauge markers
-##     (lines 185-192, the fighting, are the scene's: flight_combat.gd)
+##     (lines 185-192, the fighting: flight_combat.gd)
 ##     keys()         lines 200-210
 ##
-## tests/check_flight_passes.gd runs the same pieces without the waits
-## against 50 passes of the real game (tools/mame/pass_live.lua) and
-## compares both hi-res pages byte for byte after every pass.
+## tests/check_flight_passes.gd runs flight_loop.gd with no waits against
+## the real game, recorded pass by pass in MAME (tools/mame/pass_live.lua,
+## jump_live.lua), and compares both hi-res pages byte for byte after
+## every pass.
 ##
 ## How the original's display works, since nothing here makes sense
 ## without it. `FOR OO = 0 TO 1` alternates two passes:
@@ -303,6 +304,13 @@ func _lamp(first_row: int, column: int, bytes: Array) -> void:
 # -- STARSHIP SIMULATOR.bas ---------------------------------------------
 
 
+## RUN <program>, the DOS command: when the program is loaded and about
+## to start, one carriage return goes through the character generator
+## (a BLOAD sends none). Seen live, tools/mame/print_live.lua.
+func ran() -> void:
+	text.new_line()
+
+
 ## Lines 1-9. `run` is true for RUN STARSHIP SIMULATOR (every variable
 ## starts at zero) and false for line 500's GOTO 1 (they keep their
 ## values).
@@ -467,12 +475,20 @@ func _restart(lamp: int) -> Keyed:
 
 # -- RE.bas -------------------------------------------------------------
 
+## Rows of the window RE.bas, ORBIT.bas and the rest fill, one HPLOT each.
+const OVERLAY_ROWS := 126
 
-## Lines 1-26: gauges and read-outs off, the window filled with orange
-## and the message on it, the ORBIT lamp white.
-func reentry_show() -> void:
+
+## Lines 1-10: gauges and read-outs off, ready for the window to be
+## filled with orange a row at a time (overlay_row) and the message put
+## on it (overlay_message). flight_loop.gd has the order and the waits.
+func reentry_open() -> void:
 	text.page = 0 # 1
-	_overlay_opening(5, "REENTRY SEQUENCE START") # 2-20
+	_overlay_open(5)
+
+
+## Lines 21-26.
+func reentry_close() -> void:
 	page_1.hcolor = 3 # 21
 	text.page = 1
 	for j in range(153, 158): # 22
@@ -508,11 +524,14 @@ func reentry_load() -> void:
 # -- ORBIT.bas ----------------------------------------------------------
 
 
-## Lines 1-26, RE's in green.
-func orbit_show() -> void:
+## Lines 1-10, RE's in green.
+func orbit_open() -> void:
 	page_1.hcolor = 0 # 1
 	text.page = 0 # 2
-	_overlay_opening(6, "ORBITAL INSERTION START") # 2-20
+	_overlay_open(6)
+
+
+func orbit_close() -> void:
 	page_1.hcolor = 1 # 21
 	text.page = 1
 	for j in range(153, 158): # 22
@@ -522,8 +541,8 @@ func orbit_show() -> void:
 
 
 ## Lines 27-40: the star field again, with whatever is in orbit, and the
-## ship at 700, 200, 2000 heading 190.
-func orbit_load() -> void:
+## ship at 700, 200, 2000 heading 190. True when a ship was loaded.
+func orbit_load() -> bool:
 	var kept_pitch := GameState.ship_pitch # 28
 	var kept_bank := GameState.ship_bank
 	text.print_line(" ") # 30
@@ -537,12 +556,14 @@ func orbit_load() -> void:
 	GameState.ship_bank = kept_bank
 	GameState.ship_heading = 190
 	text.print_line(" ") # 40
+	return GameState.orbital_defender_tier != 0
 
 
-## Lines 2-20 of RE.bas and ORBIT.bas, the same but for the colour and
-## the words.
-func _overlay_opening(fill_color: int, message: String) -> void:
-	page_1.hcolor = 0 # 2: speed and energy markers off, wherever they are
+## Line 2 of RE.bas and ORBIT.bas, line 8 of H_D.bas and of COM.bas: the
+## speed and energy markers off, wherever they are, and the read-outs
+## blanked.
+func markers_off() -> void:
+	page_1.hcolor = 0
 	for x in range(200, 261, 5):
 		page_1.draw(shapes, 25, x, 133)
 	for x in range(13, 74, 5):
@@ -552,13 +573,25 @@ func _overlay_opening(fill_color: int, message: String) -> void:
 	text.print_text(" ".repeat(17))
 	text.htab(24)
 	text.print_line(" ".repeat(16))
+
+
+## Lines 2-10 of RE.bas and ORBIT.bas, the same but for the colour.
+func _overlay_open(fill_color: int) -> void:
+	markers_off() # 2
 	view.shown = 0 # 5  POKE -16300,0
 	text.page = 0
 	text.mode = 0xFF
 	page_1.hcolor = fill_color # 10
-	for y in range(126):
-		page_1.hplot_path([0, y, 279, y])
-	text.vtab(7) # 20
+
+
+## Line 10: one row of the fill.
+func overlay_row(y: int) -> void:
+	page_1.hplot_path([0, y, 279, y])
+
+
+## Line 20: the words, in inverse, with a blank line above and below.
+func overlay_message(message: String) -> void:
+	text.vtab(7)
 	text.htab(10)
 	text.print_line(" ".repeat(message.length()))
 	text.htab(10)
@@ -568,12 +601,172 @@ func _overlay_opening(fill_color: int, message: String) -> void:
 
 
 # -- H_D.bas ------------------------------------------------------------
+#
+# The hyperdrive, watched live from the key press to the first pass at
+# the other star (tools/mame/jump_live.lua, analysis/live/jump/). The
+# pieces are in the order flight_loop.gd calls them.
+
+## Where every ray of line 20 starts (C1, C2).
+const JUMP_CENTRE := [140, 63]
+## Line 17 blanks text rows 1 to 16: the window and two rows of the panel.
+const JUMP_CLEAR_ROWS := 16
+## Line 18: calls of the noise routine before the first ray.
+const JUMP_NOISE_CALLS := 251
+## Line 20: rays per burst. The first burst is white, the second black.
+const JUMP_RAYS := 175
 
 
-## H_D.bas line 1: page 1 on show, and no jump from inside an atmosphere,
-## to the planet the ship is at, or with no course set. A refusal costs
-## nothing but the two program loads: RUN STARSHIP SIMULATOR.
+## Line 1: page 1 on show, and no jump from inside an atmosphere, to the
+## planet the ship is at, or with no course set. A refusal costs nothing
+## but the two program loads: RUN STARSHIP SIMULATOR.
 func hyperdrive_refused() -> bool:
 	view.shown = 0 # POKE -16300,0
 	return GameState.in_atmosphere or GameState.target_planet == GameState.current_planet \
 		or GameState.target_planet < 0
+
+
+## Line 2. With no energy at all the ship is lost instead (lines 3-4).
+func jump_has_energy() -> bool:
+	return int(GameState.ship_energy) != 0
+
+
+## Line 3: where "OUT OF ENERGY" and then "ORBIT DECAYING" are printed,
+## on page 1. flight_loop.gd prints them a letter at a time.
+func jump_no_energy_message() -> void:
+	view.shown = 0
+	text.page = 0
+	text.htab(15)
+	text.vtab(15)
+
+
+## Lines 10000-10020: light-years to the course's star, which is also the
+## energy the jump costs. The original takes the difference of the two
+## stars' chart X three times over (X1, Y1 and Z1 are all read from the
+## X table), so the chart's Y and Z do not count.
+func jump_distance() -> int:
+	var d: int = absi(GameState.PLANET_X[GameState.current_planet]) \
+		- absi(GameState.PLANET_X[GameState.target_planet])
+	return int(sqrt(3.0 * d * d) + 0.6)
+
+
+## Lines 5-6: the read-outs go to page 2, the loot of the star being left
+## is forgotten, the star date moves on.
+func jump_log(distance: int) -> void:
+	text.page = 1 # 5  POKE 974,64
+	GameState.loot_collected_this_visit = false # POKE 301,0
+	# 6: three INPUTs from MISC FILE. Each one's prompt is a NUL, which
+	# the character generator draws (glyph 0, a dot) and steps past; the
+	# line read from the file never reaches it.
+	for i in range(3):
+		text.put(0)
+	GameState.stardate += distance + 0.3
+
+
+## Lines 7-16: gauges off, troops and the planet's record put away, the
+## energy paid.
+func jump_ready(distance: int) -> void:
+	text.page = 0 # 7
+	markers_off() # 8
+	if GameState.troop_location == 0 or GameState.troop_location == 3: # 11
+		GameState.troops_stationed_at = GameState.target_planet + 1
+	GameState.store_planet_record(GameState.current_planet) # 12
+	if GameState.morale_flag == 17: # 12-13: troops that fought and were not paid off
+		GameState.troop_morale = maxi(GameState.troop_morale - 1, 0)
+		GameState.morale_flag = 0
+	page_1.hcolor = 3 # 14
+	GameState.ship_energy = maxf(int(GameState.ship_energy) - distance, 0.0)
+	text.mode = 0 # 15
+	text.page = 0 # 16
+	GameState.defender_damage_points = 0.0
+	GameState.planet_scouted[GameState.target_planet] = true
+
+
+## Line 17, one turn of the loop (l from 1 to JUMP_CLEAR_ROWS).
+func jump_clear_row(l: int) -> void:
+	text.vtab(l)
+	text.print_line(" ".repeat(40))
+	if l == JUMP_CLEAR_ROWS:
+		text.vtab(1)
+
+
+## Line 20, one ray, in whatever colour is set.
+func jump_ray() -> void:
+	page_1.hplot_path([JUMP_CENTRE[0], JUMP_CENTRE[1], int(randf() * 279.0), int(randf() * 125.0)])
+
+
+## Lines 25-76: the other star's record, what is in orbit there, and the
+## ship somewhere around it, level, on any heading. True when a file was
+## loaded for what is in orbit.
+func jump_arrive() -> bool:
+	GameState.load_planet_record(GameState.target_planet) # 25
+	GameState.current_planet = GameState.target_planet # 26
+	var tier: int = GameState.orbital_defender_tier
+	if GameState.planet_tech[GameState.current_planet] > 1 and tier == 0: # 30
+		view.load_debris()
+	elif tier == 0: # 37
+		view.remove_ship()
+	else: # 38-40
+		view.load_ship(tier)
+	GameState.ship_x = floori(10000.0 - randf() * 20000.0) # 50
+	GameState.ship_y = floori(5000.0 - randf() * 10000.0) # 60
+	var z := 0
+	while absi(z) < 7000: # 70: never close in
+		z = floori(10000.0 - randf() * 20000.0)
+	GameState.ship_z = z
+	GameState.ship_pitch = 0 # 73-75
+	GameState.ship_heading = int(randf() * 255.0)
+	GameState.ship_bank = 0
+	page_1.hcolor = 0 # 76: the second burst of rays rubs the first out
+	return tier != 0 or GameState.planet_tech[GameState.current_planet] > 1
+
+
+## Lines 90-105: what the planet can stand, from its technology. The
+## target stays set: a second H here is refused by line 1.
+func jump_finish() -> void:
+	var tech: int = GameState.planet_tech[GameState.current_planet]
+	if tech < 2: # 90
+		GameState.gf_enemy_strength = 0.0
+	else: # 93
+		GameState.gf_enemy_strength = tech * 60.0
+		GameState.defender_damage_threshold = tech * 60.0
+		GameState.gf_victory_progress = 0.0
+	GameState.enlisted_this_trip = false # 105
+	GameState.base_built_this_trip = false
+
+
+# -- EX.bas, DMG.bas, S_X.bas -------------------------------------------
+#
+# What these three leave behind. Their pictures are combat_fx.gd's.
+
+
+## EX.bas lines 30-56: nothing in orbit but the wreck, and half the
+## fighters gone with the defender.
+func ex_finish() -> void:
+	GameState.orbital_defender_tier = 0 # 30
+	view.remove_ship()
+	view.load_debris() # 40
+	GameState.flight_escort_fighters = GameState.flight_escort_fighters / 2 # 56
+
+
+## DMG.bas line 10: the DAMAGE lamp, orange, on page 1; and a blank
+## through the character generator wherever its cursor was left.
+func dmg_show() -> void:
+	page_1.hcolor = 5
+	for j in range(153, 158):
+		page_1.hplot_path([262, j, 271, j])
+	text.print_line(" ")
+
+
+## S_X.bas lines 2-5: page 1, inverse text, black lines.
+func sx_open() -> void:
+	view.shown = 0 # 2
+	text.page = 0 # 4
+	page_1.hcolor = 0 # 5
+	text.mode = 0xFF
+	text.new_line()
+
+
+## S_X.bas line 40: where the last message goes.
+func sx_message() -> void:
+	text.vtab(22)
+	text.htab(5)

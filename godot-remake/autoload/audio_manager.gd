@@ -48,6 +48,8 @@ var _noise_medium: AudioStreamWAV
 var _noise_heavy: AudioStreamWAV
 var _noise_explosion: AudioStreamWAV
 var _noise_destruction: AudioStreamWAV
+var _noise_jump: AudioStreamWAV
+var _noise_tick: AudioStreamWAV
 
 var _players: Array[AudioStreamPlayer] = []
 
@@ -62,11 +64,19 @@ func _ready() -> void:
 	# into double digits of seconds, nowhere near a real speaker burst's
 	# actual length. Step duration (noise coarseness/pitch) stays
 	# roughly constant across all five; only the overall duration grows.
-	_noise_light = _build_noise(0.10, 0.004)
-	_noise_medium = _build_noise(0.18, 0.004)
-	_noise_heavy = _build_noise(0.35, 0.004)
-	_noise_explosion = _build_noise(0.7, 0.004)
-	_noise_destruction = _build_noise(1.6, 0.0035)
+	#
+	# Since measured on the real machine (tools/mame/jump_live.lua): a
+	# `CALL SG` after the 4110 / 4120 / 4100 preset lasts 11 / 8 / 13
+	# video frames; EX.bas's 75 calls 95 frames; S_X.bas's 500 calls 240;
+	# H_D.bas line 18's 251 calls 120, and one call of line 20 under half
+	# a frame.
+	_noise_light = _build_noise(0.18, 0.004)
+	_noise_medium = _build_noise(0.13, 0.004)
+	_noise_heavy = _build_noise(0.22, 0.004)
+	_noise_explosion = _build_noise(1.6, 0.004)
+	_noise_destruction = _build_noise(4.0, 0.0035)
+	_noise_jump = _build_noise(2.0, 0.003)
+	_noise_tick = _build_noise(0.03, 0.003)
 
 	for i in range(POLYPHONY):
 		var p := AudioStreamPlayer.new()
@@ -106,6 +116,16 @@ func play_explosion() -> void:
 ## S_X.bas's 500-call burst — the player's OWN ship destroyed.
 func play_destruction() -> void:
 	_play(_noise_destruction)
+
+
+## H_D.bas line 18: the hyperdrive winding up, 251 calls.
+func play_jump() -> void:
+	_play(_noise_jump)
+
+
+## H_D.bas line 20: the one call that goes with each ray.
+func play_tick() -> void:
+	_play(_noise_tick)
 
 
 func _play(stream: AudioStreamWAV) -> void:

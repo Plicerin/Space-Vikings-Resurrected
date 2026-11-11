@@ -11,8 +11,8 @@ extends Node
 ## nothing while another is running, and `idle` fires when one ends.
 ##
 ## Timing. One unit is one video frame (1/60 s) of the real machine,
-## measured with tools/mame/fight_live.lua (page-change and byte-change
-## frames in analysis/fight_live_*.log):
+## measured with tools/mame/fight_live.lua and jump_live.lua (page-change
+## and byte-change frames, analysis/live/jump/jump_live.log):
 ##   - fighter pass: 5 frames per step (drawn about 2, erased about 3);
 ##     a strafing hit holds the step for about 35 with the turrets firing
 ##   - a `CALL SG` right after a GOSUB 4100/4110 preset lasts 13 / 11
@@ -21,11 +21,22 @@ extends Node
 ##     35, 40, done at 45
 ##   - laser: lines up in about 5 frames, 44 lit (`CALL LA`), erased over
 ##     about 5 in drawing order, 3 dark; 56 per pulse
-##   - missile sparkles: 12 frames per step
-##   - hi-res text: about 2.5 frames per character
-## The missile's direct hit (1200-1222), the damage flashes (3019/3032)
-## and EX.bas were not caught on a capture; their waits are estimates
-## built from the measured costs above and are marked ESTIMATE below.
+##   - missile: first sparkles 10 frames after the button is read, then
+##     about 11 per step (drawn 5, erased 6)
+##   - direct hit (1200-1222): on each side SCALE 1, 2 frames, SCALE 2,
+##     4 frames, 10 frames of white while the quarter-discs are drawn;
+##     15 between the sides, 3 between the two passes; 97 in all
+##   - damage (3019/3032): light flashes of 1-2 frames, 6-9 apart; the
+##     heavier one 8 frames
+##   - EX.bas: the blast is drawn in about 20 frames on the page not on
+##     show; 62 frames of white (50 noise calls), 33 more (25 calls),
+##     then 240 lines at about 3 frames each
+##   - S_X.bas: 500 noise calls in about 240 frames, then the same lines
+##   - hi-res text at SPEED=127: 2.6 frames per character
+##
+## `instant = true` runs every effect to its end inside the call, with no
+## waits: tests/check_jump.gd uses it to hold the drawing against the
+## live pages.
 ##
 ## The white flashes are `POKE -16298,0` ... `POKE -16297,0` (see
 ## hgr_view.gd). A flash lasts as long as whatever BASIC runs between
@@ -44,8 +55,14 @@ const WINDOW_ROWS := 124
 
 ## `CALL SG` lengths in frames, first call after each preset.
 const SG_HEAVY := 13.0
-const SG_MEDIUM := 12.0 # ESTIMATE (between the two measured ones)
+const SG_MEDIUM := 8.0
 const SG_LIGHT := 11.0
+## Hi-res text at SPEED=127, frames per character.
+const TEXT_FRAMES := 2.6
+## EX.bas and S_X.bas: frames per line of the fan, on average.
+const FAN_LINE_FRAMES := 3.0
+## S_X.bas line 6: 500 noise calls.
+const SHIP_NOISE_FRAMES := 240.0
 ## Frames between the eight XDRAWs of the line-1100 burst.
 const BURST_WAITS: Array[float] = [13.0, 4.0, 5.0, 5.0, 4.0, 4.0, 5.0, 5.0]
 
@@ -62,8 +79,12 @@ signal destruction_finished
 @export var view_path: NodePath
 
 var table := ShapeTable.new()
+## Where the white flashes are shown; none without it.
 var view: HgrView
+## The page BASIC draws on. The flight scene points it at hi-res page 1.
 var screen: HgrScreen
+## No waits: see above.
+var instant := false
 
 var _steps: Array = [] # float = wait that many frames, Callable = do it
 var _wait := 0.0
@@ -79,8 +100,10 @@ var _turrets_armed := false
 
 func _ready() -> void:
 	table.load_shapes(ENEMY_SHAPES)
-	view = get_node(view_path)
-	screen = view.screen
+	if not view_path.is_empty():
+		view = get_node(view_path)
+		if screen == null:
+			screen = view.screen
 
 
 func is_busy() -> bool:
@@ -120,12 +143,21 @@ func _begin(steps: Array, done: Callable) -> bool:
 	_steps = steps
 	_done = done
 	_wait = 0.0
+	if instant:
+		while not _steps.is_empty():
+			var step = _steps.pop_front()
+			if step is Callable:
+				step.call()
+		_done = Callable()
+		done.call()
+		return true
 	_busy = true
 	return true
 
 
 func _flash(frames: float) -> void:
-	view.flash(frames * FRAME)
+	if view != null and not instant:
+		view.flash(frames * FRAME)
 
 
 func _xdraw(shape: int, x: float, y: float) -> void:
@@ -134,27 +166,31 @@ func _xdraw(shape: int, x: float, y: float) -> void:
 
 # --- Missile (lines 1000-1222) ---
 
-## Two sparkles converge on the gunsight over 16 steps, then either the
-## direct hit of line 1200 or the burst of line 1100. Whether it hits is
-## the caller's decision (line 1050's box test).
-func fire_missile(hit: bool) -> bool:
+## Two sparkles converge on the gunsight, then either the direct hit of
+## line 1200 or the burst of line 1100. Whether it hits is the caller's
+## decision (lines 1010-1050), and so is `steps`: 16, or 1 when the ship
+## is pitched between 64 and 190 and line 1060 never reaches its NEXT.
+func fire_missile(hit: bool, steps_flown: int = 16) -> bool:
 	if _busy:
 		return false
-	var steps: Array = []
+	var steps: Array = [func() -> void: AudioManager.play_hit_light(), 10.0]
 	# FOR M=124 TO 62 STEP -4, with M3=M3+.32 and M2=M2-2 each time round.
-	for k in range(16):
+	for k in range(steps_flown):
 		var shape := int(3.0 + 0.32 * k)
 		var y := 124 - 4 * k
 		var spread := 40 - 2 * k
 		var pair := func() -> void:
 			_xdraw(shape, 140 + spread, y)
 			_xdraw(shape, 140 - spread, y)
-		steps.append_array([pair, 6.0, pair, 6.0])
-	# The loop leaves M=60 and M2=8.
+		steps.append_array([pair, 5.0, pair, 6.0])
+	# A whole loop leaves M=60 and M2=8; a loop left after one step leaves
+	# M=124 and M2=38.
+	var m := 60 if steps_flown == 16 else 124 - 4 * (steps_flown - 1)
+	var m2 := 40 - 2 * steps_flown
 	if hit:
-		steps.append_array(_direct_hit_steps(132, 148, 60))
+		steps.append_array(_direct_hit_steps(140 - m2, 140 + m2, m))
 	else:
-		steps.append_array(_burst_steps(132, 148, 60))
+		steps.append_array(_burst_steps(140 - m2, 140 + m2, m))
 	return _begin(steps, func() -> void: missile_finished.emit(hit))
 
 
@@ -186,7 +222,7 @@ func _burst_steps(left: float, right: float, y: float) -> Array:
 
 ## Lines 1200-1222, twice over (the second pass erases): on each side the
 ## burst at SCALE 1 and 2, then the four quarter-discs under a flash,
-## with the heavy noise between the two sides. Waits are an ESTIMATE.
+## with the heavy noise between the two sides.
 func _direct_hit_steps(left: float, right: float, y: float) -> Array:
 	var steps: Array = []
 	for pass_no in range(2):
@@ -196,22 +232,25 @@ func _direct_hit_steps(left: float, right: float, y: float) -> Array:
 				screen.shape_scale = 1
 				_xdraw(2, x, y)
 			)
-			steps.append(1.0)
+			steps.append(2.0)
 			steps.append(func() -> void:
 				screen.shape_scale = 2
 				_xdraw(2, x, y)
 			)
-			steps.append(2.0)
+			steps.append(4.0)
 			steps.append(func() -> void:
 				screen.shape_scale = 1
-				_flash(5.0)
+				_flash(10.0)
 				for quarter in range(15, 19):
 					_xdraw(quarter, x, y)
 			)
-			steps.append(5.0)
+			steps.append(10.0)
 			if side == 0:
+				steps.append(2.0) # GOSUB 4100
 				steps.append(func() -> void: AudioManager.play_hit_heavy())
 				steps.append(SG_HEAVY)
+			elif pass_no == 0:
+				steps.append(3.0)
 	return steps
 
 
@@ -335,31 +374,30 @@ func _fighter_advance() -> void:
 # --- Damage flashes (lines 3019 and 3032) ---
 
 ## `light_flashes` short flashes with the light noise (0 = none), then,
-## if `medium`, one long flash with the medium noise. Waits are an
-## ESTIMATE.
+## if `medium`, one long flash with the medium noise.
 func damage(light_flashes: int, medium: bool) -> bool:
 	if _busy:
 		return false
 	var steps: Array = []
+	if light_flashes > 0:
+		steps.append(3.0) # GOSUB 4110
 	for i in range(light_flashes):
 		# POKE -16298,0: FOR J=1 TO 10: NEXT: POKE -16297,0: CALL SG, then
 		# a pause of 10 to 50 empty FOR passes.
-		steps.append(func() -> void: _flash(0.8))
-		steps.append(1.0)
-		if i == 0:
-			steps.append(func() -> void: AudioManager.play_hit_light())
-			steps.append(SG_LIGHT)
-		else:
-			steps.append(1.5)
-		steps.append(randf_range(0.8, 4.0))
+		steps.append(func() -> void:
+			_flash(1.5)
+			AudioManager.play_hit_light()
+		)
+		steps.append(5.5)
+		steps.append(randf_range(0.7, 3.5))
 	if medium:
-		# POKE -16298,0: CALL SG: POKE -16297,0: CALL SG
+		# GOSUB 4120: POKE -16298,0: CALL SG: POKE -16297,0: CALL SG
 		steps.append(func() -> void:
 			AudioManager.play_hit_medium()
 			_flash(SG_MEDIUM)
 		)
 		steps.append(SG_MEDIUM)
-		steps.append(1.5)
+		steps.append(4.0)
 	return _begin(steps, func() -> void: damage_finished.emit())
 
 
@@ -376,38 +414,92 @@ func print_message(text: String, htab: int, vtab: int) -> bool:
 			screen.text_mode = 0
 			screen.print_at(text[i], htab + i, vtab)
 		)
-		steps.append(2.5)
+		steps.append(TEXT_FRAMES)
+	return _begin(steps, func() -> void: message_finished.emit())
+
+
+## The same through whatever prints a character (`put`, which takes its
+## ASCII code): the game's own character generator, with its page, mode
+## and cursor. A carriage return ends it, as PRINT's does.
+func type_text(text: String, put: Callable, frames_per_character: float = TEXT_FRAMES) -> bool:
+	if _busy:
+		return false
+	var steps: Array = []
+	for code in (text + "\r").to_ascii_buffer():
+		steps.append(func() -> void: put.call(code))
+		steps.append(frames_per_character)
 	return _begin(steps, func() -> void: message_finished.emit())
 
 
 # --- The orbital defender blows up (EX.bas) ---
 
-## Lines 5-30: the burst and the four quarter-discs at SCALE 2 on the
-## gunsight, a long white-out with 50 noise calls, 25 more with the
-## picture back, then 16 x 15 white lines thrown out from (140,60), each
-## fan wider than the last. Nothing erases it; the next redraw of the
-## window does. Waits are an ESTIMATE.
+## Lines 5-30 in one go: ex_blast() and ex_fan() below.
 func destroy_defender() -> bool:
 	if _busy:
 		return false
-	var blast := func() -> void:
+	return _begin(_blast_steps() + _fan_steps(3, true), func() -> void: destruction_finished.emit())
+
+
+## Lines 5-6: the burst and the four quarter-discs at SCALE 2 on the
+## gunsight. The original draws them on page 1 while page 2 is on show.
+func ex_blast() -> bool:
+	if _busy:
+		return false
+	return _begin(_blast_steps(), func() -> void: pass)
+
+
+## Lines 6-30, from the moment page 1 is shown: a long white-out with 50
+## noise calls, 25 more with the picture back, then 16 x 15 white lines
+## thrown out from (140,60), each fan wider than the last. Nothing erases
+## it; the next redraw of the window does.
+func ex_fan() -> bool:
+	if _busy:
+		return false
+	return _begin(_fan_steps(3, true), func() -> void: destruction_finished.emit())
+
+
+## S_X.bas lines 6-30: the ship's own end. 500 noise calls, then the same
+## lines in black, eating the picture away.
+func destroy_ship() -> bool:
+	if _busy:
+		return false
+	var steps: Array = [func() -> void: AudioManager.play_destruction(), SHIP_NOISE_FRAMES]
+	steps.append_array(_fan_steps(0, false))
+	return _begin(steps, func() -> void: destruction_finished.emit())
+
+
+func _blast_steps() -> Array:
+	var scale_up := func() -> void:
 		screen.hcolor = 3
 		screen.shape_scale = 2
-		for shape: int in [2, 15, 16, 17, 18]:
-			_xdraw(shape, 140, 65)
-		screen.shape_scale = 1
-		AudioManager.play_explosion()
-		_flash(75.0)
-	var steps: Array = [blast, 75.0, 37.0]
+	var steps: Array = [scale_up]
+	for shape: int in [2, 15, 16, 17, 18]:
+		steps.append(func() -> void: _xdraw(shape, 140, 65))
+		steps.append(4.0)
+	return steps
+
+
+func _fan_steps(color: int, white_out: bool) -> Array:
+	var steps: Array = []
+	if white_out:
+		steps.append(func() -> void:
+			screen.shape_scale = 1
+			AudioManager.play_explosion()
+			_flash(62.0)
+		)
+		steps.append_array([62.0, 33.0])
 	var y1 := 20.0
 	for x1 in range(5, 131, 8):
 		y1 += 4.8
 		for j in range(15):
-			var x2 := x1 - randf() * 2.0 * x1
-			var y2 := clampf(y1 - randf() * 2.0 * y1, -60.0, 65.0)
+			var reach_x: float = x1
+			var reach_y := y1
 			steps.append(func() -> void:
-				screen.hcolor = 3
+				# 20-25, the random numbers taken as the line is drawn
+				var x2 := reach_x - randf() * (reach_x + reach_x)
+				var y2 := clampf(reach_y - randf() * (reach_y + reach_y), -60.0, 65.0)
+				screen.hcolor = color
 				screen.hplot_path([140, 60, int(140.0 + x2), int(60.0 + y2)])
 			)
-			steps.append(1.2 + Vector2(x2, y2).length() / 62.0)
-	return _begin(steps, func() -> void: destruction_finished.emit())
+			steps.append(FAN_LINE_FRAMES)
+	return steps

@@ -1,0 +1,25 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tests/check_flight_passes.gd" id="1"]
+
+[node name="CheckJump" type="Node"]
+script = ExtResource("1")
+reference = "../analysis/live/jump/"
+log_name = "jump_live.log"
+window_random_at = PackedInt32Array(4, 5, 26, 27)
+arrival_event = 4
+dice_at = {
+13: [0.1, 0.1, 0.9, 0.1, 0.5],
+14: [0.99, 0.1, 0.5],
+15: [0.99, 0.99, 0.95],
+16: [0.99, 0.1, 0.5],
+18: [0.99, 0.99, 0.5],
+19: [0.99, 0.99, 0.5],
+20: [0.99, 0.99, 0.5],
+21: [0.99, 0.99, 0.5],
+22: [0.99, 0.1, 0.5],
+24: [0.99, 0.99, 0.5],
+39: [0.99, 0.1, 0.5, 0.5, 0.3, 0.9, 0.5, 0.5, 0.1],
+42: [0.99, 0.1, 0.5, 0.5, 0.1, 0.7, 0.9, 0.9, 0.5]
+}
+ends_destroyed = true
