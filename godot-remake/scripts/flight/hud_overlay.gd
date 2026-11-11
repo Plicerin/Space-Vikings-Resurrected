@@ -183,17 +183,17 @@ func _draw_panel() -> void:
 	draw_rect(Rect2(0.0, top, size.x, PANEL_HEIGHT), Color(0.02, 0.03, 0.05, 0.92))
 	draw_rect(Rect2(0.0, top, size.x, PANEL_HEIGHT), Color(0.9, 0.9, 0.9), false, 2.0)
 	var w := size.x
-	_display(Rect2(w * 0.012, top + 10.0, w * 0.272, PANEL_HEIGHT - 20.0))
+	_display(Rect2(w * 0.012, top + 10.0, w * 0.385, PANEL_HEIGHT - 20.0))
 	# TURN with SPEED and ENERGY tucked under it, VERT standing tall beside
-	var column := w * 0.3
-	_dial(font, "TURN", Rect2(column, top + 24.0, w * 0.112, 26.0), (bank + 48.0) / 95.0, false)
-	_bar(font, "SPEED", Rect2(column, top + 74.0, w * 0.112, 8.0), speed / 120.0, false)
-	_bar(font, "ENERGY", Rect2(column, top + 108.0, w * 0.112, 8.0), energy / 63.0, false)
+	var column := w * 0.412
+	_dial(font, "TURN", Rect2(column, top + 24.0, w * 0.088, 26.0), (bank + 48.0) / 95.0, false)
+	_bar(font, "SPEED", Rect2(column, top + 74.0, w * 0.088, 8.0), speed / 120.0, false)
+	_bar(font, "ENERGY", Rect2(column, top + 108.0, w * 0.088, 8.0), energy / 63.0, false)
 	# VERT: the nose up is the top
-	_dial(font, "VERT", Rect2(w * 0.437, top + 12.0, 26.0, PANEL_HEIGHT - 28.0), (-pitch + 61.0) / 120.0, true)
-	_switches.position = Vector2(w * 0.505, top + 8.0)
+	_dial(font, "VERT", Rect2(w * 0.513, top + 12.0, 26.0, PANEL_HEIGHT - 28.0), (-pitch + 61.0) / 120.0, true)
+	_switches.position = Vector2(w * 0.562, top + 8.0)
 	# damage control
-	var box := Rect2(w * 0.612, top + 8.0, w * 0.378, PANEL_HEIGHT - 16.0)
+	var box := Rect2(w * 0.672, top + 8.0, w * 0.318, PANEL_HEIGHT - 16.0)
 	_damage_box = box
 	_plastic.position = box.position
 	_plastic.size = box.size
@@ -434,13 +434,12 @@ func _stacked(font: Font, text: String, at: Vector2, pitch_px: float) -> void:
 # --- the display: a green panel that can be written to ---
 
 const HELP := [
-	"ARROWS       STICK",
-	"1 2 3 4      SPEED",
-	"SPACE        FIRE",
-	"A  AUTO      S  SHIELD",
-	"B  ALERT     W  WEAPON",
-	"C  CONSOLE   R  RADAR",
-	"H  JUMP      N  NAV",
+	"ARROWS  STICK          1 2 3 4  SPEED",
+	"SPACE   FIRE           A  AUTO",
+	"S  SHIELD              W  WEAPON",
+	"B  ALERT               C  CONSOLE",
+	"R  RADAR               H  JUMP",
+	"N  NAV DATA            F1 KEYS",
 ]
 const LED := Color(0.25, 1.0, 0.45)
 
@@ -464,16 +463,16 @@ func _display(rect: Rect2) -> void:
 	(_glass.material as ShaderMaterial).set_shader_parameter("panel_size", _glass.size)
 	var inner := rect.grow(-14.0)
 	if message != "":
-		_write(BlockFont.wrap(message, 2.0, inner.size.x), inner.position, 2.0, 24.0)
+		_write(BlockFont.wrap(message, 1.5, inner.size.x), inner.position, 1.5, 18.0)
 	elif not page.is_empty():
-		_write(page, inner.position, 1.4, 14.5)
+		_write(page, inner.position, 1.05, 11.5)
 	elif mode == Mode.NAV:
 		_nav(inner)
 	elif mode == Mode.HELP:
-		_write(HELP, inner.position, 1.6, 14.5)
+		_write(HELP, inner.position, 1.2, 14.0)
 	else:
 		var here: String = GameState.STAR_NAMES[GameState.current_planet]
-		_write([here, "IN ORBIT" if not GameState.in_atmosphere else "IN THE ATMOSPHERE", "", "N  NAV DATA", "F1 KEYS"], inner.position, 2.0, 21.0)
+		_write([here, "IN ORBIT" if not GameState.in_atmosphere else "IN THE ATMOSPHERE", "", "N  NAV DATA        F1 KEYS"], inner.position, 1.5, 17.0)
 	# a faint scan over the glass
 	for line in range(int(rect.position.y) + 4, int(rect.end.y) - 2, 3):
 		draw_line(Vector2(rect.position.x + 3.0, line), Vector2(rect.end.x - 3.0, line), Color(0.0, 0.0, 0.0, 0.16), 1.0)
@@ -488,15 +487,16 @@ func _write(lines: Array, at: Vector2, scale: float, pitch_px: float) -> void:
 ## The position and the headings: the numbers big, their names small.
 func _nav(inner: Rect2) -> void:
 	var cells := [["X", 0, 6], ["Y", 1, 6], ["Z", 2, 6], ["HDG", 3, 4], ["PITCH", 4, 4], ["BANK", 5, 4]]
-	var column := inner.size.x * 0.48
+	var column := inner.size.x / 3.0
 	for i in cells.size():
 		var cell: Array = cells[i]
-		var origin := inner.position + Vector2(0.0 if i < 3 else column, (i % 3) * 30.0)
-		_crt("name%d" % i, cell[0], origin + Vector2(0.0, 12.0), 1.2, 0.75)
-		var label_width := 16.0 if i < 3 else 58.0
-		_crt("value%d" % i, str(nav[cell[1]]).lpad(cell[2], " "), origin + Vector2(label_width, 0.0), 3.0, 1.0)
+		var origin := inner.position + Vector2((i % 3) * column, (i / 3) * 34.0)
+		_crt("name%d" % i, cell[0], origin + Vector2(0.0, 9.0), 0.9, 0.75)
+		var label_width := 14.0 if i < 3 else 40.0
+		_crt("value%d" % i, str(nav[cell[1]]).lpad(cell[2], " "), origin + Vector2(label_width, 0.0), 2.25, 1.0)
 	var going := "" if GameState.target_planet < 0 else " > %s" % GameState.STAR_NAMES[GameState.target_planet]
-	_crt("where", "%s%s" % [GameState.STAR_NAMES[GameState.current_planet], going], inner.position + Vector2(0.0, 96.0), 1.3, 0.9)
+	_crt("where", "%s%s" % [GameState.STAR_NAMES[GameState.current_planet], going], inner.position + Vector2(0.0, 76.0), 1.0, 0.9)
+	_crt("status", "SPEED %d  ENERGY %d  SHIELD %d" % [roundi(speed), roundi(energy), roundi(GameState.ship_shield)], inner.position + Vector2(0.0, 90.0), 1.0, 0.75)
 
 
 ## One line of the display, as a phosphor draws it: lit at a brightness that
