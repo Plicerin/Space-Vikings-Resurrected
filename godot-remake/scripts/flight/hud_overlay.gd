@@ -14,6 +14,8 @@ const RED := Color(1.0, 0.25, 0.2)
 const TARGET := Color(1.0, 0.6, 0.2)
 const BULB := preload("res://assets/shaders/bulb.gdshader")
 const BALL := preload("res://assets/shaders/ball.gdshader")
+const PLASTIC := preload("res://assets/shaders/plastic.gdshader")
+const AMBER_TEXT := Color(1.0, 0.69, 0.0) ## an 80s terminal's amber
 const GAUGE_RADIUS := 52.0
 const TIGHT := 0.8 ## letters on a lamp's arc, closer than their usual spacing
 const PANEL_HEIGHT := 140.0
@@ -31,10 +33,30 @@ var range_scale := 0.5
 var _bulbs: Array[ColorRect] = []
 var _bulb_next := 0
 var _ball: ColorRect
+var _plastic: ColorRect
+var _letters: Control
+var _damage_box := Rect2()
+var _damage_lamps: Array = []
+
+
+func _ready() -> void:
+	# the damage-control panel: plastic, then the raised lettering on it (bulbs are added over both)
+	_plastic = ColorRect.new()
+	_plastic.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var material := ShaderMaterial.new()
+	material.shader = PLASTIC
+	_plastic.material = material
+	add_child(_plastic)
+	_letters = Control.new()
+	_letters.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_letters.draw.connect(_draw_letters)
+	add_child(_letters)
 
 
 func _process(_delta: float) -> void:
 	queue_redraw()
+	if _letters != null:
+		_letters.queue_redraw()
 
 
 func _draw() -> void:
@@ -127,15 +149,34 @@ func _draw_panel() -> void:
 		draw_string(font, Vector2(w * 0.015, top + 78.0 + i * 18.0), lines[i], HORIZONTAL_ALIGNMENT_LEFT, -1, 12, GREEN)
 	# damage control
 	var box := Rect2(w * 0.605, top + 8.0, w * 0.385, PANEL_HEIGHT - 16.0)
-	draw_rect(box, Color(GREEN, 0.4), false, 1.0)
-	draw_string(font, box.position + Vector2(8.0, 14.0), "DAMAGE CONTROL", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, GREEN)
-	var lamps := ComRules.lamps()
-	for i in lamps.size():
-		var lamp: Array = lamps[i]
-		var centre := box.position + Vector2(box.size.x * (1.0 + 2.0 * (i % 6)) / 12.0, 54.0 + (i / 6) * 44.0)
-		var colour := RED if lamp[2] else GREEN
-		_bulb(centre, 9.0, colour, true)
-		_arc_text(font, _lamp_name(i, lamp), centre, 17.0, colour)
+	_damage_box = box
+	_plastic.position = box.position
+	_plastic.size = box.size
+	(_plastic.material as ShaderMaterial).set_shader_parameter("panel_size", box.size)
+	_damage_lamps = ComRules.lamps()
+	for i in _damage_lamps.size():
+		var lamp: Array = _damage_lamps[i]
+		_bulb(_lamp_centre(i), 9.0, RED if lamp[2] else GREEN, true)
+
+
+func _lamp_centre(index: int) -> Vector2:
+	return _damage_box.position + Vector2(_damage_box.size.x * (1.0 + 2.0 * (index % 6)) / 12.0, 54.0 + (index / 6) * 44.0)
+
+
+## The raised amber lettering on the plastic: drawn on `_letters`, a node over it.
+func _draw_letters() -> void:
+	var font := get_theme_default_font()
+	_raised_string(_letters, font, _damage_box.position + Vector2(10.0, 17.0), "DAMAGE CONTROL", 11)
+	for i in _damage_lamps.size():
+		_arc_text(_letters, font, _lamp_name(i, _damage_lamps[i]), _lamp_centre(i), 17.0)
+
+
+## Lettering that stands out of the surface: a shadow below and to the right, a
+## highlight on the upper left edge, and the amber between.
+func _raised_string(canvas: CanvasItem, font: Font, at: Vector2, text: String, size_px: int) -> void:
+	canvas.draw_string(font, at + Vector2(0.9, 1.1), text, HORIZONTAL_ALIGNMENT_LEFT, -1, size_px, Color(0.0, 0.0, 0.0, 0.75))
+	canvas.draw_string(font, at + Vector2(-0.5, -0.6), text, HORIZONTAL_ALIGNMENT_LEFT, -1, size_px, AMBER_TEXT.lightened(0.55))
+	canvas.draw_string(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, size_px, AMBER_TEXT)
 
 
 ## What a lamp is called: COM's top line (the engines' number after ENG);
@@ -146,8 +187,8 @@ func _lamp_name(index: int, lamp: Array) -> String:
 
 
 ## `text` along the top of a circle: its middle straight above `centre`, each
-## letter turned to stand on the arc.
-func _arc_text(font: Font, text: String, centre: Vector2, radius: float, colour: Color) -> void:
+## letter turned to stand on the arc, raised.
+func _arc_text(canvas: CanvasItem, font: Font, text: String, centre: Vector2, radius: float) -> void:
 	var size_px := 7
 	var widths := []
 	var total := 0.0
@@ -159,10 +200,10 @@ func _arc_text(font: Font, text: String, centre: Vector2, radius: float, colour:
 	for i in text.length():
 		var half: float = widths[i] / radius / 2.0
 		angle += half
-		draw_set_transform(centre + Vector2(cos(angle), sin(angle)) * radius, angle + PI / 2.0, Vector2.ONE)
-		draw_string(font, Vector2(-widths[i] / TIGHT / 2.0, 0.0), text[i], HORIZONTAL_ALIGNMENT_LEFT, -1, size_px, colour)
+		canvas.draw_set_transform(centre + Vector2(cos(angle), sin(angle)) * radius, angle + PI / 2.0, Vector2.ONE)
+		_raised_string(canvas, font, Vector2(-widths[i] / TIGHT / 2.0, 0.0), text[i], size_px)
 		angle += half
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
 ## A gauge: its name above, an outlined track, filled from the left to
