@@ -232,52 +232,50 @@ func _bar(font: Font, name: String, track: Rect2, amount: float, centred: bool) 
 		draw_rect(Rect2(track.position, Vector2(track.size.x * amount, track.size.y)), GREEN)
 
 
-## The telltales along the top left, as on a car's dash: A and M (one lit),
-## the missile and the laser (one lit), the shield and orbit lamps; then the
-## damage lamp, a row of segments that sweeps to and fro while the damage
-## alert is on, as a scanner or a meter does.
+## The telltales along the top left, as on a car's dash, without frames: A / M
+## and missile / laser, each pair one tile with a slash between and one side
+## lit; the orbit lamp; and the damage scanner in a border that is the shield
+## (blue and lit with its small icon when the shields are up, dark when not).
 func _draw_lamps() -> void:
-	var font := get_theme_default_font()
 	var blue := Color(0.35, 0.8, 1.0)
 	var x := 16.0
 	var y := 14.0
-	var tiles := [
-		["A", GameState.autopilot_active, GREEN], ["M", not GameState.autopilot_active, GREEN], null,
-		["missile", GameState.missile_mode_active, TARGET], ["laser", not GameState.missile_mode_active, blue], null,
-		["shield", GameState.shields_up, GREEN], ["orbit", not GameState.in_atmosphere, blue],
-	]
-	for tile in tiles:
-		if tile == null:
-			x += 22.0
-			continue
-		var rect := Rect2(x, y, TILE, TILE)
-		_tile(rect, tile[2], tile[1])
-		var colour: Color = tile[2] if tile[1] else Color(tile[2], 0.2)
-		var middle := rect.get_center()
-		match tile[0]:
-			"missile": _icon_missile(middle, colour)
-			"laser": _icon_laser(middle, colour)
-			"shield": _icon_shield(middle, colour)
-			"orbit": _icon_orbit(middle, colour)
-			_:
-				var width := font.get_string_size(tile[0], HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x
-				draw_string(font, middle + Vector2(-width / 2.0, 9.0), tile[0], HORIZONTAL_ALIGNMENT_LEFT, -1, 24, colour)
-		x += TILE + 8.0
-	_draw_rolling(Vector2(x + 22.0, y + TILE / 2.0 - 11.0))
+	_pair(x, y, ["A", GameState.autopilot_active, GREEN], ["M", not GameState.autopilot_active, GREEN])
+	x += TILE * 2.0 + 22.0
+	_pair(x, y, ["missile", GameState.missile_mode_active, TARGET], ["laser", not GameState.missile_mode_active, blue])
+	x += TILE * 2.0 + 22.0
+	_symbol("orbit", Rect2(x, y, TILE, TILE).get_center(), blue, not GameState.in_atmosphere)
+	x += TILE + 34.0
+	_draw_rolling(Vector2(x + 14.0, y + TILE / 2.0 - 11.0))
 
 
-## A dark rounded tile with a coloured rim and glow when it is lit.
-func _tile(rect: Rect2, colour: Color, lit: bool) -> void:
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.04, 0.045, 0.05, 0.85)
-	style.set_corner_radius_all(8)
-	style.set_border_width_all(2)
-	style.border_color = Color(colour, 0.9) if lit else Color(0.28, 0.3, 0.33, 0.8)
-	style.anti_aliasing = true
+## Two symbols side by side with a slanted line between: either lit.
+func _pair(x: float, y: float, left: Array, right: Array) -> void:
+	_symbol(left[0], Vector2(x + TILE / 2.0, y + TILE / 2.0), left[2], left[1])
+	_symbol(right[0], Vector2(x + TILE * 1.5, y + TILE / 2.0), right[2], right[1])
+	var middle := x + TILE
+	draw_line(Vector2(middle - 5.0, y + TILE - 8.0), Vector2(middle + 5.0, y + 8.0), Color(0.55, 0.57, 0.62, 0.55), 2.0, true)
+
+
+## One symbol: lit it glows in its colour, unlit it is a faint shadow of itself.
+func _symbol(kind: String, middle: Vector2, colour: Color, lit: bool) -> void:
 	if lit:
-		style.shadow_color = Color(colour, 0.5)
-		style.shadow_size = 8
-	draw_style_box(style, rect)
+		var glow := StyleBoxFlat.new()
+		glow.bg_color = Color(colour, 0.0)
+		glow.set_corner_radius_all(14)
+		glow.shadow_color = Color(colour, 0.38)
+		glow.shadow_size = 12
+		draw_style_box(glow, Rect2(middle - Vector2(10.0, 10.0), Vector2(20.0, 20.0)))
+	var shade := colour if lit else Color(colour, 0.2)
+	match kind:
+		"missile": _icon_missile(middle, shade)
+		"laser": _icon_laser(middle, shade)
+		"shield": _icon_shield(middle, shade)
+		"orbit": _icon_orbit(middle, shade)
+		_:
+			var font := get_theme_default_font()
+			var width := font.get_string_size(kind, HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x
+			draw_string(font, middle + Vector2(-width / 2.0, 9.0), kind, HORIZONTAL_ALIGNMENT_LEFT, -1, 24, shade)
 
 
 func _icon_missile(c: Vector2, colour: Color) -> void:
@@ -315,6 +313,25 @@ func _icon_orbit(c: Vector2, colour: Color) -> void:
 ## along and back, in amber, otherwise they sit dim.
 func _draw_rolling(at: Vector2) -> void:
 	var count := 16
+	var shield := GameState.shields_up
+	var frame := StyleBoxFlat.new()
+	frame.bg_color = Color(0.03, 0.035, 0.04, 0.8)
+	frame.set_corner_radius_all(9)
+	frame.set_border_width_all(2)
+	frame.border_color = Color(0.35, 0.8, 1.0, 0.95) if shield else Color(0.22, 0.24, 0.28, 0.8)
+	frame.anti_aliasing = true
+	if shield:
+		frame.shadow_color = Color(0.35, 0.8, 1.0, 0.4)
+		frame.shadow_size = 9
+	var box := Rect2(at - Vector2(14.0, 11.0), Vector2(count * 15.0 + 12.0, 44.0))
+	draw_style_box(frame, box)
+	# the shield's icon sits in the upper left corner, over the border
+	var corner := box.position + Vector2(16.0, 0.0)
+	draw_circle(corner, 11.0, Color(0.03, 0.035, 0.04))
+	var scale := 0.55
+	draw_set_transform(corner, 0.0, Vector2(scale, scale))
+	_icon_shield(Vector2.ZERO, Color(0.35, 0.8, 1.0) if shield else Color(0.35, 0.8, 1.0, 0.2))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	var alert := GameState.damage_alert_active
 	var sweep := 0.0
 	var direction := 1.0
@@ -334,7 +351,7 @@ func _draw_rolling(at: Vector2) -> void:
 		if level > 0.25:
 			style.shadow_color = Color(1.0, 0.6, 0.05, 0.35 * level)
 			style.shadow_size = 5
-		draw_style_box(style, Rect2(at + Vector2(i * 15.0, 0.0), Vector2(12.0, 22.0)))
+		draw_style_box(style, Rect2(at + Vector2(i * 15.0, 8.0), Vector2(12.0, 22.0)))
 
 
 ## Where `world_at` lies as seen from the ship, on the ball: straight ahead is
