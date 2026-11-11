@@ -17,64 +17,6 @@ light_energy = 1.6
 
 [node name="Hud" type="CanvasLayer" parent="."]
 
-[node name="Bar" type="PanelContainer" parent="Hud"]
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -118.0
-grow_horizontal = 2
-grow_vertical = 0
-mouse_filter = 2
-
-[node name="Rows" type="HBoxContainer" parent="Hud/Bar"]
-layout_mode = 2
-theme_override_constants/separation = 28
-
-[node name="Gauges" type="GridContainer" parent="Hud/Bar/Rows"]
-custom_minimum_size = Vector2(300, 0)
-layout_mode = 2
-theme_override_constants/h_separation = 12
-columns = 2
-
-[node name="SpeedLabel" type="Label" parent="Hud/Bar/Rows/Gauges"]
-layout_mode = 2
-text = "SPEED"
-
-[node name="Speed" type="ProgressBar" parent="Hud/Bar/Rows/Gauges"]
-custom_minimum_size = Vector2(190, 18)
-layout_mode = 2
-size_flags_vertical = 4
-max_value = 120.0
-show_percentage = false
-
-[node name="EnergyLabel" type="Label" parent="Hud/Bar/Rows/Gauges"]
-layout_mode = 2
-text = "ENERGY"
-
-[node name="Energy" type="ProgressBar" parent="Hud/Bar/Rows/Gauges"]
-custom_minimum_size = Vector2(190, 18)
-layout_mode = 2
-size_flags_vertical = 4
-max_value = 63.0
-show_percentage = false
-
-[node name="ShieldLabel" type="Label" parent="Hud/Bar/Rows/Gauges"]
-layout_mode = 2
-text = "SHIELDS"
-
-[node name="Shields" type="ProgressBar" parent="Hud/Bar/Rows/Gauges"]
-custom_minimum_size = Vector2(190, 18)
-layout_mode = 2
-size_flags_vertical = 4
-max_value = 100.0
-show_percentage = false
-
-[node name="Readout" type="Label" parent="Hud/Bar/Rows"]
-custom_minimum_size = Vector2(300, 0)
-layout_mode = 2
-theme_type_variation = &"CrewLabel"
-
 
 [node name="Overlay" type="Control" parent="Hud"]
 layout_mode = 3

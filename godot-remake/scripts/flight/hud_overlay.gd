@@ -2,25 +2,26 @@ extends Control
 ## What the flight panel shows besides its bars: the target bracket (where
 ## the defender is, how far, or an arrow to the edge toward it), the
 ## attitude gauge (horizon by pitch and bank), the indicator lamps (autopilot,
-## shields, weapon, condition, damage) and the ship's systems as
-## lamps (green, amber below 60, red below 25). Drawn over the 3D view;
+## shields, weapon, condition, damage) and the bottom panel: speed, turn, vert
+## and energy gauges, the readout and the damage-control lamps. Drawn over the 3D view;
 ## native_flight.gd feeds it each frame.
 
-const SYSTEMS := [
-	["SHLD", "ship_shield"], ["ENG1", "ship_engine1"], ["ENG2", "ship_engine2"], ["COMP", "ship_computer"],
-	["RADR", "ship_radar"], ["ENV", "ship_env_control"], ["HULL", "ship_hull"], ["HYPR", "ship_hyperdrive"],
-	["MSL", "ship_missile_system"], ["LASR", "ship_laser"], ["NAV", "ship_nav_computer"],
-]
+const ComRules = preload("res://scripts/rules/com_rules.gd")
+
 const GREEN := Color(0.1, 0.95, 0.3)
 const AMBER := Color(1.0, 0.75, 0.15)
 const RED := Color(1.0, 0.25, 0.2)
 const TARGET := Color(1.0, 0.6, 0.2)
 const GAUGE_RADIUS := 52.0
+const PANEL_HEIGHT := 118.0
 
 var camera: Camera3D
 var target: Node3D ## null when there is none
 var pitch := 0.0 ## the flight's own units, 256 to the circle
 var bank := 0.0
+var speed := 0.0
+var energy := 0.0
+var readout := ""
 ## World units to the figures the panel shows (the readouts halve the original's).
 var range_scale := 0.5
 
@@ -32,7 +33,7 @@ func _process(_delta: float) -> void:
 func _draw() -> void:
 	_draw_target()
 	_draw_gauge()
-	_draw_systems()
+	_draw_panel()
 	_draw_lamps()
 
 
@@ -91,15 +92,55 @@ func _draw_gauge() -> void:
 		_ball_marker(centre, target.global_position, TARGET) # the defender
 
 
-func _draw_systems() -> void:
+## The panel along the bottom, in the original's order (INSTRUMENTS 170-200):
+## SPEED, TURN (the bank), VERT (the nose) and ENERGY gauges, the position
+## and headings under them, and the damage-control lamps (COM's twelve) on
+## the right.
+func _draw_panel() -> void:
 	var font := get_theme_default_font()
-	var at := Vector2(size.x - 120.0, 168.0)
-	for i in SYSTEMS.size():
-		var level: float = GameState.get(SYSTEMS[i][1])
-		var colour := GREEN if level >= 60.0 else (AMBER if level >= 25.0 else RED)
-		var cell := at + Vector2(0.0, i * 20.0)
-		draw_circle(cell + Vector2(5.0, -5.0), 5.0, colour)
-		draw_string(font, cell + Vector2(16.0, 0.0), SYSTEMS[i][0], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, colour)
+	var top := size.y - PANEL_HEIGHT
+	draw_rect(Rect2(0.0, top, size.x, PANEL_HEIGHT), Color(0.02, 0.03, 0.05, 0.92))
+	draw_rect(Rect2(0.0, top, size.x, PANEL_HEIGHT), Color(0.9, 0.9, 0.9), false, 2.0)
+	var w := size.x
+	_bar(font, "SPEED", Rect2(w * 0.015, top + 30.0, w * 0.165, 16.0), speed / 120.0, false)
+	_bar(font, "TURN", Rect2(w * 0.21, top + 30.0, w * 0.13, 16.0), (bank + 48.0) / 95.0, true)
+	# VERT: the nose up is the top
+	var vert := Rect2(w * 0.35, top + 14.0, 14.0, 50.0)
+	draw_string(font, Vector2(vert.end.x + 8.0, vert.get_center().y + 4.0), "VERT", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, GREEN)
+	draw_rect(vert, Color(GREEN, 0.5), false, 1.0)
+	draw_line(Vector2(vert.position.x - 3.0, vert.get_center().y), Vector2(vert.end.x + 3.0, vert.get_center().y), GREEN, 1.0)
+	var nose := clampf((-pitch + 61.0) / 120.0, 0.0, 1.0)
+	draw_rect(Rect2(vert.position.x - 3.0, vert.position.y + nose * vert.size.y - 2.0, vert.size.x + 6.0, 4.0), GREEN)
+	_bar(font, "ENERGY", Rect2(w * 0.42, top + 30.0, w * 0.15, 16.0), energy / 63.0, false)
+	var lines := readout.split("\n")
+	for i in lines.size():
+		draw_string(font, Vector2(w * 0.015, top + 78.0 + i * 18.0), lines[i], HORIZONTAL_ALIGNMENT_LEFT, -1, 12, GREEN)
+	# damage control
+	var box := Rect2(w * 0.605, top + 8.0, w * 0.385, PANEL_HEIGHT - 16.0)
+	draw_rect(box, Color(GREEN, 0.4), false, 1.0)
+	draw_string(font, box.position + Vector2(8.0, 14.0), "DAMAGE CONTROL", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, GREEN)
+	var lamps := ComRules.lamps()
+	for i in lamps.size():
+		var lamp: Array = lamps[i]
+		var cell := box.position + Vector2(10.0 + (i % 4) * (box.size.x - 14.0) / 4.0, 36.0 + (i / 4) * 28.0)
+		var colour := RED if lamp[2] else GREEN
+		draw_circle(cell + Vector2(5.0, -4.0), 5.0, colour if lamp[2] else Color(colour, 0.7))
+		draw_string(font, cell + Vector2(14.0, -8.0), lamp[0].strip_edges(), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, colour)
+		draw_string(font, cell + Vector2(14.0, 4.0), lamp[1].strip_edges(), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, colour)
+
+
+## A gauge: its name above, an outlined track, filled from the left to
+## `amount` (0 to 1), or a marker on a centre mark when `centred`.
+func _bar(font: Font, name: String, track: Rect2, amount: float, centred: bool) -> void:
+	draw_string(font, track.position + Vector2(0.0, -8.0), name, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, GREEN)
+	draw_rect(track, Color(GREEN, 0.5), false, 1.0)
+	amount = clampf(amount, 0.0, 1.0)
+	if centred:
+		var middle := track.position.x + track.size.x / 2.0
+		draw_line(Vector2(middle, track.position.y - 3.0), Vector2(middle, track.end.y + 3.0), GREEN, 1.0)
+		draw_rect(Rect2(track.position.x + amount * track.size.x - 2.0, track.position.y - 3.0, 4.0, track.size.y + 6.0), GREEN)
+	else:
+		draw_rect(Rect2(track.position, Vector2(track.size.x * amount, track.size.y)), GREEN)
 
 
 ## The panel's switches as indicator lamps along the top left: lit

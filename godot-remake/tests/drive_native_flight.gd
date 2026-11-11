@@ -37,8 +37,7 @@ func _drive() -> void:
 	var at := Vector3(GameState.ship_x, GameState.ship_y, -GameState.ship_z) # Godot's z is the original's reversed
 	_check("a new flight: the camera is at the ship (%s, the game has %s)" % [_camera().global_position, at],
 			_camera().global_position.is_equal_approx(at))
-	_check("the panel: no speed, full shields", _speed() == 0.0
-			and (_node("Hud/Bar/Rows/Gauges/Shields") as ProgressBar).value == 100.0)
+	_check("the panel: no speed, full shields", _speed() == 0.0 and GameState.ship_shield == 100.0)
 
 	_tap(KEY_4)
 	_tap(KEY_4)
@@ -196,7 +195,7 @@ func _node(path: String) -> Node:
 
 
 func _speed() -> float:
-	return (_node("Hud/Bar/Rows/Gauges/Speed") as ProgressBar).value
+	return _node("Hud/Overlay").speed
 
 
 func _signed(byte: int) -> int:

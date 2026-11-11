@@ -66,10 +66,6 @@ var _said_for := 0.0
 
 @onready var _camera: Camera3D = $Camera
 @onready var _sun_light: DirectionalLight3D = $Sun
-@onready var _speed: ProgressBar = $Hud/Bar/Rows/Gauges/Speed
-@onready var _energy: ProgressBar = $Hud/Bar/Rows/Gauges/Energy
-@onready var _shields: ProgressBar = $Hud/Bar/Rows/Gauges/Shields
-@onready var _readout: Label = $Hud/Bar/Rows/Readout
 @onready var _said: Label = $Hud/Said
 @onready var _flash: ColorRect = $Hud/Flash
 @onready var _overlay: Control = $Hud/Overlay
@@ -489,10 +485,9 @@ func _update_camera() -> void:
 func _update_hud() -> void:
 	_overlay.pitch = _rules.pitch
 	_overlay.bank = _rules.bank
-	_speed.value = _rules.speed
-	_energy.value = GameState.ship_energy
-	_shields.value = GameState.ship_shield
+	_overlay.speed = _rules.speed
+	_overlay.energy = GameState.ship_energy
 	# the original's read-outs: X Y Z halved, heading and pitch as degrees (a unit * 1.41)
-	_readout.text = "X %d  Y %d  Z %d\nHEADING %d  PITCH %d\nBANK %d" % [
+	_overlay.readout = "X %d  Y %d  Z %d\nHDG %d  PITCH %d  BANK %d" % [
 		_rules.x / 2.0, _rules.y / 2.0, _rules.z / 2.0, roundi(_rules.heading * 1.41),
 		roundi(_rules.pitch * 1.41), roundi(_rules.bank * 1.41)]
