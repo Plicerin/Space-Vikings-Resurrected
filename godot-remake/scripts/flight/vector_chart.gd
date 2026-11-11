@@ -4,7 +4,7 @@ extends Control
 ## placed, marked by how far off they are (a ring and a dot for near, a ring for
 ## middle, a cross for far), violet where the planet is secured, a square round
 ## the star the ship is at, and a crosshair to point with: the mouse, or the
-## arrow keys, which go from star to star. Everything written goes on the console's display: what is
+## arrow keys, which count through the stars by number. Everything written goes on the console's display: what is
 ## pointed at, what the chart says of a star on Enter, and its question
 ## "DO YOU WISH FURTHER INFORMATION?", "Y" to which runs the console with that
 ## star's page. What a click finds and what is said is
@@ -32,6 +32,7 @@ var from_console := false
 
 var _cursor := Vector2(140.0, 75.0)
 var _asking := 0 ## the star the player is being asked about, or 0
+var _focus := 0 ## the star the arrow keys are on, or 0 when the pointer is in charge
 var _said_until := 0.0
 var _said_no_star := false
 var _turn := 0.0
@@ -85,14 +86,10 @@ func handle_key(key: InputEventKey) -> bool:
 		KEY_ENTER, KEY_KP_ENTER:
 			if not key.echo:
 				select()
-		KEY_LEFT:
-			_nudge(Vector2.LEFT)
-		KEY_RIGHT:
-			_nudge(Vector2.RIGHT)
-		KEY_UP:
-			_nudge(Vector2.UP)
-		KEY_DOWN:
-			_nudge(Vector2.DOWN)
+		KEY_LEFT, KEY_UP:
+			_step(-1)
+		KEY_RIGHT, KEY_DOWN:
+			_step(1)
 		_:
 			return false
 	return true
@@ -113,42 +110,36 @@ func _gui_input(event: InputEvent) -> void:
 ## Points the cursor at a place in the chart's dots.
 func point_at(dots: Vector2) -> void:
 	_cursor = ChartRules.clamp_cursor(dots)
+	_focus = 0
 
 
 func _move(by: Vector2) -> void:
 	point_at(_cursor + by)
 
 
-## An arrow key goes to the next star that way: the nearest one in that
-## direction (a little across counts for more than a lot along), the cursor
-## put right on it. Where there is none the cursor just steps, so that the
-## whole map can still be reached by keys.
-func _nudge(direction: Vector2) -> void:
-	var here := ChartRules.star_at(_cursor)
-	var best := 0
-	var best_cost := INF
-	for star in range(1, ChartRules.STARS + 1):
-		if star == here:
-			continue
-		var off := ChartRules.place(star) - _cursor
-		var along := off.dot(direction)
-		if along < 1.0:
-			continue
-		var across := absf(off.dot(Vector2(-direction.y, direction.x)))
-		var cost := along + across * 2.5
-		if cost < best_cost:
-			best_cost = cost
-			best = star
-	if best > 0:
-		point_at(ChartRules.place(best))
-	else:
-		_move(direction * ARROW_STEP)
+## The arrow keys count through the stars: left and up to the one before,
+## right and down to the next, 20 round to 1 and 1 round to 20, the crosshair
+## put on it. (The original's paddles moved a free cursor and its button asked
+## about whatever it was over; this is the keyboard's way of getting to a star.)
+func _step(by: int) -> void:
+	var from := _focus if _focus > 0 else maxi(ChartRules.star_at(_cursor), 0)
+	if from == ChartRules.NO_STAR:
+		from = 0
+	var star := posmod(from - 1 + by, ChartRules.STARS) + 1
+	_cursor = ChartRules.clamp_cursor(ChartRules.place(star))
+	_focus = star
+
+
+## The star pointed at: the one the keys chose, or what the cursor is over.
+func _pointed() -> int:
+	return _focus if _focus > 0 else ChartRules.star_at(_cursor)
+
 
 ## @witness GALAXY MAP 3210-3270
 func select() -> void:
 	if _asking > 0:
 		return
-	var star := ChartRules.star_at(_cursor)
+	var star := _pointed()
 	if star == ChartRules.NO_STAR:
 		_said_no_star = true
 		_said_until = _turn + SAID
@@ -201,10 +192,10 @@ func _write_console() -> void:
 	elif _said_no_star:
 		lines.append(ChartRules.SAID_NO_STAR)
 	else:
-		var over := ChartRules.star_at(_cursor)
-		lines.append("CLICK A STAR." if over == ChartRules.NO_STAR else "STAR: %s" % ChartRules.NAMES[over - 1])
+		var over := _pointed()
+		lines.append("CLICK A STAR." if over == ChartRules.NO_STAR else "STAR %d: %s" % [over, ChartRules.NAMES[over - 1]])
 		lines.append("")
-		lines.append(columns.call("ARROWS  STAR TO STAR", "ENTER  ASK"))
+		lines.append(columns.call("ARROWS  STAR NUMBER", "ENTER  ASK"))
 		lines.append(columns.call("SPACE  CLOSE", ""))
 	console.page = lines
 
@@ -226,7 +217,7 @@ func _draw() -> void:
 		_vline(_map.position + Vector2(i * 40.0 * _scale, 0.0), _map.position + Vector2(i * 40.0 * _scale, _map.size.y), Color(PHOSPHOR, 0.08), 1.0)
 	for i in range(1, 4):
 		_vline(_map.position + Vector2(0.0, i * 40.0 * _scale), _map.position + Vector2(_map.size.x, i * 40.0 * _scale), Color(PHOSPHOR, 0.08), 1.0)
-	var over := ChartRules.star_at(_cursor)
+	var over := _pointed()
 	for star in range(1, ChartRules.STARS + 1):
 		var at := _map.position + ChartRules.place(star) * _scale
 		var colour := VIOLET if ChartRules.secured(star) else ink

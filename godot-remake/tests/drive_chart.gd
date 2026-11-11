@@ -46,7 +46,7 @@ func _drive() -> void:
 	_check("another click while asked changes nothing", chart._asking == SIRIUS and _page().has(said[0]))
 	_tap(KEY_N)
 	await _frames(2)
-	_check("N: the question goes", chart._asking == 0 and _page().has("STAR: SIRIUS") and not _page().has(ChartRules.QUESTION))
+	_check("N: the question goes", chart._asking == 0 and _page().has("STAR 7: SIRIUS") and not _page().has(ChartRules.QUESTION))
 
 	chart.point_at(Vector2(20, 20))
 	chart.select()
@@ -55,21 +55,33 @@ func _drive() -> void:
 	await _until(func() -> bool: return not _page().has(ChartRules.SAID_NO_STAR))
 	_check("and it goes by itself", not _page().has(ChartRules.SAID_NO_STAR))
 
-	# the keys: an arrow goes to the next star that way, Enter asks
+	# the keys count through the stars, Enter asks
 	chart = await _chart()
 	chart.point_at(ChartRules.place(SIRIUS))
-	var before := ChartRules.star_at(chart._cursor)
 	_tap(KEY_RIGHT)
 	await _frames(2)
-	var after := ChartRules.star_at(chart._cursor)
-	_check("an arrow right goes to a star to the right of SIRIUS (star %d to star %d)" % [before, after],
-			after != before and chart._cursor.x > ChartRules.place(SIRIUS).x and chart._cursor == ChartRules.place(after).clamp(Vector2(10, 10), Vector2(270, 145)))
+	_check("an arrow right is the next star number: SIRIUS (7) to VARCAR (8)", chart._pointed() == SIRIUS + 1 and _page().has("STAR 8: VARCAR"))
+	_tap(KEY_UP)
+	await _frames(2)
+	_check("up is the one before", chart._pointed() == SIRIUS)
+	for i in 13: # round past the end: 7 to 20, and one more is 1
+		_tap(KEY_DOWN)
+	await _frames(2)
+	_check("counting on past 20 comes round to 1", chart._pointed() == 20)
+	_tap(KEY_DOWN)
+	await _frames(2)
+	_check("and 1 round to 20 the other way", chart._pointed() == 1)
 	_tap(KEY_LEFT)
 	await _frames(2)
-	_check("and left comes back to SIRIUS", ChartRules.star_at(chart._cursor) == before)
+	_check("(one back from 1 is 20)", chart._pointed() == 20)
+	for i in 13:
+		_tap(KEY_UP)
+	await _frames(2)
+	_check("and back to SIRIUS", chart._pointed() == SIRIUS)
+	var before := SIRIUS
 	_tap(KEY_ENTER)
 	await _frames(2)
-	_check("Enter asks about it", _page().has("STAR SYSTEM : " + ChartRules.NAMES[before - 1]))
+	_check("Enter asks about it", _page().has("STAR SYSTEM : SIRIUS"))
 	_tap(KEY_Y)
 	await _scene_is(COM)
 	_check("Y runs the console with that star's page", _path() == COM and GameState.handover == before)
