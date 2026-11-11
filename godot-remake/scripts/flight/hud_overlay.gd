@@ -1,7 +1,8 @@
 extends Control
 ## What the flight panel shows besides its bars: the target bracket (where
 ## the defender is, how far, or an arrow to the edge toward it), the
-## attitude gauge (horizon by pitch and bank) and the ship's systems as
+## attitude gauge (horizon by pitch and bank), the indicator lamps (autopilot,
+## shields, weapon, condition, damage) and the ship's systems as
 ## lamps (green, amber below 60, red below 25). Drawn over the 3D view;
 ## native_flight.gd feeds it each frame.
 
@@ -32,6 +33,7 @@ func _draw() -> void:
 	_draw_target()
 	_draw_gauge()
 	_draw_systems()
+	_draw_lamps()
 
 
 func _draw_target() -> void:
@@ -95,3 +97,30 @@ func _draw_systems() -> void:
 		var cell := at + Vector2(0.0, i * 20.0)
 		draw_circle(cell + Vector2(5.0, -5.0), 5.0, colour)
 		draw_string(font, cell + Vector2(16.0, 0.0), SYSTEMS[i][0], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, colour)
+
+
+## The panel's switches as indicator lamps along the top left: lit
+## bright with a halo, or dark.
+func _draw_lamps() -> void:
+	var font := get_theme_default_font()
+	var blue := Color(0.35, 0.8, 1.0)
+	var lamps := [
+		["AUTO", GameState.autopilot_active, GREEN],
+		["SHIELDS", GameState.shields_up, GREEN],
+		["MISSILE", GameState.missile_mode_active, TARGET],
+		["LASER", not GameState.missile_mode_active, blue],
+		["GREEN", GameState.condition == 1, GREEN],
+		["BLUE", GameState.condition == 2, blue],
+		["RED", GameState.condition == 3, RED],
+		["DAMAGE", GameState.damage_alert_active, AMBER],
+	]
+	for i in lamps.size():
+		var at := Vector2(50.0 + i * 98.0, 36.0)
+		var colour: Color = lamps[i][2]
+		if lamps[i][1]:
+			draw_circle(at, 17.0, Color(colour, 0.25))
+			draw_circle(at, 11.0, colour)
+		else:
+			draw_arc(at, 11.0, 0.0, TAU, 24, Color(colour, 0.35), 2.0)
+		var width := font.get_string_size(lamps[i][0], HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
+		draw_string(font, at + Vector2(-width / 2.0, 32.0), lamps[i][0], HORIZONTAL_ALIGNMENT_LEFT, -1, 11, colour if lamps[i][1] else Color(colour, 0.4))

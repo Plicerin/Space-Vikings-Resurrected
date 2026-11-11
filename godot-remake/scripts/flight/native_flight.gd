@@ -70,7 +70,6 @@ var _said_for := 0.0
 @onready var _energy: ProgressBar = $Hud/Bar/Rows/Gauges/Energy
 @onready var _shields: ProgressBar = $Hud/Bar/Rows/Gauges/Shields
 @onready var _readout: Label = $Hud/Bar/Rows/Readout
-@onready var _lamps: GridContainer = $Hud/Bar/Rows/Lamps
 @onready var _said: Label = $Hud/Said
 @onready var _flash: ColorRect = $Hud/Flash
 @onready var _overlay: Control = $Hud/Overlay
@@ -87,7 +86,6 @@ func _ready() -> void:
 		_make_planet()
 		_make_defender()
 		_make_stars()
-	_make_lamps()
 	_combat.start(true)
 	_effects = FightEffects.new()
 	_effects.camera = _camera
@@ -488,15 +486,6 @@ func _update_camera() -> void:
 # --- the panel ---
 
 
-func _make_lamps() -> void:
-	for text in ["AUTOPILOT", "SHIELDS", "WEAPON", "CONDITION"]:
-		var lamp := Label.new()
-		lamp.name = text
-		lamp.text = text
-		lamp.custom_minimum_size.x = 150
-		_lamps.add_child(lamp)
-
-
 func _update_hud() -> void:
 	_overlay.pitch = _rules.pitch
 	_overlay.bank = _rules.bank
@@ -507,15 +496,3 @@ func _update_hud() -> void:
 	_readout.text = "X %d  Y %d  Z %d\nHEADING %d  PITCH %d\nBANK %d" % [
 		_rules.x / 2.0, _rules.y / 2.0, _rules.z / 2.0, roundi(_rules.heading * 1.41),
 		roundi(_rules.pitch * 1.41), roundi(_rules.bank * 1.41)]
-	_lamp("AUTOPILOT", GameState.autopilot_active, Color(0.1, 0.95, 0.3))
-	_lamp("SHIELDS", GameState.shields_up, Color(0.1, 0.95, 0.3))
-	_lamp("WEAPON", true, Color(1.0, 0.55, 0.2) if GameState.missile_mode_active else Color(0.35, 0.8, 1.0))
-	var colours := {1: Color(0.1, 0.95, 0.3), 2: Color(0.3, 0.6, 1.0), 3: Color(1.0, 0.3, 0.2)}
-	_lamp("CONDITION", true, colours.get(GameState.condition, Color.WHITE))
-
-
-func _lamp(name: String, on: bool, colour: Color) -> void:
-	var lamp := _lamps.get_node(name) as Label
-	lamp.modulate = colour if on else Color(0.45, 0.45, 0.45)
-	if name == "WEAPON":
-		lamp.text = "MISSILES" if GameState.missile_mode_active else "LASER"

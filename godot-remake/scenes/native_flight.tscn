@@ -75,11 +75,6 @@ custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 theme_type_variation = &"CrewLabel"
 
-[node name="Lamps" type="GridContainer" parent="Hud/Bar/Rows"]
-layout_mode = 2
-theme_override_constants/h_separation = 10
-theme_override_constants/v_separation = 6
-columns = 2
 
 [node name="Overlay" type="Control" parent="Hud"]
 layout_mode = 3
@@ -105,9 +100,9 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -300.0
-offset_top = 24.0
+offset_top = 96.0
 offset_right = 300.0
-offset_bottom = 60.0
+offset_bottom = 132.0
 grow_horizontal = 2
 theme_type_variation = &"CrewLabel"
 horizontal_alignment = 1
