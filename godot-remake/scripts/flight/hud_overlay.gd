@@ -86,6 +86,9 @@ func _draw_gauge() -> void:
 	draw_line(centre + Vector2(-14, 0), centre + Vector2(-5, 0), GREEN, 2.0)
 	draw_line(centre + Vector2(5, 0), centre + Vector2(14, 0), GREEN, 2.0)
 	draw_circle(centre, 2.0, GREEN)
+	_ball_marker(centre, Vector3.ZERO, Color(0.35, 0.8, 1.0)) # the planet
+	if target != null and is_instance_valid(target):
+		_ball_marker(centre, target.global_position, TARGET) # the defender
 
 
 func _draw_systems() -> void:
@@ -105,7 +108,9 @@ func _draw_lamps() -> void:
 	var font := get_theme_default_font()
 	var blue := Color(0.35, 0.8, 1.0)
 	var lamps := [
+		["MANUAL", not GameState.autopilot_active, GREEN],
 		["AUTO", GameState.autopilot_active, GREEN],
+		["ORBIT", not GameState.in_atmosphere, blue],
 		["SHIELDS", GameState.shields_up, GREEN],
 		["MISSILE", GameState.missile_mode_active, TARGET],
 		["LASER", not GameState.missile_mode_active, blue],
@@ -115,7 +120,7 @@ func _draw_lamps() -> void:
 		["DAMAGE", GameState.damage_alert_active, AMBER],
 	]
 	for i in lamps.size():
-		var at := Vector2(50.0 + i * 98.0, 36.0)
+		var at := Vector2(48.0 + i * 104.0, 36.0)
 		var colour: Color = lamps[i][2]
 		if lamps[i][1]:
 			draw_circle(at, 17.0, Color(colour, 0.25))
@@ -124,3 +129,21 @@ func _draw_lamps() -> void:
 			draw_arc(at, 11.0, 0.0, TAU, 24, Color(colour, 0.35), 2.0)
 		var width := font.get_string_size(lamps[i][0], HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
 		draw_string(font, at + Vector2(-width / 2.0, 32.0), lamps[i][0], HORIZONTAL_ALIGNMENT_LEFT, -1, 11, colour if lamps[i][1] else Color(colour, 0.4))
+
+
+## Where `world_at` lies as seen from the ship, on the ball: straight ahead is
+## the centre, abeam is half way out, behind is the rim (a hollow mark).
+func _ball_marker(centre: Vector2, world_at: Vector3, colour: Color) -> void:
+	if camera == null:
+		return
+	var local := camera.global_transform.basis.inverse() * (world_at - camera.global_position)
+	if local.length() < 1.0:
+		return
+	var angle := local.angle_to(Vector3(0.0, 0.0, -1.0)) # 0 ahead, PI behind
+	var across := Vector2(local.x, -local.y)
+	var dir := across.normalized() if across.length() > 0.0001 else Vector2.UP
+	var spot := centre + dir * (angle / PI) * (GAUGE_RADIUS - 5.0)
+	if angle > PI / 2.0:
+		draw_arc(spot, 5.0, 0.0, TAU, 16, colour, 2.0)
+	else:
+		draw_circle(spot, 5.0, colour)
