@@ -28,38 +28,38 @@ none
 | 25 | W |  | 5 | `POKE 32,0: POKE 33,40: POKE 34,0: POKE 35,23: PRINT` |
 | 29 | W |  | 5 | `HOME : PRINT "                    ": HOME : VTAB 2: FOR X = 1 TO 12: PRINT "              ` |
 | 35 | W |  | 5 | `IF R = 1 THEN R = 0: RETURN` |
-| 40 | P | godot-remake/scripts/com/com_console.gd:82<br>godot-remake/scripts/rules/com_rules.gd:66 | 5 | `LOC = 38198:V(1) = 2:H(1) = 23:V(2) = 2:H(2) = 29:V(3) = 2:H(3) = 35:V(4) = 5:H(4) = 23:V(` |
-| 50 | P | godot-remake/scripts/com/com_console.gd:82<br>godot-remake/scripts/rules/com_rules.gd:66 | 5 | `V(7) = 8:H(7) = 23:V(8) = 8:H(8) = 29:V(9) = 8:H(9) = 35:V(10) = 11:H(10) = 23:V(11) = 11:` |
-| 60 | P | godot-remake/scripts/com/com_console.gd:82<br>godot-remake/scripts/rules/com_rules.gd:66 | 5 | `I = 1: FOR J1 = 1 TO 12:X = ST(J1)` |
-| 65 | P | godot-remake/scripts/com/com_console.gd:82<br>godot-remake/scripts/rules/com_rules.gd:66 | 5 | `FOR J = 1 TO 2` |
-| 70 | P | godot-remake/scripts/com/com_console.gd:82<br>godot-remake/scripts/rules/com_rules.gd:66 | 5 | `T =  PEEK (X): GOSUB 10000: VTAB V(I): HTAB H(I): READ T$: PRINT T$:V(I) = V(I) + 1: NEXT ` |
-| 72 | P | godot-remake/scripts/com/com_console.gd:82<br>godot-remake/scripts/rules/com_rules.gd:66 | 5 | `RESTORE : POKE 973,0` |
-| 80 | P | godot-remake/scripts/com/com_console.gd:82<br>godot-remake/scripts/rules/com_rules.gd:66 | 5 | `VTAB 15: HTAB 1: PRINT "  COMPUTER DISPLAY      DAMAGE CONTROL  ";: POKE 33,21: POKE 32,1:` |
-| 90 | P | godot-remake/scripts/com/com_console.gd:181 | 5 | `HCOLOR= 1: HPLOT 1,1 TO 139,1 TO 139,110 TO 1,110 TO 1,1` |
-| 95 | P | godot-remake/scripts/com/com_console.gd:181 | 5 | `PRINT` |
-| 98 | L | godot-remake/scripts/com/com_console.gd:181<br>godot-remake/scripts/rules/com_rules.gd:78 | 5 | `IF  PEEK (38151) = 7 THEN  POKE 38151,0: POKE 974,64: PRINT "RUN GROUND FORCES"` |
-| 100 | P | godot-remake/scripts/com/com_console.gd:181 | 5 | `PRINT  TAB( 3);"COMMAND MODE": PRINT` |
-| 110 | P | godot-remake/scripts/com/com_console.gd:181 | 5 | `PRINT "1) COMPUTER": PRINT "2) GROUND FORCES": PRINT "3) RADAR": PRINT "4) END": PRINT "5)` |
-| 115 | L | godot-remake/scripts/com/com_console.gd:181<br>godot-remake/scripts/rules/com_rules.gd:78 | 5 | `IF  PEEK (38151) = 7 THEN  POKE 974,64: POKE 38151,0: PRINT "RUN GROUND FORCES"` |
-| 120 | L | godot-remake/scripts/com/com_console.gd:181<br>godot-remake/scripts/rules/com_rules.gd:93 | 5 | `PRINT "COMMAND?";: GET COM$:COM =  VAL (COM$): IF COM < 1 OR COM > 5 THEN  SPEED= 127: PRI` |
-| 121 | P | godot-remake/scripts/com/com_console.gd:181<br>godot-remake/scripts/rules/com_rules.gd:93 | 5 | `POKE 974,64` |
-| 127 | L | godot-remake/scripts/com/com_console.gd:181<br>godot-remake/scripts/rules/com_rules.gd:93 | 5 | `IF COM = 2 THEN  PRINT " ": PRINT "RUN GROUND FORCES"` |
-| 128 | P | godot-remake/scripts/com/com_console.gd:181<br>godot-remake/scripts/rules/com_rules.gd:93 | 5 | `POKE 974,32: POKE 32,0: POKE 33,40: POKE 34,0: POKE 35,24` |
-| 129 | L | godot-remake/scripts/com/com_console.gd:181<br>godot-remake/scripts/rules/com_rules.gd:93 | 5 | `PRINT " ": IF COM = 5 THEN J = 16: FOR X = 1 TO J: VTAB X: HTAB 1: PRINT "                ` |
-| 130 | L | godot-remake/scripts/com/com_console.gd:181<br>godot-remake/scripts/rules/com_rules.gd:93 | 5 | `VTAB 1: IF COM = 5 THEN  POKE 974,64: PRINT "RUNSTARSHIP SIMULATOR"` |
-| 131 | P | godot-remake/scripts/com/com_console.gd:181<br>godot-remake/scripts/rules/com_rules.gd:93 | 5 | `POKE 974,64` |
-| 132 | L | godot-remake/scripts/com/com_console.gd:181<br>godot-remake/scripts/rules/com_rules.gd:93 | 5 | `IF COM = 4 THEN  PRINT "RUNEND"` |
-| 133 | L | godot-remake/scripts/com/com_console.gd:181<br>godot-remake/scripts/rules/com_rules.gd:93 | 5 | `IF COM = 3 THEN  POKE 38388,2: PRINT "RUN RADAR"` |
-| 135 | L | godot-remake/scripts/com/com_console.gd:181<br>godot-remake/scripts/rules/com_rules.gd:93 | 5 | `POKE 974,32: IF COM = 1 THEN 200` |
+| 40 | P | godot-remake/scripts/com/com_console.gd:81<br>godot-remake/scripts/rules/com_rules.gd:66 | 5 | `LOC = 38198:V(1) = 2:H(1) = 23:V(2) = 2:H(2) = 29:V(3) = 2:H(3) = 35:V(4) = 5:H(4) = 23:V(` |
+| 50 | P | godot-remake/scripts/com/com_console.gd:81<br>godot-remake/scripts/rules/com_rules.gd:66 | 5 | `V(7) = 8:H(7) = 23:V(8) = 8:H(8) = 29:V(9) = 8:H(9) = 35:V(10) = 11:H(10) = 23:V(11) = 11:` |
+| 60 | P | godot-remake/scripts/com/com_console.gd:81<br>godot-remake/scripts/rules/com_rules.gd:66 | 5 | `I = 1: FOR J1 = 1 TO 12:X = ST(J1)` |
+| 65 | P | godot-remake/scripts/com/com_console.gd:81<br>godot-remake/scripts/rules/com_rules.gd:66 | 5 | `FOR J = 1 TO 2` |
+| 70 | P | godot-remake/scripts/com/com_console.gd:81<br>godot-remake/scripts/rules/com_rules.gd:66 | 5 | `T =  PEEK (X): GOSUB 10000: VTAB V(I): HTAB H(I): READ T$: PRINT T$:V(I) = V(I) + 1: NEXT ` |
+| 72 | P | godot-remake/scripts/com/com_console.gd:81<br>godot-remake/scripts/rules/com_rules.gd:66 | 5 | `RESTORE : POKE 973,0` |
+| 80 | P | godot-remake/scripts/com/com_console.gd:81<br>godot-remake/scripts/rules/com_rules.gd:66 | 5 | `VTAB 15: HTAB 1: PRINT "  COMPUTER DISPLAY      DAMAGE CONTROL  ";: POKE 33,21: POKE 32,1:` |
+| 90 | P | godot-remake/scripts/com/com_console.gd:180 | 5 | `HCOLOR= 1: HPLOT 1,1 TO 139,1 TO 139,110 TO 1,110 TO 1,1` |
+| 95 | P | godot-remake/scripts/com/com_console.gd:180 | 5 | `PRINT` |
+| 98 | L | godot-remake/scripts/com/com_console.gd:180<br>godot-remake/scripts/rules/com_rules.gd:78 | 5 | `IF  PEEK (38151) = 7 THEN  POKE 38151,0: POKE 974,64: PRINT "RUN GROUND FORCES"` |
+| 100 | P | godot-remake/scripts/com/com_console.gd:180 | 5 | `PRINT  TAB( 3);"COMMAND MODE": PRINT` |
+| 110 | P | godot-remake/scripts/com/com_console.gd:180 | 5 | `PRINT "1) COMPUTER": PRINT "2) GROUND FORCES": PRINT "3) RADAR": PRINT "4) END": PRINT "5)` |
+| 115 | L | godot-remake/scripts/com/com_console.gd:180<br>godot-remake/scripts/rules/com_rules.gd:78 | 5 | `IF  PEEK (38151) = 7 THEN  POKE 974,64: POKE 38151,0: PRINT "RUN GROUND FORCES"` |
+| 120 | L | godot-remake/scripts/com/com_console.gd:180<br>godot-remake/scripts/rules/com_rules.gd:93 | 5 | `PRINT "COMMAND?";: GET COM$:COM =  VAL (COM$): IF COM < 1 OR COM > 5 THEN  SPEED= 127: PRI` |
+| 121 | P | godot-remake/scripts/com/com_console.gd:180<br>godot-remake/scripts/rules/com_rules.gd:93 | 5 | `POKE 974,64` |
+| 127 | L | godot-remake/scripts/com/com_console.gd:180<br>godot-remake/scripts/rules/com_rules.gd:93 | 5 | `IF COM = 2 THEN  PRINT " ": PRINT "RUN GROUND FORCES"` |
+| 128 | P | godot-remake/scripts/com/com_console.gd:180<br>godot-remake/scripts/rules/com_rules.gd:93 | 5 | `POKE 974,32: POKE 32,0: POKE 33,40: POKE 34,0: POKE 35,24` |
+| 129 | L | godot-remake/scripts/com/com_console.gd:180<br>godot-remake/scripts/rules/com_rules.gd:93 | 5 | `PRINT " ": IF COM = 5 THEN J = 16: FOR X = 1 TO J: VTAB X: HTAB 1: PRINT "                ` |
+| 130 | L | godot-remake/scripts/com/com_console.gd:180<br>godot-remake/scripts/rules/com_rules.gd:93 | 5 | `VTAB 1: IF COM = 5 THEN  POKE 974,64: PRINT "RUNSTARSHIP SIMULATOR"` |
+| 131 | P | godot-remake/scripts/com/com_console.gd:180<br>godot-remake/scripts/rules/com_rules.gd:93 | 5 | `POKE 974,64` |
+| 132 | L | godot-remake/scripts/com/com_console.gd:180<br>godot-remake/scripts/rules/com_rules.gd:93 | 5 | `IF COM = 4 THEN  PRINT "RUNEND"` |
+| 133 | L | godot-remake/scripts/com/com_console.gd:180<br>godot-remake/scripts/rules/com_rules.gd:93 | 5 | `IF COM = 3 THEN  POKE 38388,2: PRINT "RUN RADAR"` |
+| 135 | L | godot-remake/scripts/com/com_console.gd:180<br>godot-remake/scripts/rules/com_rules.gd:93 | 5 | `POKE 974,32: IF COM = 1 THEN 200` |
 | 140 | P |  |  | `GOTO 30` |
-| 200 | P | godot-remake/scripts/com/com_console.gd:201 | 5 | `POKE 974,32:R = 1: GOSUB 21: HOME` |
-| 210 | P | godot-remake/scripts/com/com_console.gd:201 | 5 | `PRINT  TAB( 1);"CENTRAL COMPUTER": PRINT` |
-| 215 | L | godot-remake/scripts/com/com_console.gd:201<br>godot-remake/scripts/rules/com_rules.gd:107 | 5 | `IF  PEEK (38196) = 0 THEN  PRINT "COMPUTER NOT": PRINT "FUNCTIONING.": FOR J = 1 TO 4000: ` |
-| 220 | P | godot-remake/scripts/com/com_console.gd:201 | 4 | `PRINT "1) NAVIGATION COMP.": PRINT "2) GALAXY DIRECTORY": PRINT "3) GALAXY MAP": PRINT "4)` |
-| 260 | L | godot-remake/scripts/com/com_console.gd:201<br>godot-remake/scripts/rules/com_rules.gd:113 | 4 | `PRINT "READY ";: GET C$:C =  VAL (C$): IF C < 1 OR C > 6 THEN  SPEED= 127: PRINT : PRINT "` |
-| 265 | L | godot-remake/scripts/com/com_console.gd:201<br>godot-remake/scripts/rules/com_rules.gd:113 | 4 | `IF C = 3 THEN  GOSUB 3000: GOTO 20` |
-| 270 | L | godot-remake/scripts/com/com_console.gd:201<br>godot-remake/scripts/rules/com_rules.gd:113 | 4 | `ON C GOTO 800,900,30,1200,20000` |
-| 280 | L | godot-remake/scripts/com/com_console.gd:201<br>godot-remake/scripts/rules/com_rules.gd:113 | 4 | `IF C = 6 THEN 12` |
+| 200 | P | godot-remake/scripts/com/com_console.gd:200 | 5 | `POKE 974,32:R = 1: GOSUB 21: HOME` |
+| 210 | P | godot-remake/scripts/com/com_console.gd:200 | 5 | `PRINT  TAB( 1);"CENTRAL COMPUTER": PRINT` |
+| 215 | L | godot-remake/scripts/com/com_console.gd:200<br>godot-remake/scripts/rules/com_rules.gd:107 | 5 | `IF  PEEK (38196) = 0 THEN  PRINT "COMPUTER NOT": PRINT "FUNCTIONING.": FOR J = 1 TO 4000: ` |
+| 220 | P | godot-remake/scripts/com/com_console.gd:200 | 4 | `PRINT "1) NAVIGATION COMP.": PRINT "2) GALAXY DIRECTORY": PRINT "3) GALAXY MAP": PRINT "4)` |
+| 260 | L | godot-remake/scripts/com/com_console.gd:200<br>godot-remake/scripts/rules/com_rules.gd:113 | 4 | `PRINT "READY ";: GET C$:C =  VAL (C$): IF C < 1 OR C > 6 THEN  SPEED= 127: PRINT : PRINT "` |
+| 265 | L | godot-remake/scripts/com/com_console.gd:200<br>godot-remake/scripts/rules/com_rules.gd:113 | 4 | `IF C = 3 THEN  GOSUB 3000: GOTO 20` |
+| 270 | L | godot-remake/scripts/com/com_console.gd:200<br>godot-remake/scripts/rules/com_rules.gd:113 | 4 | `ON C GOTO 800,900,30,1200,20000` |
+| 280 | L | godot-remake/scripts/com/com_console.gd:200<br>godot-remake/scripts/rules/com_rules.gd:113 | 4 | `IF C = 6 THEN 12` |
 | 390 | W |  | 2 | `RETURN` |
 | 600 | P |  |  | `PRINT D$;"RUN STARSHIP SIMULATOR"` |
 | 800 | P | godot-remake/scripts/com/com_console.gd:226 | 2 | `R = 1: GOSUB 21: HOME` |

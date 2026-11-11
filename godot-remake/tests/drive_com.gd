@@ -13,7 +13,6 @@ const COM := "res://scenes/com.tscn"
 const FLIGHT := "res://scenes/native_flight.tscn"
 const GROUND_FORCES := "res://scenes/ground_forces.tscn"
 const END := "res://scenes/end_game.tscn"
-const CHART := "res://scenes/star_chart.tscn"
 const STATUS := "res://scenes/status.tscn"
 const SUPPLY := "res://scenes/supply_report.tscn"
 const CONSOLE := "Center/Columns/Console/VBox/"
@@ -128,7 +127,7 @@ func _drive() -> void:
 		_check("command %d goes to %s" % [case[0] - KEY_0, case[1]], _path() == case[1])
 		if case[0] == KEY_3:
 			_check("RADAR is told who ran it (38388 = 2)", GameState.handover == 2)
-	for case: Array in [[KEY_3, CHART], [KEY_4, STATUS], [KEY_5, SUPPLY]]:
+	for case: Array in [[KEY_3, FLIGHT], [KEY_4, STATUS], [KEY_5, SUPPLY]]:
 		await _console(func() -> void: pass)
 		_tap(KEY_1)
 		await _frames(3)
@@ -142,8 +141,9 @@ func _drive() -> void:
 		GameState.planet_scouted[4] = true)
 	_check("the chart's Y: LUYTEN's page, straight away", _title() == "LUYTEN STAR SYSTEM")
 	(_node("Buttons").get_child(0) as Button).pressed.emit()
-	await _scene_is(CHART)
-	_check("and RETURN runs the chart again, the mark taken", _path() == CHART and GameState.handover == 0)
+	await _scene_is(FLIGHT)
+	await _frames(3)
+	_check("and RETURN runs the chart again, the mark taken", _scene().get("_chart").visible and GameState.handover == 0)
 	GameState.start_new_game()
 	GameState.ground_forces_due = true
 	GameState.goto_scene(COM)
@@ -164,7 +164,7 @@ func _console(with: Callable) -> void:
 	_scene().pace = 0.15
 
 
-func _scene() -> Control:
+func _scene() -> Node:
 	return get_tree().current_scene
 
 

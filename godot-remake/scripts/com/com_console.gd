@@ -18,7 +18,6 @@ const ComRules = preload("res://scripts/rules/com_rules.gd")
 
 const GROUND_FORCES := "res://scenes/ground_forces.tscn"
 const END := "res://scenes/end_game.tscn"
-const CHART := "res://scenes/star_chart.tscn"
 const STATUS := "res://scenes/status.tscn"
 const SUPPLY := "res://scenes/supply_report.tscn"
 
@@ -214,7 +213,8 @@ func _central_picked(choice: int) -> void:
 	elif goes == ComRules.Central.DIRECTORY:
 		_directory()
 	elif goes == ComRules.Central.GALAXY_MAP:
-		_go(CHART)
+		GameState.show_chart_on_arrival = true
+		_go(GameState.flight_scene)
 	elif goes == ComRules.Central.STATUS:
 		_go(STATUS)
 	elif goes == ComRules.Central.SUPPLY:
@@ -284,6 +284,7 @@ func _page(c: int) -> void:
 
 func _page_closed() -> void:
 	if ComRules.page_closed():
-		_go(CHART)
+		GameState.show_chart_on_arrival = true
+		_go(GameState.flight_scene)
 	else:
 		_directory()

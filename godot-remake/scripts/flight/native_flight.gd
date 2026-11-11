@@ -35,6 +35,7 @@ const FightEffects = preload("res://scripts/flight/fight_effects.gd")
 
 const COM := "res://scenes/com.tscn"
 const VectorRadar = preload("res://scripts/flight/vector_radar.gd")
+const VectorChart = preload("res://scripts/flight/vector_chart.gd")
 
 const PLANET_RADIUS := 780.0
 ## The game's own points nearer than this to the planet are its cluster; the
@@ -54,6 +55,7 @@ var _rules := FlightRules.new()
 var _combat := CombatRules.new()
 var _effects: Node3D
 var _radar: Control
+var _chart: Control
 ## Seconds since the last pass of fighting, and whether the fire key was
 ## pressed since (a tap between two passes still fires).
 var _fight_clock := 0.0
@@ -106,6 +108,15 @@ func _ready() -> void:
 	if GameState.show_radar_on_arrival: # the console's RADAR
 		GameState.show_radar_on_arrival = false
 		_radar.open()
+	_chart = VectorChart.new()
+	_chart.console = $Hud/Overlay
+	$Hud.add_child(_chart)
+	_chart.closed.connect(func(to_console: bool) -> void:
+		if to_console:
+			_leave(COM))
+	if GameState.show_chart_on_arrival: # the console's GALAXY MAP
+		GameState.show_chart_on_arrival = false
+		_chart.open(true)
 	_overlay.camera = _camera
 	_overlay.target = _defender
 	_update_camera()
@@ -141,17 +152,17 @@ func _process(delta: float) -> void:
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	var key := event as InputEventKey
-	if key == null or not key.pressed or key.echo:
+	if key == null or not key.pressed or (key.echo and not _chart.visible): # a held arrow moves the chart's cursor
 		return
 	if _dead:
 		GameState.reboot() # a key after the ship is lost, and the machine starts again
 		return
+	var viewport := get_viewport() # the radar's X may leave for the console
+	if _radar.handle_key(key) or _chart.handle_key(key):
+		viewport.set_input_as_handled()
+		return
 	if event.is_action("fire"):
 		_fire_tapped = true
-		return
-	var viewport := get_viewport() # the radar's X may leave for the console
-	if _radar.handle_key(key):
-		viewport.set_input_as_handled()
 		return
 	match key.keycode:
 		KEY_1: _rules.change_speed(-3.0)
@@ -167,7 +178,11 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		KEY_C:
 			_leave(COM)
 		KEY_R:
-			_radar.open()
+			if not _chart.visible:
+				_radar.open()
+		KEY_G:
+			if not _radar.visible:
+				_chart.open()
 		KEY_H:
 			_hyperdrive()
 

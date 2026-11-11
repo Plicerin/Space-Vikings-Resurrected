@@ -36,7 +36,7 @@ data in `tests/golden/`.
 |---|---|---|---|
 | `GROUND FORCES`, `RECALL`, `COLLECT` | `scripts/rules/ground_rules.gd` | `scripts/ui/ground_forces.gd` | `check_ground_rules` (the rules), `drive_ground_forces` (the scene) |
 | `SHORE LEAVE` (shore leave, enlisting and weapons, loot, repairs, a base, cryogenics) | `scripts/rules/shore_rules.gd` | `scripts/ui/shore_leave.gd`, one panel over the ground forces menu | `check_shore_rules`, `drive_shore_leave` |
-| `GALAXY MAP` (star chart) | `scripts/rules/chart_rules.gd` | `scripts/chart/star_chart.gd` | `check_chart_rules`, `drive_chart` |
+| `GALAXY MAP` (star chart) | `scripts/rules/chart_rules.gd` | `scripts/flight/vector_chart.gd` (a vector overlay on the flight) | `check_chart_rules`, `drive_chart` |
 | `END` (save, continue, end game) | `scripts/rules/end_rules.gd` | `scripts/end/end_console.gd` | `check_end_rules`, `drive_end` |
 | `COM` (command console, central and navigation computers, galaxy directory, damage-control lamps) | `scripts/rules/com_rules.gd` | `scripts/com/com_console.gd` | `check_com_rules`, `drive_com` |
 | `STATUS`, `SUPPLY` (the central computer's two reports) | `scripts/rules/report_rules.gd` | `scripts/reports/report_console.gd`, one panel each | `check_report_rules`, `drive_reports` |
@@ -122,9 +122,12 @@ flashes (the screen flashes in Godot's way).
 
 ## Star chart
 
-The central computer's "GALAXY MAP", one panel (`scripts/chart/star_chart.gd`
-over `scripts/rules/chart_rules.gd`, held to a recording that put the
-paddles to fifty places: `check_chart_rules`). Twenty stars by X and Y, a
+The central computer's "GALAXY MAP", a vector display over the front
+window, like the radar (`scripts/flight/vector_chart.gd` over
+`scripts/rules/chart_rules.gd`, held to a recording that put the paddles to
+fifty places: `check_chart_rules`). `G` puts it up in the flight; the
+console's GALAXY MAP shows it too, and Space then goes back to the console.
+What it says is written on the console's display, not on the glass. Twenty stars by X and Y, a
 different mark for near, middle and far Z, violet for a secured one, a
 box round the star the ship is at. Point at a star and click (or the
 arrow keys and Enter) and it says what the star is called, where it is
@@ -234,7 +237,7 @@ a difference.
     godot --headless --path . res://tests/check_flight_rules.tscn    # the continuous flight model against the original's arithmetic, the engine's matrix and the camera
     godot --headless --path . res://tests/check_report_rules.tscn    # STATUS and SUPPLY: 6 recorded routes, 20 pages as the real game printed them
     godot --headless --path . res://tests/check_shore_rules.tscn     # SHORE LEAVE: 7 recorded routes through the rules, state and text
-    godot --headless --fixed-fps 60 --path . res://tests/drive_chart.tscn    # the chart scene, by pointer and keys: a click, the question, Y and N, Space, the way to the console and back
+    godot --headless --fixed-fps 60 --path . res://tests/drive_chart.tscn    # the vector chart, by pointer and keys: a click, the question, Y and N, Space, the way to the console and back
     godot --headless --fixed-fps 60 --path . res://tests/drive_com.tscn      # the console scene, by keys: the lamps, every menu, a course, the directory, every way out of it
     godot --headless --fixed-fps 60 --path . res://tests/drive_radar.tscn    # the vector radar and I.D. over the flight, by keys
     godot --headless --fixed-fps 60 --path . res://tests/drive_save.tscn     # title, END, save, CONTINUE

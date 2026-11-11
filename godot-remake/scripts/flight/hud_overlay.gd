@@ -439,8 +439,8 @@ const HELP := [
 	"SPACE   FIRE           A  AUTO",
 	"S  SHIELD              W  WEAPON",
 	"B  ALERT               C  CONSOLE",
-	"R  RADAR               H  JUMP",
-	"N  NAV DATA            F1 KEYS",
+	"R  RADAR               G  GALAXY MAP",
+	"H  JUMP                N  NAV  F1 KEYS",
 ]
 const LED := Color(0.25, 1.0, 0.45)
 

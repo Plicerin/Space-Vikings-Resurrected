@@ -29,6 +29,8 @@ var in_atmosphere: bool = false  # $38210
 ## back to: each flight scene puts its own path here as it starts.
 ## The console's RADAR: the flight is shown with the radar already up.
 var show_radar_on_arrival := false
+## The console's GALAXY MAP: the flight is shown with the chart already up.
+var show_chart_on_arrival := false
 var flight_scene: String = "res://scenes/native_flight.tscn"
 var handover: int = 0
 ## $38151 = 7: COLLECT and GROUND FORCES run COM to have the console
