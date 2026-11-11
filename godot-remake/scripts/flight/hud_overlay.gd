@@ -169,14 +169,9 @@ func _draw_panel() -> void:
 	draw_rect(Rect2(0.0, top, size.x, PANEL_HEIGHT), Color(0.9, 0.9, 0.9), false, 2.0)
 	var w := size.x
 	_bar(font, "SPEED", Rect2(w * 0.015, top + 34.0, w * 0.13, 8.0), speed / 120.0, false)
-	_bar(font, "TURN", Rect2(w * 0.17, top + 34.0, w * 0.105, 8.0), (bank + 48.0) / 95.0, true)
+	_dial(font, "TURN", Rect2(w * 0.17, top + 26.0, w * 0.105, 26.0), (bank + 48.0) / 95.0, false)
 	# VERT: the nose up is the top
-	var vert := Rect2(w * 0.292, top + 14.0, 14.0, 50.0)
-	draw_string(font, Vector2(vert.end.x + 8.0, vert.get_center().y + 4.0), "VERT", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, GREEN)
-	draw_rect(vert, Color(GREEN, 0.5), false, 1.0)
-	draw_line(Vector2(vert.position.x - 3.0, vert.get_center().y), Vector2(vert.end.x + 3.0, vert.get_center().y), GREEN, 1.0)
-	var nose := clampf((-pitch + 61.0) / 120.0, 0.0, 1.0)
-	draw_rect(Rect2(vert.position.x - 3.0, vert.position.y + nose * vert.size.y - 2.0, vert.size.x + 6.0, 4.0), GREEN)
+	_dial(font, "VERT", Rect2(w * 0.292, top + 12.0, 26.0, 64.0), (-pitch + 61.0) / 120.0, true)
 	_bar(font, "ENERGY", Rect2(w * 0.365, top + 34.0, w * 0.105, 8.0), energy / 63.0, false)
 	var lines := readout.split("\n")
 	for i in lines.size():
@@ -239,6 +234,60 @@ func _arc_text(canvas: CanvasItem, font: Font, text: String, centre: Vector2, ra
 		_raised_string(canvas, font, Vector2(-widths[i] / TIGHT / 2.0, 0.0), text[i], size_px)
 		angle += half
 	canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+## An old radio's tuning dial: a window with a scale printed behind it and a
+## small plastic triangle that slides in it, about a third of the window's
+## width across. `amount` is 0 to 1 along the window; `vertical` for VERT.
+func _dial(font: Font, name: String, window: Rect2, amount: float, vertical: bool) -> void:
+	amount = clampf(amount, 0.0, 1.0)
+	if vertical:
+		draw_string(font, Vector2(window.end.x + 8.0, window.get_center().y + 4.0), name, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, GREEN)
+	else:
+		draw_string(font, window.position + Vector2(0.0, -7.0), name, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, GREEN)
+	var frame := StyleBoxFlat.new()
+	frame.bg_color = Color(0.03, 0.05, 0.04)
+	frame.set_corner_radius_all(4)
+	frame.set_border_width_all(2)
+	frame.border_color = Color(0.3, 0.32, 0.36)
+	frame.anti_aliasing = true
+	draw_style_box(frame, window)
+	var inner := window.grow(-3.0)
+	# the scale, lit from behind: a tick every eighth, the middle longer
+	var along := inner.size.y if vertical else inner.size.x
+	var across := inner.size.x if vertical else inner.size.y
+	for i in 9:
+		var t := i / 8.0
+		var length := across * (0.42 if i == 4 else 0.28)
+		var tick := Color(1.0, 0.8, 0.35, 0.9 if i == 4 else 0.6)
+		if vertical:
+			var y := inner.position.y + t * along
+			draw_line(Vector2(inner.position.x, y), Vector2(inner.position.x + length, y), tick, 1.0 if i != 4 else 1.5, true)
+		else:
+			var x := inner.position.x + t * along
+			draw_line(Vector2(x, inner.position.y), Vector2(x, inner.position.y + length), tick, 1.0 if i != 4 else 1.5, true)
+	# the pointer: a triangle of red plastic, a third of the window across
+	var size_px := across / 3.0 + 2.0
+	var base := size_px * 1.1
+	var point: Vector2
+	var corners: PackedVector2Array
+	if vertical:
+		var y := inner.position.y + amount * along
+		point = Vector2(inner.position.x + across * 0.45, y)
+		corners = PackedVector2Array([point, point + Vector2(size_px, -base / 2.0), point + Vector2(size_px, base / 2.0)])
+	else:
+		var x := inner.position.x + amount * along
+		point = Vector2(x, inner.position.y + across * 0.45)
+		corners = PackedVector2Array([point, point + Vector2(-base / 2.0, size_px), point + Vector2(base / 2.0, size_px)])
+	var shadow := PackedVector2Array()
+	for corner in corners:
+		shadow.append(corner + Vector2(1.2, 1.2))
+	draw_colored_polygon(shadow, Color(0.0, 0.0, 0.0, 0.5))
+	draw_colored_polygon(corners, Color(0.9, 0.18, 0.1))
+	draw_line(corners[0], corners[1], Color(1.0, 0.65, 0.5, 0.9), 1.2, true) # the edge catching the light
+	draw_line(corners[0], corners[2], Color(0.45, 0.05, 0.03, 0.9), 1.0, true)
+	# the glass over it all
+	draw_rect(Rect2(window.position + Vector2(3.0, 3.0), Vector2(window.size.x - 6.0, (window.size.y - 6.0) * 0.45)), Color(1.0, 1.0, 1.0, 0.05))
 
 
 ## A gauge: its name above, an outlined track, filled from the left to
