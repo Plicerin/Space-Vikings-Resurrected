@@ -6,28 +6,31 @@ non-functional `js-remake/`.
 
     godot --path godot-remake
 
-boots to `scenes/start.tscn`: New Game, Load Game, the shape viewer and
-the combat demo. Developed and tested on Godot 4.7.
+boots to `scenes/start.tscn`: NEW GAME, and CONTINUE when a game has been
+saved. Developed and tested on Godot 4.7.
 
-This file says what the port is today. How each fact was found is in the
-parent repository's analysis documents (`CALL_SITES.md` first) and in
-the git history.
+The aim is a small, simple Godot game with the original's rules and
+experience, none of the Apple's hardware to fight with. Anyone after the
+Apple's own picture, speed and disk habits has the real disk and an
+emulator. The test of whether one of the original's bugs, quirks or
+mechanics is kept is whether keeping it leaves the Godot game simpler
+(see "Liberties").
 
-## Three kinds of screen
+This file says what the port is. How each fact was found is in the
+parent repository's analysis documents (`CALL_SITES.md` first), the
+witness ledgers and the git history.
 
-The original is a dozen BASIC programs that chain to each other and
-share one hi-res page, with machine code for the 3D view, the text and
-the panel lamps. The port has that game in three states, and is moving
-all of it to the first: the same game by the same rules, shown the way
-Godot shows things. Anyone after the Apple's own picture, speed and
-disk habits has the real disk and an emulator.
+## How it is put together
 
-**Native, rules held to the real game.** The rules are a class of
-their own with no screen in it, played through recordings of the real
-game (its keys, the numbers its `RND` gave) and compared with the real
-game's memory, variables and printed text at every stop. The screen is
-a Godot scene: controls, a theme (`theme/space_vikings.tres`), numbers
-that count, waits a key can cut short.
+Every program of the original is a **rules class** with no screen in it
+(`scripts/rules/`) and a **Godot scene** that shows it (controls, the
+theme `theme/space_vikings.tres`, numbers that count, waits a key can cut
+short). The rules were played through recordings of the real game, made
+in MAME (`tools/mame/*_live.lua`, results in `analysis/live/`): its keys,
+the numbers its `RND` gave, compared with its memory, variables and
+printed text at every stop. Where the recording could not reach, the
+rules were compared with the verified code of the earlier port, kept as
+data in `tests/golden/`.
 
 | Original program | Rules | Scene | Held to the real game by |
 |---|---|---|---|
@@ -37,33 +40,11 @@ that count, waits a key can cut short.
 | `END` (save, continue, end game) | `scripts/rules/end_rules.gd` | `scripts/end/end_console.gd` | `check_end_rules`, `drive_end` |
 | `COM` (command console, central and navigation computers, galaxy directory, damage-control lamps) | `scripts/rules/com_rules.gd` | `scripts/com/com_console.gd` | `check_com_rules`, `drive_com` |
 | `STATUS`, `SUPPLY` (the central computer's two reports) | `scripts/rules/report_rules.gd` | `scripts/reports/report_console.gd`, one panel each | `check_report_rules`, `drive_reports` |
-
-**Ported faithfully.** The screen is a software copy of the Apple's
-hi-res page, drawn by the original's own statements in the original's
-order at the original's speed, and compared byte for byte with the real
-game running in MAME.
-
-| Original program | Port | Held to the real game by |
-|---|---|---|
-| `STARSHIP SIMULATOR` (flight, fighting, keys) | `scripts/flight/flight_program.gd`, `flight_combat.gd`, `flight_loop.gd` | `check_flight_passes`, `check_jump`, `check_flight_core` |
-| `INSTRUMENTS`, TRANLIT (panel and lamps) | `flight_program.gd` | the same |
-| `RE`, `ORBIT` (into and out of the atmosphere) | `flight_program.gd` | the same |
-| `H_D` (hyperdrive) | `flight_program.gd`, `flight_loop.gd` | `check_jump` |
-| `EX`, `DMG`, `S/X` (the ends of a fight) | `flight_combat.gd`, `scripts/combat/combat_fx.gd` | `check_jump` |
-| A2-3D1 (the 3D view, machine code) | `scripts/shapes/a2_3d1_view.gd`, `a2_3d1_trig.gd` | `check_a2_3d1` |
-| `RADAR` | `scripts/rules/radar_rules.gd`, `scripts/radar/radar_console.gd` (a native plan view) | `check_radar_rules` |
-| `SHIP # 0 I.D.`, `# 1`, `# 3`, `# 4` (what is in orbit) | `radar_rules.gd` (the texts), `scripts/radar/ship_id.gd` (a turntable of the native model) | `check_radar_rules` |
-| Planet record copy, new-game data, save and load | `autoload/game_state.gd` | `check_save`, `check_jump` |
-| An old game's way into flight (`START` 3000-3030, `INSTRUMENTS` 210, `GALAXY MAP` 2), and `END`'s CONTINUE | `flight_loop.gd` (`run()`, `lamps()`) | `check_save` |
-
-**Standing in.** The rules are the original's (formulas, gates, order of
-effects, quirks) but the screen is Godot buttons and labels, not the
-hi-res page, nothing is timed, and nothing holds them to the real
-game yet. One is left:
-
-| Original program | Stand-in |
-|---|---|
-| `START` (title, new or old game) | `start_screen.gd` |
+| `STARSHIP SIMULATOR` (flight, fighting, keys) | `scripts/rules/flight_rules.gd`, `combat_rules.gd` | `scripts/flight/native_flight.gd` (3D), `fight_effects.gd` | `check_flight_rules`, `check_combat_rules`, `drive_native_flight` |
+| `H_D` (hyperdrive), `RE`, `ORBIT` (into and out of the atmosphere) | `hyperdrive_rules.gd`, `flight_rules.gd` | `native_flight.gd`, `hyperspace_effect.gd` | `check_hyperdrive_rules`, `check_flight_rules` |
+| `EX`, `DMG`, `S/X` (the ends of a fight) | `combat_rules.gd` | `native_flight.gd` | `check_combat_rules` |
+| `RADAR`, `SHIP # 0 I.D.`, `# 1`, `# 3`, `# 4` | `radar_rules.gd` | `scripts/radar/radar_console.gd` (a plan view), `ship_id.gd` (a turntable) | `check_radar_rules`, `drive_radar` |
+| `START` (title), save and load, planet records, new-game data | `autoload/game_state.gd` | `scripts/ui/start_screen.gd` | `check_save`, `drive_save` |
 
 ## The code witness
 
@@ -79,69 +60,34 @@ line that is not there, and for a `CALL` into machine code that no
 lines no recording ever ran, the ones the rules rest on the listing
 alone for. `python3 tools/witness.py --check` is part of the suite.
 
-Today it covers `GROUND FORCES`, `RECALL`, `COLLECT`, `SHORE LEAVE`,
-`STATUS` and `SUPPLY`: no machine-code calls in any of them. The
-ledger's open items are the two COLLECT lines no recording runs: 820
-(a planet with no technology) and 1090 (the superior one's loot).
-
-## How a faithful port is put together
-
-Three files per program:
-
-- **the program** (`flight_program.gd`,
-  `flight_combat.gd`): the BASIC
-  statements, a function for each stretch between which time passes on
-  the real machine. No timing.
-- **the loop** (`flight_loop.gd`): a
-  coroutine that
-  calls those in order with the measured waits between, in video frames.
-  Everything that takes time goes through one `wait` callable.
-- **the scene** (`space_flight.gd`):
-  points `wait` at a
-  real clock, shows whichever hi-res page the original would have on
-  show, and turns keyboard and mouse into the Apple's keyboard latch,
-  paddles and button.
-
-A test points `wait` at nothing and runs the same loop, so what is
-played and what is compared with the real game is one piece of code.
-
-Under them, in `scripts/shapes/`:
-
-- `hgr_screen.gd`: one hi-res page, 7680 bytes. `HPLOT`, `HPLOT TO`
-  (the ROM's own line routine, which is not Bresenham's), `DRAW`,
-  `XDRAW`, `HCOLOR`, `ROT`, `SCALE`, with the palette bit and the
-  odd/even column colours behaving as on the Apple.
-- `shape_table.gd`: Applesoft shape tables (`ENEMY` is the game's one).
-- `char_generator.gd`: the game's hi-res character generator (`$933C`):
-  store / inverse / XOR modes, the text window (`POKE 32..35`), `HOME`,
-  form feed, wrap and scroll-to-top as the original does them.
-- `a2_3d1_view.gd`: the A2-3D1 interpreter, clipper and plotter.
-- `hgr_view.gd`: draws a page as a colour monitor would.
-
-The timings come from recordings of the real game:
-`tools/mame/*_live.lua` in the parent repository, results in
-`analysis/live/`.
+It covers every program the rules came from (the ledgers are in
+`analysis/witness/`); `STARSHIP SIMULATOR` is still listed as in
+progress. COLLECT lines 820 (a planet with no technology) and 1090 (the
+superior one's loot) are the ones no recording runs.
 
 ## Flight
+
+`scenes/native_flight.tscn` is the flight in Godot's own 3D. The ship
+flies by `scripts/rules/flight_rules.gd`, the original's rules as a
+continuous model (the same turn rates, stops, climb, world edge and sink,
+a pass of the original being one second), held to the original's own
+arithmetic by `check_flight_rules`. The view is a camera with the
+original's attitude convention, the planet a shaded sphere (the game's
+cluster of points round its planet are the lights of its cities, more lit
+the more advanced the planet), the rest of the game's points stars, and
+solid low-poly craft made from the original's wireframes
+(`assets/models/`, by `tools_make_models.gd`). Below the atmosphere there
+is a ground and a sky.
 
 Keys are the original's: `1` `2` `3` `4` speed, `A` autopilot, `B`
 condition, `S` shields, `W` missile or laser, `C` command console, `R`
 radar, `H` hyperdrive. The arrow keys are the stick and SPACE is the
-button (see "Liberties").
+button.
 
-What the original does and a tidy remake would not, all kept; the doc
-comments of `flight_program.gd`, `flight_core.gd` and `flight_combat.gd`
-have the full lists:
+What the original does that is kept (the rules files have the full
+lists):
 
-- Two passes alternate between the two hi-res pages, and BASIC's own
-  drawing always goes to page 1, so one page shows the gauge markers of
-  the pass before.
-- A lamp key restarts the program: the frame just drawn is never shown,
-  old gauge markers stay until overwritten, the position loses its
-  fraction.
-- The world wraps at ±20000. Bank does not return to level. Going over
-  the top of a loop turns the heading by 126 or 127, not half a turn.
-  At two exact angles the ship all but stops along one axis.
+- The world wraps at ±20000. Bank does not return to level.
 - The laser adds `1/(tech+1)` to the defender's damage and the result is
   stored in a byte, so it does nothing to a defender at technology 1 or
   more. It still moves the planet towards surrender.
@@ -150,36 +96,17 @@ have the full lists:
   them down whether or not anything is seen to hit.
 - The missile is tested against the place the defender would be, whether
   or not one is there.
-- The white flashes in a fight are the display switched to the (white)
-  lo-res page between two POKEs. `HgrView.flashes_enabled` turns them
-  off.
 - The hyperdrive goes to whatever star the navigation computer was last
   set to. The energy it costs is meant to be the distance, but `H_D`
   reads the X table three times over, so the two stars' Y and Z do not
   count and it is not the distance the chart gives.
 
-### Native flight (in progress)
-
-`scenes/native_flight.tscn` (from the title: "NATIVE FLIGHT (PREVIEW)")
-is the flight in Godot's own 3D, built beside the original's until it can
-take its place. The ship flies by `scripts/rules/flight_rules.gd`, the
-original's rules as a continuous model (the same turn rates, stops, climb,
-world edge and sink, a pass of the original being one second), held to the
-original's own arithmetic by `check_flight_rules`. The view is a camera
-with the original's attitude convention, the planet a shaded sphere (the
-game's cluster of points round its planet are the lights of its cities,
-more lit the more advanced the planet), the rest of the game's points
-stars, a sky of far ones, and a low-poly craft for the defender. A panel
-shows speed, energy, shields, position, attitude and the four lamps.
-Missing so far: fighting, going down to the planet and up again, the
-hyperdrive, the real ship models. The witness ledger
-(`analysis/witness/STARSHIP_SIMULATOR.md`) lists what is not yet
-converted.
-
-Not kept: the engine's sine table slips (entry 25 is wrong, and negative
-results are a little too negative), the factor that stays unset at two
-angles, the cosines read as nothing at 64, 128 and 191, and the turn the
-heading takes when the stick holds the nose past its stop.
+Not kept: the 3D engine's sine table slips (entry 25 is wrong, and
+negative results are a little too negative), the factor that stays unset
+at two angles, the cosines read as nothing at 64, 128 and 191, the turn
+the heading takes when the stick holds the nose past its stop, the
+alternating hi-res pages and their stale gauge markers, and the white
+flashes (the screen flashes in Godot's way).
 
 ## Star chart
 
@@ -229,40 +156,25 @@ threshold.
 Ported as it is: `GameState.planet_secured` holds bytes, not flags, and
 `store_planet_record()` / `load_planet_record()` carry the seventeenth.
 The real game's log shows the 100 (`analysis/live/jump/`), and
-`check_flight_passes` compares the byte on every pass.
+`check_save` and the jump recordings show it.
 
 ## Save and load
 
 `END.bas` and `START.bas`: saving is refused in an atmosphere ("YOU MUST
 BE IN ORBIT TO SAVE GAME") and the ship's place is saved with the game.
-The file is JSON in `user://`, not the original's three binary files.
-`END`'s menu is native (below); the title is still a stand-in. What happens round them is the original's, recorded with
-`tools/mame/save_live.lua`:
+The file is JSON in `user://`, not the original's three binary files. The
+title's CONTINUE is there when a game is saved and loads it; the file
+stays until it is saved over.
 
-- **A saved game can be taken up once.** The original's boot loads
-  `PLANET FILE`, and if it finds the saved-game mark it clears it and
-  writes the file straight back, before it asks "(N)EW GAME OR (O)LD
-  GAME?". So the game is there for that boot only, and answering N uses
-  it up as well. `GameState.boot()` does the same to the JSON file when
-  the title screen first comes up (the mark is the file's `"saved"`;
-  the rest of the file is left as it was).
-- "O" with nothing saved: "THERE IS NO GAME SAVED" for 170 frames, then
-  the question again.
-- An old game does not go through TRANLIT. A new game's first
-  `INSTRUMENTS` flips all four panel switches (which is how a new game
-  comes to have shields down and condition RED); an old game's skips
-  that and runs `GALAXY MAP`, which paints the eight lamps as plain
-  blocks and goes on to flight. The switches are as they were saved,
-  and the lamps stay plain blocks until a lamp key is pressed.
-- `END`'s "CONTINUE PRESENT GAME" takes the same road from `GALAXY MAP`
-  on.
-- When the ship is destroyed the original has to be booted again, so
-  the port's way back to the title counts as a boot
-  (`GameState.reboot()`).
+Not kept: the original's saved game could be taken up once, at the next
+boot, and no other (the boot cleared the mark before it asked "(N)EW
+GAME OR (O)LD GAME?"; `analysis/live/save/` has the recordings), the old
+game skipping the panel's lamp routine, and the reboot after a lost
+ship, which is the way back to the title.
 
-`check_save` loads the game the real machine saved (the ship where it
-was, from the planet's record on the disk) and compares the panel at the
-third pass with the real page, every byte.
+`check_save` saves, loads and compares every field and the planet
+record's seventeenth byte; `drive_save` goes through the title, flight,
+the console and END's menu.
 
 ## END
 
@@ -270,8 +182,7 @@ The console's "4) END" is one panel (`scripts/end/end_console.gd` over
 `scripts/rules/end_rules.gd`, held to the recordings by `check_end_rules`):
 1) SAVE GAME, 2) CONTINUE PRESENT GAME, 3) END GAME. A save is refused in
 an atmosphere (the original's refusal and wording); "2" goes on with the
-game by way of the flight scene, the saved-game mark left for it to
-take off. Not kept, as they were the machine and not the game:
+game by way of the flight scene. Not kept, as they were the machine and not the game:
 
 - **A key that was not a number lost the game in hand.** The original's
   choice was read with `GET C`, a numeric variable: a letter, RETURN or
@@ -300,33 +211,28 @@ them.
 From `godot-remake/`. Each prints one summary line and exits non-zero on
 a difference.
 
-    godot --headless --path . res://tests/check_flight_passes.tscn   # 50 passes of flight, both pages, every byte
-    godot --headless --path . res://tests/check_jump.tscn            # 42 passes: fighting, hyperdrive, arrival
     godot --headless --path . res://tests/check_chart_rules.tscn     # GALAXY MAP: 50 recorded paddle positions through the rules, and the 18 stars' marks on the recorded page
-    godot --headless --path . res://tests/check_end_rules.tscn       # END: the menu, the refusal and "GAME SAVED." as the real game printed them, the mark after a save
+    godot --headless --path . res://tests/check_end_rules.tscn       # END: the menu, the refusal and "GAME SAVED." as the real game printed them
     godot --headless --path . res://tests/check_com_rules.tscn       # COM: 5 recorded routes through the rules, 201 screens rebuilt from the characters it drew
     godot --headless --path . res://tests/check_radar_rules.tscn     # RADAR and the I.D. texts against the recordings
     godot --headless --path . res://tests/check_combat_rules.tscn    # fighting (missile, lasers, damage, fighters, EX/DMG/S-X) against analysis/live/combat
     godot --headless --path . res://tests/check_hyperdrive_rules.tscn # hyperdrive cost, refusals, re-entry and orbit against the verified legacy code
-    godot --headless --path . res://tests/check_save.tscn            # record copy, save, the boot, an old game's panel
+    godot --headless --path . res://tests/check_save.tscn            # save and load, the planet record's byte
     godot --headless --path . res://tests/check_ground_rules.tscn    # GROUND FORCES, RECALL, COLLECT: 14 recorded routes through the rules, state and text
     godot --headless --path . res://tests/check_flight_rules.tscn    # the continuous flight model against the original's arithmetic, the engine's matrix and the camera
     godot --headless --path . res://tests/check_report_rules.tscn    # STATUS and SUPPLY: 6 recorded routes, 20 pages as the real game printed them
     godot --headless --path . res://tests/check_shore_rules.tscn     # SHORE LEAVE: 7 recorded routes through the rules, state and text
-    godot --headless --path . -s res://tests/check_flight_core.gd    # flight arithmetic against the model
-    godot --headless --path . -s res://tests/check_a2_3d1.gd         # 200 views against tools/a2_3d1_view.py
-    godot --headless --fixed-fps 60 --path . res://tests/drive_flight.tscn   # the flight scene, by key events
     godot --headless --fixed-fps 60 --path . res://tests/drive_chart.tscn    # the chart scene, by pointer and keys: a click, the question, Y and N, Space, the way to the console and back
     godot --headless --fixed-fps 60 --path . res://tests/drive_com.tscn      # the console scene, by keys: the lamps, every menu, a course, the directory, every way out of it
     godot --headless --fixed-fps 60 --path . res://tests/drive_radar.tscn    # the native radar and I.D. scenes, by keys
-    godot --headless --fixed-fps 60 --path . res://tests/drive_save.tscn     # title, END, save, continue, three boots
+    godot --headless --fixed-fps 60 --path . res://tests/drive_save.tscn     # title, END, save, CONTINUE
     godot --headless --fixed-fps 60 --path . res://tests/drive_ground_forces.tscn   # the ground forces scene, by keys: refusals, recall, a win, a retreat, a loss
     godot --headless --fixed-fps 60 --path . res://tests/drive_end.tscn             # END's menu, by keys: a save, a refused save, continue
     godot --headless --fixed-fps 60 --path . res://tests/drive_native_flight.tscn   # the native flight scene: the stick, the speed keys, the lamps, C and R
     godot --headless --fixed-fps 60 --path . res://tests/drive_reports.tscn         # the two report panels: what is on show, and the way back to the console
     godot --headless --fixed-fps 60 --path . res://tests/drive_shore_leave.tscn     # commands 3 to 8, by keys: every question, every refusal, what each leaves behind
 
-The first seventeen need the recordings in `../analysis/live/`. A compared
+The `check_*_rules` tests need the recordings in `../analysis/live/` (and `tests/golden/`). A compared
 byte is never adjusted to make a test pass: both times a test differed
 from the real game by a handful of bytes, the difference was something
 the original does that nobody had noticed (the seventeen-byte copy;
@@ -398,10 +304,6 @@ Where the port departs from the original on purpose:
   between two passes is remembered. On the chart the mouse is the
   paddles (the cross goes to the pointer), the arrow keys turn them, and
   a click or ENTER is the button.
-- **Disk waits.** Every hand-over between programs was a floppy load of
-  two to eight seconds. Those waits are kept in proportion and cut to
-  15% (`FlightLoop.DISK_WAIT_SCALE`). Nothing the machine computed or
-  drew is sped up.
 - **Key hints** on the flight, chart, console, radar and END screens,
   outside the Apple's picture.
 - **The console** is one panel with the lamps always beside it, not a
@@ -429,7 +331,9 @@ Where the port departs from the original on purpose:
   nothing. TOO MANY TROOPS asks again where the original began the
   command again. What is said stays up about as long as the original's,
   and a key or a click moves on.
-- **The title screen** (the stand-in above).
+- **COLLECT's two slips are fixed** (below), and likewise the other
+  quirks of the machine: the keys that were not a number losing the game
+  in hand, the saved game used up at one boot, hung machines.
 
 ## Not ported, estimated, or unverified
 
@@ -449,11 +353,6 @@ Where the port departs from the original on purpose:
   decides what of the original's quirks stay.
 - `RADAR` pokes 38151 with 5 on its way to an I.D. program. Nothing
   found reads a 5 there, and the port does not keep it.
-- The load of `STARSHIP SIMULATOR` after an old game's or CONTINUE's
-  lamps (`FlightLoop.LOAD_SIMULATOR_SPINNING`) is worked out from the
-  real game's totals with the drive still turning, not timed on its
-  own; and the lamps are given the speed measured for them on the way
-  out of the chart.
 - The save file keeps the byte after the record table
   (`planet_record_overrun`, which planet 20's seventeen-byte copy
   reaches). The original saves `P/F` without it (`L$140`); what an old
@@ -461,18 +360,10 @@ Where the port departs from the original on purpose:
 - Open questions about the original's own code are marked ❓ in
   `CALL_SITES.md`.
 
-## Shape viewer and combat demo
-
-Start screen → "Shape Data Viewer" (`scripts/shape_view.gd`): the 26
-shapes of `ENEMY` on a hi-res page; LEFT/RIGHT changes `ROT`, UP/DOWN
-`SCALE`, ESC goes back. `scenes/contact_sheet.tscn` writes the same
-sheet to a PNG headless (`-- --out=sheet.png`). "Combat VFX Demo" plays
-each fight effect on its own.
-
 ## Convention
 
 No script uses `class_name`: it needs Godot's global class cache, which
 only exists once the project has been opened in the editor, and a fresh
 clone run from the command line has none. Scripts `preload()` each other
-into a local const (see `scripts/shapes/shape_table.gd`). Scripts that
+into a local const (see `scripts/rules/combat_rules.gd`). Scripts that
 need the `GameState` autoload are run as scenes.

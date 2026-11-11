@@ -52,7 +52,6 @@ func _choose(number: int) -> void:
 			_said.text = "\n".join(_rules.save())
 			_hold.start(maxf(SAID * pace, 0.001))
 		2:
-			_rules.continue_game()
 			GameState.goto_scene(GameState.flight_scene)
 		3:
 			get_tree().quit()

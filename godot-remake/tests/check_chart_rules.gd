@@ -14,7 +14,6 @@ extends Node
 ## Spaces are not compared (the original lays its text out with spaces).
 
 const ChartRules = preload("res://scripts/rules/chart_rules.gd")
-const HgrScreen = preload("res://scripts/shapes/hgr_screen.gd")
 
 const PAGE := "../analysis/live/chart/chart_clean_p1.bin"
 
@@ -125,6 +124,11 @@ func _rows(glyphs: Dictionary) -> Array:
 	return out
 
 
+## A dot of the recorded hi-res page: seven to a byte, the lowest bit leftmost.
+func _lit(bytes: PackedByteArray, x: int, y: int) -> bool:
+	return x >= 0 and x < 280 and y >= 0 and y < 192 and (bytes[y * 40 + x / 7] >> (x % 7)) & 1 == 1
+
+
 func _check(what: String, ok: bool) -> void:
 	if not ok:
 		print("WRONG  %s" % what)
@@ -137,11 +141,7 @@ func _check(what: String, ok: bool) -> void:
 ## middle one thirteen, a far one nine, centred. Two stars (3 and 8) are
 ## a row apart and share dots, and are left out.
 func _marks() -> void:
-	var screen := HgrScreen.new()
 	var bytes := FileAccess.get_file_as_bytes(PAGE)
-	for y in range(192):
-		for c in range(40):
-			screen.set_byte(y, c, bytes[y * 40 + c])
 	var marks := {
 		ChartRules.Mark.NEAR: [8, Vector2(0.0, 0.5)], ChartRules.Mark.MIDDLE: [13, Vector2.ZERO],
 		ChartRules.Mark.FAR: [9, Vector2.ZERO],
@@ -154,7 +154,7 @@ func _marks() -> void:
 		var sum := Vector2.ZERO
 		for dy in range(-4, 5):
 			for dx in range(-4, 5):
-				if screen.is_lit(int(at.x) + dx, int(at.y) + dy):
+				if _lit(bytes, int(at.x) + dx, int(at.y) + dy):
 					n += 1
 					sum += Vector2(dx, dy)
 		var want: Array = marks[ChartRules.mark(star)]

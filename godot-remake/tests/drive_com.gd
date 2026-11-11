@@ -10,7 +10,7 @@ extends Node
 ## under the root (see drive_radar.gd).
 
 const COM := "res://scenes/com.tscn"
-const FLIGHT := "res://scenes/flight/space_flight.tscn"
+const FLIGHT := "res://scenes/native_flight.tscn"
 const GROUND_FORCES := "res://scenes/ground_forces.tscn"
 const RADAR := "res://scenes/radar.tscn"
 const END := "res://scenes/end_game.tscn"

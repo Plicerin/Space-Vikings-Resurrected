@@ -32,20 +32,10 @@ func in_atmosphere() -> bool:
 
 ## @witness END 190-220
 ## "1) SAVE GAME": what is said. The ship's place goes into the planet's
-## record, the saved-game mark is set (204) and the record is written out
-## (200-210): that is the writer's.
+## record and the record is written out (200-210): that is the writer's.
 func save() -> Array[String]:
 	if in_atmosphere():
 		return SAID_ORBIT
-	GameState.saved_marker = true # 204  POKE 38391,77
 	if not writer.call():
-		GameState.saved_marker = false
 		return SAID_NOT_SAVED
 	return SAID_SAVED
-
-
-## @witness END 110-120
-## "2) CONTINUE PRESENT GAME": the saved-game mark is left for GALAXY MAP
-## (the flight loop's own way in, flight_loop.gd run()) to take off.
-func continue_game() -> void:
-	GameState.saved_marker = true # 120  POKE 38391,77

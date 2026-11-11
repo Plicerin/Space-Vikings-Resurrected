@@ -16,22 +16,22 @@ extends Node
 ##   godot --headless --path godot-remake res://tests/check_flight_rules.tscn
 
 const FlightRules = preload("res://scripts/rules/flight_rules.gd")
-const FlightCore = preload("res://scripts/flight/flight_core.gd")
-const A2View = preload("res://scripts/shapes/a2_3d1_view.gd")
-const FlightProgram = preload("res://scripts/flight/flight_program.gd")
+## The original's answers (the hi-res engine's code, held to the real game
+## while it was in the project) are tests/golden/flight_rules.json.
+const GOLDEN := "res://tests/golden/flight_rules.json"
 
 var _bad := 0
 var _checked := 0
+var _golden: Dictionary
 
 
 func _ready() -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 1982
-	_matrix(rng)
-	_motion(rng)
-	_dynamics(rng)
+	_golden = JSON.parse_string(FileAccess.get_file_as_string(GOLDEN))
+	_matrix()
+	_motion()
+	_dynamics()
 	_stops()
-	_down_and_up(rng)
+	_down_and_up()
 	print("flight rules: %d compared, %d wrong" % [_checked, _bad])
 	get_tree().quit(1 if _bad > 0 else 0)
 
@@ -42,20 +42,12 @@ func _ready() -> void:
 ## complement less its high byte, which is up to 0.4% too far from nothing
 ## (a2_3d1_trig.gd). So the two agree to within 5% of the distance and
 ## ten units; a wrong axis or sign is a difference of the distance itself.
-func _matrix(rng: RandomNumberGenerator) -> void:
-	var view := A2View.new()
-	for i in 300:
-		var attitude := Vector3(rng.randi_range(0, 255), rng.randi_range(0, 255), rng.randi_range(0, 255))
-		var eye := Vector3(rng.randi_range(-9000, 9000), rng.randi_range(-9000, 9000), rng.randi_range(-9000, 9000))
-		var point := eye + Vector3(rng.randi_range(-3000, 3000), rng.randi_range(-3000, 3000), rng.randi_range(-3000, 3000))
-		view._eye = [int(eye.x) & 0xFFFF, int(eye.y) & 0xFFFF, int(eye.z) & 0xFFFF]
-		view._build_matrix(int(attitude.x), int(attitude.y), int(attitude.z))
-		view.poke(A2View.DATABASE, 0)
-		view.poke_word(A2View.DATABASE + 1, int(point.x))
-		view.poke_word(A2View.DATABASE + 3, int(point.y))
-		view.poke_word(A2View.DATABASE + 5, int(point.z))
-		var engine = view._transform(A2View.DATABASE)
-		var theirs := Vector3(_signed(engine.x), _signed(engine.y), _signed(engine.z))
+func _matrix() -> void:
+	for c: Dictionary in _golden.matrix:
+		var attitude := _v(c.att)
+		var eye := _v(c.eye)
+		var point := _v(c.point)
+		var theirs := _v(c.engine)
 		var mine := FlightRules.to_view(point, eye, attitude)
 		_checked += 1
 		_check("view of %s from %s at %s: the engine has %s, the rules %s" % [point, eye, attitude, theirs, mine],
@@ -68,23 +60,22 @@ func _matrix(rng: RandomNumberGenerator) -> void:
 				(local - Vector3(mine.x, mine.y, -mine.z)).length() < 0.01)
 
 
+func _v(a: Array) -> Vector3:
+	return Vector3(a[0], a[1], a[2])
+
+
 func _signed(v: int) -> int:
 	return v - 0x10000 if v & 0x8000 else v
 
 
 ## One step along an attitude (the same slips in the original's table, so
 ## 2.5% of the speed).
-func _motion(rng: RandomNumberGenerator) -> void:
-	for i in 400:
-		var pitch := rng.randi_range(-61, 59)
-		var heading := rng.randi_range(0, 255)
-		if [63, 64, 127, 128, 190, 191, 192].has(heading):
-			continue # angles at which the original's step does not follow its own cosine: at
-			# 63 and 190 the factor is not set at all, and at 64, 128 and 191 the cosine's
-			# table entry is read as a negative of nothing, so that the ship all but stops
-		var speed := rng.randi_range(1, 120)
-		var core := FlightCore.new(1000, 1000, 1000)
-		core.step(pitch & 0xFF, heading, speed)
+func _motion() -> void:
+	for c: Dictionary in _golden.motion:
+		var pitch: int = c.pitch
+		var heading: int = c.heading
+		var speed: int = c.speed
+		var core := _v(c.core)
 		var rules := FlightRules.new()
 		rules.x = 1000.0
 		rules.y = 1000.0
@@ -94,8 +85,8 @@ func _motion(rng: RandomNumberGenerator) -> void:
 		rules.speed = float(speed)
 		rules._move(1.0)
 		_checked += 1
-		_check("a step at pitch %d heading %d speed %d: the original's (%.2f, %.2f, %.2f), the rules' (%.2f, %.2f, %.2f)" % [
-				pitch, heading, speed, core.x, core.y, core.z, rules.x, rules.y, rules.z],
+		_check("a step at pitch %d heading %d speed %d: the original's %s, the rules' (%.2f, %.2f, %.2f)" % [
+				pitch, heading, speed, core, rules.x, rules.y, rules.z],
 				absf(core.x - rules.x) < 0.025 * speed + 0.05 and absf(core.y - rules.y) < 0.025 * speed + 0.05
 				and absf(core.z - rules.z) < 0.025 * speed + 0.05)
 
@@ -106,47 +97,27 @@ func _motion(rng: RandomNumberGenerator) -> void:
 ## heading by 126 for the "inverted" flip, and the clamp puts the nose
 ## back; the model has no such turn, and the heading is not compared in a
 ## run where that happened.)
-func _dynamics(rng: RandomNumberGenerator) -> void:
-	for run in 40:
-		var core := FlightCore.new(0, 3000, 0)
+func _dynamics() -> void:
+	var run := 0
+	for c: Dictionary in _golden.dynamics:
 		var rules := FlightRules.new()
 		rules.y = 3000.0
 		rules.speed = 60.0
-		var pitch := 0
-		var bank := 0
-		var heading := 0
-		var flip := 0
-		var over_the_top := false
-		for pass_ in 30:
-			# a stick position for the pass: a few passes at each setting
-			if pass_ % 6 == 0:
-				var settings := [-1.0, -0.85, -0.7, -0.55, -0.4, -0.2, 0.0, 0.2, 0.4, 0.55, 0.7, 0.85, 1.0]
-				var pitch_stick: float = settings[rng.randi_range(0, 12)]
-				var bank_stick: float = settings[rng.randi_range(0, 12)]
-				run_sticks = [pitch_stick, bank_stick]
-			var paddle_pitch := int(round(128.0 - run_sticks[0] * 127.5))
-			var paddle_bank := int(round(128.0 - run_sticks[1] * 127.5))
-			var got := FlightCore.stick(pitch, bank, heading, flip, paddle_pitch, paddle_bank)
-			if got[0] >= 0x40 and got[0] < 0xC0:
-				over_the_top = true # the stick took the nose past the stop: see below
-			pitch = FlightCore.pitch_clamp(got[0])
-			bank = got[1]
-			heading = got[2]
-			flip = got[3]
-			core.step(pitch, heading, 60)
+		for sticks: Array in c.sticks:
 			for frame in 10:
-				rules.fly(0.1, run_sticks[0], run_sticks[1])
-		var model_pitch := rules.pitch
+				rules.fly(0.1, sticks[0], sticks[1])
+		var core := _v(c.core)
+		var pitch: int = c.pitch
+		var bank: int = c.bank
+		var heading: int = c.heading
 		_checked += 1
-		_check("run %d: pitch %d (original) and %.1f (rules), bank %d and %.1f, heading %d and %.1f, at (%.0f, %.0f, %.0f) and (%.0f, %.0f, %.0f)" % [
-				run, _signed8(pitch), model_pitch, _signed8(bank), rules.bank, heading, rules.heading,
-				core.x, core.y, core.z, rules.x, rules.y, rules.z],
-				absf(_signed8(pitch) - model_pitch) < 1.5 and absf(_signed8(bank) - rules.bank) < 1.5
-				and (over_the_top or absf(_angle_gap(heading, rules.heading)) < 8.0)
-				and Vector3(core.x - rules.x, core.y - rules.y, core.z - rules.z).length() < 1800.0)
-
-
-var run_sticks := [0.0, 0.0]
+		_check("run %d: pitch %d (original) and %.1f (rules), bank %d and %.1f, heading %d and %.1f, at %s and (%.0f, %.0f, %.0f)" % [
+				run, _signed8(pitch), rules.pitch, _signed8(bank), rules.bank, heading, rules.heading,
+				core, rules.x, rules.y, rules.z],
+				absf(_signed8(pitch) - rules.pitch) < 1.5 and absf(_signed8(bank) - rules.bank) < 1.5
+				and (c.over_the_top or absf(_angle_gap(heading, rules.heading)) < 8.0)
+				and (core - Vector3(rules.x, rules.y, rules.z)).length() < 1800.0)
+		run += 1
 
 
 func _signed8(v: int) -> int:
@@ -159,44 +130,38 @@ func _angle_gap(a: float, b: float) -> float:
 
 ## RE and ORBIT: where the ship comes out, against the original's own
 ## statements (flight_program.gd's reentry_load and orbit_load).
-func _down_and_up(rng: RandomNumberGenerator) -> void:
-	for i in 20:
+func _down_and_up() -> void:
+	for c: Dictionary in _golden.down_up:
 		GameState.start_new_game()
-		var x := rng.randi_range(-20000, 20000)
-		GameState.ship_x = x
-		GameState.ship_y = rng.randi_range(-5000, 5000)
-		GameState.ship_z = rng.randi_range(-20000, 20000)
-		GameState.ship_pitch = rng.randi_range(0, 255)
-		GameState.ship_bank = rng.randi_range(0, 255)
-		GameState.ship_heading = rng.randi_range(0, 255)
+		var from: Array = c.from
+		GameState.ship_x = int(from[0])
+		GameState.ship_y = int(from[1])
+		GameState.ship_z = int(from[2])
+		GameState.ship_pitch = int(from[3])
+		GameState.ship_bank = int(from[4])
+		GameState.ship_heading = int(from[5])
 		var rules := FlightRules.new()
 		rules.load_state()
-		var original := FlightProgram.new()
-		original.reentry_load()
-		var down := Vector3(GameState.ship_x, GameState.ship_y, GameState.ship_z)
-		var down_heading := GameState.ship_heading
-		var kept := Vector2(GameState.ship_pitch, GameState.ship_bank)
 		rules.reenter()
 		rules.store_state()
+		var down: Array = c.down
+		var mine := [GameState.ship_x, GameState.ship_y, GameState.ship_z, GameState.ship_heading, GameState.ship_pitch, GameState.ship_bank]
 		_checked += 1
-		_check("down from x %d: (%d, %d, %d) heading %d pitch and bank %s, the rules' (%d, %d, %d) heading %d, %s" % [
-				x, down.x, down.y, down.z, down_heading, str(kept), GameState.ship_x, GameState.ship_y, GameState.ship_z,
-				GameState.ship_heading, str(Vector2(GameState.ship_pitch, GameState.ship_bank))],
-				down == Vector3(GameState.ship_x, GameState.ship_y, GameState.ship_z) and down_heading == GameState.ship_heading
-				and kept == Vector2(GameState.ship_pitch, GameState.ship_bank) and rules.in_atmosphere)
-		GameState.start_new_game()
-		GameState.ship_pitch = int(kept.x)
-		GameState.ship_bank = int(kept.y)
-		original.orbit_load()
-		var up := Vector3(GameState.ship_x, GameState.ship_y, GameState.ship_z)
-		var up_heading := GameState.ship_heading
+		_check("down from %s: the original's %s, the rules' %s" % [str(from), str(down), str(mine)],
+				_same(down, mine) and rules.in_atmosphere)
 		rules.enter_orbit()
 		rules.store_state()
+		var up: Array = c.up
+		mine = [GameState.ship_x, GameState.ship_y, GameState.ship_z, GameState.ship_heading]
 		_checked += 1
-		_check("up: (%d, %d, %d) heading %d, the rules' (%d, %d, %d) heading %d" % [
-				up.x, up.y, up.z, up_heading, GameState.ship_x, GameState.ship_y, GameState.ship_z, GameState.ship_heading],
-				up == Vector3(GameState.ship_x, GameState.ship_y, GameState.ship_z) and up_heading == GameState.ship_heading
-				and not rules.in_atmosphere)
+		_check("up: the original's %s, the rules' %s" % [str(up), str(mine)], _same(up, mine) and not rules.in_atmosphere)
+
+
+func _same(a: Array, b: Array) -> bool:
+	for i in a.size():
+		if int(a[i]) != int(b[i]):
+			return false
+	return true
 
 
 ## The nose and the bank are held where the original holds them.
@@ -217,13 +182,12 @@ func _stops() -> void:
 	sinking.in_atmosphere = true
 	sinking.y = 500.0
 	sinking.speed = 40.0
-	var core := FlightCore.new(0, 500, 0)
+	var core_y: float = _golden.sink_y
 	for pass_ in 10:
-		core.sink(40)
 		sinking.fly(1.0, 0.0, 0.0)
 	_checked += 1
-	_check("ten passes in the atmosphere at 40: y %.1f (original %.1f) less what the speed moved it" % [sinking.y, core.y],
-			absf((core.y - 2.0 * 10.0 + 0.0) - (sinking.y - 0.0)) < 40.0 * 10.0 + 1.0 and sinking.y < 500.0 - 10.0 * 2.0 + 1.0
+	_check("ten passes in the atmosphere at 40: y %.1f (original %.1f) less what the speed moved it" % [sinking.y, core_y],
+			absf((core_y - 2.0 * 10.0 + 0.0) - (sinking.y - 0.0)) < 40.0 * 10.0 + 1.0 and sinking.y < 500.0 - 10.0 * 2.0 + 1.0
 			and sinking.y > 500.0 - 10.0 * 2.0 - 1.0 - 0.0)
 	# the world's edge
 	var edge := FlightRules.new()

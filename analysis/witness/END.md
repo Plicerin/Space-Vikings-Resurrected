@@ -3,7 +3,7 @@
 Written by `tools/witness.py`; do not edit. Rules cite lines with `@witness` tags under
 `godot-remake/scripts`; recordings are listed in `analysis/witness/manifest.json`.
 
-21 lines: 10 logic, 10 presentation, 1 waived. 13 lines cited by a rule; 0 of them never run in a recording.
+21 lines: 9 logic, 10 presentation, 2 waived. 11 lines cited by a rule; 0 of them never run in a recording.
 Machine-code calls: line 210 -> 38825.
 
 ## Problems
@@ -30,8 +30,8 @@ none
 | 80 | L | godot-remake/scripts/end/end_console.gd:48 | 3 | `IF C = 1 THEN  GOSUB 190: GOTO 30` |
 | 90 | L | godot-remake/scripts/end/end_console.gd:48 | 3 | `IF C = 2 THEN  GOTO 110` |
 | 100 | L | godot-remake/scripts/end/end_console.gd:48 | 1 | `IF C = 3 THEN  FOR J = 1 TO 5000: POKE J,0: NEXT : END` |
-| 110 | P | godot-remake/scripts/rules/end_rules.gd:47 | 2 | `REM  RESTART` |
-| 120 | L | godot-remake/scripts/rules/end_rules.gd:47 | 3 | `POKE 38391,77: PRINT "RUNGALAXY MAP"` |
+| 110 | P |  | 2 | `REM  RESTART` |
+| 120 | W |  | 3 | `POKE 38391,77: PRINT "RUNGALAXY MAP"` |
 | 190 | L | godot-remake/scripts/rules/end_rules.gd:27<br>godot-remake/scripts/rules/end_rules.gd:33 | 2 | `IF  PEEK (38210) = 1 THEN  SPEED= 128: PRINT : PRINT "YOU MUST BE IN ORBIT TO SAVE GAME": ` |
 | 200 | L | godot-remake/scripts/rules/end_rules.gd:33 | 2 | `POKE 38211, PEEK (29467): POKE 38212, PEEK (29468): POKE 38213, PEEK (29469): POKE 38214, ` |
 | 202 | L | godot-remake/scripts/rules/end_rules.gd:33 | 1 | `POKE 38219, PEEK (29475)` |

@@ -11,7 +11,7 @@ extends Node
 ## another, so the driver is a node of its own under the root.
 
 const END := "res://scenes/end_game.tscn"
-const FLIGHT := "res://scenes/flight/space_flight.tscn"
+const FLIGHT := "res://scenes/native_flight.tscn"
 const PATH := "user://drive_end.json"
 const PANEL := "Center/Panel/VBox/"
 const TIMEOUT_FRAMES := 60 * 30
@@ -42,20 +42,19 @@ func _drive() -> void:
 	_check("a key that is no choice is no choice (nothing said, no error)", _said() == "" and _path() == END)
 	_tap(KEY_1)
 	await _frames(3)
-	_check("1 saves, and says so", _said() == "GAME SAVED." and FileAccess.file_exists(PATH) and GameState.saved_marker)
+	_check("1 saves, and says so", _said() == "GAME SAVED." and FileAccess.file_exists(PATH))
 	await _until(func() -> bool: return _said() == "")
 	_check("and the message goes", _said() == "")
 
 	await _end(func() -> void: GameState.in_atmosphere = true)
 	_tap(KEY_1)
 	await _frames(3)
-	_check("in the atmosphere a save is refused", _said() == "YOU MUST BE IN ORBIT TO SAVE GAME" and not FileAccess.file_exists(PATH)
-			and not GameState.saved_marker)
+	_check("in the atmosphere a save is refused", _said() == "YOU MUST BE IN ORBIT TO SAVE GAME" and not FileAccess.file_exists(PATH))
 
 	await _end(func() -> void: pass)
 	(_scene().get_node(PANEL + "Buttons").get_child(1) as Button).pressed.emit()
 	await _scene_is(FLIGHT)
-	_check("2 goes on with the game: the flight, the saved-game mark left", _path() == FLIGHT and GameState.saved_marker)
+	_check("2 goes on with the game: the flight", _path() == FLIGHT)
 
 	_remove()
 	print("end scene driven: %d wrong" % _bad)

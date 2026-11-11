@@ -1,34 +1,27 @@
 extends Node
 ## Saves a game and takes it up again through the scenes a player goes
-## through: the title's buttons, flight, the command console, END's
-## menu, and the title again after a boot. The save itself is held to
-## the real game in check_save.gd and END's rules in check_end_rules.gd;
-## this is for the scenes round them, and for the original's rule that a
-## saved game is good for one boot (START.bas lines 25-26 and 73;
-## GameState.boot()). A boot is the title scene started afresh: the
-## original had to switch the machine off and on, and END's wrong keys
-## were the way to it that is not kept.
+## through: the title's buttons, flight, the command console, END's menu,
+## and the title again. The save itself is held in check_save.gd and END's
+## rules in check_end_rules.gd; this is for the scenes round them, and for
+## CONTINUE: it is there when a game is saved, loads that game, and stays
+## after it is used.
 ##
 ##   godot --headless --fixed-fps 60 --path godot-remake res://tests/drive_save.tscn
 ##
 ## Saves to a file of its own, not the player's.
 ##
 ## The scenes replace one another, so the driver is a node of its own
-## under the root (see drive_flight.gd).
+## under the root (see drive_radar.gd).
 
 const START := "res://scenes/start.tscn"
-const FLIGHT := "res://scenes/flight/space_flight.tscn"
+const FLIGHT := "res://scenes/native_flight.tscn"
 const COM := "res://scenes/com.tscn"
 const END := "res://scenes/end_game.tscn"
 const PATH := "user://drive_save.json"
-## Page 1 at the third pass after END's "continue" in the real game
-## (tools/mame/save_live.lua).
-const LIVE_CONTINUED := "../analysis/live/save/save_continued_p1.bin"
 ## Frames before a step is given up.
 const TIMEOUT_FRAMES := 60 * 240
 
 var _driver := false
-var _passes := 0
 var _bad := 0
 
 
@@ -49,60 +42,31 @@ func _drive() -> void:
 	# headless, the window is 64 dots square and the buttons are off it
 	get_tree().root.size = Vector2i(1152, 648)
 
-	# a boot with nothing saved
-	await _boot()
-	await _press("VBox/LoadGameButton")
-	_check("O with nothing saved says so", _status() == "THERE IS NO GAME SAVED")
-	await _frames(200)
-	_check("and the message goes after its three seconds", _status() == "")
-	_check("still at the title", _current_path() == START)
+	# nothing saved
+	await _title()
+	_check("CONTINUE is off with nothing saved", _continue().disabled)
 
 	await _press("VBox/NewGameButton")
-	await _flight()
-	await _passes_more(3)
-	var switches := _switches()
-	_check("a new game is in flight, switches flipped (%s)" % str(switches),
-			switches == [false, true, 3, false])
+	await _scene_is(FLIGHT)
+	GameState.credits = 1234.0
 	await _to_end()
 	_tap(KEY_1, "1")
 	await _frames(3)
-	_check("1) SAVE GAME saves, and says so", _saved_mark() == true and _end_said() == "GAME SAVED.")
+	_check("1) SAVE GAME saves, and says so", FileAccess.file_exists(PATH) and _end_said() == "GAME SAVED.")
 
 	_tap(KEY_2, "2")
-	await _flight()
-	_check("2) CONTINUE leaves the mark for GALAXY MAP", GameState.saved_marker)
-	await _passes_more(3)
-	_check("which takes it off", not GameState.saved_marker)
-	_check("and touches no switch (%s)" % str(_switches()), _switches() == switches)
-	var different := _lamp_rows_different()
-	_check("its lamps are the real game's (%d bytes different)" % different, different == 0)
+	await _scene_is(FLIGHT)
+	_check("2) CONTINUE goes back to the flight", _current_path() == FLIGHT)
 
-	# the next boot finds the game; the one after does not
-	await _to_end()
-	await _reboot()
-	_check("the boot takes the mark off the file", GameState.old_game and _saved_mark() == false)
-	await _press("VBox/LoadGameButton")
-	await _flight()
-	await _passes_more(1)
-	_check("O is the saved game, switches as saved (%s)" % str(_switches()),
-			_switches() == switches and not GameState.saved_marker)
-
-	await _to_end()
-	await _reboot()
-	await _press("VBox/LoadGameButton")
-	_check("a second boot has no game to load", _status() == "THERE IS NO GAME SAVED"
-			and _current_path() == START)
-
-	# and a boot answered N uses a saved game up as well
-	GameState.save_to_disk()
-	await _boot()
-	_check("(a game is saved again)", GameState.old_game)
-	await _press("VBox/NewGameButton")
-	await _flight()
-	await _passes_more(1)
-	await _to_end()
-	await _reboot()
-	_check("N uses the saved game up too", not GameState.old_game)
+	# the title offers the game, and keeps offering it
+	GameState.credits = 0.0
+	await _title()
+	_check("CONTINUE is on with a game saved", not _continue().disabled)
+	await _press("VBox/ContinueButton")
+	await _scene_is(FLIGHT)
+	_check("it is the saved game (credits %s)" % GameState.credits, GameState.credits == 1234.0)
+	await _title()
+	_check("and is still there afterwards", not _continue().disabled)
 
 	_remove_file()
 	print("save driven: %d wrong" % _bad)
@@ -137,53 +101,15 @@ func _end_said() -> String:
 	return (get_tree().current_scene.get_node("Center/Panel/VBox/Said") as Label).text
 
 
-## The title again, as a switched-on machine finds it.
-func _reboot() -> void:
-	await _boot()
-	_check("the boot is the title, booted", _current_path() == START and GameState.booted)
-
-
-## The machine switched off and on: START.bas from its first line. Only
-## from a scene that is not in the middle of a program.
-func _boot() -> void:
-	GameState.booted = false
+## The title scene started afresh.
+func _title() -> void:
 	GameState.goto_scene(START)
 	await _frames(3)
 	await _scene_is(START)
 
 
-func _flight() -> void:
-	await _scene_is(FLIGHT)
-	_passes = 0
-	get_tree().current_scene._loop.pass_started = func() -> void: _passes += 1
-
-
-func _switches() -> Array:
-	return [GameState.shields_up, GameState.missile_mode_active, GameState.condition,
-			GameState.autopilot_active]
-
-
-func _status() -> String:
-	return get_tree().current_scene.get_node("VBox/Status").text
-
-
-func _saved_mark() -> Variant:
-	var data = JSON.parse_string(FileAccess.get_file_as_string(PATH))
-	return data.get("saved") if data is Dictionary else null
-
-
-## The two rows of text cells the eight lamps are in, against the real
-## game's page.
-func _lamp_rows_different() -> int:
-	var live := FileAccess.get_file_as_bytes(LIVE_CONTINUED)
-	var page: PackedByteArray = GameState.view3d.pages[0].mem
-	if live.size() != page.size():
-		return -1
-	var different := 0
-	for i in range(152 * 40, 168 * 40):
-		if page[i] != live[i]:
-			different += 1
-	return different
+func _continue() -> Button:
+	return get_tree().current_scene.get_node("VBox/ContinueButton")
 
 
 func _current_path() -> String:
@@ -203,17 +129,6 @@ func _scene_is(path: String) -> void:
 func _frames(n: int) -> void:
 	for i in range(n):
 		await get_tree().process_frame
-
-
-func _passes_more(n: int) -> void:
-	var until := _passes + n
-	for i in range(TIMEOUT_FRAMES):
-		if _passes >= until:
-			return
-		await get_tree().process_frame
-	print("WRONG  the program stopped making passes (%d)" % _passes)
-	_bad += 1
-	get_tree().quit(1)
 
 
 ## A click of the mouse on one of the current scene's buttons.

@@ -21,30 +21,18 @@ grow_vertical = 2
 
 [node name="Title" type="Label" parent="VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "SPACE VIKINGS — GODOT SCAFFOLD"
+theme_override_font_sizes/font_size = 32
+text = "SPACE VIKINGS"
 horizontal_alignment = 1
 
 [node name="NewGameButton" type="Button" parent="VBox"]
 layout_mode = 2
 text = "NEW GAME"
 
-[node name="LoadGameButton" type="Button" parent="VBox"]
+[node name="ContinueButton" type="Button" parent="VBox"]
 layout_mode = 2
-text = "LOAD GAME"
+text = "CONTINUE"
 
 [node name="Status" type="Label" parent="VBox"]
 layout_mode = 2
 horizontal_alignment = 1
-
-[node name="ShapeViewerButton" type="Button" parent="VBox"]
-layout_mode = 2
-text = "SHAPE DATA VIEWER (DEV TOOL)"
-
-[node name="NativeFlightButton" type="Button" parent="VBox"]
-layout_mode = 2
-text = "NATIVE FLIGHT (PREVIEW)"
-
-[node name="CombatDemoButton" type="Button" parent="VBox"]
-layout_mode = 2
-text = "COMBAT VFX DEMO (DEV TOOL)"

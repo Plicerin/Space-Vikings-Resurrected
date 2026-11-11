@@ -68,10 +68,8 @@ func _route(route: String) -> void:
 		rules.writer = func() -> bool: return true
 		var said := rules.save()
 		_checked += 1
-		_check("%s, %s: a save %s, the mark is %d afterwards" % [route, stops[i]["name"],
-				"refused" if in_atmosphere else "made", stops[i + 1]["mark"]],
-				(GameState.saved_marker) == (stops[i + 1]["mark"] == 77)
-				and said == (EndRules.SAID_ORBIT if in_atmosphere else EndRules.SAID_SAVED))
+		_check("%s, %s: a save %s" % [route, stops[i]["name"], "refused" if in_atmosphere else "made"],
+				said == (EndRules.SAID_ORBIT if in_atmosphere else EndRules.SAID_SAVED))
 
 
 func _plain(text: String) -> String:

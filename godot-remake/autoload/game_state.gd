@@ -8,75 +8,30 @@ extends Node
 ## new bookkeeping the port needs that the original didn't need in this
 ## form (e.g. Godot's own scene path instead of `RUN "X"`).
 
-# --- The machine the hi-res programs share ---
-# The original's programs hand each other more than variables: the two
-# hi-res pages, the 3D engine's display list at $7300 (with the ship's
-# position and attitude inside it) and the character generator's cursor
-# all stay as the last program left them. STARSHIP SIMULATOR relies on
-# it (the instrument panel is drawn once, by INSTRUMENTS.bas, and only
-# copied from page to page afterwards), so they live here and not in a
-# scene.
-const A2View = preload("res://scripts/shapes/a2_3d1_view.gd")
-const CharGenerator = preload("res://scripts/shapes/char_generator.gd")
-
-## A2-3D1 with its 64K and hi-res pages 1 and 2 (`view3d.pages`).
-## Applesoft's HCOLOR, ROT and SCALE are page 1's fields: BASIC only
-## ever draws on page 1.
-var view3d: A2View = A2View.new()
-## `HI-RES CHARACTER GENERATOR` and the cursor.
-var chargen: CharGenerator = CharGenerator.new(view3d.pages[0], view3d.pages[1])
-
-## Ship position: three signed 16-bit words at 29467/29469/29471, inside
-## the display list's eye record. BASIC keeps its own floats (see
-## flight_core.gd) and stores them here once a pass.
-var ship_x: int:
-	get: return view3d.peek_signed(A2View.EYE)
-	set(value): view3d.poke_word(A2View.EYE, value)
-var ship_y: int:
-	get: return view3d.peek_signed(A2View.EYE + 2)
-	set(value): view3d.poke_word(A2View.EYE + 2, value)
-var ship_z: int:
-	get: return view3d.peek_signed(A2View.EYE + 4)
-	set(value): view3d.poke_word(A2View.EYE + 4, value)
-## Pitch, bank, heading: bytes 29473-29475, 256 to the circle.
-var ship_pitch: int:
-	get: return view3d.peek(A2View.EYE + 6)
-	set(value): view3d.poke(A2View.EYE + 6, value)
-var ship_bank: int:
-	get: return view3d.peek(A2View.EYE + 7)
-	set(value): view3d.poke(A2View.EYE + 7, value)
-var ship_heading: int:
-	get: return view3d.peek(A2View.EYE + 8)
-	set(value): view3d.poke(A2View.EYE + 8, value)
+# --- The ship's place and attitude ---
+## Position in the original's world units (it wraps at +-20000) and the
+## attitude as three bytes, 256 to the circle (pitch, bank, heading). The
+## flight keeps its own floats (scripts/rules/flight_rules.gd) and stores
+## them here when the ship leaves for another screen.
+var ship_x: int = 0
+var ship_y: int = 0
+var ship_z: int = 0
+var ship_pitch: int = 0
+var ship_bank: int = 0
+var ship_heading: int = 0
 var ship_speed: int = 120        # $38157, 0..120 units a pass
-var loop_flip: int = 0           # $952F: 1 while the nose is past vertical
-var paddle_pitch: int = 128      # $38397, what the stick routine reads
-var paddle_bank: int = 128       # $38398
 var in_atmosphere: bool = false  # $38210
-## START.bas line 260 / GALAXY MAP.bas line 3125: INSTRUMENTS.bas has to
-## draw the panel before the flight program runs.
-var instruments_due: bool = true
-## $38391 = 77: the mark START.bas (an old game), GALAXY MAP.bas (leaving
-## the chart) and END.bas (going on with the game) leave for INSTRUMENTS
-## and GALAXY MAP, which then draw the panel's lamps from the flags
-## as they are. Without it INSTRUMENTS calls TRANLIT, which flips all
-## four switches as it draws them.
-var saved_marker: bool = false
 ## $38388: a byte the programs hand each other when one runs the next.
 ## The star chart leaves the star asked about (1-20) for COM, which then
 ## shows that star's page and runs the chart again; COM leaves a 2 for
 ## RADAR. 0 is nothing.
 ## The flight scene the game is in, which the console, the radar and END go
 ## back to: each flight scene puts its own path here as it starts.
-var flight_scene: String = "res://scenes/flight/space_flight.tscn"
+var flight_scene: String = "res://scenes/native_flight.tscn"
 var handover: int = 0
 ## $38151 = 7: COLLECT and GROUND FORCES run COM to have the console
 ## drawn, and COM runs GROUND FORCES straight back (COM.bas line 98).
 var ground_forces_due: bool = false
-## The floppy drive is still turning from the last load, which takes
-## about a second off the next one. Set by a program that runs another
-## straight after being loaded itself.
-var drive_spinning: bool = false
 
 # --- Economy ---
 # Original: credits/stardate/troops were persisted via the "MISC FILE"
@@ -259,15 +214,6 @@ func load_planet_record(index: int) -> void:
 	gf_planet_surrendered = planet_surrendered[index]
 
 
-## START.bas lines 230-250: what is in orbit here goes behind the star
-## field, at $7879. A world with industry and no defender left has the
-## wreck of one.
-func load_orbit_ship() -> void:
-	if planet_tech[current_planet] > 1 and orbital_defender_tier == 0:
-		view3d.load_debris()
-	else:
-		view3d.load_ship(orbital_defender_tier)
-
 # --- The four panel switches (CALL_SITES.md section 2). Each is a byte
 # the flight program flips through `POKE 38167,n: CALL 38402`. The
 # values here are `SHIP'S DATA-M`'s and START.bas line 2030's; a new
@@ -428,12 +374,8 @@ var loot_collected_this_visit: bool = false # $301
 ## index 0's multiplier is itself randomized per sale (`300*RND(1)`,
 ## not a fixed 300 like every other category), and the full sum is
 ## doubled at the end.
-## The machine restarted: the reset vector, and the disk boots START.bas
-## again. Whatever was in memory is gone (START builds a new game or
-## loads the old one), and the monitor's text window is the whole screen.
+## The ship is lost: back to the title.
 func reboot() -> void:
-	booted = false
-	chargen.set_window(0, 40, 0, 24)
 	goto_scene("res://scenes/start.tscn")
 
 
@@ -527,30 +469,17 @@ func start_new_game() -> void:
 	shields_up = true
 	condition = 2
 	autopilot_active = true
-	instruments_due = true
-	saved_marker = false
 	handover = 0
 	ground_forces_due = false
-	drive_spinning = false
 
-	# START.bas lines 40-250: the machine as a new game finds it.
-	view3d.pages[0].clear()
-	view3d.pages[1].clear()
-	view3d.pages[0].rot = 1 # line 40: ROT= 1: SCALE= 1
-	view3d.pages[0].shape_scale = 1
-	view3d.reset_engine()
-	view3d.load_planet(0) # line 100
-	ship_x = 700 # line 190
+	# START.bas lines 190-195: where a new game begins
+	ship_x = 700
 	ship_y = 200
 	ship_z = -7000
-	ship_heading = 0 # line 195
-	load_orbit_ship()
-	chargen.page = 1 # line 2036: POKE 974,64
-	chargen.mode = 0
+	ship_pitch = 0
+	ship_bank = 0
+	ship_heading = 0
 	ship_speed = 120
-	loop_flip = 0
-	paddle_pitch = 128
-	paddle_bank = 128
 	in_atmosphere = false
 
 	ship_shield = 100.0
@@ -585,57 +514,23 @@ func show_stub(title: String, note: String, back_scene: String) -> void:
 
 
 # --- Save / load (END.bas lines 190-220, "SAVE GAME") ---
-# The original BSAVEs three raw memory-image files straight to the
-# Apple II disk (P/F, PLANET FILE, and a 54-byte SHIP'S DATA block —
-# the same memory range SHIP'S DATA-M's new-game template occupies,
-# see the ship-system-health fields above) plus 9 bytes of ship
-# position. This port has no equivalent of raw memory images to BSAVE,
-# so it serializes the fields that actually hold persistent state
-# instead, to a single JSON file — same real effect (resume where you
-# left off), not a byte-exact format.
+# The original BSAVEs raw memory images to the Apple II disk. This
+# stores the fields that hold the game's state as one JSON file, and the
+# title's CONTINUE loads it; it stays until the next save.
 const SAVE_PATH := "user://savegame.json"
 ## Where the game is saved; a test points it at a file of its own.
 var save_path: String = SAVE_PATH
 
-## False until START.bas has run: at the first title screen, and again
-## after the ship is destroyed (the original reboots there).
-var booted: bool = false
-## START.bas's OG = 77: a game was saved when the machine booted.
-var old_game: bool = false
+## Whether a game has been saved.
+func has_saved_game(path: String = save_path) -> bool:
+	return FileAccess.file_exists(path)
 
 
-## START.bas lines 25-26, which run at every boot before the question is
-## asked: `OG = PEEK(38391): POKE 38391,0`, and if a game was saved
-## PLANET FILE goes straight back to the disk without the mark. So a
-## saved game can be taken up once, at the next boot, and the mark is
-## gone whether the answer is O or N (watched live on copies of the
-## disk, tools/mame/save_live.lua). The saved state itself stays in the
-## file, as it stays on the disk.
-func boot(path: String = save_path) -> void:
-	booted = true
-	old_game = false
-	if not FileAccess.file_exists(path):
-		return
-	var data = JSON.parse_string(FileAccess.get_file_as_string(path))
-	if not data is Dictionary:
-		return
-	# a file from before the mark was kept counts as a saved game
-	old_game = data.get("saved", true)
-	if old_game:
-		data["saved"] = false
-		var file := FileAccess.open(path, FileAccess.WRITE)
-		file.store_string(JSON.stringify(data))
-
-
-## False if the file could not be written. On the Apple a disk that
-## cannot be written to (the write-protect notch covered, say) is a DOS
-## error, and this disk's DOS has one answer to every error: the SYSTEM
-## ERROR screen (scripts/dos/system_error.gd).
+## False if the file could not be written.
 func save_to_disk(path: String = save_path) -> bool:
 	# END.bas line 210 stores the current planet's record before the BSAVEs.
 	store_planet_record(current_planet)
 	var data := {
-		"saved": true, # 204  POKE 38391,77
 		"credits": credits, "stardate": stardate,
 		"troops": troops, "troop_morale": troop_morale, "morale_flag": morale_flag,
 		"troop_location": troop_location, "troops_stationed_at": troops_stationed_at,
@@ -668,7 +563,7 @@ func save_to_disk(path: String = save_path) -> bool:
 		# lines 200-202: the nine bytes at 29467, and what of the flight
 		# program's own is inside SHIP'S DATA (38157, 38191)
 		"ship": [ship_x, ship_y, ship_z, ship_pitch, ship_bank, ship_heading],
-		"ship_speed": ship_speed, "loop_flip": loop_flip,
+		"ship_speed": ship_speed,
 	}
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	if file == null:
@@ -742,7 +637,6 @@ func load_from_disk(path: String = save_path) -> void:
 	ship_laser = data.get("ship_laser", ship_laser)
 	ship_nav_computer = data.get("ship_nav_computer", ship_nav_computer)
 	ship_speed = int(data.get("ship_speed", ship_speed))
-	loop_flip = int(data.get("loop_flip", loop_flip))
 	# START.bas lines 220-250, as a new game does them, and 225 between:
 	# the ship back where it was.
 	load_planet_record(current_planet)
@@ -754,5 +648,4 @@ func load_from_disk(path: String = save_path) -> void:
 		ship_pitch = int(ship[3])
 		ship_bank = int(ship[4])
 		ship_heading = int(ship[5])
-	load_orbit_ship()
-	saved_marker = true # 3030  POKE 38391,77
+

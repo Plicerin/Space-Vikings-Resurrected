@@ -1,14 +1,14 @@
 extends Node
 ## Holds scripts/rules/hyperdrive_rules.gd (H_D.bas) to the original's own
-## statements: flight_program.gd's jump_*, which check_jump holds to a live
-## run of the real game. Jumps from random states to random stars, the
+## statements (flight_program.gd's jump_*, held to a live run of the real
+## game while it was in the project): tests/golden/hyperdrive_rules.json. Jumps from random states to random stars, the
 ## same dice for both (the original's draws in the order of lines 50 to
 ## 75), and every field either of them changes compared.
 ##
 ##   godot --headless --path godot-remake res://tests/check_hyperdrive_rules.tscn
 
 const HyperdriveRules = preload("res://scripts/rules/hyperdrive_rules.gd")
-const FlightProgram = preload("res://scripts/flight/flight_program.gd")
+const GOLDEN := "res://tests/golden/hyperdrive_rules.json"
 
 const FIELDS := [
 	"stardate", "ship_energy", "troops_stationed_at", "troop_morale", "morale_flag", "current_planet",
@@ -26,8 +26,9 @@ var _checked := 0
 func _ready() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
+	var golden: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(GOLDEN))
 	for i in 150:
-		_jump(rng, i)
+		_jump(rng, i, golden.jumps[i])
 	_refusals()
 	print("hyperdrive rules: %d compared, %d wrong" % [_checked, _bad])
 	get_tree().quit(1 if _bad > 0 else 0)
@@ -44,7 +45,7 @@ func _state(rng: RandomNumberGenerator) -> void:
 	GameState.troop_location = rng.randi_range(0, 3)
 	GameState.troops_stationed_at = rng.randi_range(1, 20)
 	GameState.troop_morale = rng.randi_range(0, 6)
-	GameState.morale_flag = [0, 17, 70].pick_random()
+	GameState.morale_flag = [0, 17, 70][rng.randi_range(0, 2)]
 	GameState.stardate = rng.randf_range(100.0, 300.0)
 	GameState.defender_damage_points = float(rng.randi_range(0, 200))
 	GameState.enlisted_this_trip = true
@@ -66,42 +67,25 @@ func _snapshot() -> Dictionary:
 	return out
 
 
-func _jump(rng: RandomNumberGenerator, i: int) -> void:
+func _jump(rng: RandomNumberGenerator, i: int, golden: Dictionary) -> void:
 	_state(rng)
 	var seed := rng.randi()
-	var saved := _snapshot()
-	# the original's
-	seed(seed)
-	var original := FlightProgram.new()
-	var cost := original.jump_distance()
-	original.jump_log(cost)
-	original.jump_ready(cost)
-	original.jump_arrive()
-	original.jump_finish()
-	var theirs := _snapshot()
-	# back to the start, and the rules'
-	_restore(saved)
+	_checked += 1
 	seed(seed)
 	var mine_cost := HyperdriveRules.jump(func() -> float: return randf())
-	var mine := _snapshot()
-	_checked += 1
+	var mine: Dictionary = JSON.parse_string(JSON.stringify(_snapshot()))
+	var theirs: Dictionary = golden.after
 	var differences := []
+	if seed != int(golden.seed):
+		differences.append("the test's dice are not the recording's")
 	for field: String in FIELDS:
-		if str(theirs[field]) != str(mine[field]):
+		if JSON.stringify(theirs[field]) != JSON.stringify(mine[field]):
 			differences.append("%s: %s against %s" % [field, str(theirs[field]).left(60), str(mine[field]).left(60)])
-	if cost != mine_cost:
-		differences.append("cost %d against %d" % [cost, mine_cost])
+	if int(golden.cost) != mine_cost:
+		differences.append("cost %d against %d" % [golden.cost, mine_cost])
 	if not differences.is_empty():
 		_bad += 1
 		print("WRONG  jump %d: %s" % [i, "; ".join(differences)])
-
-
-func _restore(snapshot: Dictionary) -> void:
-	# the planet's record is stored by the jump: set the state up as it was
-	GameState.load_planet_record(snapshot["current_planet"])
-	for field: String in snapshot:
-		var value: Variant = snapshot[field]
-		GameState.set(field, value.duplicate() if value is Array else value)
 
 
 func _refusals() -> void:

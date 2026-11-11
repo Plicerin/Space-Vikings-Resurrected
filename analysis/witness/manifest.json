@@ -199,9 +199,11 @@
       "5150": "flight panel lamps",
       "5160": "flight panel lamps",
       "5500": "flight panel lamps: draws a lamp block",
-      "2": "the 77 trampoline into flight (END's CONTINUE, START's old game) is the flight loop's own (flight_loop.gd run()), not run through this scene"
+      "2": "the 77 trampoline into flight (END's CONTINUE, START's old game): CONTINUE now just loads the flight scene"
     },
-    "END": {},
+    "END": {
+      "120": "POKE the saved-game mark and run GALAXY MAP: CONTINUE just returns to the flight; the mark is gone (the save stays until saved over)"
+    },
     "STARSHIP SIMULATOR": {},
     "H_D": {
       "6000": "stores a number as two bytes (HI%, LO%): the game's own whole numbers",
