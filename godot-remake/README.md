@@ -362,6 +362,17 @@ A2-3D1's call is timed record by record in the port (so much a point,
 so much an end of a line, so much a dot), with prices fitted to four
 recordings; the whole call comes within a third of a frame of each.
 
+## The look
+
+The native screens share one theme (`theme/space_vikings.tres`) and one
+font, `assets/fonts/space_vikings.ttf`, made by `tools/make_font.py` from
+the game's own character table (the 7x8 glyphs `HI-RES CHARACTER
+GENERATOR` draws from). The lit dots of each glyph are followed as
+lines, eased into curves and drawn with a round pen, then set wide and
+monospaced, so the letters are the game's (slanted, a little uneven) and
+smooth at any size, in the manner of an early-80s display face. The
+accents are the Apple hi-res colours.
+
 ## Liberties
 
 Where the port departs from the original on purpose:
