@@ -49,7 +49,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "analysis", "witness")
-SCRIPTS = os.path.join(ROOT, "godot-remake", "scripts")
+SCRIPTS = [os.path.join(ROOT, "godot-remake", d) for d in ("scripts", "autoload")]
 
 TAG = re.compile(r"@witness\s+([A-Z][A-Z0-9 ._#]*?)\s+([0-9][0-9, \-]*)$")
 TAG_ASM = re.compile(r"@witness-asm\s+([0-9][0-9, ]*)")
@@ -79,7 +79,7 @@ def spans(spec):
 def cited():
     """{program: [(first, last, file:line)]}, {call address: [file:line]}"""
     programs, asm = {}, {}
-    for path in sorted(glob.glob(os.path.join(SCRIPTS, "**", "*.gd"), recursive=True)):
+    for path in sorted(p for d in SCRIPTS for p in glob.glob(os.path.join(d, "**", "*.gd"), recursive=True)):
         rel = os.path.relpath(path, ROOT)
         with open(path) as f:
             for n, text in enumerate(f, 1):

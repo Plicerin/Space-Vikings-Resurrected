@@ -34,6 +34,7 @@ that count, waits a key can cut short.
 | `GROUND FORCES`, `RECALL`, `COLLECT` | `scripts/rules/ground_rules.gd` | `scripts/ui/ground_forces.gd` | `check_ground_rules` (the rules), `drive_ground_forces` (the scene) |
 | `SHORE LEAVE` (shore leave, enlisting and weapons, loot, repairs, a base, cryogenics) | `scripts/rules/shore_rules.gd` | `scripts/ui/shore_leave.gd`, one panel over the ground forces menu | `check_shore_rules`, `drive_shore_leave` |
 | `GALAXY MAP` (star chart) | `scripts/rules/chart_rules.gd` | `scripts/chart/star_chart.gd` | `check_chart_rules`, `drive_chart` |
+| `END` (save, continue, end game) | `scripts/rules/end_rules.gd` | `scripts/end/end_console.gd` | `check_end_rules`, `drive_end` |
 | `COM` (command console, central and navigation computers, galaxy directory, damage-control lamps) | `scripts/rules/com_rules.gd` | `scripts/com/com_console.gd` | `check_com_rules`, `drive_com` |
 | `STATUS`, `SUPPLY` (the central computer's two reports) | `scripts/rules/report_rules.gd` | `scripts/reports/report_console.gd`, one panel each | `check_report_rules`, `drive_reports` |
 
@@ -50,8 +51,6 @@ game running in MAME.
 | `H_D` (hyperdrive) | `flight_program.gd`, `flight_loop.gd` | `check_jump` |
 | `EX`, `DMG`, `S/X` (the ends of a fight) | `flight_combat.gd`, `scripts/combat/combat_fx.gd` | `check_jump` |
 | A2-3D1 (the 3D view, machine code) | `scripts/shapes/a2_3d1_view.gd`, `a2_3d1_trig.gd` | `check_a2_3d1` |
-| `END` (save, continue, end game) | `scripts/end/end_program.gd`, `end_loop.gd` | `check_end`, `check_end_atmosphere` |
-| DOS's error routine (SYSTEM ERROR, reboot) | `scripts/dos/system_error.gd`, `scripts/shapes/text_screen.gd` | `check_end` |
 | `RADAR` | `scripts/radar/radar_program.gd`, `radar_loop.gd` | `check_radar` and the six beside it |
 | `SHIP # 0 I.D.`, `# 1`, `# 3`, `# 4` (what is in orbit) | `scripts/radar/ship_id_program.gd`, `ship_id_loop.gd` | `check_radar_ids`, `check_radar_com` |
 | Planet record copy, new-game data, save and load | `autoload/game_state.gd` | `check_save`, `check_jump` |
@@ -90,14 +89,14 @@ ledger's open items are the two COLLECT lines no recording runs: 820
 Three files per program:
 
 - **the program** (`flight_program.gd`,
-  `end_program.gd`): the BASIC
+  `radar_program.gd`): the BASIC
   statements, a function for each stretch between which time passes on
   the real machine. No timing.
-- **the loop** (`flight_loop.gd`, `end_loop.gd`): a
+- **the loop** (`flight_loop.gd`, `radar_loop.gd`): a
   coroutine that
   calls those in order with the measured waits between, in video frames.
   Everything that takes time goes through one `wait` callable.
-- **the scene** (`space_flight.gd`, `end_console.gd`):
+- **the scene** (`space_flight.gd`, `radar_console.gd`):
   points `wait` at a
   real clock, shows whichever hi-res page the original would have on
   show, and turns keyboard and mouse into the Apple's keyboard latch,
@@ -214,8 +213,7 @@ The real game's log shows the 100 (`analysis/live/jump/`), and
 `END.bas` and `START.bas`: saving is refused in an atmosphere ("YOU MUST
 BE IN ORBIT TO SAVE GAME") and the ship's place is saved with the game.
 The file is JSON in `user://`, not the original's three binary files.
-`END`'s screen is the original's (below); the title is still a
-stand-in. What happens round them is the original's, recorded with
+`END`'s menu is native (below); the title is still a stand-in. What happens round them is the original's, recorded with
 `tools/mame/save_live.lua`:
 
 - **A saved game can be taken up once.** The original's boot loads
@@ -243,31 +241,27 @@ stand-in. What happens round them is the original's, recorded with
 was, from the planet's record on the disk) and compares the panel at the
 third pass with the real page, every byte.
 
-## END, and SYSTEM ERROR
+## END
 
-The console's "4) END" is the original's menu on the hi-res page: 1)
-SAVE GAME, 2) CONTINUE PRESENT GAME, 3) END GAME. Three things about it
-are the original's and are kept, harsh as the first one is:
+The console's "4) END" is one panel (`scripts/end/end_console.gd` over
+`scripts/rules/end_rules.gd`, held to the recordings by `check_end_rules`):
+1) SAVE GAME, 2) CONTINUE PRESENT GAME, 3) END GAME. A save is refused in
+an atmosphere (the original's refusal and wording); "2" goes on with the
+game by way of the flight scene, the saved-game mark left for it to
+take off. Not kept, as they were the machine and not the game:
 
-- **A key that is not a number loses the game in hand.** The choice is
-  read with `GET C`, a numeric variable. A digit other than 1-3 (and
-  space, `.`, `+`, `-`, `,`, `:`, `E`, which Applesoft reads as 0) draws
-  the menu again; a letter, RETURN or ESC is a ?SYNTAX ERROR, which goes
-  to the game's error line. Each was pressed on the real game.
-- **Every error in the game ends at one screen.** The disk's DOS has
-  had its error routine replaced: it clears the text screen, writes
-  "SYSTEM ERROR!" and "PRESS ANY KEY TO REBOOT", waits for a key and
-  boots the disk. Every program's `ONERR` line runs it (as DOS's `INT`
-  command, repointed). The port has that screen, in the Apple's own
-  text characters, and its key goes back to the title as a boot, which
-  uses a saved game up. A save that cannot be written ends there too
-  (on the Apple a DOS error would; that one is from the disassembly,
-  not tried).
-- **"3) END GAME" hangs the machine.** It pokes zeros up through memory
-  from address 1 and never gets to its `END`: half a second later the
-  screen is black and the Apple has to be switched off. The port's
-  screen goes black at the same frame; a second later it closes the
-  application.
+- **A key that was not a number lost the game in hand.** The original's
+  choice was read with `GET C`, a numeric variable: a letter, RETURN or
+  ESC was a ?SYNTAX ERROR, which went to the one error screen of the
+  disk's DOS ("SYSTEM ERROR!" and "PRESS ANY KEY TO REBOOT", then a
+  boot, which used a saved game up). Here only the three choices (the
+  keys 1 to 3 or the buttons) do anything. The recordings of those keys
+  are in `analysis/live/end/end_key_*.log`.
+- **"3) END GAME" hung the machine,** poking zeros up through memory
+  until the screen went black. The application closes.
+
+A save that cannot be written says so (THE GAME COULD NOT BE SAVED.);
+that is the port's own, where the Apple would have had a DOS error.
 
 ## Sound
 
@@ -286,9 +280,8 @@ a difference.
     godot --headless --path . res://tests/check_flight_passes.tscn   # 50 passes of flight, both pages, every byte
     godot --headless --path . res://tests/check_jump.tscn            # 42 passes: fighting, hyperdrive, arrival
     godot --headless --path . res://tests/check_chart_rules.tscn     # GALAXY MAP: 50 recorded paddle positions through the rules, and the 18 stars' marks on the recorded page
+    godot --headless --path . res://tests/check_end_rules.tscn       # END: the menu, the refusal and "GAME SAVED." as the real game printed them, the mark after a save
     godot --headless --path . res://tests/check_com_rules.tscn       # COM: 5 recorded routes through the rules, 201 screens rebuilt from the characters it drew
-    godot --headless --path . res://tests/check_end.tscn             # END at 20 stops and back in flight; its keys; SYSTEM ERROR dot for dot
-    godot --headless --path . res://tests/check_end_atmosphere.tscn  # END's refusal in an atmosphere, 6 stops
     godot --headless --path . res://tests/check_radar.tscn           # RADAR from flight, and X back to it
     godot --headless --path . res://tests/check_radar_ids.tscn       # RADAR and each of the four I.D. programs, round and round, 14 stops; a type 2
     godot --headless --path . res://tests/check_radar_com.tscn       # RADAR from the console and back to it, and by way of an I.D.
@@ -306,12 +299,13 @@ a difference.
     godot --headless --fixed-fps 60 --path . res://tests/drive_chart.tscn    # the chart scene, by pointer and keys: a click, the question, Y and N, Space, the way to the console and back
     godot --headless --fixed-fps 60 --path . res://tests/drive_com.tscn      # the console scene, by keys: the lamps, every menu, a course, the directory, every way out of it
     godot --headless --fixed-fps 60 --path . res://tests/drive_radar.tscn    # the radar scene, by keys: from flight, from the console, an I.D. and back, no radar
-    godot --headless --fixed-fps 60 --path . res://tests/drive_save.tscn     # title, END, save, continue, SYSTEM ERROR, three boots, END GAME
+    godot --headless --fixed-fps 60 --path . res://tests/drive_save.tscn     # title, END, save, continue, three boots
     godot --headless --fixed-fps 60 --path . res://tests/drive_ground_forces.tscn   # the ground forces scene, by keys: refusals, recall, a win, a retreat, a loss
+    godot --headless --fixed-fps 60 --path . res://tests/drive_end.tscn             # END's menu, by keys: a save, a refused save, continue
     godot --headless --fixed-fps 60 --path . res://tests/drive_reports.tscn         # the two report panels: what is on show, and the way back to the console
     godot --headless --fixed-fps 60 --path . res://tests/drive_shore_leave.tscn     # commands 3 to 8, by keys: every question, every refusal, what each leaves behind
 
-The first seventeen need the recordings in `../analysis/live/`. A compared
+The first sixteen need the recordings in `../analysis/live/`. A compared
 byte is never adjusted to make a test pass: both times a test differed
 from the real game by a handful of bytes, the difference was something
 the original does that nobody had noticed (the seventeen-byte copy;
@@ -383,7 +377,7 @@ Where the port departs from the original on purpose:
   15% (`FlightLoop.DISK_WAIT_SCALE`). Nothing the machine computed or
   drew is sped up.
 - **Key hints** on the flight, chart, console, radar and END screens,
-  outside the Apple's picture. END's says what a wrong key costs.
+  outside the Apple's picture.
 - **The console** is one panel with the lamps always beside it, not a
   screen painted over the flight panel a row at a time. A wrong key is
   not scolded and waited out; only the keys offered do anything. The
@@ -395,8 +389,6 @@ Where the port departs from the original on purpose:
 - **The reports** (above) show both pages at once, and `STATUS` adds the
   star the troops were left at when they are not aboard: the original's
   says only PLANETSIDE or SHORE LEAVE, never where.
-- **END GAME closes the application** a second after the screen goes
-  black. The original leaves a dead machine to be switched off.
 - **Ground battle retreat.** In the original any key at all retreats.
   The scene has a RETREAT button (and R). As in the original, the order
   is obeyed after the round in hand, which is fought and paid for.
@@ -433,11 +425,6 @@ Where the port departs from the original on purpose:
   be some frames out.
 - `RADAR` pokes 38151 with 5 on its way to an I.D. program. Nothing
   found reads a 5 there, and the port does not keep it.
-- SYSTEM ERROR has been seen live from `END` only, where the text
-  window is the whole screen. The routine writes inside whatever window
-  the program left; from a program with a narrower one the message
-  would wrap differently. The port keeps the window but not the old
-  text-screen contents that would show round it.
 - The load of `STARSHIP SIMULATOR` after an old game's or CONTINUE's
   lamps (`FlightLoop.LOAD_SIMULATOR_SPINNING`) is worked out from the
   real game's totals with the drive still turning, not timed on its

@@ -215,6 +215,9 @@ var planet_record_overrun: int = 255
 
 ## `POKE 38824,1: CALL 38825` -- write the working registers back to
 ## this planet's record.
+## (END.bas line 210 and H_D.bas line 12 run it; CALL_SITES.md section 3; held to
+## the real game by check_save and check_jump.)
+## @witness-asm 38825
 func store_planet_record(index: int) -> void:
 	planet_defender_threshold[index] = defender_damage_threshold
 	# the seventeenth byte: see load_planet_record()
