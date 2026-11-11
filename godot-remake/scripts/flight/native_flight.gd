@@ -73,6 +73,7 @@ var _said_for := 0.0
 @onready var _lamps: GridContainer = $Hud/Bar/Rows/Lamps
 @onready var _said: Label = $Hud/Said
 @onready var _flash: ColorRect = $Hud/Flash
+@onready var _overlay: Control = $Hud/Overlay
 
 
 func _ready() -> void:
@@ -92,6 +93,8 @@ func _ready() -> void:
 	_effects.camera = _camera
 	_effects.flashed.connect(_flash_screen)
 	add_child(_effects)
+	_overlay.camera = _camera
+	_overlay.target = _defender
 	_update_camera()
 	_update_hud()
 
@@ -182,6 +185,7 @@ func _fight() -> void:
 				_effects.explosion(_defender.global_position, 300.0)
 				_defender.queue_free()
 				_defender = null
+				_overlay.target = null
 			_combat.defender_destroyed()
 			_combat.start(true)
 			_make_debris()
@@ -494,6 +498,8 @@ func _make_lamps() -> void:
 
 
 func _update_hud() -> void:
+	_overlay.pitch = _rules.pitch
+	_overlay.bank = _rules.bank
 	_speed.value = _rules.speed
 	_energy.value = GameState.ship_energy
 	_shields.value = GameState.ship_shield

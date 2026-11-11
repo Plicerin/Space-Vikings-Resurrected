@@ -1,6 +1,6 @@
 [gd_resource type="Theme" load_steps=2 format=3]
 
-[ext_resource type="FontFile" path="res://assets/fonts/space_vikings.ttf" id="font_sv"]
+[ext_resource type="FontFile" path="res://assets/fonts/space_vikings.res" id="font_sv"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yfe0v"]
 content_margin_left = 28.0

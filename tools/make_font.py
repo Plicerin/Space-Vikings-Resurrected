@@ -15,7 +15,7 @@ monospaced, the way an early-80s display typeface is.
     python3 -m venv /tmp/fontenv && /tmp/fontenv/bin/pip install fonttools
     /tmp/fontenv/bin/python tools/make_font.py
 
-Writes godot-remake/assets/fonts/space_vikings.ttf.
+Writes godot-remake/font_source/space_vikings.ttf (then tools_make_font_res.gd makes the .res the theme uses).
 """
 import json
 import math
@@ -26,7 +26,7 @@ from fontTools.pens.ttGlyphPen import TTGlyphPen
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TABLE = os.path.join(ROOT, "godot-remake", "assets", "hgr", "character_table.json")
-OUT = os.path.join(ROOT, "godot-remake", "assets", "fonts", "space_vikings.ttf")
+OUT = os.path.join(ROOT, "godot-remake", "font_source", "space_vikings.ttf")
 
 DOT = 100  # font units to a dot
 COLUMNS, ROWS = 7, 8

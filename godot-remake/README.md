@@ -286,7 +286,7 @@ a hyperspace burst, a ground plane and sky below the atmosphere.
 ## The look
 
 The native screens share one theme (`theme/space_vikings.tres`) and one
-font, `assets/fonts/space_vikings.ttf`, made by `tools/make_font.py` from
+font, `assets/fonts/space_vikings.res` (from `font_source/space_vikings.ttf`, made by `tools/make_font.py`; the `.res` holds the data so a fresh clone needs no import) from
 the game's own character table (the 7x8 glyphs `HI-RES CHARACTER
 GENERATOR` draws from). The lit dots of each glyph are followed as
 lines, eased into curves and drawn with a round pen, then set wide and
