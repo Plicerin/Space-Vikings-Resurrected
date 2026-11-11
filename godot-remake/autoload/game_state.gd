@@ -98,7 +98,9 @@ var troop_location: int = 3        # $38166: 0=on board 1=planetside 2=shore
 	# cryogenic sleep.
 var troops_stationed_at: int = 1   # $38158, real starting value — set by
 	# an explicit `POKE 38158,1` in START.bas's new-game setup (line
-	# 2030), which runs after and overrides the blob's own value there
+	# 2030), which runs after and overrides the blob's own value there.
+	# The star the troops were last with the ship at, counted from 1 as
+	# $38209 is: they are here when it is current_planet + 1.
 # $38389 (enlist) / $38149 (base) — "once per trip" flags, both reset
 # together by H_D.bas line 105 on arriving at a star (flight_program.gd,
 # jump_finish()). The chart's "Y" writes 8 to the second one's byte and

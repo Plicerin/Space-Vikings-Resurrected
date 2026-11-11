@@ -13,7 +13,7 @@ func _ready() -> void:
 	if GameState.troops <= 0.0:
 		msg = "WE HAVE NO TROOPS LEFT, SIR!"
 		GameState.troop_location = 0
-	elif GameState.troops_stationed_at != GameState.current_planet and GameState.troop_location > 0 and GameState.troop_location < 3:
+	elif GameState.troops_stationed_at != GameState.current_planet + 1 and GameState.troop_location > 0 and GameState.troop_location < 3:
 		msg = "TROOPS ARE NOT ON THIS PLANET, SIR!"
 	elif GameState.troop_location == 1 or GameState.troop_location == 2:
 		msg = "TROOPS ARE BEING RECALLED, SIR!"

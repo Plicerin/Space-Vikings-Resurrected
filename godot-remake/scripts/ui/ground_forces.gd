@@ -70,16 +70,17 @@ func _update_menu_gating() -> void:
 
 	# Lines 66-67: Attack and Enlist both additionally require troops
 	# actually being here ($38158=$38209 — troops_stationed_at ==
-	# current_planet). Attack keeps its own press-time check too
-	# (below) since it's reachable even with no base at all.
-	if GameState.troops_stationed_at != GameState.current_planet:
+	# current_planet + 1: both bytes count the stars from 1). Attack
+	# keeps its own press-time check too (below) since it's reachable
+	# even with no base at all.
+	if GameState.troops_stationed_at != GameState.current_planet + 1:
 		_enlist_btn.disabled = true
 
 
 # --- Attack / battle loop (GROUND FORCES.bas lines 170-690) ---
 
 func _on_attack_pressed() -> void:
-	if GameState.troops_stationed_at != GameState.current_planet:
+	if GameState.troops_stationed_at != GameState.current_planet + 1:
 		GameState.show_stub(
 			"ATTACK PLANET", "YOU LEFT YOUR TROOPS ON ANOTHER PLANET!", "res://scenes/ground_forces.tscn"
 		)

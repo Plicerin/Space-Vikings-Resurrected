@@ -47,6 +47,6 @@ func _on_refuse() -> void:
 func _after_shore_leave() -> void:
 	# Line 2098: troops are now considered stationed at this planet,
 	# location = shore leave.
-	GameState.troops_stationed_at = GameState.current_planet
+	GameState.troops_stationed_at = GameState.current_planet + 1 # POKE 38158, PEEK (38209)
 	GameState.troop_location = 2
 	GameState.goto_scene("res://scenes/ground_forces.tscn")
