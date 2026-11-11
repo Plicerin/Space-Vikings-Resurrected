@@ -31,7 +31,7 @@ none
 | 22 | W |  |  | `IF Y2 <  - 60 THEN Y2 =  - 60` |
 | 25 | W |  |  | `HPLOT 140,60 TO 140 + X2,60 + Y2: NEXT` |
 | 30 | W |  |  | `NEXT` |
-| 40 | P | godot-remake/scripts/flight/native_flight.gd:171 |  | `VTAB 22: HTAB 5: SPEED= 127: PRINT "YOUR SHIP HAS BEEN DESTROYED!!"` |
-| 50 | L | godot-remake/scripts/flight/native_flight.gd:171 |  | `GET A$: GET A$: PRINT " ": PRINT "PR#6"` |
-| 70 | P | godot-remake/scripts/flight/native_flight.gd:171 |  | `END` |
+| 40 | P | godot-remake/scripts/flight/native_flight.gd:172 |  | `VTAB 22: HTAB 5: SPEED= 127: PRINT "YOUR SHIP HAS BEEN DESTROYED!!"` |
+| 50 | L | godot-remake/scripts/flight/native_flight.gd:172 |  | `GET A$: GET A$: PRINT " ": PRINT "PR#6"` |
+| 70 | P | godot-remake/scripts/flight/native_flight.gd:172 |  | `END` |
 | 63999 | P |  |  | `PRINT : PRINT "INT"` |

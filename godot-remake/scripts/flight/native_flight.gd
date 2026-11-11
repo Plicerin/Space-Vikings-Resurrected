@@ -67,7 +67,6 @@ var _said_for := 0.0
 
 @onready var _camera: Camera3D = $Camera
 @onready var _sun_light: DirectionalLight3D = $Sun
-@onready var _said: Label = $Hud/Said
 @onready var _flash: ColorRect = $Hud/Flash
 @onready var _overlay: Control = $Hud/Overlay
 
@@ -125,7 +124,7 @@ func _process(delta: float) -> void:
 	if _said_for > 0.0:
 		_said_for -= delta
 		if _said_for <= 0.0:
-			_said.text = ""
+			_overlay.message = ""
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -143,6 +142,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		KEY_2: _rules.change_speed(3.0)
 		KEY_3: _rules.change_speed(-15.0)
 		KEY_4: _rules.change_speed(15.0)
+		KEY_N: _overlay.show_mode(_overlay.Mode.NAV)
+		KEY_F1, KEY_SLASH: _overlay.show_mode(_overlay.Mode.HELP)
 		KEY_A: GameState.autopilot_active = not GameState.autopilot_active
 		KEY_B: GameState.condition = {2: 3, 3: 1}.get(GameState.condition, 2)
 		KEY_S: GameState.shields_up = not GameState.shields_up
@@ -194,7 +195,7 @@ func _fight() -> void:
 			_combat.start(true)
 		CombatRules.Outcome.SHIP_DESTROYED:
 			_flash_screen(1.0)
-			_said.text = "YOUR SHIP HAS BEEN DESTROYED!!"
+			_overlay.message = "YOUR SHIP HAS BEEN DESTROYED!!"
 			_said_for = 1e9
 			_dead = true
 
@@ -247,7 +248,7 @@ func _hyperdrive() -> void:
 		_say("ORBIT DECAYING")
 		await get_tree().create_timer(1.6).timeout
 		_flash_screen(1.0)
-		_said.text = "YOUR SHIP HAS BEEN DESTROYED!!"
+		_overlay.message = "YOUR SHIP HAS BEEN DESTROYED!!"
 		_said_for = 1e9
 		_dead = true
 		return
@@ -273,7 +274,7 @@ func _change_world(words: String, move: Callable) -> void:
 
 
 func _say(text: String) -> void:
-	_said.text = text
+	_overlay.message = text
 	_said_for = 2.5
 
 
@@ -494,6 +495,5 @@ func _update_hud() -> void:
 	_overlay.speed = _rules.speed
 	_overlay.energy = GameState.ship_energy
 	# the original's read-outs: X Y Z halved, heading and pitch as degrees (a unit * 1.41)
-	_overlay.readout = "X %d  Y %d  Z %d\nHDG %d  PITCH %d  BANK %d" % [
-		_rules.x / 2.0, _rules.y / 2.0, _rules.z / 2.0, roundi(_rules.heading * 1.41),
-		roundi(_rules.pitch * 1.41), roundi(_rules.bank * 1.41)]
+	_overlay.nav = [roundi(_rules.x / 2.0), roundi(_rules.y / 2.0), roundi(_rules.z / 2.0),
+			roundi(_rules.heading * 1.41), roundi(_rules.pitch * 1.41), roundi(_rules.bank * 1.41)]

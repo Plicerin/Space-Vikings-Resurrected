@@ -91,6 +91,19 @@ func _drive() -> void:
 	await _frames(2)
 	_check("B: the condition steps", GameState.condition == 3 or GameState.condition == 2 or GameState.condition == 1)
 
+	# the display: N puts up the position and headings, F1 the keys, the same key takes them down
+	var panel: Control = _node("Hud/Overlay")
+	_check("the display starts idle", panel.mode == panel.Mode.IDLE)
+	_tap(KEY_N)
+	await _frames(2)
+	_check("N: the nav data", panel.mode == panel.Mode.NAV)
+	_tap(KEY_F1)
+	await _frames(2)
+	_check("F1: the keys", panel.mode == panel.Mode.HELP)
+	_tap(KEY_F1)
+	await _frames(2)
+	_check("F1 again: idle", panel.mode == panel.Mode.IDLE)
+
 	# AUTO holds the stick: held left, switched to auto, let go - the ship keeps turning
 	await _flight(func() -> void:
 		GameState.autopilot_active = false
@@ -157,8 +170,8 @@ func _drive() -> void:
 		GameState.ship_shield = 0.0
 		GameState.shields_up = false
 		GameState.flight_escort_fighters = 0)
-	await _until(func() -> bool: return (_node("Hud/Said") as Label).text.begins_with("YOUR SHIP HAS BEEN"), 60 * 90)
-	_check("a hull with nothing left: YOUR SHIP HAS BEEN DESTROYED", (_node("Hud/Said") as Label).text.begins_with("YOUR SHIP HAS BEEN"))
+	await _until(func() -> bool: return _node("Hud/Overlay").message.begins_with("YOUR SHIP HAS BEEN"), 60 * 90)
+	_check("a hull with nothing left: YOUR SHIP HAS BEEN DESTROYED", _node("Hud/Overlay").message.begins_with("YOUR SHIP HAS BEEN"))
 
 	# the hyperdrive: refused with no course, then a jump
 	await _flight(func() -> void:
@@ -166,7 +179,7 @@ func _drive() -> void:
 		GameState.ship_speed = 0)
 	_tap(KEY_H)
 	await _frames(3)
-	_check("H with no course: refused, said", (_node("Hud/Said") as Label).text == "NO COURSE IS SET.")
+	_check("H with no course: refused, said", _node("Hud/Overlay").message == "NO COURSE IS SET.")
 	GameState.target_planet = 6
 	GameState.ship_energy = 63.0
 	var from_planet := GameState.current_planet

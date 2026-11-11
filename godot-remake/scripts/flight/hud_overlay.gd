@@ -29,7 +29,10 @@ var pitch := 0.0 ## the flight's own units, 256 to the circle
 var bank := 0.0
 var speed := 0.0
 var energy := 0.0
-var readout := ""
+var nav: Array = [0, 0, 0, 0, 0, 0] ## X, Y, Z, heading, pitch, bank, as the panel shows them
+var message := "" ## what the display says, for a while, over its page
+enum Mode { IDLE, NAV, HELP }
+var mode := Mode.IDLE
 ## World units to the figures the panel shows (the readouts halve the original's).
 var range_scale := 0.5
 
@@ -169,17 +172,15 @@ func _draw_panel() -> void:
 	draw_rect(Rect2(0.0, top, size.x, PANEL_HEIGHT), Color(0.02, 0.03, 0.05, 0.92))
 	draw_rect(Rect2(0.0, top, size.x, PANEL_HEIGHT), Color(0.9, 0.9, 0.9), false, 2.0)
 	var w := size.x
-	_bar(font, "SPEED", Rect2(w * 0.015, top + 34.0, w * 0.13, 8.0), speed / 120.0, false)
-	_dial(font, "TURN", Rect2(w * 0.17, top + 26.0, w * 0.105, 26.0), (bank + 48.0) / 95.0, false)
+	_display(Rect2(w * 0.012, top + 10.0, w * 0.228, PANEL_HEIGHT - 20.0))
+	_bar(font, "SPEED", Rect2(w * 0.255, top + 36.0, w * 0.095, 8.0), speed / 120.0, false)
+	_bar(font, "ENERGY", Rect2(w * 0.255, top + 78.0, w * 0.095, 8.0), energy / 63.0, false)
+	_dial(font, "TURN", Rect2(w * 0.365, top + 26.0, w * 0.082, 26.0), (bank + 48.0) / 95.0, false)
 	# VERT: the nose up is the top
-	_dial(font, "VERT", Rect2(w * 0.292, top + 12.0, 26.0, 64.0), (-pitch + 61.0) / 120.0, true)
-	_bar(font, "ENERGY", Rect2(w * 0.365, top + 34.0, w * 0.105, 8.0), energy / 63.0, false)
-	var lines := readout.split("\n")
-	for i in lines.size():
-		draw_string(font, Vector2(w * 0.015, top + 78.0 + i * 18.0), lines[i], HORIZONTAL_ALIGNMENT_LEFT, -1, 12, GREEN)
-	_switches.position = Vector2(w * 0.488, top + 8.0)
+	_dial(font, "VERT", Rect2(w * 0.462, top + 12.0, 26.0, 64.0), (-pitch + 61.0) / 120.0, true)
+	_switches.position = Vector2(w * 0.505, top + 8.0)
 	# damage control
-	var box := Rect2(w * 0.605, top + 8.0, w * 0.385, PANEL_HEIGHT - 16.0)
+	var box := Rect2(w * 0.612, top + 8.0, w * 0.378, PANEL_HEIGHT - 16.0)
 	_damage_box = box
 	_plastic.position = box.position
 	_plastic.size = box.size
@@ -415,3 +416,108 @@ func _stacked(font: Font, text: String, at: Vector2, pitch_px: float) -> void:
 	for i in text.length():
 		var width := font.get_string_size(text[i], HORIZONTAL_ALIGNMENT_LEFT, -1, GAUGE_LETTERS).x
 		_raised_string(self, font, Vector2(at.x - width / 2.0, top + i * pitch_px + GAUGE_LETTERS / 2.0), text[i], GAUGE_LETTERS)
+
+
+# --- the display: a green panel that can be written to ---
+
+const HELP := [
+	"ARROWS       STICK",
+	"1 2 3 4      SPEED",
+	"SPACE        FIRE",
+	"A  AUTO      S  SHIELD",
+	"B  ALERT     W  WEAPON",
+	"C  CONSOLE   R  RADAR",
+	"H  JUMP      N  NAV",
+]
+const SEGMENTS := {
+	"0": "abcdef", "1": "bc", "2": "abdeg", "3": "abcdg", "4": "bcfg", "5": "acdfg",
+	"6": "acdefg", "7": "abc", "8": "abcdefg", "9": "abcdfg", "-": "g",
+}
+const LED := Color(0.25, 1.0, 0.45)
+
+
+## NAV and HELP are shown by their keys and go again on the same key; a message
+## written to the display is shown over either for a while.
+func show_mode(wanted: Mode) -> void:
+	mode = Mode.IDLE if mode == wanted else wanted
+
+
+func _display(rect: Rect2) -> void:
+	var font := get_theme_default_font()
+	var window := StyleBoxFlat.new()
+	window.bg_color = Color(0.01, 0.03, 0.015)
+	window.set_corner_radius_all(6)
+	window.set_border_width_all(3)
+	window.border_color = Color(0.22, 0.24, 0.27)
+	window.anti_aliasing = true
+	draw_style_box(window, rect)
+	var inner := rect.grow(-10.0)
+	if message != "":
+		_write(font, message.split("\n"), inner.position + Vector2(0.0, 14.0), 14, 22.0)
+	elif mode == Mode.NAV:
+		_nav(font, inner)
+	elif mode == Mode.HELP:
+		_write(font, HELP, inner.position + Vector2(0.0, 10.0), 10, 15.0)
+	else:
+		var here: String = GameState.STAR_NAMES[GameState.current_planet]
+		_write(font, [here, "IN ORBIT" if not GameState.in_atmosphere else "IN THE ATMOSPHERE", "", "N  NAV DATA", "F1 KEYS"], inner.position + Vector2(0.0, 14.0), 13, 19.0)
+	# a faint scan over the glass
+	for line in range(int(rect.position.y) + 4, int(rect.end.y) - 2, 4):
+		draw_line(Vector2(rect.position.x + 3.0, line), Vector2(rect.end.x - 3.0, line), Color(0.0, 0.0, 0.0, 0.12), 1.0)
+
+
+## Lines of green text with a glow.
+func _write(font: Font, lines: Array, at: Vector2, size_px: int, pitch_px: float) -> void:
+	for i in lines.size():
+		var spot := at + Vector2(0.0, i * pitch_px)
+		draw_string(font, spot, lines[i], HORIZONTAL_ALIGNMENT_LEFT, -1, size_px, Color(LED, 0.18))
+		draw_string(font, spot + Vector2(0.6, 0.0), lines[i], HORIZONTAL_ALIGNMENT_LEFT, -1, size_px, Color(LED, 0.18))
+		draw_string(font, spot, lines[i], HORIZONTAL_ALIGNMENT_LEFT, -1, size_px, LED)
+
+
+## The position and the headings, in seven-segment digits.
+func _nav(font: Font, inner: Rect2) -> void:
+	var cells := [["X", 0, 6], ["Y", 1, 6], ["Z", 2, 6], ["HDG", 3, 4], ["PITCH", 4, 4], ["BANK", 5, 4]]
+	var column := inner.size.x / 2.0
+	for i in cells.size():
+		var cell: Array = cells[i]
+		var origin := inner.position + Vector2((i / 3) * column + (6.0 if i >= 3 else 0.0), (i % 3) * 27.0)
+		var label_width := 18.0 if i < 3 else 46.0
+		draw_string(font, origin + Vector2(0.0, 16.0), cell[0], HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(LED, 0.8))
+		_seven(origin + Vector2(label_width, 0.0), str(nav[cell[1]]), cell[2], 19.0)
+	var here: String = GameState.STAR_NAMES[GameState.current_planet]
+	var going := "" if GameState.target_planet < 0 else ">  %s" % GameState.STAR_NAMES[GameState.target_planet]
+	_write(font, ["%s  %s" % [here, going]], inner.position + Vector2(0.0, 104.0 - 8.0), 10, 12.0)
+
+
+## `text` right-aligned in `places` seven-segment digits `height` tall, with the
+## unlit segments faint behind, as an LED display has them.
+func _seven(at: Vector2, text: String, places: int, height: float) -> void:
+	var digit_w := height * 0.55
+	var pitch_px := digit_w * 1.35
+	text = text.lpad(places, " ")
+	for i in places:
+		var x0 := at.x + i * pitch_px
+		for segment in "abcdefg":
+			var lit: bool = text[i] != " " and SEGMENTS.get(text[i], "").contains(segment)
+			_segment(Vector2(x0, at.y), digit_w, height, segment, lit)
+
+
+func _segment(at: Vector2, w: float, h: float, segment: String, lit: bool) -> void:
+	var t := h * 0.11
+	var mid := at.y + h / 2.0
+	var from := Vector2.ZERO
+	var to := Vector2.ZERO
+	match segment:
+		"a": from = Vector2(at.x + t * 1.3, at.y + t / 2.0); to = Vector2(at.x + w - t * 1.3, from.y)
+		"g": from = Vector2(at.x + t * 1.3, mid); to = Vector2(at.x + w - t * 1.3, mid)
+		"d": from = Vector2(at.x + t * 1.3, at.y + h - t / 2.0); to = Vector2(at.x + w - t * 1.3, from.y)
+		"f": from = Vector2(at.x + t / 2.0, at.y + t * 1.3); to = Vector2(from.x, mid - t * 0.7)
+		"b": from = Vector2(at.x + w - t / 2.0, at.y + t * 1.3); to = Vector2(from.x, mid - t * 0.7)
+		"e": from = Vector2(at.x + t / 2.0, mid + t * 0.7); to = Vector2(from.x, at.y + h - t * 1.3)
+		"c": from = Vector2(at.x + w - t / 2.0, mid + t * 0.7); to = Vector2(from.x, at.y + h - t * 1.3)
+	if lit:
+		draw_line(from, to, Color(LED, 0.2), t * 2.6, true)
+		draw_line(from, to, LED, t, true)
+	else:
+		draw_line(from, to, Color(LED, 0.07), t, true)
