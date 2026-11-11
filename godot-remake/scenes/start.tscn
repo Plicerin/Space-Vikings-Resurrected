@@ -41,6 +41,10 @@ horizontal_alignment = 1
 layout_mode = 2
 text = "SHAPE DATA VIEWER (DEV TOOL)"
 
+[node name="NativeFlightButton" type="Button" parent="VBox"]
+layout_mode = 2
+text = "NATIVE FLIGHT (PREVIEW)"
+
 [node name="CombatDemoButton" type="Button" parent="VBox"]
 layout_mode = 2
 text = "COMBAT VFX DEMO (DEV TOOL)"

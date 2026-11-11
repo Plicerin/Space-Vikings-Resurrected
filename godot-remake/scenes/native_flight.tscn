@@ -1,0 +1,110 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/flight/native_flight.gd" id="1"]
+
+[node name="NativeFlight" type="Node3D"]
+script = ExtResource("1")
+
+[node name="Camera" type="Camera3D" parent="."]
+fov = 62.0
+near = 5.0
+far = 400000.0
+current = true
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+light_energy = 1.6
+
+[node name="Hud" type="CanvasLayer" parent="."]
+
+[node name="Bar" type="PanelContainer" parent="Hud"]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -118.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="Rows" type="HBoxContainer" parent="Hud/Bar"]
+layout_mode = 2
+theme_override_constants/separation = 28
+
+[node name="Gauges" type="GridContainer" parent="Hud/Bar/Rows"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+theme_override_constants/h_separation = 12
+columns = 2
+
+[node name="SpeedLabel" type="Label" parent="Hud/Bar/Rows/Gauges"]
+layout_mode = 2
+text = "SPEED"
+
+[node name="Speed" type="ProgressBar" parent="Hud/Bar/Rows/Gauges"]
+custom_minimum_size = Vector2(190, 18)
+layout_mode = 2
+size_flags_vertical = 4
+max_value = 120.0
+show_percentage = false
+
+[node name="EnergyLabel" type="Label" parent="Hud/Bar/Rows/Gauges"]
+layout_mode = 2
+text = "ENERGY"
+
+[node name="Energy" type="ProgressBar" parent="Hud/Bar/Rows/Gauges"]
+custom_minimum_size = Vector2(190, 18)
+layout_mode = 2
+size_flags_vertical = 4
+max_value = 63.0
+show_percentage = false
+
+[node name="ShieldLabel" type="Label" parent="Hud/Bar/Rows/Gauges"]
+layout_mode = 2
+text = "SHIELDS"
+
+[node name="Shields" type="ProgressBar" parent="Hud/Bar/Rows/Gauges"]
+custom_minimum_size = Vector2(190, 18)
+layout_mode = 2
+size_flags_vertical = 4
+max_value = 100.0
+show_percentage = false
+
+[node name="Readout" type="Label" parent="Hud/Bar/Rows"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+theme_type_variation = &"CrewLabel"
+
+[node name="Lamps" type="GridContainer" parent="Hud/Bar/Rows"]
+layout_mode = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 6
+columns = 2
+
+[node name="Said" type="Label" parent="Hud"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -300.0
+offset_top = 24.0
+offset_right = 300.0
+offset_bottom = 60.0
+grow_horizontal = 2
+theme_type_variation = &"CrewLabel"
+horizontal_alignment = 1
+
+[node name="Keys" type="Label" parent="Hud"]
+modulate = Color(1, 1, 1, 0.4)
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -420.0
+offset_top = -150.0
+offset_right = -12.0
+offset_bottom = -126.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 12
+text = "ARROWS stick  1 2 3 4 speed  A B S W  C R H"
+horizontal_alignment = 2

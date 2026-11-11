@@ -158,6 +158,29 @@ have the full lists:
   reads the X table three times over, so the two stars' Y and Z do not
   count and it is not the distance the chart gives.
 
+### Native flight (in progress)
+
+`scenes/native_flight.tscn` (from the title: "NATIVE FLIGHT (PREVIEW)")
+is the flight in Godot's own 3D, built beside the original's until it can
+take its place. The ship flies by `scripts/rules/flight_rules.gd`, the
+original's rules as a continuous model (the same turn rates, stops, climb,
+world edge and sink, a pass of the original being one second), held to the
+original's own arithmetic by `check_flight_rules`. The view is a camera
+with the original's attitude convention, the planet a shaded sphere (the
+game's cluster of points round its planet are the lights of its cities,
+more lit the more advanced the planet), the rest of the game's points
+stars, a sky of far ones, and a low-poly craft for the defender. A panel
+shows speed, energy, shields, position, attitude and the four lamps.
+Missing so far: fighting, going down to the planet and up again, the
+hyperdrive, the real ship models. The witness ledger
+(`analysis/witness/STARSHIP_SIMULATOR.md`) lists what is not yet
+converted.
+
+Not kept: the engine's sine table slips (entry 25 is wrong, and negative
+results are a little too negative), the factor that stays unset at two
+angles, the cosines read as nothing at 64, 128 and 191, and the turn the
+heading takes when the stick holds the nose past its stop.
+
 ## Star chart
 
 The central computer's "GALAXY MAP", one panel (`scripts/chart/star_chart.gd`
@@ -291,6 +314,7 @@ a difference.
     godot --headless --path . res://tests/check_radar_ship_4.tscn    # with the heavy cruiser
     godot --headless --path . res://tests/check_save.tscn            # record copy, save, the boot, an old game's panel
     godot --headless --path . res://tests/check_ground_rules.tscn    # GROUND FORCES, RECALL, COLLECT: 14 recorded routes through the rules, state and text
+    godot --headless --path . res://tests/check_flight_rules.tscn    # the continuous flight model against the original's arithmetic, the engine's matrix and the camera
     godot --headless --path . res://tests/check_report_rules.tscn    # STATUS and SUPPLY: 6 recorded routes, 20 pages as the real game printed them
     godot --headless --path . res://tests/check_shore_rules.tscn     # SHORE LEAVE: 7 recorded routes through the rules, state and text
     godot --headless --path . -s res://tests/check_flight_core.gd    # flight arithmetic against the model
@@ -302,10 +326,11 @@ a difference.
     godot --headless --fixed-fps 60 --path . res://tests/drive_save.tscn     # title, END, save, continue, three boots
     godot --headless --fixed-fps 60 --path . res://tests/drive_ground_forces.tscn   # the ground forces scene, by keys: refusals, recall, a win, a retreat, a loss
     godot --headless --fixed-fps 60 --path . res://tests/drive_end.tscn             # END's menu, by keys: a save, a refused save, continue
+    godot --headless --fixed-fps 60 --path . res://tests/drive_native_flight.tscn   # the native flight scene: the stick, the speed keys, the lamps, C and R
     godot --headless --fixed-fps 60 --path . res://tests/drive_reports.tscn         # the two report panels: what is on show, and the way back to the console
     godot --headless --fixed-fps 60 --path . res://tests/drive_shore_leave.tscn     # commands 3 to 8, by keys: every question, every refusal, what each leaves behind
 
-The first sixteen need the recordings in `../analysis/live/`. A compared
+The first seventeen need the recordings in `../analysis/live/`. A compared
 byte is never adjusted to make a test pass: both times a test differed
 from the real game by a handful of bytes, the difference was something
 the original does that nobody had noticed (the seventeen-byte copy;

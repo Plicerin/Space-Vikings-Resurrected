@@ -156,6 +156,10 @@
       "5500": "flight panel lamps: draws a lamp block",
       "2": "the 77 trampoline into flight (END's CONTINUE, START's old game) is the flight loop's own (flight_loop.gd run()), not run through this scene"
     },
-    "END": {}
-  }
+    "END": {},
+    "STARSHIP SIMULATOR": {}
+  },
+  "in_progress": [
+    "STARSHIP SIMULATOR"
+  ]
 }

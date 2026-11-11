@@ -38,6 +38,10 @@ cites it and how many recordings ran it. It fails (exit 1) for
 and reports, without failing, the cited lines no recording ever ran: the
 rules there rest on the listing alone.
 
+A program named under "in_progress" in the manifest is being converted a
+piece at a time: its uncited logic lines and machine-code calls are listed
+as not yet converted instead of failing. The list is the work that is left.
+
 Usage: tools/witness.py [--check] [PROGRAM ...]
     --check  write nothing; exit 1 if a ledger differs from what is on disk
 """
@@ -178,20 +182,25 @@ def ledger(name, entry, tags, asm_cites, manifest):
     ran = executed(name, spec) if spec else {}
     unran = []
     rows = []
+    # a program being converted piece by piece: what is not yet taken is listed, not failed
+    in_progress = name in manifest.get("in_progress", [])
+    pending = []
     for number in sorted(listing):
         kind = classify(listing[number])
         who = citations.get(number, [])
         if str(number) in waive:
             kind = "waived"
         if kind == "logic" and not who:
-            problems.append("line %d is logic and no rule cites it: %s" % (number, listing[number][:70]))
+            (pending if in_progress else problems).append(
+                "line %d is logic and no rule cites it: %s" % (number, listing[number][:70]))
         if who and kind != "waived" and number not in ran and spec:
             unran.append(number)
         rows.append((number, kind, who, ran.get(number, 0), listing[number]))
     for call in entry["calls"]:
         address = call["addr"] if "addr" in call else call.get("target")
         if address not in asm_cites:
-            problems.append("line %s CALLs %s into machine code and no rule cites that address" % (call["line"], address))
+            (pending if in_progress else problems).append(
+                "line %s CALLs %s into machine code and no rule cites that address" % (call["line"], address))
     out = ["# %s: the code witness" % name, "",
            "Written by `tools/witness.py`; do not edit. Rules cite lines with `@witness` tags under",
            "`godot-remake/scripts`; recordings are listed in `analysis/witness/manifest.json`.", ""]
@@ -204,6 +213,8 @@ def ledger(name, entry, tags, asm_cites, manifest):
     if spec is None:
         out.append("No recordings are listed for this program.")
     out += ["", "## Problems", ""] + (["- " + p for p in problems] or ["none"])
+    if in_progress:
+        out += ["", "## Not yet converted (%d)" % len(pending), ""] + ["- " + p for p in pending]
     out += ["", "## Cited, and never run in a recording (the listing alone)", "",
             ", ".join(map(str, unran)) or "none", "", "## Every line", "",
             "| line | | cited by | runs | listing |", "|---|---|---|---|---|"]

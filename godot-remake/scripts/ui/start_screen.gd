@@ -17,6 +17,7 @@ const NO_GAME_SAVED_FRAMES := 170.0 # FOR I = 1 TO 3000: NEXT
 @onready var _load_game_btn: Button = $VBox/LoadGameButton
 @onready var _shape_viewer_btn: Button = $VBox/ShapeViewerButton
 @onready var _combat_demo_btn: Button = $VBox/CombatDemoButton
+@onready var _native_flight_btn: Button = $VBox/NativeFlightButton
 @onready var _status: Label = $VBox/Status
 
 
@@ -25,6 +26,7 @@ func _ready() -> void:
 	_load_game_btn.pressed.connect(_on_load_game_pressed)
 	_shape_viewer_btn.pressed.connect(_on_shape_viewer_pressed)
 	_combat_demo_btn.pressed.connect(_on_combat_demo_pressed)
+	_native_flight_btn.pressed.connect(_on_native_flight_pressed)
 	if not GameState.booted:
 		GameState.boot()
 
@@ -53,3 +55,10 @@ func _on_shape_viewer_pressed() -> void:
 
 func _on_combat_demo_pressed() -> void:
 	GameState.goto_scene("res://scenes/combat_demo.tscn")
+
+
+## The flight in Godot's own 3D, not finished: it has no fighting, no way
+## down to the planet and no hyperdrive yet.
+func _on_native_flight_pressed() -> void:
+	GameState.start_new_game()
+	GameState.goto_scene("res://scenes/native_flight.tscn")
