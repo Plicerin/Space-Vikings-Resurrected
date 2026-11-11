@@ -59,6 +59,7 @@ var tech: int = 0
 
 
 ## Lines 11-14, the menu coming up.
+## @witness GROUND FORCES 11-14
 func open_menu() -> void:
 	troops = GameState.troops
 	missiles = GameState.gf_missiles
@@ -72,6 +73,7 @@ func open_menu() -> void:
 
 
 ## Lines 65-67: why command 1-9 is refused, or nothing.
+## @witness GROUND FORCES 65-67
 func refusal(command: int) -> Array[String]:
 	var here := GameState.troops_stationed_at == GameState.current_planet + 1
 	if command > 2 and command < 7 and not GameState.planet_has_base[GameState.current_planet]:
@@ -84,6 +86,7 @@ func refusal(command: int) -> Array[String]:
 
 
 ## Lines 120-179.
+## @witness GROUND FORCES 120-179
 func begin_attack() -> Landing:
 	if GameState.gf_planet_surrendered: # 120: a planet that gave in is taken again cheaply
 		GameState.gf_enemy_strength = 25.0
@@ -101,6 +104,7 @@ func begin_attack() -> Landing:
 
 
 ## Lines 180-185, one message at a time.
+## @witness GROUND FORCES 180-185
 func departure() -> Array[String]:
 	var said: Array[String] = ["ALL TRANSPORTS AWAY, SIR!"]
 	if not GameState.in_atmosphere:
@@ -112,6 +116,7 @@ func departure() -> Array[String]:
 
 ## Lines 200-510: what the landing force finds, a message at a time.
 ## A lifeless planet is secured here.
+## @witness GROUND FORCES 200-510
 func land() -> Array:
 	var given_in := GameState.gf_planet_surrendered
 	var said: Array = []
@@ -145,6 +150,7 @@ func land() -> Array:
 ## Lines 550-670 and 1100-1130: one round of the battle. `retreat`
 ## is the order to pull out, which the original takes from any key and
 ## reads after the round's losses, before it looks at who has won.
+## @witness GROUND FORCES 550-670, 1100-1130, 4000-4020
 func fight(retreat: bool) -> Outcome:
 	var t2: float
 	var x: float
@@ -206,6 +212,7 @@ func fight(retreat: bool) -> Outcome:
 
 
 ## RECALL.bas 2000-2030.
+## @witness RECALL 2000-2030
 func recall() -> Array[String]:
 	var place := GameState.troop_location
 	if GameState.current_planet + 1 != GameState.troops_stationed_at and place > 0 and place < 3:
@@ -225,6 +232,7 @@ func recall() -> Array[String]:
 ## it. Two of its slips are kept, as they decide what a planet is
 ## worth: a primitive planet's silver is set to the gold just counted
 ## (870-880), and titanium is never added (960).
+## @witness COLLECT 11, 15-16, 800-805, 820, 840-900, 910, 1070, 1090
 func collect() -> Array:
 	var said: Array = []
 	match GameState.planet_tech[GameState.current_planet]:
@@ -256,6 +264,7 @@ func collect() -> Array:
 
 
 ## Lines 740 and 660: the planet is ours.
+## @witness GROUND FORCES 660, 740
 func _secure() -> void:
 	GameState.gf_planet_surrendered = true
 	GameState.planet_secured[GameState.current_planet] = 1
@@ -269,6 +278,7 @@ func _twice(n: float) -> float:
 
 
 ## COLLECT 920-1050: a second haul in one visit to a star is cut.
+## @witness COLLECT 915, 920-1060
 func _haul(j1: float, j2: float) -> void:
 	if GameState.loot_collected_this_visit:
 		j1 *= SECOND_HAUL

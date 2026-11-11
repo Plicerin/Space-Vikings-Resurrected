@@ -85,6 +85,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_move_on()
 
 
+## @witness SHORE LEAVE 2085
 func _shore_leave() -> void:
 	_say(_rules.shore_leave_offer())
 	var short := _rules.shore_leave(await _ask("PAY THEM?"))
@@ -95,6 +96,7 @@ func _shore_leave() -> void:
 		await _hold(LEAVE)
 
 
+## @witness SHORE LEAVE 2140
 func _base() -> void:
 	_say(_rules.base_offer())
 	if not _rules.asking:
@@ -208,6 +210,7 @@ func _ask(question: String) -> bool:
 
 
 ## A whole number, none below nothing; nothing typed is none.
+## @witness SHORE LEAVE 5000-5010
 func _ask_number(question: String) -> float:
 	_question.text = question
 	_question.show()

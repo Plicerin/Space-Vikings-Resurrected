@@ -50,6 +50,7 @@ machine-generated structural map that covers all 23 programs:
 | Every DOS command, `CALL` site, vector install, PEEK/POKE address and branch | `analysis/BASIC_CALL_MAP.md` (+ `basic_callmap.json`), written by `tools/basic_callmap.py` from the tokenized programs in `extracted/*.bas` |
 | Independent re-count of that map, and the key-dispatch block run once per key through a small Applesoft interpreter | `tools/verify_callmap.py` |
 | 6502 disassembler used for the machine-code side | `tools/dis6502.py` (`tools/disassemble_simple.py` gets instruction lengths wrong; listings made with it are not reliable) |
+| The code witness: which listing lines each Godot rule cites (`@witness` tags), which of them logic, which a recording ran, which call into machine code (`@witness-asm`) | `tools/witness.py`, ledgers in `analysis/witness/` |
 | Live check in MAME of the keys and the record copy | `tools/mame/keys_live.lua`, reference log `analysis/keys_live.log` |
 | The new-game data tables | `tools/newgame_data.py` |
 

@@ -95,6 +95,7 @@ func _open_menu(said: Array[String] = []) -> void:
 		(_commands.get_node("Command1") as Button).grab_focus()
 
 
+## @witness GROUND FORCES 60-75
 func _command(number: int) -> void:
 	if not _menu.visible:
 		return
@@ -114,6 +115,7 @@ func _command(number: int) -> void:
 
 
 ## Commands 3 to 8, SHORE LEAVE.bas's six.
+## @witness GROUND FORCES 2150-2190
 func _shore(number: int) -> void:
 	var why := ShoreRules.refusal(number)
 	if not why.is_empty():
@@ -159,6 +161,7 @@ func _attack() -> void:
 	_open_menu()
 
 
+## @witness COLLECT 17
 func _fight() -> void:
 	_retreat_button.text = "R) RETREAT"
 	_retreat_button.disabled = false

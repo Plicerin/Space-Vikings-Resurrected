@@ -66,6 +66,25 @@ game yet. One is left:
 |---|---|
 | `START` (title, new or old game) | `start_screen.gd` |
 
+## The code witness
+
+The rules are held to the real game twice: by what it does (the
+recordings, replayed through them) and by what its code says. A rule
+cites the BASIC lines it follows with a comment, `## @witness SHORE LEAVE
+2087-2098`, and `tools/witness.py` sets that against the listing, line
+by line, in `analysis/witness/<PROGRAM>.md`: every line is logic,
+presentation or waived (with a reason), and the tool fails for a line
+that changes or decides something and that no rule cites, for a cited
+line that is not there, and for a `CALL` into machine code that no
+`@witness-asm <address>` tag accounts for. It also says which cited
+lines no recording ever ran, the ones the rules rest on the listing
+alone for. `python3 tools/witness.py --check` is part of the suite.
+
+Today it covers `GROUND FORCES`, `RECALL`, `COLLECT`, `SHORE LEAVE`,
+`STATUS` and `SUPPLY`: no machine-code calls in any of them. The
+ledger's open items are the two COLLECT lines no recording runs: 820
+(a planet with no technology) and 1090 (the superior one's loot).
+
 ## How a faithful port is put together
 
 Three files per program:

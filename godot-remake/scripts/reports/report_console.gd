@@ -31,6 +31,8 @@ func _ready() -> void:
 		_status()
 
 
+## @witness STATUS 1232, 1315, 1390, 1400
+## @witness SUPPLY 1400, 1450, 1500-1520
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_cancel"):
 		get_viewport().set_input_as_handled()

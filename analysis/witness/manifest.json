@@ -1,0 +1,69 @@
+{
+  "_about": "Which recordings witness which program's lines (see tools/witness.py). A program is in scope once a @witness tag in godot-remake/scripts cites it.",
+  "recordings": {
+    "GROUND FORCES": {
+      "logs": [
+        "analysis/live/ground/*.log",
+        "analysis/live/shore/*.log"
+      ],
+      "ran": "GROUND_FORCES"
+    },
+    "RECALL": {
+      "logs": [
+        "analysis/live/ground/*.log"
+      ],
+      "ran": "RECALL"
+    },
+    "COLLECT": {
+      "logs": [
+        "analysis/live/ground/*.log"
+      ],
+      "ran": "COLLECT"
+    },
+    "SHORE LEAVE": {
+      "logs": [
+        "analysis/live/shore/*.log"
+      ],
+      "ran": "SHORE_LEAVE"
+    },
+    "STATUS": {
+      "logs": [
+        "analysis/live/reports/reports_status*.log"
+      ],
+      "after_get": "computer",
+      "until_get": "console_again"
+    },
+    "SUPPLY": {
+      "logs": [
+        "analysis/live/reports/reports_supply*.log"
+      ],
+      "after_get": "computer",
+      "until_get": "console_again"
+    }
+  },
+  "waive": {
+    "_all": {
+      "0": "ONERR GOTO the SYSTEM ERROR screen: the original's DOS error trap, not a rule"
+    },
+    "SHORE LEAVE": {
+      "11": "OPEN/READ MISC FILE: the stardate, troops and credits come from GameState, not a file",
+      "2620": "WRITE MISC FILE: GameState keeps them"
+    },
+    "GROUND FORCES": {
+      "800": "WRITE MISC FILE: GameState keeps the stardate, troops and credits"
+    },
+    "RECALL": {
+      "11": "OPEN/READ MISC FILE: GameState keeps the stardate, troops and credits"
+    },
+    "STATUS": {
+      "5000": "OPEN/READ MISC FILE: GameState keeps the stardate, troops and credits",
+      "5010": "INPUT from MISC FILE: GameState keeps the stardate, troops and credits"
+    },
+    "SUPPLY": {
+      "5000": "OPEN/READ MISC FILE: GameState keeps the stardate, troops and credits"
+    },
+    "COLLECT": {
+      "170": "clears four rows of the text window, and R4 says whether to come back: presentation"
+    }
+  }
+}

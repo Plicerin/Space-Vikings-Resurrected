@@ -60,6 +60,7 @@ var bill := 0.0        ## P, the repairs
 ## Lines 4-5: why command 3-8 of GROUND FORCES comes straight back, or
 ## nothing. The cryogenic sleep is the one thing a planet that has not
 ## given in does not stand in the way of.
+## @witness SHORE LEAVE 4-5, 20
 static func refusal(command: int) -> Array[String]:
 	if command != CRYOGENICS and not GameState.gf_planet_surrendered:
 		return SAID_NOT_SURRENDERED
@@ -69,6 +70,7 @@ static func refusal(command: int) -> Array[String]:
 # --- 3) SHORE LEAVE ---
 
 ## Line 2082.
+## @witness SHORE LEAVE 2080-2085
 func shore_leave_offer() -> Array[String]:
 	return [
 		"TROOPS READY FOR", "SHORE LEAVE, SIR.", "BACK PAY COMES TO", "%d CREDITS." % GameState.troops, "",
@@ -78,6 +80,7 @@ func shore_leave_offer() -> Array[String]:
 
 ## Lines 2087-2098. Leave without pay is leave all the same: the troops
 ## go ashore here either way.
+## @witness SHORE LEAVE 2087-2099
 func shore_leave(pay: bool) -> Array[String]:
 	var said: Array[String] = []
 	GameState.morale_flag = 70
@@ -98,6 +101,7 @@ func shore_leave(pay: bool) -> Array[String]:
 
 ## Lines 2100-2130. The price is drawn before anything is looked at,
 ## and the one try a trip is used up by being told the price.
+## @witness SHORE LEAVE 2100-2130, 2170
 func base_offer() -> Array[String]:
 	var here := GameState.current_planet
 	asking = false
@@ -122,6 +126,7 @@ func base_offer() -> Array[String]:
 
 
 ## Lines 2159-2160, the Y to BUILD A BASE?
+## @witness SHORE LEAVE 2150-2160
 func build_base() -> Array[String]:
 	GameState.credits = floorf(GameState.credits - base_cost)
 	GameState.planet_has_base[GameState.current_planet] = true
@@ -131,6 +136,7 @@ func build_base() -> Array[String]:
 # --- 4) ENLIST TROOPS, and the weapons ---
 
 ## Lines 2200-2270. Like the base, the one time a trip is used up here.
+## @witness SHORE LEAVE 2200-2250
 func enlist_offer() -> Array[String]:
 	asking = false
 	if GameState.enlisted_this_trip:
@@ -141,6 +147,7 @@ func enlist_offer() -> Array[String]:
 
 
 ## Lines 2250-2270.
+## @witness SHORE LEAVE 2250-2270
 func enlist_terms() -> Array[String]:
 	return [
 		"EACH NEW TROOP", "MUST BE PAID ONE", "CREDIT IN ADVANCE.", "YOU HAVE %d" % GameState.credits,
@@ -151,6 +158,7 @@ func enlist_terms() -> Array[String]:
 ## Lines 2280-2290: why `count` recruits are not taken on, or nothing
 ## when they are (none at all is a number like any other). The weapons
 ## are offered next.
+## @witness SHORE LEAVE 2280-2290
 func enlist(count: float) -> Array[String]:
 	if count > GameState.credits:
 		return ["YOU DON'T HAVE", "%d CREDITS!" % count]
@@ -162,6 +170,7 @@ func enlist(count: float) -> Array[String]:
 
 
 ## Line 3060: the price asked for weapon `index` this time.
+## @witness SHORE LEAVE 3000-3060
 func price_weapon(index: int) -> float:
 	weapon_price = floorf((rnd.call() + 0.2) * 4 * WEAPONS[index][2])
 	return weapon_price
@@ -173,6 +182,7 @@ func weapon_count(index: int) -> float:
 
 ## Lines 3070-3110: why `count` of weapon `index` are not bought at the
 ## price asked, or nothing when they are.
+## @witness SHORE LEAVE 3070-3110
 func buy(index: int, count: float) -> Array[String]:
 	var aboard := weapon_count(index)
 	if count < 0 or count > MOST_OF_A_WEAPON:
@@ -189,6 +199,7 @@ func buy(index: int, count: float) -> Array[String]:
 # --- 5) SELL LOOT ---
 
 ## Lines 2400-2460.
+## @witness SHORE LEAVE 2400-2460
 func sell_loot() -> Array[String]:
 	var worth: float = GameState.loot[0] * (LOOT_WORTH_FIRST * rnd.call())
 	for kind in range(1, LOOT_WORTH.size()):
@@ -206,6 +217,7 @@ func sell_loot() -> Array[String]:
 # --- 6) REPAIR ---
 
 ## Line 2505: on the ground, by the low byte of the height alone.
+## @witness SHORE LEAVE 2500-2505
 func landed() -> bool:
 	return GameState.in_atmosphere and (GameState.ship_y & 0xFF) <= 22
 
@@ -213,6 +225,7 @@ func landed() -> bool:
 ## Lines 2510-2555: every system below its best is mended there and
 ## then, whatever comes of the bill. Returns each one mended with what
 ## it was at: [name, percent].
+## @witness SHORE LEAVE 2510-2555
 func repair() -> Array:
 	var mended: Array = []
 	bill = 0.0
@@ -240,6 +253,7 @@ func repair() -> Array:
 
 
 ## Lines 2550-2560.
+## @witness SHORE LEAVE 2550-2560
 func bill_said() -> Array[String]:
 	return [
 		"ALL REPAIRS ARE", "COMPLETE, SIR.", "THE TOTAL REPAIR", "BILL COMES TO", "%d CREDITS." % bill,
@@ -250,6 +264,7 @@ func bill_said() -> Array[String]:
 ## Lines 2580-2610: the bill paid, refused, or beyond the credits there
 ## are. A bill of nothing cannot be refused. Refusing, or not having
 ## it, loses the planet (and not having it, every credit too).
+## @witness SHORE LEAVE 2580-2610
 func settle(pay: bool) -> Array[String]:
 	var said: Array[String] = []
 	if GameState.credits < bill: # 2602
@@ -274,6 +289,7 @@ func _energy_gone(was: float) -> float:
 # --- 8) CRYOGENICS ---
 
 ## Lines 4000-4020.
+## @witness SHORE LEAVE 4000-4020
 func cryogenics() -> Array[String]:
 	match GameState.troop_location:
 		1, 2:

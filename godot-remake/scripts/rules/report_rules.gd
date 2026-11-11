@@ -49,6 +49,7 @@ const LOOT := [
 
 ## Lines 1235-1310 and 5100-5120: the ship, a row at a time, each
 ## [label, value] once or twice (the original sets two side by side).
+## @witness STATUS 1235-1310, 5100-5130
 static func ship() -> Array:
 	var gs := GameState
 	return [
@@ -65,6 +66,7 @@ static func ship() -> Array:
 
 
 ## Lines 1330-1386 and 5200-5210: the troops, [label, value] a line.
+## @witness STATUS 1320-1385, 5200-5220
 static func troops() -> Array:
 	var gs := GameState
 	return [
@@ -79,11 +81,13 @@ static func troops() -> Array:
 
 
 ## Line 1386.
+## @witness STATUS 1386
 static func troops_all_dead() -> bool:
 	return GameState.troops <= 0.0
 
 
 ## Lines 1410-1490: [name, amount, unit] for each kind of loot.
+## @witness SUPPLY 1410-1490
 static func supply() -> Array:
 	var rows := []
 	for kind: Array in LOOT:
@@ -92,6 +96,7 @@ static func supply() -> Array:
 
 
 ## Line 1490's last: the credits, whole.
+## @witness SUPPLY 1490
 static func supply_credits() -> String:
 	return _number(floorf(GameState.credits))
 
