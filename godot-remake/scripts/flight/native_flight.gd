@@ -61,6 +61,7 @@ var _dead := false
 var _jumping := false
 var _planet: MeshInstance3D
 var _defender: Node3D
+var _stick := Vector2.ZERO ## pitch and bank stick, as last read
 var _sky: MultiMeshInstance3D
 var _said_for := 0.0
 
@@ -103,9 +104,11 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if _dead or _jumping:
 		return
-	var stick_pitch := _axis("stick_forward", "stick_back")
-	var stick_bank := _axis("stick_left", "stick_right")
-	_rules.fly(delta, stick_pitch, stick_bank)
+	# AUTO does as the original did: the stick is not read, the ship keeps the
+	# position it had; MNL reads it each frame (keys, mouse or joystick alike)
+	if not GameState.autopilot_active:
+		_stick = Vector2(_axis("stick_forward", "stick_back"), _axis("stick_left", "stick_right"))
+	_rules.fly(delta, _stick.x, _stick.y)
 	_rules.store_state() # the radar, the console and a save read the game's own copy
 	_update_camera()
 	_update_hud()
@@ -155,11 +158,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 ## 0 for neither key, `hard` for the first, the other way for the second.
 func _axis(first: String, second: String) -> float:
 	var amount := STICK_FINE if Input.is_key_pressed(KEY_SHIFT) else STICK_HARD
-	if Input.is_action_pressed(first):
-		return amount
-	if Input.is_action_pressed(second):
-		return -amount
-	return 0.0
+	return clampf(Input.get_action_strength(first) - Input.get_action_strength(second), -1.0, 1.0) * amount
 
 
 func _leave(scene: String) -> void:

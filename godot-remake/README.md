@@ -81,8 +81,20 @@ is a ground and a sky.
 
 Keys are the original's: `1` `2` `3` `4` speed, `A` autopilot, `B`
 condition, `S` shields, `W` missile or laser, `C` command console, `R`
-radar, `H` hyperdrive. The arrow keys are the stick and SPACE is the
-button.
+radar, `H` hyperdrive. The arrow keys are the stick (or a joystick axis
+mapped to the stick actions) and SPACE is the button.
+
+The panel (`scripts/flight/hud_overlay.gd`, `switch_panel.gd`): SPEED,
+TURN, VERT and ENERGY gauges and the readout; three switches in a small
+3D scene of their own, which can be clicked as well as keyed: a push
+button for the shields, a rocker AUTO / MNL and a rocker missile / laser;
+the damage-control panel (dark plastic, raised amber lettering, twelve
+LED bulbs, a scanner of LEDs that sweeps while the damage alert is on);
+the attitude ball (a shaded sphere, with the orbit ring and pointers to
+the enemy and the planet); a target bracket on the defender; and a
+yellow or red line round the screen for condition 2 or 3. **AUTO** is as
+the original had it: the stick is not read, so the ship keeps the stick
+position it had when AUTO went on; a new game starts in manual.
 
 What the original does that is kept (the rules files have the full
 lists):

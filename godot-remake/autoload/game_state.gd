@@ -232,8 +232,8 @@ var shields_up: bool = true
 # $38165, key B: 1 GREEN, 2 BLUE, 3 RED, stepped 2 -> 3 -> 1 -> 2. Only
 # at RED do the turrets fire on an attacking fighter (line 5200).
 var condition: int = 2
-# $38164, key A: on autopilot the flight loop skips reading the
-# paddles (line 15), so the ship holds its last stick position.
+# $38164, key A: on autopilot the stick is not read (line 15), so the
+# ship holds the stick position it had; the flight does the same.
 var autopilot_active: bool = true
 
 var current_planet: int = 0        # $38209 ("orbiting" planet) - 1
@@ -468,7 +468,7 @@ func start_new_game() -> void:
 	missile_mode_active = false
 	shields_up = true
 	condition = 2
-	autopilot_active = true
+	autopilot_active = false # a new game starts in manual
 	handover = 0
 	ground_forces_due = false
 

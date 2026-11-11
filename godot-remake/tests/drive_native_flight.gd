@@ -84,9 +84,46 @@ func _drive() -> void:
 	_tap(KEY_A)
 	await _frames(2)
 	_check("A: the autopilot is on", GameState.autopilot_active)
+	_tap(KEY_A)
+	await _frames(2)
+	_check("A again: manual", not GameState.autopilot_active)
 	_tap(KEY_B)
 	await _frames(2)
 	_check("B: the condition steps", GameState.condition == 3 or GameState.condition == 2 or GameState.condition == 1)
+
+	# AUTO holds the stick: held left, switched to auto, let go - the ship keeps turning
+	await _flight(func() -> void:
+		GameState.autopilot_active = false
+		GameState.ship_speed = 60)
+	Input.action_press("stick_left")
+	await _frames(30)
+	_tap(KEY_A)
+	await _frames(2)
+	Input.action_release("stick_left")
+	var bank_then := _signed(GameState.ship_bank)
+	await _frames(60)
+	_check("in AUTO the stick is not read: the bank goes on (%d, then %d)" % [bank_then, _signed(GameState.ship_bank)],
+			absi(_signed(GameState.ship_bank)) > absi(bank_then))
+	_tap(KEY_A)
+	await _frames(60)
+	_check("and back in MNL the stick is let go: the bank eases off",
+			absi(_signed(GameState.ship_bank)) <= absi(bank_then) + 25)
+
+	# the switches are clickable: the panel's three hot spots do what S, A and W do
+	var switches: Control = _node("Hud/Overlay").get("_switches")
+	var spots := switches.get_children().filter(func(c: Node) -> bool: return c is Control and c.mouse_filter == Control.MOUSE_FILTER_STOP)
+	_check("three switches to click", spots.size() == 3)
+	var shields_before := GameState.shields_up
+	var auto_before := GameState.autopilot_active
+	var weapon_before := GameState.missile_mode_active
+	for spot: Control in spots:
+		var click := InputEventMouseButton.new()
+		click.button_index = MOUSE_BUTTON_LEFT
+		click.pressed = true
+		spot.gui_input.emit(click)
+	_check("clicking them flips the shields, the autopilot and the weapon",
+			GameState.shields_up != shields_before and GameState.autopilot_active != auto_before
+			and GameState.missile_mode_active != weapon_before)
 
 	# the fighting: the laser at the defender, a pass a second
 	await _flight(func() -> void:

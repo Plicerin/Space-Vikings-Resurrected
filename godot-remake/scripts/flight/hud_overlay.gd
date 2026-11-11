@@ -1,8 +1,7 @@
 extends Control
 ## What the flight panel shows besides its bars: the target bracket (where
 ## the defender is, how far, or an arrow to the edge toward it), the
-## attitude gauge (horizon by pitch and bank), the indicator lamps (autopilot,
-## shields, weapon, condition, damage) and the bottom panel: speed, turn, vert
+## attitude gauge (horizon by pitch and bank, the orbit ring) and the bottom panel: speed, turn, vert
 ## and energy gauges, the readout and the damage-control lamps. Drawn over the 3D view;
 ## native_flight.gd feeds it each frame.
 
@@ -16,9 +15,9 @@ const BULB := preload("res://assets/shaders/bulb.gdshader")
 const BALL := preload("res://assets/shaders/ball.gdshader")
 const RING := preload("res://assets/shaders/ring.gdshader")
 const PLASTIC := preload("res://assets/shaders/plastic.gdshader")
+const SWITCHES := preload("res://scripts/flight/switch_panel.gd")
 const AMBER_TEXT := Color(1.0, 0.69, 0.0) ## an 80s terminal's amber
 const GAUGE_RADIUS := 52.0
-const TILE := 46.0
 const ALERT := preload("res://assets/shaders/alert.gdshader")
 const TIGHT := 0.8 ## letters on a lamp's arc, closer than their usual spacing
 const PANEL_HEIGHT := 150.0
@@ -38,6 +37,7 @@ var _bulb_next := 0
 var _ball: ColorRect
 var _ring: ColorRect
 var _plastic: ColorRect
+var _switches: Control
 var _alert: ColorRect
 var _letters: Control
 var _damage_box := Rect2()
@@ -60,6 +60,8 @@ func _ready() -> void:
 	material.shader = PLASTIC
 	_plastic.material = material
 	add_child(_plastic)
+	_switches = SWITCHES.new()
+	add_child(_switches)
 	_letters = Control.new()
 	_letters.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_letters.draw.connect(_draw_letters)
@@ -78,7 +80,6 @@ func _draw() -> void:
 	_draw_target()
 	_draw_gauge()
 	_draw_panel()
-	_draw_lamps()
 	for i in range(_bulb_next, _bulbs.size()):
 		_bulbs[i].visible = false
 
@@ -167,19 +168,20 @@ func _draw_panel() -> void:
 	draw_rect(Rect2(0.0, top, size.x, PANEL_HEIGHT), Color(0.02, 0.03, 0.05, 0.92))
 	draw_rect(Rect2(0.0, top, size.x, PANEL_HEIGHT), Color(0.9, 0.9, 0.9), false, 2.0)
 	var w := size.x
-	_bar(font, "SPEED", Rect2(w * 0.015, top + 34.0, w * 0.165, 8.0), speed / 120.0, false)
-	_bar(font, "TURN", Rect2(w * 0.21, top + 34.0, w * 0.13, 8.0), (bank + 48.0) / 95.0, true)
+	_bar(font, "SPEED", Rect2(w * 0.015, top + 34.0, w * 0.13, 8.0), speed / 120.0, false)
+	_bar(font, "TURN", Rect2(w * 0.17, top + 34.0, w * 0.105, 8.0), (bank + 48.0) / 95.0, true)
 	# VERT: the nose up is the top
-	var vert := Rect2(w * 0.35, top + 14.0, 14.0, 50.0)
+	var vert := Rect2(w * 0.292, top + 14.0, 14.0, 50.0)
 	draw_string(font, Vector2(vert.end.x + 8.0, vert.get_center().y + 4.0), "VERT", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, GREEN)
 	draw_rect(vert, Color(GREEN, 0.5), false, 1.0)
 	draw_line(Vector2(vert.position.x - 3.0, vert.get_center().y), Vector2(vert.end.x + 3.0, vert.get_center().y), GREEN, 1.0)
 	var nose := clampf((-pitch + 61.0) / 120.0, 0.0, 1.0)
 	draw_rect(Rect2(vert.position.x - 3.0, vert.position.y + nose * vert.size.y - 2.0, vert.size.x + 6.0, 4.0), GREEN)
-	_bar(font, "ENERGY", Rect2(w * 0.42, top + 34.0, w * 0.15, 8.0), energy / 63.0, false)
+	_bar(font, "ENERGY", Rect2(w * 0.365, top + 34.0, w * 0.105, 8.0), energy / 63.0, false)
 	var lines := readout.split("\n")
 	for i in lines.size():
 		draw_string(font, Vector2(w * 0.015, top + 78.0 + i * 18.0), lines[i], HORIZONTAL_ALIGNMENT_LEFT, -1, 12, GREEN)
+	_switches.position = Vector2(w * 0.488, top + 8.0)
 	# damage control
 	var box := Rect2(w * 0.605, top + 8.0, w * 0.385, PANEL_HEIGHT - 16.0)
 	_damage_box = box
@@ -253,71 +255,6 @@ func _bar(font: Font, name: String, track: Rect2, amount: float, centred: bool) 
 		draw_rect(Rect2(track.position, Vector2(track.size.x * amount, track.size.y)), GREEN)
 
 
-## The telltales along the top left, as on a car's dash, without frames: A / M
-## and missile / laser, each pair one tile with a slash between and one side
-## lit. (The orbit lamp is a ring round the attitude ball, the damage scanner
-## is in the damage-control panel.)
-func _draw_lamps() -> void:
-	var blue := Color(0.35, 0.8, 1.0)
-	var x := 16.0
-	var y := 14.0
-	_pair(x, y, ["A", GameState.autopilot_active, GREEN], ["M", not GameState.autopilot_active, GREEN])
-	x += TILE * 2.0 + 22.0
-	_pair(x, y, ["missile", GameState.missile_mode_active, TARGET], ["laser", not GameState.missile_mode_active, blue])
-	x += TILE * 2.0 + 22.0
-
-
-## Two symbols side by side with a slanted line between: either lit.
-func _pair(x: float, y: float, left: Array, right: Array) -> void:
-	_symbol(left[0], Vector2(x + TILE / 2.0, y + TILE / 2.0), left[2], left[1])
-	_symbol(right[0], Vector2(x + TILE * 1.5, y + TILE / 2.0), right[2], right[1])
-	var middle := x + TILE
-	draw_line(Vector2(middle - 5.0, y + TILE - 8.0), Vector2(middle + 5.0, y + 8.0), Color(0.55, 0.57, 0.62, 0.55), 2.0, true)
-
-
-## One symbol: lit it glows in its colour, unlit it is a faint shadow of itself.
-func _symbol(kind: String, middle: Vector2, colour: Color, lit: bool) -> void:
-	if lit:
-		var glow := StyleBoxFlat.new()
-		glow.bg_color = Color(colour, 0.0)
-		glow.set_corner_radius_all(14)
-		glow.shadow_color = Color(colour, 0.38)
-		glow.shadow_size = 12
-		draw_style_box(glow, Rect2(middle - Vector2(10.0, 10.0), Vector2(20.0, 20.0)))
-	var shade := colour if lit else Color(colour, 0.2)
-	match kind:
-		"missile": _icon_missile(middle, shade)
-		"laser": _icon_laser(middle, shade)
-		"shield": _icon_shield(middle, shade)
-		"orbit": _icon_orbit(middle, shade)
-		_:
-			var font := get_theme_default_font()
-			var width := font.get_string_size(kind, HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x
-			draw_string(font, middle + Vector2(-width / 2.0, 9.0), kind, HORIZONTAL_ALIGNMENT_LEFT, -1, 24, shade)
-
-
-func _icon_missile(c: Vector2, colour: Color) -> void:
-	draw_colored_polygon(PackedVector2Array([c + Vector2(14, 0), c + Vector2(6, -4), c + Vector2(-9, -4), c + Vector2(-9, 4), c + Vector2(6, 4)]), colour)
-	draw_colored_polygon(PackedVector2Array([c + Vector2(-9, -4), c + Vector2(-15, -10), c + Vector2(-5, -4)]), colour)
-	draw_colored_polygon(PackedVector2Array([c + Vector2(-9, 4), c + Vector2(-15, 10), c + Vector2(-5, 4)]), colour)
-	draw_line(c + Vector2(-11, 0), c + Vector2(-18, 0), Color(colour, colour.a * 0.6), 3.0, true)
-
-
-func _icon_laser(c: Vector2, colour: Color) -> void:
-	# a point of light: a bright core and rays of two lengths
-	for i in 8:
-		var angle := TAU * i / 8.0
-		var length := 14.0 if i % 2 == 0 else 8.0
-		draw_line(c + Vector2(cos(angle), sin(angle)) * 4.0, c + Vector2(cos(angle), sin(angle)) * length, colour, 2.0 if i % 2 == 0 else 1.5, true)
-	draw_circle(c, 3.5, colour)
-	draw_circle(c, 6.0, Color(colour, colour.a * 0.3))
-
-
-func _icon_shield(c: Vector2, colour: Color, canvas: CanvasItem = self) -> void:
-	canvas.draw_colored_polygon(PackedVector2Array([c + Vector2(-11, -11), c + Vector2(11, -11), c + Vector2(11, 1), c + Vector2(0, 13), c + Vector2(-11, 1)]), colour)
-	canvas.draw_colored_polygon(PackedVector2Array([c + Vector2(-6, -7), c + Vector2(6, -7), c + Vector2(6, 0), c + Vector2(0, 8), c + Vector2(-6, 0)]), Color(0.04, 0.045, 0.05, 0.6))
-
-
 func _icon_orbit(c: Vector2, colour: Color) -> void:
 	var ring := PackedVector2Array()
 	for i in 33:
@@ -329,28 +266,17 @@ func _icon_orbit(c: Vector2, colour: Color) -> void:
 
 
 ## The damage scanner, in the damage-control panel on `canvas`: its name over
-## a row of LEDs, in a frame that is the shield (blue and lit with its small
-## icon, lower right, when the shields are up; dark when not). With the damage
-## alert on, a bright patch with a fading tail sweeps along and back, in amber.
+## a row of LEDs. With the damage alert on, a bright patch with a fading tail sweeps along and back, in amber.
 func _draw_damage(canvas: CanvasItem, box: Rect2) -> void:
 	var count := 24
-	var shield := GameState.shields_up
 	var frame_rect := Rect2(box.position + Vector2(10.0, 22.0), Vector2(box.size.x - 20.0, 28.0))
 	var frame := StyleBoxFlat.new()
 	frame.bg_color = Color(0.02, 0.022, 0.026, 0.9)
 	frame.set_corner_radius_all(8)
 	frame.set_border_width_all(2)
-	frame.border_color = Color(0.35, 0.8, 1.0, 0.95) if shield else Color(0.22, 0.24, 0.28, 0.8)
+	frame.border_color = Color(0.22, 0.24, 0.28, 0.8)
 	frame.anti_aliasing = true
-	if shield:
-		frame.shadow_color = Color(0.35, 0.8, 1.0, 0.4)
-		frame.shadow_size = 7
 	canvas.draw_style_box(frame, frame_rect)
-	var corner := frame_rect.end - Vector2(18.0, 0.0)
-	canvas.draw_circle(corner, 10.0, Color(0.075, 0.078, 0.087))
-	canvas.draw_set_transform(corner, 0.0, Vector2(0.5, 0.5))
-	_icon_shield(Vector2.ZERO, Color(0.35, 0.8, 1.0) if shield else Color(0.35, 0.8, 1.0, 0.22), canvas)
-	canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	var alert := GameState.damage_alert_active
 	var sweep := 0.0
 	var direction := 1.0
