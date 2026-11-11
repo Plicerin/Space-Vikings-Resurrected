@@ -12,6 +12,8 @@ const GREEN := Color(0.1, 0.95, 0.3)
 const AMBER := Color(1.0, 0.75, 0.15)
 const RED := Color(1.0, 0.25, 0.2)
 const TARGET := Color(1.0, 0.6, 0.2)
+const BULB := preload("res://assets/shaders/bulb.gdshader")
+const BALL := preload("res://assets/shaders/ball.gdshader")
 const GAUGE_RADIUS := 52.0
 const TIGHT := 0.8 ## letters on a lamp's arc, closer than their usual spacing
 const PANEL_HEIGHT := 140.0
@@ -26,16 +28,23 @@ var readout := ""
 ## World units to the figures the panel shows (the readouts halve the original's).
 var range_scale := 0.5
 
+var _bulbs: Array[ColorRect] = []
+var _bulb_next := 0
+var _ball: ColorRect
+
 
 func _process(_delta: float) -> void:
 	queue_redraw()
 
 
 func _draw() -> void:
+	_bulb_next = 0
 	_draw_target()
 	_draw_gauge()
 	_draw_panel()
 	_draw_lamps()
+	for i in range(_bulb_next, _bulbs.size()):
+		_bulbs[i].visible = false
 
 
 func _draw_target() -> void:
@@ -73,30 +82,30 @@ func _edge_arrow(direction: Vector2, text: String, font: Font) -> void:
 	draw_string(font, spot + Vector2(-50.0, 34.0 if dir.y < 0.5 else -22.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, TARGET)
 
 
-## A ball: the horizon tilts with the bank and slides with the nose.
+## The attitude ball, by shader, and the pointers on it.
 func _draw_gauge() -> void:
 	var centre := Vector2(size.x - 80.0, 80.0)
-	draw_circle(centre, GAUGE_RADIUS, Color(0.03, 0.05, 0.1, 0.7))
-	var tilt := -bank * TAU / 256.0
-	var slide := clampf(pitch / 61.0, -1.0, 1.0) * GAUGE_RADIUS * 0.8
-	var along := Vector2.RIGHT.rotated(tilt)
-	var down := Vector2.DOWN.rotated(tilt)
-	var horizon := centre + down * slide
-	var reach := sqrt(maxf(GAUGE_RADIUS * GAUGE_RADIUS - slide * slide, 0.0))
-	draw_line(horizon - along * reach, horizon + along * reach, Color(0.5, 0.8, 1.0), 2.0)
-	draw_arc(centre, GAUGE_RADIUS, 0.0, TAU, 48, Color(0.5, 0.8, 1.0, 0.8), 2.0)
-	draw_line(centre + Vector2(-14, 0), centre + Vector2(-5, 0), GREEN, 2.0)
-	draw_line(centre + Vector2(5, 0), centre + Vector2(14, 0), GREEN, 2.0)
+	if _ball == null:
+		_ball = ColorRect.new()
+		_ball.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var material := ShaderMaterial.new()
+		material.shader = BALL
+		_ball.material = material
+		_ball.show_behind_parent = true # the pointers are drawn over it
+		add_child(_ball)
+	_ball.position = centre - Vector2.ONE * GAUGE_RADIUS * 1.1
+	_ball.size = Vector2.ONE * GAUGE_RADIUS * 2.2
+	var material := _ball.material as ShaderMaterial
+	material.set_shader_parameter("pitch", pitch * TAU / 256.0)
+	material.set_shader_parameter("bank", bank * TAU / 256.0)
+	draw_line(centre + Vector2(-16, 0), centre + Vector2(-6, 0), GREEN, 2.0, true)
+	draw_line(centre + Vector2(6, 0), centre + Vector2(16, 0), GREEN, 2.0, true)
 	draw_circle(centre, 2.0, GREEN)
 	_ball_marker(centre, Vector3.ZERO, Color(0.35, 0.8, 1.0)) # the planet
 	if target != null and is_instance_valid(target):
 		_ball_marker(centre, target.global_position, TARGET) # the defender
 
 
-## The panel along the bottom, in the original's order (INSTRUMENTS 170-200):
-## SPEED, TURN (the bank), VERT (the nose) and ENERGY gauges, the position
-## and headings under them, and the damage-control lamps (COM's twelve) on
-## the right.
 func _draw_panel() -> void:
 	var font := get_theme_default_font()
 	var top := size.y - PANEL_HEIGHT
@@ -213,20 +222,25 @@ func _ball_marker(centre: Vector2, world_at: Vector3, colour: Color) -> void:
 		draw_circle(spot, 5.0, colour)
 
 
-## A frosted LED bulb: a dark seat, the lit plastic glowing from the middle
-## (or a dim, milky one), and a soft highlight where the room light catches it.
+## A frosted LED bulb (assets/shaders/bulb.gdshader): a node of its own, so
+## that it is drawn by the shader at any resolution and not out of circles.
 func _bulb(centre: Vector2, radius: float, colour: Color, lit: bool) -> void:
-	draw_arc(centre, radius + 1.5, 0.0, TAU, 32, Color(0.35, 0.37, 0.4), 2.0)
-	if lit:
-		for halo in 4:
-			draw_circle(centre, radius + (4 - halo) * 3.0, Color(colour, 0.07))
-		draw_circle(centre, radius, colour.darkened(0.35))
-		for layer in 6:
-			var t := layer / 6.0
-			draw_circle(centre, radius * (1.0 - t * 0.85), colour.lerp(Color.WHITE, t * 0.55).darkened(0.1 * (1.0 - t)))
+	var node: ColorRect
+	if _bulb_next < _bulbs.size():
+		node = _bulbs[_bulb_next]
 	else:
-		draw_circle(centre, radius, colour.darkened(0.85))
-		draw_circle(centre, radius * 0.6, Color(colour, 0.12))
-	var shine := 0.4 if lit else 0.12
-	draw_circle(centre + Vector2(-0.3, -0.35) * radius, radius * 0.38, Color(1.0, 1.0, 1.0, shine * 0.6))
-	draw_circle(centre + Vector2(-0.35, -0.4) * radius, radius * 0.16, Color(1.0, 1.0, 1.0, shine))
+		node = ColorRect.new()
+		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var material := ShaderMaterial.new()
+		material.shader = BULB
+		node.material = material
+		add_child(node)
+		_bulbs.append(node)
+	_bulb_next += 1
+	var reach := radius * 1.7
+	node.position = centre - Vector2(reach, reach)
+	node.size = Vector2(reach, reach) * 2.0
+	node.visible = true
+	var material := node.material as ShaderMaterial
+	material.set_shader_parameter("colour", colour)
+	material.set_shader_parameter("lit", 1.0 if lit else 0.0)

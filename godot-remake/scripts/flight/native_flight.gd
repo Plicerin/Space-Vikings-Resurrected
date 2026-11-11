@@ -76,6 +76,13 @@ func _ready() -> void:
 	_rules.load_state()
 	_environment()
 	_sun_light.look_at_from_position(Vector3.ZERO, -FlightRules.place(SUN))
+	_sun_light.light_energy = 1.6
+	# a cool fill from the other side, so that the dark side of a ship still has its shape
+	var fill := DirectionalLight3D.new()
+	fill.light_color = Color(0.55, 0.65, 0.95)
+	fill.light_energy = 0.55
+	add_child(fill)
+	fill.look_at_from_position(Vector3.ZERO, FlightRules.place(SUN) + Vector3(0.0, -0.4, 0.0) * FlightRules.place(SUN).length())
 	if _rules.in_atmosphere:
 		_make_ground()
 	else:
@@ -289,7 +296,7 @@ func _environment() -> void:
 		environment.background_color = Color.BLACK
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.ambient_light_color = Color(0.10, 0.12, 0.18)
-	environment.ambient_light_energy = 0.6
+	environment.ambient_light_energy = 0.9
 	environment.glow_enabled = true
 	environment.glow_intensity = 0.8
 	environment.glow_bloom = 0.1
