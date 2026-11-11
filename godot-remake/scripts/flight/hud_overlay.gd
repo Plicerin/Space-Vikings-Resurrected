@@ -13,7 +13,8 @@ const AMBER := Color(1.0, 0.75, 0.15)
 const RED := Color(1.0, 0.25, 0.2)
 const TARGET := Color(1.0, 0.6, 0.2)
 const GAUGE_RADIUS := 52.0
-const PANEL_HEIGHT := 150.0
+const TIGHT := 0.8 ## letters on a lamp's arc, closer than their usual spacing
+const PANEL_HEIGHT := 140.0
 
 var camera: Camera3D
 var target: Node3D ## null when there is none
@@ -122,10 +123,10 @@ func _draw_panel() -> void:
 	var lamps := ComRules.lamps()
 	for i in lamps.size():
 		var lamp: Array = lamps[i]
-		var centre := box.position + Vector2(box.size.x * (0.125 + 0.25 * (i % 4)), 54.0 + (i / 4) * 32.0)
+		var centre := box.position + Vector2(box.size.x * (1.0 + 2.0 * (i % 6)) / 12.0, 54.0 + (i / 6) * 44.0)
 		var colour := RED if lamp[2] else GREEN
-		draw_circle(centre, 6.0, colour if lamp[2] else Color(colour, 0.7))
-		_arc_text(font, _lamp_name(i, lamp), centre, 15.0, colour)
+		_bulb(centre, 9.0, colour, true)
+		_arc_text(font, _lamp_name(i, lamp), centre, 17.0, colour)
 
 
 ## What a lamp is called: COM's top line (the engines' number after ENG);
@@ -138,11 +139,11 @@ func _lamp_name(index: int, lamp: Array) -> String:
 ## `text` along the top of a circle: its middle straight above `centre`, each
 ## letter turned to stand on the arc.
 func _arc_text(font: Font, text: String, centre: Vector2, radius: float, colour: Color) -> void:
-	var size_px := 8
+	var size_px := 7
 	var widths := []
 	var total := 0.0
 	for character in text:
-		var width := font.get_string_size(character, HORIZONTAL_ALIGNMENT_LEFT, -1, size_px).x
+		var width := font.get_string_size(character, HORIZONTAL_ALIGNMENT_LEFT, -1, size_px).x * TIGHT
 		widths.append(width)
 		total += width
 	var angle := -PI / 2.0 - total / radius / 2.0
@@ -150,7 +151,7 @@ func _arc_text(font: Font, text: String, centre: Vector2, radius: float, colour:
 		var half: float = widths[i] / radius / 2.0
 		angle += half
 		draw_set_transform(centre + Vector2(cos(angle), sin(angle)) * radius, angle + PI / 2.0, Vector2.ONE)
-		draw_string(font, Vector2(-widths[i] / 2.0, 0.0), text[i], HORIZONTAL_ALIGNMENT_LEFT, -1, size_px, colour)
+		draw_string(font, Vector2(-widths[i] / TIGHT / 2.0, 0.0), text[i], HORIZONTAL_ALIGNMENT_LEFT, -1, size_px, colour)
 		angle += half
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
@@ -189,11 +190,7 @@ func _draw_lamps() -> void:
 	for i in lamps.size():
 		var at := Vector2(48.0 + i * 104.0, 36.0)
 		var colour: Color = lamps[i][2]
-		if lamps[i][1]:
-			draw_circle(at, 17.0, Color(colour, 0.25))
-			draw_circle(at, 11.0, colour)
-		else:
-			draw_arc(at, 11.0, 0.0, TAU, 24, Color(colour, 0.35), 2.0)
+		_bulb(at, 12.0, colour, lamps[i][1])
 		var width := font.get_string_size(lamps[i][0], HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
 		draw_string(font, at + Vector2(-width / 2.0, 32.0), lamps[i][0], HORIZONTAL_ALIGNMENT_LEFT, -1, 11, colour if lamps[i][1] else Color(colour, 0.4))
 
@@ -214,3 +211,22 @@ func _ball_marker(centre: Vector2, world_at: Vector3, colour: Color) -> void:
 		draw_arc(spot, 5.0, 0.0, TAU, 16, colour, 2.0)
 	else:
 		draw_circle(spot, 5.0, colour)
+
+
+## A frosted LED bulb: a dark seat, the lit plastic glowing from the middle
+## (or a dim, milky one), and a soft highlight where the room light catches it.
+func _bulb(centre: Vector2, radius: float, colour: Color, lit: bool) -> void:
+	draw_arc(centre, radius + 1.5, 0.0, TAU, 32, Color(0.35, 0.37, 0.4), 2.0)
+	if lit:
+		for halo in 4:
+			draw_circle(centre, radius + (4 - halo) * 3.0, Color(colour, 0.07))
+		draw_circle(centre, radius, colour.darkened(0.35))
+		for layer in 6:
+			var t := layer / 6.0
+			draw_circle(centre, radius * (1.0 - t * 0.85), colour.lerp(Color.WHITE, t * 0.55).darkened(0.1 * (1.0 - t)))
+	else:
+		draw_circle(centre, radius, colour.darkened(0.85))
+		draw_circle(centre, radius * 0.6, Color(colour, 0.12))
+	var shine := 0.4 if lit else 0.12
+	draw_circle(centre + Vector2(-0.3, -0.35) * radius, radius * 0.38, Color(1.0, 1.0, 1.0, shine * 0.6))
+	draw_circle(centre + Vector2(-0.35, -0.4) * radius, radius * 0.16, Color(1.0, 1.0, 1.0, shine))
