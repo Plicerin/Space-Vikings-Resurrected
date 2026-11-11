@@ -18,6 +18,7 @@ extends Node
 const FlightRules = preload("res://scripts/rules/flight_rules.gd")
 const FlightCore = preload("res://scripts/flight/flight_core.gd")
 const A2View = preload("res://scripts/shapes/a2_3d1_view.gd")
+const FlightProgram = preload("res://scripts/flight/flight_program.gd")
 
 var _bad := 0
 var _checked := 0
@@ -30,6 +31,7 @@ func _ready() -> void:
 	_motion(rng)
 	_dynamics(rng)
 	_stops()
+	_down_and_up(rng)
 	print("flight rules: %d compared, %d wrong" % [_checked, _bad])
 	get_tree().quit(1 if _bad > 0 else 0)
 
@@ -153,6 +155,48 @@ func _signed8(v: int) -> int:
 
 func _angle_gap(a: float, b: float) -> float:
 	return fposmod(a - b + 128.0, 256.0) - 128.0
+
+
+## RE and ORBIT: where the ship comes out, against the original's own
+## statements (flight_program.gd's reentry_load and orbit_load).
+func _down_and_up(rng: RandomNumberGenerator) -> void:
+	for i in 20:
+		GameState.start_new_game()
+		var x := rng.randi_range(-20000, 20000)
+		GameState.ship_x = x
+		GameState.ship_y = rng.randi_range(-5000, 5000)
+		GameState.ship_z = rng.randi_range(-20000, 20000)
+		GameState.ship_pitch = rng.randi_range(0, 255)
+		GameState.ship_bank = rng.randi_range(0, 255)
+		GameState.ship_heading = rng.randi_range(0, 255)
+		var rules := FlightRules.new()
+		rules.load_state()
+		var original := FlightProgram.new()
+		original.reentry_load()
+		var down := Vector3(GameState.ship_x, GameState.ship_y, GameState.ship_z)
+		var down_heading := GameState.ship_heading
+		var kept := Vector2(GameState.ship_pitch, GameState.ship_bank)
+		rules.reenter()
+		rules.store_state()
+		_checked += 1
+		_check("down from x %d: (%d, %d, %d) heading %d pitch and bank %s, the rules' (%d, %d, %d) heading %d, %s" % [
+				x, down.x, down.y, down.z, down_heading, str(kept), GameState.ship_x, GameState.ship_y, GameState.ship_z,
+				GameState.ship_heading, str(Vector2(GameState.ship_pitch, GameState.ship_bank))],
+				down == Vector3(GameState.ship_x, GameState.ship_y, GameState.ship_z) and down_heading == GameState.ship_heading
+				and kept == Vector2(GameState.ship_pitch, GameState.ship_bank) and rules.in_atmosphere)
+		GameState.start_new_game()
+		GameState.ship_pitch = int(kept.x)
+		GameState.ship_bank = int(kept.y)
+		original.orbit_load()
+		var up := Vector3(GameState.ship_x, GameState.ship_y, GameState.ship_z)
+		var up_heading := GameState.ship_heading
+		rules.enter_orbit()
+		rules.store_state()
+		_checked += 1
+		_check("up: (%d, %d, %d) heading %d, the rules' (%d, %d, %d) heading %d" % [
+				up.x, up.y, up.z, up_heading, GameState.ship_x, GameState.ship_y, GameState.ship_z, GameState.ship_heading],
+				up == Vector3(GameState.ship_x, GameState.ship_y, GameState.ship_z) and up_heading == GameState.ship_heading
+				and not rules.in_atmosphere)
 
 
 ## The nose and the bank are held where the original holds them.

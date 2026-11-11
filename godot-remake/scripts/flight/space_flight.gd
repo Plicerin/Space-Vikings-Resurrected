@@ -51,6 +51,7 @@ var _keys_to_leave := 0
 
 
 func _ready() -> void:
+	GameState.flight_scene = scene_file_path
 	_fx.screen = GameState.view3d.pages[0] # BASIC draws on page 1 whatever is shown
 	_show_page()
 	_loop.setup(_fx)

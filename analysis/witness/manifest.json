@@ -77,6 +77,51 @@
           "end"
         ]
       ]
+    },
+    "RADAR": {
+      "logs": [
+        "analysis/live/radar/radar_radar.log",
+        "analysis/live/radar/radar_radar_ids.log",
+        "analysis/live/radar/radar_radar_dead.log",
+        "analysis/live/radar/radar_radar_com.log"
+      ],
+      "from_key": "R"
+    },
+    "SHIP no 0 I.D.": {
+      "logs": [
+        "analysis/live/radar/radar_radar_ids.log",
+        "analysis/live/radar/radar_radar_ship_0.log",
+        "analysis/live/radar/radar_radar_ship_1.log",
+        "analysis/live/radar/radar_radar_ship_4.log"
+      ],
+      "from_key": "R"
+    },
+    "SHIP no 1 I.D.": {
+      "logs": [
+        "analysis/live/radar/radar_radar_ids.log",
+        "analysis/live/radar/radar_radar_ship_0.log",
+        "analysis/live/radar/radar_radar_ship_1.log",
+        "analysis/live/radar/radar_radar_ship_4.log"
+      ],
+      "from_key": "R"
+    },
+    "SHIP no 3 I.D.": {
+      "logs": [
+        "analysis/live/radar/radar_radar_ids.log",
+        "analysis/live/radar/radar_radar_ship_0.log",
+        "analysis/live/radar/radar_radar_ship_1.log",
+        "analysis/live/radar/radar_radar_ship_4.log"
+      ],
+      "from_key": "R"
+    },
+    "SHIP no 4 I.D.": {
+      "logs": [
+        "analysis/live/radar/radar_radar_ids.log",
+        "analysis/live/radar/radar_radar_ship_0.log",
+        "analysis/live/radar/radar_radar_ship_1.log",
+        "analysis/live/radar/radar_radar_ship_4.log"
+      ],
+      "from_key": "R"
     }
   },
   "waive": {
@@ -157,7 +202,48 @@
       "2": "the 77 trampoline into flight (END's CONTINUE, START's old game) is the flight loop's own (flight_loop.gd run()), not run through this scene"
     },
     "END": {},
-    "STARSHIP SIMULATOR": {}
+    "STARSHIP SIMULATOR": {},
+    "H_D": {
+      "6000": "stores a number as two bytes (HI%, LO%): the game's own whole numbers",
+      "6005": "the same helper",
+      "6010": "the same helper",
+      "6020": "the same helper",
+      "6030": "the same helper",
+      "6040": "the same helper",
+      "6050": "the same helper",
+      "6060": "the same helper",
+      "6070": "the same helper",
+      "6080": "the same helper"
+    },
+    "RADAR": {
+      "6000": "stores a number as two bytes (HI%, LO%): the game's own whole numbers",
+      "6005": "the same helper",
+      "6010": "the same helper",
+      "6020": "the same helper",
+      "6030": "the same helper",
+      "6040": "the same helper",
+      "6050": "the same helper",
+      "6060": "the same helper",
+      "6070": "the same helper",
+      "6080": "the same helper"
+    },
+    "EX": {
+      "6": "the explosion's burst: drawing",
+      "7": "the explosion's rays: drawing and its random lengths",
+      "20": "a ray of the explosion: drawing",
+      "21": "a ray of the explosion: drawing",
+      "22": "a ray of the explosion: drawing",
+      "25": "a ray of the explosion: drawing"
+    },
+    "S_X": {
+      "6": "the explosion's burst: drawing",
+      "7": "the explosion's rays: drawing and its random lengths",
+      "20": "a ray of the explosion: drawing",
+      "21": "a ray of the explosion: drawing",
+      "22": "a ray of the explosion: drawing",
+      "25": "a ray of the explosion: drawing",
+      "30": "the end of the rays (EX: also the defender's 38205, which the rules take: line 30 is cited there)"
+    }
   },
   "in_progress": [
     "STARSHIP SIMULATOR"

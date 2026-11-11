@@ -80,6 +80,15 @@ theme_override_constants/h_separation = 10
 theme_override_constants/v_separation = 6
 columns = 2
 
+[node name="Flash" type="ColorRect" parent="Hud"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 0)
+
 [node name="Said" type="Label" parent="Hud"]
 anchors_preset = 5
 anchor_left = 0.5

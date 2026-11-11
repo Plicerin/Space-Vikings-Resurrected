@@ -89,7 +89,84 @@ func _drive() -> void:
 	await _frames(2)
 	_check("B: the condition steps", GameState.condition == 3 or GameState.condition == 2 or GameState.condition == 1)
 
+	# the fighting: the laser at the defender, a pass a second
+	await _flight(func() -> void:
+		GameState.gf_planet_surrendered = false
+		GameState.gf_enemy_strength = 250.0
+		GameState.gf_victory_progress = 0.0
+		GameState.ship_x = 400
+		GameState.ship_y = -100
+		GameState.ship_z = -5800
+		GameState.orbital_defender_tier = 3
+		GameState.ship_speed = 0
+		GameState.missile_mode_active = false
+		GameState.shields_up = true)
+	var before_progress := GameState.gf_victory_progress
+	Input.action_press("fire")
+	await _frames(60 * 3)
+	Input.action_release("fire")
+	_check("three seconds with the fire button down at SOL: the laser scores (%.0f to %.0f)" % [before_progress, GameState.gf_victory_progress],
+			GameState.gf_victory_progress > before_progress)
+	_check("and the defender's fire wears the shields (%.0f)" % GameState.ship_shield, GameState.ship_shield < 100.0)
+
+	# a ship with nothing left is lost
+	await _flight(func() -> void:
+		GameState.gf_planet_surrendered = false
+		GameState.ship_x = 400
+		GameState.ship_y = -100
+		GameState.ship_z = -5800
+		GameState.orbital_defender_tier = 3
+		GameState.ship_speed = 0
+		GameState.ship_hull = 1.0
+		GameState.ship_shield = 0.0
+		GameState.shields_up = false
+		GameState.flight_escort_fighters = 0)
+	await _until(func() -> bool: return (_node("Hud/Said") as Label).text.begins_with("YOUR SHIP HAS BEEN"), 60 * 90)
+	_check("a hull with nothing left: YOUR SHIP HAS BEEN DESTROYED", (_node("Hud/Said") as Label).text.begins_with("YOUR SHIP HAS BEEN"))
+
+	# the hyperdrive: refused with no course, then a jump
+	await _flight(func() -> void:
+		GameState.target_planet = -1
+		GameState.ship_speed = 0)
+	_tap(KEY_H)
+	await _frames(3)
+	_check("H with no course: refused, said", (_node("Hud/Said") as Label).text == "NO COURSE IS SET.")
+	GameState.target_planet = 6
+	GameState.ship_energy = 63.0
+	var from_planet := GameState.current_planet
+	_tap(KEY_H)
+	await _until(func() -> bool: return GameState.current_planet == 6)
+	_check("H with a course (SIRIUS): the ship is at the other star", GameState.current_planet == 6 and from_planet == 0)
+	await _frames(5)
+	_check("with the energy paid (%.0f)" % GameState.ship_energy, GameState.ship_energy < 63.0)
+	_check("and the scene begun again there", _path() == FLIGHT)
+
+	# down to the planet and up again
+	await _flight(func() -> void:
+		GameState.ship_x = 300
+		GameState.ship_y = 200
+		GameState.ship_z = 100
+		GameState.ship_speed = 0)
+	await _until(func() -> bool: return GameState.in_atmosphere, 60 * 8)
+	_check("within 900 of the planet: down into the atmosphere", GameState.in_atmosphere)
+	await _frames(10)
+	_check("x with its low byte put to 188 (from 300: 444), 1024 up and 7000 short of the planet along z, heading 20 (%d, %d, %d, %d)" % [
+			GameState.ship_x, GameState.ship_y, GameState.ship_z, GameState.ship_heading],
+			GameState.ship_x == 444 and GameState.ship_z == -7000 and GameState.ship_heading == 20 and GameState.ship_y < 1100)
+	await _flight(func() -> void:
+		GameState.in_atmosphere = true
+		GameState.ship_x = 0
+		GameState.ship_y = 4500
+		GameState.ship_z = 5000
+		GameState.ship_speed = 0)
+	await _until(func() -> bool: return not GameState.in_atmosphere, 60 * 8)
+	_check("above 4000 in the atmosphere: up into orbit", not GameState.in_atmosphere)
+	await _frames(10)
+	_check("at (700, 200, 2000), heading 190 (%d, %d, %d, %d)" % [GameState.ship_x, GameState.ship_y, GameState.ship_z, GameState.ship_heading],
+			GameState.ship_x == 700 and GameState.ship_y == 200 and GameState.ship_z == 2000 and GameState.ship_heading == 190)
+
 	# on to the console, and the radar
+	await _flight(func() -> void: pass)
 	_tap(KEY_C)
 	await _scene_is(COM)
 	_check("C runs the command console", _path() == COM)
@@ -124,6 +201,13 @@ func _speed() -> float:
 
 func _signed(byte: int) -> int:
 	return byte - 256 if byte > 127 else byte
+
+
+func _until(done: Callable, frames: int = TIMEOUT_FRAMES) -> void:
+	for i in frames:
+		if done.call():
+			return
+		await get_tree().process_frame
 
 
 func _path() -> String:

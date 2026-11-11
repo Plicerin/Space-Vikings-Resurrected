@@ -31,11 +31,9 @@ const SAID_LOST: Array[String] = ["THE BATTLE IS LOST! ALL TROOPS", "HAVE BEEN D
 const SAID_RETREATING: Array[String] = ["GROUND FORCES RETREATING, SIR!", "PLANET NOT SECURED!"]
 
 ## COLLECT 925-1050: the loot, in the order its numbers are drawn, and
-## which of J1, J2 or a flat 20 each is drawn up to. Titanium (38180)
-## is drawn and then poked to 31180: none is ever collected.
-const TITANIUM := 9
+## which of J1, J2 or a flat 20 each is drawn up to.
 const HAUL := [
-	[12, "j2"], [11, "j2"], [10, "j2"], [TITANIUM, "j2"], [8, "j1"], [7, "j2"], [6, "j2"],
+	[12, "j2"], [11, "j2"], [10, "j2"], [9, "j2"], [8, "j1"], [7, "j2"], [6, "j2"],
 	[5, "j1"], [4, "j1"], [3, "j2"], [2, "flat"], [1, "j2"], [0, "j1"],
 ]
 const HAUL_FLAT := 20.0
@@ -229,9 +227,10 @@ func recall() -> Array[String]:
 
 
 ## COLLECT.bas: the loot of the planet just taken, and what is said of
-## it. Two of its slips are kept, as they decide what a planet is
-## worth: a primitive planet's silver is set to the gold just counted
-## (870-880), and titanium is never added (960).
+## it. Two of the original's slips are fixed, as the plain rule is the
+## simpler one: a primitive planet's silver is its own sum, not the gold
+## just counted (870-880), and titanium is added like the rest (960 pokes
+## 31180, so the original never collects any).
 ## @witness COLLECT 11, 15-16, 800-805, 820, 840-900, 910, 1070, 1090
 func collect() -> Array:
 	var said: Array = []
@@ -243,9 +242,8 @@ func collect() -> Array:
 				"PLANET IS PRIMITIVE. THE ONLY LOOT", "IS A LITTLE GOLD AND SILVER AND SOME",
 				"WINES AND LIQUORS, SIR.",
 			]]
-			var gold := _add(12, 5.0)
-			rnd.call() # 870: F, the silver sum, which is not what is poked
-			GameState.loot[11] = floorf(gold)
+			_add(12, 5.0)
+			_add(11, 5.0)
 			_add(2, 10.0)
 		2: # 910
 			said = [[
@@ -286,10 +284,7 @@ func _haul(j1: float, j2: float) -> void:
 	GameState.loot_collected_this_visit = true
 	var up_to := {"j1": j1, "j2": j2, "flat": HAUL_FLAT}
 	for entry in HAUL:
-		if entry[0] == TITANIUM:
-			rnd.call()
-		else:
-			_add(entry[0], up_to[entry[1]])
+		_add(entry[0], up_to[entry[1]])
 
 
 ## A loot byte and a draw up to `most`, capped as the byte is. Returns

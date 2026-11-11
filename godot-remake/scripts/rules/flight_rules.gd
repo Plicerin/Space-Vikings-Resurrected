@@ -77,6 +77,7 @@ func store_state() -> void:
 	GameState.ship_bank = roundi(bank) & 0xFF
 	GameState.ship_heading = roundi(heading) & 0xFF
 	GameState.ship_speed = roundi(speed)
+	GameState.in_atmosphere = in_atmosphere
 
 
 ## @witness STARSHIP SIMULATOR 15-19, 21, 133-138
@@ -98,6 +99,14 @@ func change_speed(change: float) -> void:
 	speed = clampf(speed + change, 0.0, FASTEST)
 
 
+## @witness STARSHIP SIMULATOR 170
+## The row of the pitch gauge's marker, which a missile's height is
+## compared with in the atmosphere (line 1010: `Y0 < VV`): 167 and a
+## quarter of the pitch, down the scale for the nose up.
+static func pitch_marker(pitch_units: float) -> float:
+	return floorf(167.0 + (pitch_units if pitch_units >= 0.0 else pitch_units + 1.0) / 4.0)
+
+
 ## @witness STARSHIP SIMULATOR 156-158
 ## Within 900 of the planet on every axis and not in the atmosphere: the
 ## ship goes down (RE).
@@ -109,6 +118,30 @@ func is_over_planet() -> bool:
 ## In the atmosphere and above 4000: the ship goes up into orbit (ORBIT).
 func is_leaving_atmosphere() -> bool:
 	return in_atmosphere and y > 4000.0
+
+
+## @witness RE 25-37
+## RE.bas: the ship goes down into the atmosphere. It comes out at 188 on
+## the x it was at (the low byte of the word is replaced, the high byte
+## kept), 1024 up and 7000 short of the planet along z, heading 20, with
+## its pitch and bank as they were.
+func reenter() -> void:
+	in_atmosphere = true # 25  POKE 38210,1
+	x = float(((floori(x) >> 8) << 8) + 188) # 27, 29, 35
+	y = 1024.0
+	z = -7000.0
+	heading = 20.0 # 28
+
+
+## @witness ORBIT 25-37
+## ORBIT.bas: the ship goes up into orbit, at (700, 200, 2000), heading 190,
+## with its pitch and bank as they were.
+func enter_orbit() -> void:
+	in_atmosphere = false # 25  POKE 38210,0
+	x = 700.0 # 27
+	y = 200.0
+	z = 2000.0
+	heading = 190.0 # 29
 
 
 ## @witness STARSHIP SIMULATOR 21, 112-129

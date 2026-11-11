@@ -10,12 +10,28 @@ extends Node3D
 ## defender at (400, -100, -3500), the world wrapping at +-20000.
 ## Godot's z is the original's the other way round (FlightRules.place).
 ##
-## Not yet in here: fighting, going down to the planet and up again, and
-## the hyperdrive; the original's flight scene (scenes/flight/) does them
-## and is still the one the game uses.
+## The fighting is scripts/rules/combat_rules.gd, a pass of it a second as
+## the original did, and scripts/flight/fight_effects.gd plays what it says.
+##
+## The hyperdrive is scripts/rules/hyperdrive_rules.gd with the jump's rays
+## over it and the scene begun again at the other star.
+##
+## Going down to the planet (within 900 of it) and up again (above 4000 in
+## the atmosphere) are flight_rules.gd's, with a few words over the view and
+## the scene begun again, the other side of the planet's sky: the ground
+## from the air, the planet's own map lines on it. In the atmosphere there
+## is no defender; the planet's fighters are all there is.
+##
+## The original's flight scene (scenes/flight/) is still the one the game
+## uses until this has the real ship models.
 
 const FlightRules = preload("res://scripts/rules/flight_rules.gd")
+const CombatRules = preload("res://scripts/rules/combat_rules.gd")
+const HyperdriveRules = preload("res://scripts/rules/hyperdrive_rules.gd")
+const HyperspaceEffect = preload("res://scripts/flight/hyperspace_effect.gd")
 const DisplayList = preload("res://scripts/world/display_list.gd")
+const Craft = preload("res://scripts/world/craft.gd")
+const FightEffects = preload("res://scripts/flight/fight_effects.gd")
 
 const COM := "res://scenes/com.tscn"
 const RADAR := "res://scenes/radar.tscn"
@@ -35,6 +51,14 @@ const STICK_HARD := 1.0
 const STICK_FINE := 0.35
 
 var _rules := FlightRules.new()
+var _combat := CombatRules.new()
+var _effects: Node3D
+## Seconds since the last pass of fighting, and whether the fire key was
+## pressed since (a tap between two passes still fires).
+var _fight_clock := 0.0
+var _fire_tapped := false
+var _dead := false
+var _jumping := false
 var _planet: MeshInstance3D
 var _defender: Node3D
 var _sky: MultiMeshInstance3D
@@ -48,27 +72,49 @@ var _said_for := 0.0
 @onready var _readout: Label = $Hud/Bar/Rows/Readout
 @onready var _lamps: GridContainer = $Hud/Bar/Rows/Lamps
 @onready var _said: Label = $Hud/Said
+@onready var _flash: ColorRect = $Hud/Flash
 
 
 func _ready() -> void:
+	GameState.flight_scene = scene_file_path
 	_rules.load_state()
 	_environment()
 	_sun_light.look_at_from_position(Vector3.ZERO, -FlightRules.place(SUN))
-	_make_planet()
-	_make_defender()
-	_make_stars()
+	if _rules.in_atmosphere:
+		_make_ground()
+	else:
+		_make_planet()
+		_make_defender()
+		_make_stars()
 	_make_lamps()
+	_combat.start(true)
+	_effects = FightEffects.new()
+	_effects.camera = _camera
+	_effects.flashed.connect(_flash_screen)
+	add_child(_effects)
 	_update_camera()
 	_update_hud()
 
 
 func _process(delta: float) -> void:
+	if _dead or _jumping:
+		return
 	var stick_pitch := _axis("stick_forward", "stick_back")
 	var stick_bank := _axis("stick_left", "stick_right")
 	_rules.fly(delta, stick_pitch, stick_bank)
 	_rules.store_state() # the radar, the console and a save read the game's own copy
 	_update_camera()
 	_update_hud()
+	if _rules.is_over_planet():
+		_change_world("REENTRY SEQUENCE START", _rules.reenter)
+		return
+	if _rules.is_leaving_atmosphere():
+		_change_world("ORBITAL INSERTION START", _rules.enter_orbit)
+		return
+	_fight_clock += delta
+	if _fight_clock >= FlightRules.PASS:
+		_fight_clock = 0.0
+		_fight()
 	if _said_for > 0.0:
 		_said_for -= delta
 		if _said_for <= 0.0:
@@ -78,6 +124,12 @@ func _process(delta: float) -> void:
 func _unhandled_key_input(event: InputEvent) -> void:
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
+		return
+	if _dead:
+		GameState.reboot() # a key after the ship is lost, and the machine starts again
+		return
+	if event.is_action("fire"):
+		_fire_tapped = true
 		return
 	match key.keycode:
 		KEY_1: _rules.change_speed(-3.0)
@@ -93,7 +145,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		KEY_R:
 			_leave(RADAR)
 		KEY_H:
-			_say("THE HYPERDRIVE IS NOT HERE YET.")
+			_hyperdrive()
 
 
 ## 0 for neither key, `hard` for the first, the other way for the second.
@@ -111,6 +163,111 @@ func _leave(scene: String) -> void:
 	GameState.goto_scene(scene)
 
 
+## @witness STARSHIP SIMULATOR 185-192
+## @witness DMG 10
+## @witness S_X 40-70
+## A pass of fighting: the rules decide, the effects play it.
+func _fight() -> void:
+	var button := _fire_tapped or Input.is_action_pressed("fire")
+	_fire_tapped = false
+	var eye := Vector3(_rules.x, _rules.y, _rules.z)
+	var result := _combat.fight(button, eye, Vector2(_rules.pitch, _rules.heading),
+			FlightRules.pitch_marker(_rules.pitch))
+	for event: Dictionary in result["events"]:
+		_play(event)
+	match result["outcome"]:
+		CombatRules.Outcome.DEFENDER_DESTROYED:
+			_say("THE DEFENDER IS DESTROYED.")
+			if _defender != null:
+				_effects.explosion(_defender.global_position, 300.0)
+				_defender.queue_free()
+				_defender = null
+			_combat.defender_destroyed()
+			_combat.start(true)
+			_make_debris()
+		CombatRules.Outcome.DAMAGED:
+			_say("DAMAGE TO THE SHIP.")
+			_combat.start(true)
+		CombatRules.Outcome.SHIP_DESTROYED:
+			_flash_screen(1.0)
+			_said.text = "YOUR SHIP HAS BEEN DESTROYED!!"
+			_said_for = 1e9
+			_dead = true
+
+
+func _play(event: Dictionary) -> void:
+	match event["kind"]:
+		"laser":
+			_effects.laser()
+		"missile":
+			var ahead := -_camera.global_transform.basis.z
+			_effects.missile(ahead, event["steps"], event["hit"])
+		"surrendered":
+			_say("THE PLANET HAS SURRENDERED")
+		"damage":
+			for i in event["light"]:
+				get_tree().create_timer(0.12 * i).timeout.connect(_flash_screen.bind(0.35))
+			if event["medium"]:
+				_flash_screen(0.7)
+		"fighter":
+			_effects.fighter(event["from"], event["step"], event["steps"], event["strafes"], event["shot_down"])
+
+
+func _flash_screen(strength: float) -> void:
+	_flash.color.a = strength
+	create_tween().tween_property(_flash, "color:a", 0.0, 0.35)
+
+
+## @witness STARSHIP SIMULATOR 209
+## @witness H_D 1-8
+## @witness-asm 37494
+## (CALL 37494 is SOUND GEN's noise, played in the jump at lines 18 and 20.)
+## The hyperdrive: refused without a word where the original refuses (here it
+## says why), the ship lost with no energy at all, otherwise the jump.
+func _hyperdrive() -> void:
+	if _jumping or _dead:
+		return
+	_rules.store_state()
+	if HyperdriveRules.refused():
+		if GameState.in_atmosphere:
+			_say("NO JUMP FROM THE ATMOSPHERE.")
+		elif GameState.target_planet < 0:
+			_say("NO COURSE IS SET.")
+		else:
+			_say("WE ARE THERE ALREADY.")
+		return
+	if not HyperdriveRules.has_energy():
+		_jumping = true
+		_say("OUT OF ENERGY")
+		await get_tree().create_timer(1.6).timeout
+		_say("ORBIT DECAYING")
+		await get_tree().create_timer(1.6).timeout
+		_flash_screen(1.0)
+		_said.text = "YOUR SHIP HAS BEEN DESTROYED!!"
+		_said_for = 1e9
+		_dead = true
+		return
+	_jumping = true
+	var rays := HyperspaceEffect.new()
+	$Hud.add_child(rays)
+	await rays.done
+	HyperdriveRules.jump(func() -> float: return randf())
+	get_tree().reload_current_scene()
+
+
+## @witness RE 20-40
+## @witness ORBIT 20-40
+## Down to the planet or up into orbit: the words, a moment, and the ship
+## put where the original puts it, in the other world.
+func _change_world(words: String, move: Callable) -> void:
+	_jumping = true
+	_say(words)
+	await get_tree().create_timer(2.0).timeout
+	move.call()
+	_rules.store_state()
+	get_tree().reload_current_scene()
+
+
 func _say(text: String) -> void:
 	_said.text = text
 	_said_for = 2.5
@@ -121,8 +278,17 @@ func _say(text: String) -> void:
 
 func _environment() -> void:
 	var environment := Environment.new()
-	environment.background_mode = Environment.BG_COLOR
-	environment.background_color = Color.BLACK
+	if _rules.in_atmosphere:
+		var sky := Sky.new()
+		sky.sky_material = ProceduralSkyMaterial.new()
+		environment.background_mode = Environment.BG_SKY
+		environment.sky = sky
+		environment.fog_enabled = true
+		environment.fog_light_color = Color(0.55, 0.70, 0.90)
+		environment.fog_density = 0.00004
+	else:
+		environment.background_mode = Environment.BG_COLOR
+		environment.background_color = Color.BLACK
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.ambient_light_color = Color(0.10, 0.12, 0.18)
 	environment.ambient_light_energy = 0.6
@@ -165,47 +331,81 @@ func _points() -> PackedVector3Array:
 	return DisplayList.load_file("planet_0.bin").points
 
 
+## The ground from the air: land and sea, and the planet's own map lines.
+func _make_ground() -> void:
+	var planet := GameState.current_planet
+	var plane := PlaneMesh.new()
+	plane.size = Vector2.ONE * 80000.0
+	var material := ShaderMaterial.new()
+	material.shader = load("res://assets/shaders/ground.gdshader")
+	material.set_shader_parameter("tech", float(GameState.planet_tech[planet]))
+	material.set_shader_parameter("seed", float(planet + 1))
+	var ground := MeshInstance3D.new()
+	ground.mesh = plane
+	ground.material_override = material
+	add_child(ground)
+	var map: PackedVector3Array = DisplayList.load_file("planet_%d.bin" % (planet + 1)).lines
+	if map.is_empty():
+		return
+	var points := PackedVector3Array()
+	for point in map:
+		points.append(FlightRules.place(point + Vector3(0, 4, 0)))
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = points
+	var lines := ArrayMesh.new()
+	lines.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, arrays)
+	var map_material := StandardMaterial3D.new()
+	map_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	map_material.albedo_color = Color(0.95, 0.9, 0.55)
+	var map_lines := MeshInstance3D.new()
+	map_lines.mesh = lines
+	map_lines.material_override = map_material
+	add_child(map_lines)
+
+
+## What is left of a defender: the game's own fifty points of wreckage.
+func _make_debris() -> void:
+	var points: PackedVector3Array = DisplayList.load_file("debris.bin").points
+	var multimesh := MultiMesh.new()
+	multimesh.transform_format = MultiMesh.TRANSFORM_3D
+	multimesh.mesh = Craft.rock()
+	multimesh.instance_count = points.size()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	for i in points.size():
+		var rock := Basis.from_euler(Vector3(rng.randf() * TAU, rng.randf() * TAU, rng.randf() * TAU)).scaled(
+				Vector3.ONE * rng.randf_range(4.0, 16.0))
+		multimesh.set_instance_transform(i, Transform3D(rock, FlightRules.place(points[i])))
+	var wreck := MultiMeshInstance3D.new()
+	wreck.multimesh = multimesh
+	wreck.material_override = Craft.material(Color(0.5, 0.48, 0.45))
+	add_child(wreck)
+
+
 ## What defends the planet, if anything does: a low-poly craft, flat
 ## shaded, until the originals' own shapes are made into models.
 func _make_defender() -> void:
 	var planet := GameState.current_planet
-	if GameState.planet_tech[planet] < 2 or GameState.gf_planet_surrendered:
+	if GameState.planet_tech[planet] < 2:
+		return
+	if GameState.orbital_defender_tier == 0: # the wreck of one
+		_make_debris()
+		return
+	if GameState.gf_planet_surrendered:
 		return
 	_defender = Node3D.new()
 	var body := MeshInstance3D.new()
-	body.mesh = _craft_mesh()
-	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(0.62, 0.68, 0.78)
-	material.metallic = 0.5
-	material.roughness = 0.4
-	material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	body.material_override = material
-	body.scale = Vector3.ONE * 120.0
+	var model := Craft.defender(GameState.orbital_defender_tier)
+	if model != null:
+		body.mesh = model
+	else:
+		body.mesh = Craft.mesh()
+		body.scale = Vector3.ONE * 120.0
+	body.material_override = Craft.material(Color(0.62, 0.68, 0.78))
 	_defender.add_child(body)
 	_defender.position = FlightRules.place(DEFENDER_AT)
 	add_child(_defender)
-
-
-## A swept craft in a dozen triangles, nose along -z (ahead in Godot).
-func _craft_mesh() -> ArrayMesh:
-	var nose := Vector3(0, 0, -3)
-	var left := Vector3(-2.2, 0, 1.6)
-	var right := Vector3(2.2, 0, 1.6)
-	var top := Vector3(0, 0.9, 1.0)
-	var bottom := Vector3(0, -0.6, 1.0)
-	var tail := Vector3(0, 0, 2.2)
-	var faces := [
-		[nose, left, top], [nose, top, right], [nose, bottom, left], [nose, right, bottom],
-		[left, tail, top], [top, tail, right], [left, bottom, tail], [bottom, right, tail],
-	]
-	var tool := SurfaceTool.new()
-	tool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	tool.set_smooth_group(-1) # flat: each face by itself, as the original's polygons are
-	for face: Array in faces:
-		for vertex: Vector3 in face:
-			tool.add_vertex(vertex)
-	tool.generate_normals()
-	return tool.commit()
 
 
 ## The stars: the original's own 195 points, a little bigger, and a sky of
@@ -277,7 +477,8 @@ func _star_texture() -> GradientTexture2D:
 func _update_camera() -> void:
 	var eye := FlightRules.place(Vector3(_rules.x, _rules.y, _rules.z))
 	_camera.transform = Transform3D(FlightRules.camera_basis(_rules.pitch, _rules.bank, _rules.heading), eye)
-	_sky.position = eye
+	if _sky != null:
+		_sky.position = eye
 
 
 # --- the panel ---

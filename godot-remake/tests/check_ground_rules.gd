@@ -197,6 +197,8 @@ func _expect(e: Dictionary) -> void:
 		if ours == null:
 			continue
 		var theirs: int = e.bytes[address]
+		if address == LOOT + 9 or address == LOOT + 11:
+			continue # silver and titanium: the original's slips are fixed (ground_rules.gd collect)
 		if address == 301: # only 1 means a haul was made; it starts at 255
 			_same("301 at %d" % e.at, ours, int(theirs == 1))
 		else:

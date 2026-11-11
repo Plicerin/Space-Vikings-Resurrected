@@ -66,6 +66,9 @@ var saved_marker: bool = false
 ## The star chart leaves the star asked about (1-20) for COM, which then
 ## shows that star's page and runs the chart again; COM leaves a 2 for
 ## RADAR. 0 is nothing.
+## The flight scene the game is in, which the console, the radar and END go
+## back to: each flight scene puts its own path here as it starts.
+var flight_scene: String = "res://scenes/flight/space_flight.tscn"
 var handover: int = 0
 ## $38151 = 7: COLLECT and GROUND FORCES run COM to have the console
 ## drawn, and COM runs GROUND FORCES straight back (COM.bas line 98).

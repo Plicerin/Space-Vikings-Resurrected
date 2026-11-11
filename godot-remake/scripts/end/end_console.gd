@@ -12,7 +12,6 @@ extends Control
 
 const EndRules = preload("res://scripts/rules/end_rules.gd")
 
-const FLIGHT := "res://scenes/flight/space_flight.tscn"
 const SAID := 3.0 ## seconds a message stays
 
 ## Tests shorten every wait by this.
@@ -54,6 +53,6 @@ func _choose(number: int) -> void:
 			_hold.start(maxf(SAID * pace, 0.001))
 		2:
 			_rules.continue_game()
-			GameState.goto_scene(FLIGHT)
+			GameState.goto_scene(GameState.flight_scene)
 		3:
 			get_tree().quit()

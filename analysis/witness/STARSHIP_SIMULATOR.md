@@ -3,7 +3,7 @@
 Written by `tools/witness.py`; do not edit. Rules cite lines with `@witness` tags under
 `godot-remake/scripts`; recordings are listed in `analysis/witness/manifest.json`.
 
-134 lines: 102 logic, 31 presentation, 1 waived. 35 lines cited by a rule; 0 of them never run in a recording.
+134 lines: 102 logic, 31 presentation, 1 waived. 41 lines cited by a rule; 0 of them never run in a recording.
 Machine-code calls: line 73 -> 24582, line 74 -> 24582, line 114 -> 24585, line 116 -> 24585, line 120 -> 24585, line 122 -> 24585, line 124 -> 24582, line 125 -> 24582, line 127 -> 24582, line 128 -> 24582, line 150 -> 36899, line 150 -> 37936, line 153 -> 37888, line 500 -> 38402, line 1010 -> 37494, line 1100 -> 37494, line 1100 -> 37494, line 1205 -> 37494, line 1505 -> 37585, line 3019 -> 37494, line 3032 -> 37494, line 3032 -> 37494, line 5098 -> 37494, line 5230 -> 37494.
 No recordings are listed for this program.
 
@@ -11,7 +11,7 @@ No recordings are listed for this program.
 
 none
 
-## Not yet converted (94)
+## Not yet converted (78)
 
 - line 8 is logic and no rule cites it: L =  PEEK (XI):H =  PEEK (XI + 1): GOSUB 6600:X = H:L =  PEEK (YI):H =
 - line 9 is logic and no rule cites it: POKE 38149,7
@@ -19,17 +19,11 @@ none
 - line 74 is logic and no rule cites it: CALL CSN:A1 =  PEEK (M1):A2 =  PEEK (M2):A2 = A2 - HH:BH = (A2 * HH) +
 - line 153 is logic and no rule cites it: IF OO = 0 THEN  POKE 974,64: CALL 37888
 - line 159 is logic and no rule cites it: HCOLOR= 0: DRAW 25 AT TT,133: DRAW 26 AT 136,VV: DRAW 25 AT EE,133: DR
-- line 170 is logic and no rule cites it: VY =  INT (167 - ((HL - P) / 4)): IF P < 127 THEN VY =  INT (167 + (P 
 - line 175 is logic and no rule cites it: HCOLOR= 3: IF  PEEK (P1) > 59 AND  PEEK (P1) < 127 THEN  POKE P1,59
 - line 177 is logic and no rule cites it: IF  PEEK (P1) < 195 AND  PEEK (P1) > 127 THEN  POKE P1,195
 - line 180 is logic and no rule cites it: DRAW 13 AT TX,133: DRAW 14 AT 136,VY: DRAW 13 AT SX,133: DRAW 13 AT EX
 - line 182 is logic and no rule cites it: IF  PEEK (38149) = 7 THEN  POKE 38149,0: GOTO 200
-- line 185 is logic and no rule cites it: IF  PEEK ( - 16287) > 127 THEN  GOSUB 1500
-- line 189 is logic and no rule cites it: IF  PEEK (38282 +  PEEK (38209)) < 2 THEN 200
-- line 190 is logic and no rule cites it: IF  PEEK (38208) = 0 AND  PEEK (38210) = 1 THEN  GOSUB 3000: IF  RND (
-- line 192 is logic and no rule cites it: IF  PEEK (38208) = 0 AND X >  - 3500 AND X < 4500 AND Y >  - 3000 AND 
 - line 200 is logic and no rule cites it: K =  PEEK ( - 16384): IF K < 128 THEN  NEXT : GOTO 15
-- line 209 is logic and no rule cites it: IF K = 24 THEN  PRINT "RUNH/D"
 - line 210 is logic and no rule cites it: POKE 38157,S:K = 0: NEXT : GOTO 15
 - line 500 is logic and no rule cites it: CALL 38402: GOTO 1
 - line 1000 is logic and no rule cites it: M8 = M1:M9 = M2:M3 = 3:M1 = 140:M2 = 40:X0 = X:Y0 = Y:Z0 = Z:S2 = 160:
@@ -94,19 +88,9 @@ none
 - line 127 CALLs 24582 into machine code and no rule cites that address
 - line 128 CALLs 24582 into machine code and no rule cites that address
 - line 150 CALLs 36899 into machine code and no rule cites that address
-- line 150 CALLs 37936 into machine code and no rule cites that address
 - line 153 CALLs 37888 into machine code and no rule cites that address
 - line 500 CALLs 38402 into machine code and no rule cites that address
-- line 1010 CALLs 37494 into machine code and no rule cites that address
-- line 1100 CALLs 37494 into machine code and no rule cites that address
-- line 1100 CALLs 37494 into machine code and no rule cites that address
-- line 1205 CALLs 37494 into machine code and no rule cites that address
 - line 1505 CALLs 37585 into machine code and no rule cites that address
-- line 3019 CALLs 37494 into machine code and no rule cites that address
-- line 3032 CALLs 37494 into machine code and no rule cites that address
-- line 3032 CALLs 37494 into machine code and no rule cites that address
-- line 5098 CALLs 37494 into machine code and no rule cites that address
-- line 5230 CALLs 37494 into machine code and no rule cites that address
 
 ## Cited, and never run in a recording (the listing alone)
 
@@ -121,59 +105,59 @@ none
 | 2 | P |  |  | `EE = 199:SS = 13:EX = EE:VV = 160:Q = 1.41:X9 = 400:Y9 =  - 100:Z9 =  - 3500: POKE 232,HL:` |
 | 8 | L |  |  | `L =  PEEK (XI):H =  PEEK (XI + 1): GOSUB 6600:X = H:L =  PEEK (YI):H =  PEEK (YI + 1): GOS` |
 | 9 | L |  |  | `POKE 38149,7` |
-| 15 | L | godot-remake/scripts/rules/flight_rules.gd:82 |  | `FOR OO = 0 TO 1: IF  PEEK (38164) = 1 THEN 20` |
-| 19 | L | godot-remake/scripts/rules/flight_rules.gd:82 |  | `J =  PDL (1):K =  PDL (0): POKE 38397,J: POKE 38398,K` |
+| 15 | L | godot-remake/scripts/rules/flight_rules.gd:83 |  | `FOR OO = 0 TO 1: IF  PEEK (38164) = 1 THEN 20` |
+| 19 | L | godot-remake/scripts/rules/flight_rules.gd:83 |  | `J =  PDL (1):K =  PDL (0): POKE 38397,J: POKE 38398,K` |
 | 20 | P |  |  | `P =  PEEK (P1):B =  PEEK (B1):H =  PEEK (H1)` |
-| 21 | L | godot-remake/scripts/rules/flight_rules.gd:114<br>godot-remake/scripts/rules/flight_rules.gd:82 |  | `POKE M1,B: IF B > 127 THEN 74` |
+| 21 | L | godot-remake/scripts/rules/flight_rules.gd:147<br>godot-remake/scripts/rules/flight_rules.gd:83 |  | `POKE M1,B: IF B > 127 THEN 74` |
 | 73 | L |  |  | `CALL CSN:BH = ( PEEK (M2) * HH) +  PEEK (M1): GOTO 112` |
 | 74 | L |  |  | `CALL CSN:A1 =  PEEK (M1):A2 =  PEEK (M2):A2 = A2 - HH:BH = (A2 * HH) + A1` |
-| 112 | P | godot-remake/scripts/rules/flight_rules.gd:114 |  | `POKE M1,P` |
-| 114 | L | godot-remake/scripts/rules/flight_rules.gd:114 |  | `IF P < 63 OR P > 190 THEN  CALL SN:A1 =  PEEK (M1):A2 =  PEEK (M2):ZP = (A2 * HH) + A1` |
-| 116 | L | godot-remake/scripts/rules/flight_rules.gd:114 |  | `IF P > 63 AND P < 190 THEN  CALL SN:A1 =  PEEK (M1):A2 =  PEEK (M2):A2 = A2 - HH:ZP = (A2 ` |
-| 119 | P | godot-remake/scripts/rules/flight_rules.gd:114 |  | `POKE M1,H` |
-| 120 | L | godot-remake/scripts/rules/flight_rules.gd:114 |  | `IF H < 63 OR H > 190 THEN  CALL SN:A1 =  PEEK (M1):A2 =  PEEK (M2):ZH = (A2 * HH) + A1` |
-| 122 | L | godot-remake/scripts/rules/flight_rules.gd:114 |  | `IF H > 63 AND H < 190 THEN  CALL SN:A1 =  PEEK (M1):A2 =  PEEK (M2):A2 = A2 - HH:ZH = (A2 ` |
-| 123 | L | godot-remake/scripts/rules/flight_rules.gd:114 |  | `POKE M1,H: IF H > 127 THEN 125` |
-| 124 | L | godot-remake/scripts/rules/flight_rules.gd:114 |  | `CALL CSN:XH = ( PEEK (M2) * HH) +  PEEK (M1): GOTO 126` |
-| 125 | L | godot-remake/scripts/rules/flight_rules.gd:114 |  | `CALL CSN:A1 =  PEEK (M1):A2 =  PEEK (M2):A2 = A2 - HH:XH = (A2 * HH) + A1` |
-| 126 | L | godot-remake/scripts/rules/flight_rules.gd:114 |  | `POKE M1,P: IF P > 127 THEN 128` |
-| 127 | L | godot-remake/scripts/rules/flight_rules.gd:114 |  | `CALL CSN:YP = ( PEEK (M2) * HH) +  PEEK (M1): GOTO 129` |
-| 128 | L | godot-remake/scripts/rules/flight_rules.gd:114 |  | `CALL CSN:A1 =  PEEK (M1):A2 =  PEEK (M2):A2 = A2 - HH:YP = (A2 * HH) + A1` |
-| 129 | L | godot-remake/scripts/rules/flight_rules.gd:114 |  | `YP = YP / DI:ZH = ZH / DI:XH = XH / DI:ZP = ZP / DI:X1 = S * (ZP * XH):Z1 = S * ZP * ZH:X ` |
-| 133 | L | godot-remake/scripts/rules/flight_rules.gd:82 |  | `IF X < W2 THEN X = W1` |
-| 134 | L | godot-remake/scripts/rules/flight_rules.gd:82 |  | `IF X > W1 THEN X = W2` |
-| 135 | L | godot-remake/scripts/rules/flight_rules.gd:82 |  | `IF Y < W2 THEN Y = W1` |
-| 136 | L | godot-remake/scripts/rules/flight_rules.gd:82 |  | `IF Y > W1 THEN Y = W2` |
-| 137 | L | godot-remake/scripts/rules/flight_rules.gd:82 |  | `IF Z < W2 THEN Z = W1` |
-| 138 | L | godot-remake/scripts/rules/flight_rules.gd:82 |  | `IF Z > W1 THEN Z = W2` |
-| 140 | P | godot-remake/scripts/rules/flight_rules.gd:219 |  | `BV% = X: GOSUB 6000: POKE XI,LO%: POKE XI + 1,HI%:BV% = Y: GOSUB 6000: POKE YI,LO%: POKE Y` |
-| 147 | L | godot-remake/scripts/rules/flight_rules.gd:219 |  | `POKE 29461,84 + OO:OP =  ABS (OO - 1): POKE 29463,OP: POKE 29465,OP: IF  PEEK (38210) = 1 ` |
-| 150 | L | godot-remake/scripts/rules/flight_rules.gd:219 |  | `CALL CA: IF OO = 1 THEN  POKE 974,32: CALL 37936` |
+| 112 | P | godot-remake/scripts/rules/flight_rules.gd:147 |  | `POKE M1,P` |
+| 114 | L | godot-remake/scripts/rules/flight_rules.gd:147 |  | `IF P < 63 OR P > 190 THEN  CALL SN:A1 =  PEEK (M1):A2 =  PEEK (M2):ZP = (A2 * HH) + A1` |
+| 116 | L | godot-remake/scripts/rules/flight_rules.gd:147 |  | `IF P > 63 AND P < 190 THEN  CALL SN:A1 =  PEEK (M1):A2 =  PEEK (M2):A2 = A2 - HH:ZP = (A2 ` |
+| 119 | P | godot-remake/scripts/rules/flight_rules.gd:147 |  | `POKE M1,H` |
+| 120 | L | godot-remake/scripts/rules/flight_rules.gd:147 |  | `IF H < 63 OR H > 190 THEN  CALL SN:A1 =  PEEK (M1):A2 =  PEEK (M2):ZH = (A2 * HH) + A1` |
+| 122 | L | godot-remake/scripts/rules/flight_rules.gd:147 |  | `IF H > 63 AND H < 190 THEN  CALL SN:A1 =  PEEK (M1):A2 =  PEEK (M2):A2 = A2 - HH:ZH = (A2 ` |
+| 123 | L | godot-remake/scripts/rules/flight_rules.gd:147 |  | `POKE M1,H: IF H > 127 THEN 125` |
+| 124 | L | godot-remake/scripts/rules/flight_rules.gd:147 |  | `CALL CSN:XH = ( PEEK (M2) * HH) +  PEEK (M1): GOTO 126` |
+| 125 | L | godot-remake/scripts/rules/flight_rules.gd:147 |  | `CALL CSN:A1 =  PEEK (M1):A2 =  PEEK (M2):A2 = A2 - HH:XH = (A2 * HH) + A1` |
+| 126 | L | godot-remake/scripts/rules/flight_rules.gd:147 |  | `POKE M1,P: IF P > 127 THEN 128` |
+| 127 | L | godot-remake/scripts/rules/flight_rules.gd:147 |  | `CALL CSN:YP = ( PEEK (M2) * HH) +  PEEK (M1): GOTO 129` |
+| 128 | L | godot-remake/scripts/rules/flight_rules.gd:147 |  | `CALL CSN:A1 =  PEEK (M1):A2 =  PEEK (M2):A2 = A2 - HH:YP = (A2 * HH) + A1` |
+| 129 | L | godot-remake/scripts/rules/flight_rules.gd:147 |  | `YP = YP / DI:ZH = ZH / DI:XH = XH / DI:ZP = ZP / DI:X1 = S * (ZP * XH):Z1 = S * ZP * ZH:X ` |
+| 133 | L | godot-remake/scripts/rules/flight_rules.gd:83 |  | `IF X < W2 THEN X = W1` |
+| 134 | L | godot-remake/scripts/rules/flight_rules.gd:83 |  | `IF X > W1 THEN X = W2` |
+| 135 | L | godot-remake/scripts/rules/flight_rules.gd:83 |  | `IF Y < W2 THEN Y = W1` |
+| 136 | L | godot-remake/scripts/rules/flight_rules.gd:83 |  | `IF Y > W1 THEN Y = W2` |
+| 137 | L | godot-remake/scripts/rules/flight_rules.gd:83 |  | `IF Z < W2 THEN Z = W1` |
+| 138 | L | godot-remake/scripts/rules/flight_rules.gd:83 |  | `IF Z > W1 THEN Z = W2` |
+| 140 | P | godot-remake/scripts/rules/flight_rules.gd:252 |  | `BV% = X: GOSUB 6000: POKE XI,LO%: POKE XI + 1,HI%:BV% = Y: GOSUB 6000: POKE YI,LO%: POKE Y` |
+| 147 | L | godot-remake/scripts/rules/flight_rules.gd:252 |  | `POKE 29461,84 + OO:OP =  ABS (OO - 1): POKE 29463,OP: POKE 29465,OP: IF  PEEK (38210) = 1 ` |
+| 150 | L | godot-remake/scripts/rules/flight_rules.gd:252 |  | `CALL CA: IF OO = 1 THEN  POKE 974,32: CALL 37936` |
 | 153 | L |  |  | `IF OO = 0 THEN  POKE 974,64: CALL 37888` |
 | 155 | P |  |  | `VTAB 24: HTAB 1: PRINT  INT (X / 2);" ";: HTAB 7: PRINT  INT (Y / 2);" ";: HTAB 13: PRINT ` |
-| 156 | L | godot-remake/scripts/rules/flight_rules.gd:101 |  | `POKE 973,1: VTAB 8: HTAB 18: PRINT "-"; CHR$ (91);"  "; CHR$ (93);"-": POKE 973,0: IF  ABS` |
-| 158 | L | godot-remake/scripts/rules/flight_rules.gd:101<br>godot-remake/scripts/rules/flight_rules.gd:108 |  | `IF  PEEK (38210) = 1 AND Y > 4000 THEN  PRINT "RUNORBIT"` |
+| 156 | L | godot-remake/scripts/rules/flight_rules.gd:110 |  | `POKE 973,1: VTAB 8: HTAB 18: PRINT "-"; CHR$ (91);"  "; CHR$ (93);"-": POKE 973,0: IF  ABS` |
+| 158 | L | godot-remake/scripts/rules/flight_rules.gd:110<br>godot-remake/scripts/rules/flight_rules.gd:117 |  | `IF  PEEK (38210) = 1 AND Y > 4000 THEN  PRINT "RUNORBIT"` |
 | 159 | L |  |  | `HCOLOR= 0: DRAW 25 AT TT,133: DRAW 26 AT 136,VV: DRAW 25 AT EE,133: DRAW 25 AT SS,133:TX =` |
-| 170 | L |  |  | `VY =  INT (167 - ((HL - P) / 4)): IF P < 127 THEN VY =  INT (167 + (P / 4))` |
+| 170 | L | godot-remake/scripts/rules/flight_rules.gd:102 |  | `VY =  INT (167 - ((HL - P) / 4)): IF P < 127 THEN VY =  INT (167 + (P / 4))` |
 | 173 | P |  |  | `SX = 13 + (S / 2):EX = 199 + E` |
 | 175 | L |  |  | `HCOLOR= 3: IF  PEEK (P1) > 59 AND  PEEK (P1) < 127 THEN  POKE P1,59` |
 | 177 | L |  |  | `IF  PEEK (P1) < 195 AND  PEEK (P1) > 127 THEN  POKE P1,195` |
 | 180 | L |  |  | `DRAW 13 AT TX,133: DRAW 14 AT 136,VY: DRAW 13 AT SX,133: DRAW 13 AT EX,133: IF OO = 1 THEN` |
 | 182 | L |  |  | `IF  PEEK (38149) = 7 THEN  POKE 38149,0: GOTO 200` |
-| 185 | L |  |  | `IF  PEEK ( - 16287) > 127 THEN  GOSUB 1500` |
-| 189 | L |  |  | `IF  PEEK (38282 +  PEEK (38209)) < 2 THEN 200` |
-| 190 | L |  |  | `IF  PEEK (38208) = 0 AND  PEEK (38210) = 1 THEN  GOSUB 3000: IF  RND (1) < .5 AND  PEEK (3` |
-| 192 | L |  |  | `IF  PEEK (38208) = 0 AND X >  - 3500 AND X < 4500 AND Y >  - 3000 AND Y < 3000 AND Z >  - ` |
+| 185 | L | godot-remake/scripts/flight/native_flight.gd:166<br>godot-remake/scripts/rules/combat_rules.gd:109 |  | `IF  PEEK ( - 16287) > 127 THEN  GOSUB 1500` |
+| 189 | L | godot-remake/scripts/flight/native_flight.gd:166<br>godot-remake/scripts/rules/combat_rules.gd:109 |  | `IF  PEEK (38282 +  PEEK (38209)) < 2 THEN 200` |
+| 190 | L | godot-remake/scripts/flight/native_flight.gd:166<br>godot-remake/scripts/rules/combat_rules.gd:109 |  | `IF  PEEK (38208) = 0 AND  PEEK (38210) = 1 THEN  GOSUB 3000: IF  RND (1) < .5 AND  PEEK (3` |
+| 192 | L | godot-remake/scripts/flight/native_flight.gd:166<br>godot-remake/scripts/rules/combat_rules.gd:109 |  | `IF  PEEK (38208) = 0 AND X >  - 3500 AND X < 4500 AND Y >  - 3000 AND Y < 3000 AND Z >  - ` |
 | 200 | L |  |  | `K =  PEEK ( - 16384): IF K < 128 THEN  NEXT : GOTO 15` |
-| 201 | L | godot-remake/scripts/rules/flight_rules.gd:95 |  | `IF K - 176 > 0 THEN K = K - 176: POKE  - 16368,0: ON K GOSUB 311,312,313,314` |
-| 202 | L | godot-remake/scripts/rules/flight_rules.gd:95 |  | `IF K < 17 THEN 207` |
-| 203 | L | godot-remake/scripts/rules/flight_rules.gd:95 |  | `ON K - 16 GOTO 317,318,319` |
-| 204 | L | godot-remake/scripts/rules/flight_rules.gd:95 |  | `IF K < 34 THEN 207` |
-| 205 | L | godot-remake/scripts/rules/flight_rules.gd:95 |  | `IF K = 39 THEN  POKE LT,2: GOTO 500` |
-| 206 | L | godot-remake/scripts/rules/flight_rules.gd:95 |  | `ON K - 33 GOTO 320,321` |
-| 207 | L | godot-remake/scripts/rules/flight_rules.gd:95 |  | `IF S < 0 THEN S = 0` |
-| 208 | L | godot-remake/scripts/rules/flight_rules.gd:95 |  | `IF S > 120 THEN S = 120` |
-| 209 | L |  |  | `IF K = 24 THEN  PRINT "RUNH/D"` |
+| 201 | L | godot-remake/scripts/rules/flight_rules.gd:96 |  | `IF K - 176 > 0 THEN K = K - 176: POKE  - 16368,0: ON K GOSUB 311,312,313,314` |
+| 202 | L | godot-remake/scripts/rules/flight_rules.gd:96 |  | `IF K < 17 THEN 207` |
+| 203 | L | godot-remake/scripts/rules/flight_rules.gd:96 |  | `ON K - 16 GOTO 317,318,319` |
+| 204 | L | godot-remake/scripts/rules/flight_rules.gd:96 |  | `IF K < 34 THEN 207` |
+| 205 | L | godot-remake/scripts/rules/flight_rules.gd:96 |  | `IF K = 39 THEN  POKE LT,2: GOTO 500` |
+| 206 | L | godot-remake/scripts/rules/flight_rules.gd:96 |  | `ON K - 33 GOTO 320,321` |
+| 207 | L | godot-remake/scripts/rules/flight_rules.gd:96 |  | `IF S < 0 THEN S = 0` |
+| 208 | L | godot-remake/scripts/rules/flight_rules.gd:96 |  | `IF S > 120 THEN S = 120` |
+| 209 | L | godot-remake/scripts/flight/native_flight.gd:221 |  | `IF K = 24 THEN  PRINT "RUNH/D"` |
 | 210 | L |  |  | `POKE 38157,S:K = 0: NEXT : GOTO 15` |
 | 311 | P |  |  | `S = S - 3: RETURN` |
 | 312 | P |  |  | `S = S + 3: RETURN` |

@@ -51,8 +51,8 @@ game running in MAME.
 | `H_D` (hyperdrive) | `flight_program.gd`, `flight_loop.gd` | `check_jump` |
 | `EX`, `DMG`, `S/X` (the ends of a fight) | `flight_combat.gd`, `scripts/combat/combat_fx.gd` | `check_jump` |
 | A2-3D1 (the 3D view, machine code) | `scripts/shapes/a2_3d1_view.gd`, `a2_3d1_trig.gd` | `check_a2_3d1` |
-| `RADAR` | `scripts/radar/radar_program.gd`, `radar_loop.gd` | `check_radar` and the six beside it |
-| `SHIP # 0 I.D.`, `# 1`, `# 3`, `# 4` (what is in orbit) | `scripts/radar/ship_id_program.gd`, `ship_id_loop.gd` | `check_radar_ids`, `check_radar_com` |
+| `RADAR` | `scripts/rules/radar_rules.gd`, `scripts/radar/radar_console.gd` (a native plan view) | `check_radar_rules` |
+| `SHIP # 0 I.D.`, `# 1`, `# 3`, `# 4` (what is in orbit) | `radar_rules.gd` (the texts), `scripts/radar/ship_id.gd` (a turntable of the native model) | `check_radar_rules` |
 | Planet record copy, new-game data, save and load | `autoload/game_state.gd` | `check_save`, `check_jump` |
 | An old game's way into flight (`START` 3000-3030, `INSTRUMENTS` 210, `GALAXY MAP` 2), and `END`'s CONTINUE | `flight_loop.gd` (`run()`, `lamps()`) | `check_save` |
 
@@ -89,14 +89,14 @@ ledger's open items are the two COLLECT lines no recording runs: 820
 Three files per program:
 
 - **the program** (`flight_program.gd`,
-  `radar_program.gd`): the BASIC
+  `flight_combat.gd`): the BASIC
   statements, a function for each stretch between which time passes on
   the real machine. No timing.
-- **the loop** (`flight_loop.gd`, `radar_loop.gd`): a
+- **the loop** (`flight_loop.gd`): a
   coroutine that
   calls those in order with the measured waits between, in video frames.
   Everything that takes time goes through one `wait` callable.
-- **the scene** (`space_flight.gd`, `radar_console.gd`):
+- **the scene** (`space_flight.gd`):
   points `wait` at a
   real clock, shows whichever hi-res page the original would have on
   show, and turns keyboard and mouse into the Apple's keyboard latch,
@@ -305,13 +305,9 @@ a difference.
     godot --headless --path . res://tests/check_chart_rules.tscn     # GALAXY MAP: 50 recorded paddle positions through the rules, and the 18 stars' marks on the recorded page
     godot --headless --path . res://tests/check_end_rules.tscn       # END: the menu, the refusal and "GAME SAVED." as the real game printed them, the mark after a save
     godot --headless --path . res://tests/check_com_rules.tscn       # COM: 5 recorded routes through the rules, 201 screens rebuilt from the characters it drew
-    godot --headless --path . res://tests/check_radar.tscn           # RADAR from flight, and X back to it
-    godot --headless --path . res://tests/check_radar_ids.tscn       # RADAR and each of the four I.D. programs, round and round, 14 stops; a type 2
-    godot --headless --path . res://tests/check_radar_com.tscn       # RADAR from the console and back to it, and by way of an I.D.
-    godot --headless --path . res://tests/check_radar_dead.tscn      # the radar shot away, from flight and from the console
-    godot --headless --path . res://tests/check_radar_ship_0.tscn    # the radar's picture with nothing in orbit, and how long it takes
-    godot --headless --path . res://tests/check_radar_ship_1.tscn    # with the space lab
-    godot --headless --path . res://tests/check_radar_ship_4.tscn    # with the heavy cruiser
+    godot --headless --path . res://tests/check_radar_rules.tscn     # RADAR and the I.D. texts against the recordings
+    godot --headless --path . res://tests/check_combat_rules.tscn    # fighting (missile, lasers, damage, fighters, EX/DMG/S-X) against analysis/live/combat
+    godot --headless --path . res://tests/check_hyperdrive_rules.tscn # hyperdrive cost, refusals, re-entry and orbit against the verified legacy code
     godot --headless --path . res://tests/check_save.tscn            # record copy, save, the boot, an old game's panel
     godot --headless --path . res://tests/check_ground_rules.tscn    # GROUND FORCES, RECALL, COLLECT: 14 recorded routes through the rules, state and text
     godot --headless --path . res://tests/check_flight_rules.tscn    # the continuous flight model against the original's arithmetic, the engine's matrix and the camera
@@ -322,7 +318,7 @@ a difference.
     godot --headless --fixed-fps 60 --path . res://tests/drive_flight.tscn   # the flight scene, by key events
     godot --headless --fixed-fps 60 --path . res://tests/drive_chart.tscn    # the chart scene, by pointer and keys: a click, the question, Y and N, Space, the way to the console and back
     godot --headless --fixed-fps 60 --path . res://tests/drive_com.tscn      # the console scene, by keys: the lamps, every menu, a course, the directory, every way out of it
-    godot --headless --fixed-fps 60 --path . res://tests/drive_radar.tscn    # the radar scene, by keys: from flight, from the console, an I.D. and back, no radar
+    godot --headless --fixed-fps 60 --path . res://tests/drive_radar.tscn    # the native radar and I.D. scenes, by keys
     godot --headless --fixed-fps 60 --path . res://tests/drive_save.tscn     # title, END, save, continue, three boots
     godot --headless --fixed-fps 60 --path . res://tests/drive_ground_forces.tscn   # the ground forces scene, by keys: refusals, recall, a win, a retreat, a loss
     godot --headless --fixed-fps 60 --path . res://tests/drive_end.tscn             # END's menu, by keys: a save, a refused save, continue
@@ -363,29 +359,23 @@ rules' (`scripts/rules/report_rules.gd`, held to the recordings by
 
 ### The radar
 
-`RADAR` is the flight program's own picture from somewhere else: the
-eye lifted to 20000 above the stars and pointed straight down, A2-3D1
-run once, and a violet frame, two diagonals, a cross and a small green
-box for the ship drawn over it. What the recordings show that a radar
-would not:
+`RADAR` is a native top-down plan of the stars about the ship with the
+firing box and the ship's arrow; X goes back, any other key shows the
+I.D. of what is in orbit (a turntable of its low-poly model, with the
+original's text). With the radar shot away it does nothing and goes
+back. Whether it works, which I.D. text a defender gets (type 2 gets the
+light cruiser's) and where X goes back to are `radar_rules.gd`, held to
+the recordings by `check_radar_rules`.
 
-- It takes two seconds to draw, every time: the stars come a few to a
-  frame, and coming back from an I.D. the whole of it is drawn again.
-- A2-3D1 clears all of page 1 for it, so the flight panel is gone while
-  the stars come and is copied back afterwards.
-- The eye's heading is left alone: the map turns with the ship.
-- With the radar shot away (38195 = 0) it draws nothing, says nothing,
-  and goes back to whichever program ran it.
-- X goes back. Any other key runs the I.D. program of what is in
-  orbit: a drawing on a green grid and four or five lines of text, a
-  character at a time, and a key from there runs `RADAR` again. With
-  nothing in orbit that is a page saying so.
-- A defender of type 2 (three planets have one) has no I.D. program of
-  its own and gets the light cruiser's.
+### Fighting, hyperdrive, the atmosphere
 
-A2-3D1's call is timed record by record in the port (so much a point,
-so much an end of a line, so much a dot), with prices fitted to four
-recordings; the whole call comes within a third of a frame of each.
+`scripts/rules/combat_rules.gd` is a fight pass by pass (missile box,
+firing box, lasers, shields, damage, fighters, the ends EX/DMG/S-X),
+compared with `analysis/live/combat/combat.log` (dice count and every
+byte). `hyperdrive_rules.gd` and the re-entry/orbit helpers in
+`flight_rules.gd` are compared with the byte-verified legacy code.
+`scripts/flight/native_flight.gd` shows them: beams, missile, explosion,
+a hyperspace burst, a ground plane and sky below the atmosphere.
 
 ## The look
 
@@ -453,12 +443,10 @@ Where the port departs from the original on purpose:
   about one part in 10^8 for some D (`../analysis/live/shore/`); a cost
   could be one credit out where the product falls that close to a whole
   number. Every bill in the recordings comes out the same.
-- `COLLECT`'s two slips are kept, as they decide what a planet is
-  worth: a primitive planet's silver is set to its gold, and titanium
-  is never collected.
-- The radar's A2-3D1 prices are fitted to four recordings (64 to 144
-  frames a call). A picture with far more in it than those had could
-  be some frames out.
+- `COLLECT`'s two slips are fixed, not ported: a primitive planet's
+  silver is its own sum (the original set it to the gold), and titanium
+  is collected (the original poked the wrong address). Simpler Godot
+  decides what of the original's quirks stay.
 - `RADAR` pokes 38151 with 5 on its way to an I.D. program. Nothing
   found reads a 5 there, and the port does not keep it.
 - The load of `STARSHIP SIMULATOR` after an old game's or CONTINUE's
