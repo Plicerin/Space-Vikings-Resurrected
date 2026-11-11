@@ -2,7 +2,7 @@
 """The game's own character table as a smooth vector font.
 
 HI-RES CHARACTER GENERATOR draws every character of the game from a
-table of 7x8 bit glyphs (godot-remake/assets/hgr/character_table.json,
+table of 7x8 bit glyphs (godot-remake/assets/fonts/character_table.json,
 from the disk's CHARACTER TABLE). Each glyph there is a line drawn on a
 seven by eight grid. This follows those lines: the lit dots are joined
 into strokes (a dot to the dot beside it, or across a corner where the
@@ -25,7 +25,7 @@ from fontTools.fontBuilder import FontBuilder
 from fontTools.pens.ttGlyphPen import TTGlyphPen
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-TABLE = os.path.join(ROOT, "godot-remake", "assets", "hgr", "character_table.json")
+TABLE = os.path.join(ROOT, "godot-remake", "assets", "fonts", "character_table.json")
 OUT = os.path.join(ROOT, "godot-remake", "font_source", "space_vikings.ttf")
 
 DOT = 100  # font units to a dot

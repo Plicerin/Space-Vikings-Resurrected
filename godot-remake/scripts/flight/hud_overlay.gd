@@ -16,6 +16,7 @@ const BALL := preload("res://assets/shaders/ball.gdshader")
 const RING := preload("res://assets/shaders/ring.gdshader")
 const PLASTIC := preload("res://assets/shaders/plastic.gdshader")
 const SWITCHES := preload("res://scripts/flight/switch_panel.gd")
+const BlockFont = preload("res://scripts/flight/block_font.gd")
 const AMBER_TEXT := Color(1.0, 0.69, 0.0) ## an 80s terminal's amber
 const GAUGE_RADIUS := 52.0
 const GAUGE_LETTERS := 7 ## the size of a damage lamp's lettering
@@ -172,12 +173,14 @@ func _draw_panel() -> void:
 	draw_rect(Rect2(0.0, top, size.x, PANEL_HEIGHT), Color(0.02, 0.03, 0.05, 0.92))
 	draw_rect(Rect2(0.0, top, size.x, PANEL_HEIGHT), Color(0.9, 0.9, 0.9), false, 2.0)
 	var w := size.x
-	_display(Rect2(w * 0.012, top + 10.0, w * 0.228, PANEL_HEIGHT - 20.0))
-	_bar(font, "SPEED", Rect2(w * 0.255, top + 36.0, w * 0.095, 8.0), speed / 120.0, false)
-	_bar(font, "ENERGY", Rect2(w * 0.255, top + 78.0, w * 0.095, 8.0), energy / 63.0, false)
-	_dial(font, "TURN", Rect2(w * 0.365, top + 26.0, w * 0.082, 26.0), (bank + 48.0) / 95.0, false)
+	_display(Rect2(w * 0.012, top + 10.0, w * 0.272, PANEL_HEIGHT - 20.0))
+	# TURN with SPEED and ENERGY tucked under it, VERT standing tall beside
+	var column := w * 0.3
+	_dial(font, "TURN", Rect2(column, top + 24.0, w * 0.112, 26.0), (bank + 48.0) / 95.0, false)
+	_bar(font, "SPEED", Rect2(column, top + 74.0, w * 0.112, 8.0), speed / 120.0, false)
+	_bar(font, "ENERGY", Rect2(column, top + 108.0, w * 0.112, 8.0), energy / 63.0, false)
 	# VERT: the nose up is the top
-	_dial(font, "VERT", Rect2(w * 0.462, top + 12.0, 26.0, 64.0), (-pitch + 61.0) / 120.0, true)
+	_dial(font, "VERT", Rect2(w * 0.437, top + 12.0, 26.0, PANEL_HEIGHT - 28.0), (-pitch + 61.0) / 120.0, true)
 	_switches.position = Vector2(w * 0.505, top + 8.0)
 	# damage control
 	var box := Rect2(w * 0.612, top + 8.0, w * 0.378, PANEL_HEIGHT - 16.0)
@@ -429,10 +432,6 @@ const HELP := [
 	"C  CONSOLE   R  RADAR",
 	"H  JUMP      N  NAV",
 ]
-const SEGMENTS := {
-	"0": "abcdef", "1": "bc", "2": "abdeg", "3": "abcdg", "4": "bcfg", "5": "acdfg",
-	"6": "acdefg", "7": "abc", "8": "abcdefg", "9": "abcdfg", "-": "g",
-}
 const LED := Color(0.25, 1.0, 0.45)
 
 
@@ -443,7 +442,6 @@ func show_mode(wanted: Mode) -> void:
 
 
 func _display(rect: Rect2) -> void:
-	var font := get_theme_default_font()
 	var window := StyleBoxFlat.new()
 	window.bg_color = Color(0.01, 0.03, 0.015)
 	window.set_corner_radius_all(6)
@@ -451,73 +449,37 @@ func _display(rect: Rect2) -> void:
 	window.border_color = Color(0.22, 0.24, 0.27)
 	window.anti_aliasing = true
 	draw_style_box(window, rect)
-	var inner := rect.grow(-10.0)
+	var inner := rect.grow(-12.0)
 	if message != "":
-		_write(font, message.split("\n"), inner.position + Vector2(0.0, 14.0), 14, 22.0)
+		_write(BlockFont.wrap(message, 2.0, inner.size.x), inner.position, 2.0, 24.0)
 	elif mode == Mode.NAV:
-		_nav(font, inner)
+		_nav(inner)
 	elif mode == Mode.HELP:
-		_write(font, HELP, inner.position + Vector2(0.0, 10.0), 10, 15.0)
+		_write(HELP, inner.position, 1.6, 14.5)
 	else:
 		var here: String = GameState.STAR_NAMES[GameState.current_planet]
-		_write(font, [here, "IN ORBIT" if not GameState.in_atmosphere else "IN THE ATMOSPHERE", "", "N  NAV DATA", "F1 KEYS"], inner.position + Vector2(0.0, 14.0), 13, 19.0)
+		_write([here, "IN ORBIT" if not GameState.in_atmosphere else "IN THE ATMOSPHERE", "", "N  NAV DATA", "F1 KEYS"], inner.position, 2.0, 21.0)
 	# a faint scan over the glass
-	for line in range(int(rect.position.y) + 4, int(rect.end.y) - 2, 4):
-		draw_line(Vector2(rect.position.x + 3.0, line), Vector2(rect.end.x - 3.0, line), Color(0.0, 0.0, 0.0, 0.12), 1.0)
+	for line in range(int(rect.position.y) + 4, int(rect.end.y) - 2, 3):
+		draw_line(Vector2(rect.position.x + 3.0, line), Vector2(rect.end.x - 3.0, line), Color(0.0, 0.0, 0.0, 0.16), 1.0)
 
 
-## Lines of green text with a glow.
-func _write(font: Font, lines: Array, at: Vector2, size_px: int, pitch_px: float) -> void:
+## Lines of the block lettering, `scale` pixels to the dot.
+func _write(lines: Array, at: Vector2, scale: float, pitch_px: float) -> void:
 	for i in lines.size():
-		var spot := at + Vector2(0.0, i * pitch_px)
-		draw_string(font, spot, lines[i], HORIZONTAL_ALIGNMENT_LEFT, -1, size_px, Color(LED, 0.18))
-		draw_string(font, spot + Vector2(0.6, 0.0), lines[i], HORIZONTAL_ALIGNMENT_LEFT, -1, size_px, Color(LED, 0.18))
-		draw_string(font, spot, lines[i], HORIZONTAL_ALIGNMENT_LEFT, -1, size_px, LED)
+		BlockFont.draw(self, lines[i], at + Vector2(0.0, i * pitch_px), scale, LED)
 
 
-## The position and the headings, in seven-segment digits.
-func _nav(font: Font, inner: Rect2) -> void:
+## The position and the headings: the numbers big, their names small.
+func _nav(inner: Rect2) -> void:
 	var cells := [["X", 0, 6], ["Y", 1, 6], ["Z", 2, 6], ["HDG", 3, 4], ["PITCH", 4, 4], ["BANK", 5, 4]]
-	var column := inner.size.x / 2.0
+	var column := inner.size.x * 0.48
 	for i in cells.size():
 		var cell: Array = cells[i]
-		var origin := inner.position + Vector2((i / 3) * column + (6.0 if i >= 3 else 0.0), (i % 3) * 27.0)
-		var label_width := 18.0 if i < 3 else 46.0
-		draw_string(font, origin + Vector2(0.0, 16.0), cell[0], HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(LED, 0.8))
-		_seven(origin + Vector2(label_width, 0.0), str(nav[cell[1]]), cell[2], 19.0)
-	var here: String = GameState.STAR_NAMES[GameState.current_planet]
-	var going := "" if GameState.target_planet < 0 else ">  %s" % GameState.STAR_NAMES[GameState.target_planet]
-	_write(font, ["%s  %s" % [here, going]], inner.position + Vector2(0.0, 104.0 - 8.0), 10, 12.0)
-
-
-## `text` right-aligned in `places` seven-segment digits `height` tall, with the
-## unlit segments faint behind, as an LED display has them.
-func _seven(at: Vector2, text: String, places: int, height: float) -> void:
-	var digit_w := height * 0.55
-	var pitch_px := digit_w * 1.35
-	text = text.lpad(places, " ")
-	for i in places:
-		var x0 := at.x + i * pitch_px
-		for segment in "abcdefg":
-			var lit: bool = text[i] != " " and SEGMENTS.get(text[i], "").contains(segment)
-			_segment(Vector2(x0, at.y), digit_w, height, segment, lit)
-
-
-func _segment(at: Vector2, w: float, h: float, segment: String, lit: bool) -> void:
-	var t := h * 0.11
-	var mid := at.y + h / 2.0
-	var from := Vector2.ZERO
-	var to := Vector2.ZERO
-	match segment:
-		"a": from = Vector2(at.x + t * 1.3, at.y + t / 2.0); to = Vector2(at.x + w - t * 1.3, from.y)
-		"g": from = Vector2(at.x + t * 1.3, mid); to = Vector2(at.x + w - t * 1.3, mid)
-		"d": from = Vector2(at.x + t * 1.3, at.y + h - t / 2.0); to = Vector2(at.x + w - t * 1.3, from.y)
-		"f": from = Vector2(at.x + t / 2.0, at.y + t * 1.3); to = Vector2(from.x, mid - t * 0.7)
-		"b": from = Vector2(at.x + w - t / 2.0, at.y + t * 1.3); to = Vector2(from.x, mid - t * 0.7)
-		"e": from = Vector2(at.x + t / 2.0, mid + t * 0.7); to = Vector2(from.x, at.y + h - t * 1.3)
-		"c": from = Vector2(at.x + w - t / 2.0, mid + t * 0.7); to = Vector2(from.x, at.y + h - t * 1.3)
-	if lit:
-		draw_line(from, to, Color(LED, 0.2), t * 2.6, true)
-		draw_line(from, to, LED, t, true)
-	else:
-		draw_line(from, to, Color(LED, 0.07), t, true)
+		var origin := inner.position + Vector2(0.0 if i < 3 else column, (i % 3) * 30.0)
+		BlockFont.draw(self, cell[0], origin + Vector2(0.0, 12.0), 1.2, Color(LED, 0.75))
+		var label_width := 16.0 if i < 3 else 58.0
+		var text := str(nav[cell[1]]).lpad(cell[2], " ")
+		BlockFont.draw(self, text, origin + Vector2(label_width, 0.0), 3.0, LED)
+	var going := "" if GameState.target_planet < 0 else " > %s" % GameState.STAR_NAMES[GameState.target_planet]
+	BlockFont.draw(self, "%s%s" % [GameState.STAR_NAMES[GameState.current_planet], going], inner.position + Vector2(0.0, 96.0), 1.3, Color(LED, 0.9))
