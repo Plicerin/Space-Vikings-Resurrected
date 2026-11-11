@@ -433,6 +433,7 @@ func _stacked(font: Font, text: String, at: Vector2, pitch_px: float) -> void:
 
 # --- the display: a green panel that can be written to ---
 
+const COLUMNS := 40 ## the Apple's text screen
 const HELP := [
 	"ARROWS  STICK          1 2 3 4  SPEED",
 	"SPACE   FIRE           A  AUTO",
@@ -461,18 +462,24 @@ func _display(rect: Rect2) -> void:
 	_glass.position = rect.position + Vector2(3.0, 3.0)
 	_glass.size = rect.size - Vector2(6.0, 6.0)
 	(_glass.material as ShaderMaterial).set_shader_parameter("panel_size", _glass.size)
+	# the Apple's text screen: 40 columns across, and as many rows of eight dots as fit
 	var inner := rect.grow(-14.0)
+	var scale := inner.size.x / (COLUMNS * BlockFont.ADVANCE)
+	var pitch_px := (BlockFont.HEIGHT + 1.0) * scale # a blank dot row between lines
+	var rows := int(inner.size.y / pitch_px)
+	var lines: Array
 	if message != "":
-		_write(BlockFont.wrap(message, 1.5, inner.size.x), inner.position, 1.5, 18.0)
+		lines = BlockFont.wrap(message, scale, inner.size.x)
 	elif not page.is_empty():
-		_write(page, inner.position, 1.05, 11.5)
+		lines = page
 	elif mode == Mode.NAV:
-		_nav(inner)
+		lines = _nav_lines()
 	elif mode == Mode.HELP:
-		_write(HELP, inner.position, 1.2, 14.0)
+		lines = HELP
 	else:
-		var here: String = GameState.STAR_NAMES[GameState.current_planet]
-		_write([here, "IN ORBIT" if not GameState.in_atmosphere else "IN THE ATMOSPHERE", "", "N  NAV DATA        F1 KEYS"], inner.position, 1.5, 17.0)
+		lines = [GameState.STAR_NAMES[GameState.current_planet], "IN ORBIT" if not GameState.in_atmosphere else "IN THE ATMOSPHERE",
+				"", columns("N  NAV DATA", "F1 KEYS")]
+	_write(lines.slice(0, rows), inner.position, scale, pitch_px)
 	# a faint scan over the glass
 	for line in range(int(rect.position.y) + 4, int(rect.end.y) - 2, 3):
 		draw_line(Vector2(rect.position.x + 3.0, line), Vector2(rect.end.x - 3.0, line), Color(0.0, 0.0, 0.0, 0.16), 1.0)
@@ -485,18 +492,21 @@ func _write(lines: Array, at: Vector2, scale: float, pitch_px: float) -> void:
 
 
 ## The position and the headings: the numbers big, their names small.
-func _nav(inner: Rect2) -> void:
-	var cells := [["X", 0, 6], ["Y", 1, 6], ["Z", 2, 6], ["HDG", 3, 4], ["PITCH", 4, 4], ["BANK", 5, 4]]
-	var column := inner.size.x / 3.0
-	for i in cells.size():
-		var cell: Array = cells[i]
-		var origin := inner.position + Vector2((i % 3) * column, (i / 3) * 34.0)
-		_crt("name%d" % i, cell[0], origin + Vector2(0.0, 9.0), 0.9, 0.75)
-		var label_width := 14.0 if i < 3 else 40.0
-		_crt("value%d" % i, str(nav[cell[1]]).lpad(cell[2], " "), origin + Vector2(label_width, 0.0), 2.25, 1.0)
+func _nav_lines() -> Array:
 	var going := "" if GameState.target_planet < 0 else " > %s" % GameState.STAR_NAMES[GameState.target_planet]
-	_crt("where", "%s%s" % [GameState.STAR_NAMES[GameState.current_planet], going], inner.position + Vector2(0.0, 76.0), 1.0, 0.9)
-	_crt("status", "SPEED %d  ENERGY %d  SHIELD %d" % [roundi(speed), roundi(energy), roundi(GameState.ship_shield)], inner.position + Vector2(0.0, 90.0), 1.0, 0.75)
+	return [
+		columns("X %d" % nav[0], "HEADING %d" % nav[3]),
+		columns("Y %d" % nav[1], "PITCH %d" % nav[4]),
+		columns("Z %d" % nav[2], "BANK %d" % nav[5]),
+		"%s%s" % [GameState.STAR_NAMES[GameState.current_planet], going],
+		columns("SPEED %d" % roundi(speed), "ENERGY %d" % roundi(energy)),
+		columns("SHIELD %d" % roundi(GameState.ship_shield), "HULL %d" % roundi(GameState.ship_hull)),
+	]
+
+
+## Two columns on the text screen's forty: `right` starts at the twenty-first.
+static func columns(left: String, right: String, width := 20) -> String:
+	return left.rpad(width).left(width) + right
 
 
 ## One line of the display, as a phosphor draws it: lit at a brightness that

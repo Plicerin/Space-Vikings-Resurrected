@@ -85,7 +85,7 @@ radar, `H` hyperdrive. The arrow keys are the stick (or a joystick axis
 mapped to the stick actions) and SPACE is the button.
 
 The panel (`scripts/flight/hud_overlay.gd`, `switch_panel.gd`): SPEED,
-a green LED display that is written to (`N` puts up the position and headings in seven-segment digits, `F1` or `?` the keys, the same key takes them down; messages such as "THE DEFENDER IS DESTROYED" appear on it); SPEED and ENERGY bars, TURN and VERT dials; three switches in a small
+a green CRT display on the Apple's text screen (40 columns across, six rows, two-column printing) that is written to (`N` puts up the position and headings in seven-segment digits, `F1` or `?` the keys, the same key takes them down; messages such as "THE DEFENDER IS DESTROYED" appear on it); SPEED and ENERGY bars, TURN and VERT dials; three switches in a small
 3D scene of their own, which can be clicked as well as keyed: a push
 button for the shields, a rocker AUTO / MNL and a rocker missile / laser;
 the damage-control panel (dark plastic, raised amber lettering, twelve

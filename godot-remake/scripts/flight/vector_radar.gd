@@ -109,20 +109,29 @@ func _write_console() -> void:
 	if console == null:
 		return
 	console.hide_target = true
+	var columns: Callable = console.columns
 	if identify:
-		var text: Array = RadarRules.ship_id_text(RadarRules.ship_id_program(GameState.orbital_defender_tier)).duplicate()
-		text.append("I RADAR  X CLOSE")
-		console.page = text
+		var text: Array = RadarRules.ship_id_text(RadarRules.ship_id_program(GameState.orbital_defender_tier))
+		var lines: Array = [text[0], ""]
+		lines.append_array(BlockFont.wrap(" ".join(text.slice(1)), 1.0, 40.0 * BlockFont.ADVANCE)) # the description, run on across the forty columns
+		lines.append("")
+		lines.append(columns.call("I  RADAR", "X  CLOSE"))
+		console.page = lines
 		return
-	var lines := ["-RADAR-", "X %d Y %d Z %d" % [GameState.ship_x / 2, GameState.ship_y / 2, GameState.ship_z / 2],
-			"HEADING %d" % roundi(GameState.ship_heading * 1.41)]
-	if GameState.orbital_defender_tier != 0 and not GameState.gf_planet_surrendered:
-		var range_units := Vector3(GameState.ship_x, GameState.ship_y, GameState.ship_z).distance_to(CombatRules.DEFENDER) / 2.0
-		lines.append("DEFENDER RANGE %d" % roundi(range_units))
-	else:
-		lines.append("NO DEFENDER")
-	lines.append("I SHIP I.D.  X CLOSE")
+	var lines: Array = ["-RADAR-",
+			columns.call("X %d" % (GameState.ship_x / 2), "HEADING %d" % roundi(GameState.ship_heading * 1.41)),
+			columns.call("Y %d" % (GameState.ship_y / 2), "")]
+	lines[2] = columns.call("Y %d" % (GameState.ship_y / 2), _defender_line())
+	lines.append("Z %d" % (GameState.ship_z / 2))
+	lines.append("")
+	lines.append(columns.call("I  SHIP I.D.", "X  CLOSE"))
 	console.page = lines
+
+
+func _defender_line() -> String:
+	if GameState.orbital_defender_tier != 0 and not GameState.gf_planet_surrendered:
+		return "DEFENDER %d" % roundi(Vector3(GameState.ship_x, GameState.ship_y, GameState.ship_z).distance_to(CombatRules.DEFENDER) / 2.0)
+	return "NO DEFENDER"
 
 
 func _release_console() -> void:
