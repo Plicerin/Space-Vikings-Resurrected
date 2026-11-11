@@ -18,6 +18,7 @@ const PLASTIC := preload("res://assets/shaders/plastic.gdshader")
 const SWITCHES := preload("res://scripts/flight/switch_panel.gd")
 const AMBER_TEXT := Color(1.0, 0.69, 0.0) ## an 80s terminal's amber
 const GAUGE_RADIUS := 52.0
+const GAUGE_LETTERS := 7 ## the size of a damage lamp's lettering
 const ALERT := preload("res://assets/shaders/alert.gdshader")
 const TIGHT := 0.8 ## letters on a lamp's arc, closer than their usual spacing
 const PANEL_HEIGHT := 150.0
@@ -242,9 +243,9 @@ func _arc_text(canvas: CanvasItem, font: Font, text: String, centre: Vector2, ra
 func _dial(font: Font, name: String, window: Rect2, amount: float, vertical: bool) -> void:
 	amount = clampf(amount, 0.0, 1.0)
 	if vertical:
-		draw_string(font, Vector2(window.end.x + 8.0, window.get_center().y + 4.0), name, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, GREEN)
+		_stacked(font, name, Vector2(window.end.x + 8.0, window.get_center().y), 8.0)
 	else:
-		draw_string(font, window.position + Vector2(0.0, -7.0), name, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, GREEN)
+		_raised_string(self, font, window.position + Vector2(0.0, -6.0), name, GAUGE_LETTERS)
 	var frame := StyleBoxFlat.new()
 	frame.bg_color = Color(0.03, 0.05, 0.04)
 	frame.set_corner_radius_all(4)
@@ -293,7 +294,7 @@ func _dial(font: Font, name: String, window: Rect2, amount: float, vertical: boo
 ## A gauge: its name above, an outlined track, filled from the left to
 ## `amount` (0 to 1), or a marker on a centre mark when `centred`.
 func _bar(font: Font, name: String, track: Rect2, amount: float, centred: bool) -> void:
-	draw_string(font, track.position + Vector2(0.0, -8.0), name, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, GREEN)
+	_raised_string(self, font, track.position + Vector2(0.0, -6.0), name, GAUGE_LETTERS)
 	draw_rect(track, Color(GREEN, 0.5), false, 1.0)
 	amount = clampf(amount, 0.0, 1.0)
 	if centred:
@@ -406,3 +407,11 @@ func _update_alert() -> void:
 	material.set_shader_parameter("colour", Color(1.0, 0.2, 0.1) if red else Color(1.0, 0.8, 0.1))
 	material.set_shader_parameter("pulse_rate", 3.0 if red else 1.2)
 	material.set_shader_parameter("screen_size", size)
+
+
+## Letters one over the next, centred on `at` vertically, for a gauge that stands up.
+func _stacked(font: Font, text: String, at: Vector2, pitch_px: float) -> void:
+	var top := at.y - pitch_px * (text.length() - 1) / 2.0
+	for i in text.length():
+		var width := font.get_string_size(text[i], HORIZONTAL_ALIGNMENT_LEFT, -1, GAUGE_LETTERS).x
+		_raised_string(self, font, Vector2(at.x - width / 2.0, top + i * pitch_px + GAUGE_LETTERS / 2.0), text[i], GAUGE_LETTERS)
