@@ -122,8 +122,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if _keys_to_leave > 0:
 		_keys_to_leave -= 1
 		if _keys_to_leave == 0:
-			GameState.booted = false # the original reboots
-			GameState.goto_scene("res://scenes/start.tscn")
+			GameState.reboot() # as the original does
 		return
 	for action: String in ["stick_forward", "stick_back", "stick_left", "stick_right"]:
 		if event.is_action(action):

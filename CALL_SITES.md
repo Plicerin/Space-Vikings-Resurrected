@@ -100,8 +100,9 @@ the screen — `PRINT CHR$(4)"RUN COM"` really does **chain-load and run
 argument, so `"RUNCOM"` and `"RUN COM"` are the same command). Every
 `BLOAD`, `BSAVE`, `OPEN`/`WRITE`/`CLOSE MISC FILE`, and the identical
 `PRINT CHR$(4)"INT"` that ends *every single `.bas` file at line
-63999* (DOS's "drop to interactive BASIC on any runtime error" trap)
-all go through this exact convention. None of it is a real Applesoft
+63999* (not Integer BASIC: this disk's DOS has `INT` pointed at its own
+"SYSTEM ERROR! / PRESS ANY KEY TO REBOOT" screen, see the END.bas
+section) all go through this exact convention. None of it is a real Applesoft
 statement underneath — it's BASIC code typing at DOS through the
 character-output hook, disguised as print statements. A line-by-line
 read that doesn't know this convention misreads every one of these as
@@ -152,7 +153,7 @@ key codes and groups the outcomes.
 | `1` `2` `3` `4` | 201 → `GOSUB` 311-314 → 207-210 | speed −3 / +3 / −15 / +15, clamped to 0..120 | ✅ the same keys, `flight_program.gd::keys()` (the stick is the arrow keys, so that W, S, A and B keep their original meanings) |
 | `A` | 203 → 317 → 500 | `POKE LT,4: CALL 38402` — autopilot on/off | ✅ `keys()` → `tranlit(4)` |
 | `B` | 203 → 318 → 500 | `POKE LT,3: CALL 38402` — step the condition | ✅ `keys()` → `tranlit(3)` |
-| `C` | 203 → 319 | `RUN COM` | ✅ leaves flight for the command console (a stand-in screen, see `COM.bas` below) |
+| `C` | 203 → 319 | `RUN COM` | ✅ leaves flight for the command console (see `COM.bas` below) |
 | `H` | 204 → 207 → 208 → 209 | `RUN H/D` — hyperdrive | ✅ `flight_loop.gd::_hyperdrive()`, held to a live recording (`tests/check_jump.gd`) |
 | `R` | 206 → 320 | `RUN RADAR` | ✅ leaves flight for the radar (a stand-in screen) |
 | `S` | 206 → 321 → 500 | `POKE LT,1: CALL 38402` — shields on/off | ✅ `keys()` → `tranlit(1)` |
@@ -440,7 +441,7 @@ the whole list; the distance takes a quarter of a second, most of it
 
 | Line | Target | What it actually does | Status |
 |---|---|---|---|
-| 1-2 | `GOSUB 5000` | Entered from `INSTRUMENTS` with `38391=77` (a loaded game, or the way back out of this chart, which had to redraw the whole panel): redraw the six panel lights in BASIC from the flags, with no toggling, then go to flight or back to `COM`. | ✅ `chart_program.gd::lamp_blocks()`, `chart_loop.gd::_leave()`. There are eight blocks (one each for shields, condition, orbit and damage, two each for the missile/laser and manual/auto pairs; nine `GOSUB 5500`s at condition BLUE, which lines 5065 and 5080 both paint), plain `HPLOT` rows and not TRANLIT's lamp pictures, so the panel looks different until a lamp key is pressed in flight. `END.bas` 120 comes the same way (`end_game.gd`). |
+| 1-2 | `GOSUB 5000` | Entered from `INSTRUMENTS` with `38391=77` (a loaded game, or the way back out of this chart, which had to redraw the whole panel): redraw the six panel lights in BASIC from the flags, with no toggling, then go to flight or back to `COM`. | ✅ `chart_program.gd::lamp_blocks()`, `chart_loop.gd::_leave()`. There are eight blocks (one each for shields, condition, orbit and damage, two each for the missile/laser and manual/auto pairs; nine `GOSUB 5500`s at condition BLUE, which lines 5065 and 5080 both paint), plain `HPLOT` rows and not TRANLIT's lamp pictures, so the panel looks different until a lamp key is pressed in flight. `END.bas` 120 comes the same way (`end_program.gd::continue_game()`). |
 | 3020 | (inline) | Reads the coordinates: X `38366+P`, Y `38345+P`, Z `38324+P`. | ✅ 2026-11-10 data ported (`PLANET_X/Y/Z`). |
 | 3025-3080 | (inline) | The chart: each star at `X·10−35, Y·5`, one of three sizes by Z, a different colour when secured (`38219+P = 1`), a box round the current system. | ✅ `chart_program.gd::star()`. SOL is white at SOL in a new game: its flag holds 100 (§3). |
 | 3110-3200 | (inline) | Cursor from the two paddles; any key returns through `INSTRUMENTS`. | ✅ `chart_loop.gd::_turn()`. Any key leaves, not only the space asked for. The cross is taken off with a black `DRAW` (3210), which takes the star under it off too. |
@@ -483,7 +484,7 @@ spaces wipe the first column of the instrument panel's lower half
 | 900-969 | `GOSUB 20` | Galaxy directory: orange, the twenty names in inverse, 1 → line 970, 2 → `R = 2: GOSUB 20: GOTO 810`. Line 35 only returns for `R = 1`, so "2) RETURN" never gets to its `GOTO 810`: it falls through into the command menu, whether the directory was asked for from the central or the navigation computer. Any other key paints the whole directory again. | ✅ `_list()`; compared live (`after_directory` is the command menu). ❓ each such return leaves a `GOSUB` on the stack; some thirty of them in one stay in COM should end in `?OUT OF MEMORY` and the `ONERR` line 63999 (`INT`). Not run live, not ported. |
 | 970-978 | (inline) | "WHICH SYSTEM" and the same two-character entry. Out of 1-20: "TRY AGAIN PLEASE." | ✅ `_which()`; compared live (30, then 02 and 01). |
 | 979-1180 | (inline) | A star system's page: nothing known until scouted (`38240+C`); else tech text, defenders for tech 2 and up, population (`PEEK(38261+C)·35294`), secured or independent, base. Any key: back to the chart if it asked (`38388 > 0`, zeroed), else to line 900. Line 1175 is never reached (`R` is 0 again by then). | ✅ `page_lines()`, `page_close()`; compared live for a scouted and an unscouted system and from the chart. |
-| 63999 | `ONERR` | Any error runs `INT` (DOS's switch to Integer BASIC). | ⬜ no error is known to be reachable but the stack one above. |
+| 63999 | `ONERR` | Any error runs DOS's `INT`, which on this disk is the SYSTEM ERROR screen and a reboot (see END.bas below). | ⬜ no error is known to be reachable but the stack one above. The screen itself is ported (`system_error.gd`). |
 
 Measured, in video frames, and in `com_loop.gd`: from the flight's "C" to
 the command menu's `GET` is 14 s on the real machine, 7.2 of them the
@@ -515,11 +516,61 @@ of the written disk.
 
 | Line(s) | What it does | Seen live | Port |
 |---|---|---|---|
-| `END` 200-210 | the ship's place (29467-29475) into 38211-38219, which are bytes 7-15 of the planet record's working copy; `POKE 38391,77: POKE 38392,PEEK(38209)`; the record stored (`CALL 38825`); three `BSAVE`s | `PLANET FILE` on the disk afterwards holds 38391 = 77, 38392 = 1. **The ship's place is in `P/F`, inside the record of the planet it is at**: SOL's record on the saved disk is `150 3 100 30 1 1 0 188 2 200 0 15 230 0 0 0 100`, x = 700, y = 200, z = -6641 | ✅ as a JSON file (`GameState.save_to_disk()`); ⬜ the screen itself is a stand-in |
-| `END` 120 | `POKE 38391,77: RUN GALAXY MAP` (continue) | line 2 clears the 77 after 237 frames; no `CALL 38402`, the four switches unchanged; the third pass of flight 791 frames after the clear | ✅ `end_game.gd` sets `GameState.saved_marker`; `flight_loop.gd::run()` does the rest, timed (`LOAD_GALAXY_MAP`, `lamps()`, `LOAD_SIMULATOR_SPINNING`). `drive_save` compares the lamps with the live page |
+| `END` 200-210 | the ship's place (29467-29475) into 38211-38219, which are bytes 7-15 of the planet record's working copy; `POKE 38391,77: POKE 38392,PEEK(38209)`; the record stored (`CALL 38825`); three `BSAVE`s | `PLANET FILE` on the disk afterwards holds 38391 = 77, 38392 = 1. **The ship's place is in `P/F`, inside the record of the planet it is at**: SOL's record on the saved disk is `150 3 100 30 1 1 0 188 2 200 0 15 230 0 0 0 100`, x = 700, y = 200, z = -6641 | ✅ as a JSON file (`GameState.save_to_disk()`); the screen is `end_program.gd` (the table below) |
+| `END` 120 | `POKE 38391,77: RUN GALAXY MAP` (continue) | line 2 clears the 77 after 237 frames; no `CALL 38402`, the four switches unchanged; the third pass of flight 791 frames after the clear | ✅ `end_program.gd::continue_game()` sets `GameState.saved_marker`; `flight_loop.gd::run()` does the rest, timed (`LOAD_GALAXY_MAP`, `lamps()`, `LOAD_SIMULATOR_SPINNING`). `drive_save` compares the lamps with the live page |
 | `START` 25-26 | `BLOAD PLANET FILE`, `OG = PEEK(38391): POKE 38391,0`, and if it was 77 `BSAVE PLANET FILE` straight back | **A saved game can be resumed once.** The boot itself clears the marker on the disk, before the question is asked: after a boot answered `O` and after one answered `N` the file holds 38391 = 0 both times. The title takes about 180 frames longer when it has that write to do. | ✅ `GameState.boot()`, called when the title first comes up and again after the ship is destroyed: the file's `"saved"` is the mark (`check_save`, `drive_save`) |
 | `START` 73 | `O` with `OG <> 77` | a second boot of the same disk answered `O`, and a boot of the untouched disk: "THERE IS NO GAME SAVED" for 170 frames (looked at every frame, three times: `analysis/live/save/save_none.log`), the screen cleared, the question again | ✅ `start_screen.gd` (`NO_GAME_SAVED_FRAMES`); the screen is a stand-in |
 | `START` 3000-3030, `INSTRUMENTS` 210-220, `GALAXY MAP` 2 | an old game: the three saved files, `POKE 38391,77`, so `INSTRUMENTS` skips TRANLIT and runs `GALAXY MAP`, whose line 2 paints the lamp blocks and runs the flight program | no `CALL 38402` between the load and flight; shields 0, weapon 1, condition 3, autopilot 0 came back exactly as saved; 38391 = 77 for 613 frames | ✅ `flight_loop.gd::run()`: `instruments(false)`, the wait for `GALAXY MAP`, `lamps()` (`flight_program.gd::lamp_blocks()`, shared with the chart), the wait for the flight program. `check_save` loads the game the real machine saved and compares the whole panel at the third pass with the live page: 0 bytes different. A new game's panel differs from it in 57 bytes, so the comparison tells the two roads apart |
+
+### END.bas on the hi-res page (live 2026-11-10)
+
+Recorded with `tools/mame/end_live.lua` (routes `menu`, `atmosphere`,
+`quit`, `font` and ten `key_*`); the records are in `analysis/live/end/`.
+Ported as `scripts/end/end_program.gd` (statements), `end_loop.gd`
+(order and frames) and `end_console.gd` (the scene). `check_end`
+compares page 1, the text cursor and window, 973/974 and 38391 at every
+stop of the `menu` route (20 stops) and `check_end_atmosphere` at the
+`atmosphere` route's (6): 0 bytes different, and back in flight after
+CONTINUE as well.
+
+| Line(s) | What it does | Seen live | Port |
+|---|---|---|---|
+| 0-20 | `ONERR GOTO 63999`, `POKE 974,32` (the generator back on page 1; COM left it on page 2) | the load is 150 frames, COM's console on show meanwhile | ✅ `ran()`, `open()`, `LOAD_END` |
+| 30 | `POKE 33,40: FOR J = 1 TO 16: VTAB J: PRINT "<40 spaces>": NEXT: HOME` | text rows 1-16 wiped (the view and the top two rows of the panel), 2.6 frames a row. **There is no `HTAB`**: the forty spaces start in whatever column the cursor was in, so after a key that is not 1-3 the first fifteen cells of row 1 are left | ✅ `wipe_open()`, `wipe_row()`, `home()`; the menu after a 9, a 0 and a 4 is compared |
+| 31-70 | the title, three choices, "ENTER CHOICE.  ", `GET C` | the menu is up 50 frames after the program starts; the cursor waits at column 15, row 9 | ✅ `title()` … `prompt()` |
+| 70 | **`GET C` reads a number.** | A digit is itself. Space, `.`, `+`, `-`, `,`, `:` and `E` are 0, and like any digit not 1-3 the menu is drawn again. **Any other key (a letter, RETURN, ESC) is a ?SYNTAX ERROR**, which `ONERR` sends to line 63999: the SYSTEM ERROR screen 4.2 frames later, and the game in hand is gone. Ten keys pressed live, one run each (`end_key_*.log`) | ✅ `EndProgram.number()`, held to all ten logs; `Left.ERROR` |
+| 75-90, 190 | 1 in an atmosphere (`PEEK(38210) = 1`): `SPEED= 128`, "YOU MUST BE IN ORBIT TO SAVE GAME", a `FOR` of 2000, the menu | 2.57 frames a character, the carriage returns too; held 111 frames | ✅ `_save()`, `_slow()`; `check_end_atmosphere` |
+| 200-220 | 1 otherwise: the save (the table above), `PRINT : PRINT "GAME SAVED."`, a `FOR` of 2000, the menu | 8 frames of pokes, 600 of floppy (the `BSAVE`s print no carriage return, so the message is on row 11), held 113 frames. The 77 stays in memory until CONTINUE pokes it again | ✅ `save()`, `saved_message()`; the floppy cut by `DISK_WAIT_SCALE` |
+| 110-120 | 2: `POKE 38391,77: RUN GALAXY MAP` | as in the table above | ✅ `continue_game()`, `Left.CONTINUE` |
+| 100 | 3: `FOR J = 1 TO 5000: POKE J,0: NEXT : END` | **It never reaches its `END`.** Zeroing the zero page takes BASIC's own pointers with it: 32.7 frames after the key the display is the blank text screen and the machine is hung (`quit_after_20.png`, twenty seconds on) | ✅ `Left.QUIT`: the picture goes black at that frame. The scene then closes the application a second later, which is the port's liberty (the Apple has to be switched off) |
+| 63999 | `PRINT : PRINT CHR$(4)"INT"` | see below | ✅ `error()`, `scenes/system_error.tscn` |
+
+**SYSTEM ERROR.** The disk's DOS 3.3 has been patched (disassembled from
+a memory dump, `analysis/live/end/dos_9d00.bin`, load `$9D00`). Its error
+handler at `$A6D2` no longer prints a message and returns to BASIC: it
+does `HOME`, writes a table at `$A971` through `COUT1` (`$FDF0`, the text
+screen, past the game's hi-res character generator; a byte under `$80`
+is that many spaces), switches the display to text page 1, clears the
+key strobe, waits for a key with no cursor (`$FD1B`) and jumps through
+the reset vector, which boots the disk. The table is 413 spaces, "SYSTEM
+ERROR!", a carriage return, 48 spaces, "PRESS ANY KEY TO REBOOT", where
+DOS's own error messages used to be. The `INT` command's entry at
+`$A59E` is `JMP $A6D5`, the same routine. So:
+
+- every program's line 63999 ends there, whatever the error was;
+- so does every DOS error that `ONERR` does not get first (a
+  write-protected disk during the `BSAVE`s, for one: derived from the
+  disassembly, not tried);
+- the only one a player can reach from the keyboard, as far as is
+  known, is the letter at END's menu.
+
+Ported as `scripts/dos/system_error.gd` on a text screen of its own
+(`text_screen.gd`, with the Apple II+ character ROM's glyphs captured
+live: `apple_text_characters.png`, `apple_text_font.json`). Its picture
+is the live snapshot's dot for dot (`check_end`, against
+`system_error.png`). A key there is `GameState.reboot()`: the title
+again, and the boot that uses a saved game up. A write that fails in
+`save_to_disk()` goes the same way.
 
 Timing of the road through `GALAXY MAP` line 2, in frames: the 77 poked
 by `START` 3030 at 4913, `INSTRUMENTS` starts at 5201, its last glyph at
@@ -565,13 +616,18 @@ derived, not timed on its own.
   atmosphere, the ship's place kept, the record stored first; a saved
   game good for one boot; an old game and CONTINUE into flight by way
   of `GALAXY MAP` line 2, with no TRANLIT (the START/END table above).
+- The command console (the COM table above).
+- `END.bas` on the hi-res page, its numeric `GET`, its dead machine,
+  and the SYSTEM ERROR screen every error in the game ends at (the END
+  table above).
 
 **Not ported yet**
 
-1. **`COM.bas` and the programs under it on the hi-res page**
-   (`STATUS`, `SUPPLY`, `RADAR`, `GROUND FORCES`, `COLLECT`, `SHORE
-   LEAVE`, `END`, `START`). Their rules are in the port as Godot UI;
-   their screens and timing are not.
+1. **The programs under `COM.bas` on the hi-res page** (`STATUS`,
+   `SUPPLY`, `RADAR`, `GROUND FORCES`, `COLLECT`, `SHORE LEAVE`) and
+   `START`'s title on the text screen. Their rules are in the port as
+   Godot UI; their screens and timing are not. (`COM` and `END`
+   themselves are ported: their tables above.)
 2. `GROUND FORCES.bas` setting `38170 = 17`, which `H_D.bas` 12-13
    reads.
 3. Record byte 2 (`38206`).

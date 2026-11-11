@@ -1,10 +1,15 @@
 extends Node
 ## Saves a game and takes it up again through the scenes a player goes
 ## through: the title's buttons, flight, the command console, END's
-## buttons, and the title again after a "reboot". The save itself is
-## held to the real game in check_save.gd; this is for the scenes round
-## it, and for the original's rule that a saved game is good for one
-## boot (START.bas lines 25-26 and 73; GameState.boot()).
+## menu, and the title again after a reboot. The save itself is held to
+## the real game in check_save.gd and END's screen in check_end.gd; this
+## is for the scenes round them, and for the original's rule that a
+## saved game is good for one boot (START.bas lines 25-26 and 73;
+## GameState.boot()).
+##
+## The reboots are the ones the game has: a key that is no number at
+## END's menu, the SYSTEM ERROR screen, and a key there. The last thing
+## driven is "3) END GAME", which closes the application.
 ##
 ##   godot --headless --fixed-fps 60 --path godot-remake res://tests/drive_save.tscn
 ##
@@ -17,6 +22,7 @@ const START := "res://scenes/start.tscn"
 const FLIGHT := "res://scenes/flight/space_flight.tscn"
 const COM := "res://scenes/com.tscn"
 const END := "res://scenes/end_game.tscn"
+const ERROR := "res://scenes/system_error.tscn"
 const PATH := "user://drive_save.json"
 ## Page 1 at the third pass after END's "continue" in the real game
 ## (tools/mame/save_live.lua).
@@ -27,6 +33,10 @@ const TIMEOUT_FRAMES := 60 * 240
 var _driver := false
 var _passes := 0
 var _bad := 0
+## END's stops, by name: how many there have been, and how many of them
+## the driver has waited for.
+var _seen := {}
+var _awaited := {}
 
 
 func _ready() -> void:
@@ -61,10 +71,13 @@ func _drive() -> void:
 	_check("a new game is in flight, switches flipped (%s)" % str(switches),
 			switches == [false, true, 3, false])
 	await _to_end()
-	await _press("VBox/SaveButton")
-	_check("1) SAVE GAME saves", _status() == "GAME SAVED." and _saved_mark() == true)
+	_tap(KEY_1, "1")
+	await _end_shows("saved")
+	var text: RefCounted = GameState.chargen
+	_check("1) SAVE GAME saves, and says so", _saved_mark() == true and [text.column, text.row] == [0, 12])
 
-	await _press("VBox/ContinueButton")
+	await _end_shows("menu")
+	_tap(KEY_2, "2")
 	await _flight()
 	_check("2) CONTINUE leaves the mark for GALAXY MAP", GameState.saved_marker)
 	await _passes_more(3)
@@ -75,7 +88,7 @@ func _drive() -> void:
 
 	# the next boot finds the game; the one after does not
 	await _to_end()
-	await _boot()
+	await _reboot()
 	_check("the boot takes the mark off the file", GameState.old_game and _saved_mark() == false)
 	await _press("VBox/LoadGameButton")
 	await _flight()
@@ -84,7 +97,7 @@ func _drive() -> void:
 			_switches() == switches and not GameState.saved_marker)
 
 	await _to_end()
-	await _boot()
+	await _reboot()
 	await _press("VBox/LoadGameButton")
 	_check("a second boot has no game to load", _status() == "THERE IS NO GAME SAVED"
 			and _current_path() == START)
@@ -97,12 +110,27 @@ func _drive() -> void:
 	await _flight()
 	await _passes_more(1)
 	await _to_end()
-	await _boot()
+	await _reboot()
 	_check("N uses the saved game up too", not GameState.old_game)
+
+	# 3) END GAME: the screen black, and a second later the scene closes
+	# the application itself
+	await _press("VBox/NewGameButton")
+	await _flight()
+	await _passes_more(1)
+	await _to_end()
+	_tap(KEY_3, "3")
+	var end := get_tree().current_scene
+	for i in range(TIMEOUT_FRAMES):
+		if not end.get_node("HGRCanvas/HgrView").visible:
+			break
+		await get_tree().process_frame
+	_check("3) END GAME blacks the screen", not end.get_node("HGRCanvas/HgrView").visible)
 
 	_remove_file()
 	print("save driven: %d wrong" % _bad)
-	get_tree().quit(1 if _bad > 0 else 0)
+	if _bad > 0:
+		get_tree().quit(1)
 
 
 func _check(what: String, ok: bool) -> void:
@@ -131,11 +159,40 @@ func _to_end() -> void:
 	_check("the command console asks for a command", asked[0])
 	_tap(KEY_4, "4")
 	await _scene_is(END)
+	_seen = {}
+	_awaited = {}
+	get_tree().current_scene._loop.watch = func(what: String) -> void:
+		_seen[what] = _seen.get(what, 0) + 1
+	await _end_shows("menu")
+
+
+## Waits for END's next stop of that name.
+func _end_shows(what: String) -> void:
+	_awaited[what] = _awaited.get(what, 0) + 1
+	for i in range(TIMEOUT_FRAMES):
+		if _seen.get(what, 0) >= _awaited[what]:
+			return
+		await get_tree().process_frame
+	print("WRONG  END never came to \"%s\"" % what)
+	_bad += 1
+	get_tree().quit(1)
+
+
+## The reboot a player can get: a letter at END's menu, which is the
+## SYSTEM ERROR screen, and any key there.
+func _reboot() -> void:
+	_tap(KEY_A, "a")
+	await _scene_is(ERROR)
+	_check("a letter at END's menu is the SYSTEM ERROR screen", _current_path() == ERROR)
+	await _frames(3)
+	_tap(KEY_SPACE, " ")
+	await _scene_is(START)
+	await _frames(3)
+	_check("and a key there boots the game again", _current_path() == START and GameState.booted)
 
 
 ## The machine switched off and on: START.bas from its first line. Only
-## from a scene that is not in the middle of a program (END's 3) END
-## GAME is where the original stops).
+## from a scene that is not in the middle of a program.
 func _boot() -> void:
 	GameState.booted = false
 	GameState.goto_scene(START)

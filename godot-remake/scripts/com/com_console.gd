@@ -12,8 +12,9 @@ extends Control
 ## the page, as the original's does.
 ##
 ## The programs under COM that are not on the hi-res page yet (GROUND
-## FORCES, RADAR, END, STATUS, SUPPLY) are still Godot screens. They come
-## back here, which runs COM from the top again as theirs do.
+## FORCES, RADAR, STATUS, SUPPLY) are still Godot screens. They come
+## back here, which runs COM from the top again as theirs do. END is on
+## the page (end_console.gd) and goes on to flight, not back here.
 
 const ComLoop = preload("res://scripts/com/com_loop.gd")
 const HgrView = preload("res://scripts/shapes/hgr_view.gd")

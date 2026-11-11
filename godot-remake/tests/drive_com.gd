@@ -125,11 +125,26 @@ func _drive() -> void:
 			_current_path() == COM and GameState.handover == 0)
 	_hook()
 
-	for way: Array in [["4", KEY_4, "end_game"], ["2", KEY_2, "ground_forces"]]:
-		await _seen_more("command")
-		_tap(way[1], way[0])
-		await _left_for(way[0], way[2])
-		await _com()
+	# END is on the hi-res page too, and its way back is the flight program
+	await _seen_more("command")
+	_tap(KEY_4, "4")
+	await _left_for("4", "end_game")
+	_hook()
+	await _seen_more("menu")
+	_check("END asks for a choice", [text.column, text.row] == [15, 9])
+	_shot("8_end")
+	_tap(KEY_2, "2")
+	await _scene_is(FLIGHT)
+	_check("and 2 there runs the flight program", _current_path() == FLIGHT)
+	await _passes(2)
+	_tap(KEY_C, "c")
+	await _scene_is(COM)
+	_hook()
+
+	await _seen_more("command")
+	_tap(KEY_2, "2")
+	await _left_for("2", "ground_forces")
+	await _com()
 
 	for way: Array in [["3", KEY_3, "star_chart"], ["4", KEY_4, "status"], ["5", KEY_5, "supply_report"]]:
 		await _seen_more("command")

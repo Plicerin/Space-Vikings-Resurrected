@@ -483,6 +483,15 @@ var loot_collected_this_visit: bool = false # $301
 ## index 0's multiplier is itself randomized per sale (`300*RND(1)`,
 ## not a fixed 300 like every other category), and the full sum is
 ## doubled at the end.
+## The machine restarted: the reset vector, and the disk boots START.bas
+## again. Whatever was in memory is gone (START builds a new game or
+## loads the old one), and the monitor's text window is the whole screen.
+func reboot() -> void:
+	booted = false
+	chargen.set_window(0, 40, 0, 24)
+	goto_scene("res://scenes/start.tscn")
+
+
 func compute_loot_value() -> float:
 	var total := 0.0
 	for i in range(loot.size()):
@@ -674,7 +683,11 @@ func boot(path: String = save_path) -> void:
 		file.store_string(JSON.stringify(data))
 
 
-func save_to_disk(path: String = save_path) -> void:
+## False if the file could not be written. On the Apple a disk that
+## cannot be written to (the write-protect notch covered, say) is a DOS
+## error, and this disk's DOS has one answer to every error: the SYSTEM
+## ERROR screen (scripts/dos/system_error.gd).
+func save_to_disk(path: String = save_path) -> bool:
 	# END.bas line 210 stores the current planet's record before the BSAVEs.
 	store_planet_record(current_planet)
 	var data := {
@@ -714,7 +727,10 @@ func save_to_disk(path: String = save_path) -> void:
 		"ship_speed": ship_speed, "loop_flip": loop_flip,
 	}
 	var file := FileAccess.open(path, FileAccess.WRITE)
+	if file == null:
+		return false
 	file.store_string(JSON.stringify(data))
+	return true
 
 
 func load_from_disk(path: String = save_path) -> void:

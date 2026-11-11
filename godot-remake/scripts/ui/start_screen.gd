@@ -1,7 +1,7 @@
 extends Control
 ## START.bas's "(N)EW GAME OR (O)LD GAME?" prompt (line 60), as buttons.
-## Load Game is the "O" path (see end_game.gd / GameState.save_to_disk()'s
-## doc comment for why this isn't a byte-exact BSAVE/BLOAD port).
+## Load Game is the "O" path (see GameState.save_to_disk()'s doc comment
+## for why this isn't a byte-exact BSAVE/BLOAD port).
 ##
 ## The original's rule for a saved game is kept (GameState.boot()): it
 ## can be taken up at the next boot and at no other, because the boot
