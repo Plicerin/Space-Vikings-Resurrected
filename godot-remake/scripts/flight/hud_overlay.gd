@@ -15,6 +15,7 @@ const BULB := preload("res://assets/shaders/bulb.gdshader")
 const BALL := preload("res://assets/shaders/ball.gdshader")
 const RING := preload("res://assets/shaders/ring.gdshader")
 const PLASTIC := preload("res://assets/shaders/plastic.gdshader")
+const GLASS := preload("res://assets/shaders/glass.gdshader")
 const SWITCHES := preload("res://scripts/flight/switch_panel.gd")
 const BlockFont = preload("res://scripts/flight/block_font.gd")
 const AMBER_TEXT := Color(1.0, 0.69, 0.0) ## an 80s terminal's amber
@@ -42,6 +43,8 @@ var _bulb_next := 0
 var _ball: ColorRect
 var _ring: ColorRect
 var _plastic: ColorRect
+var _glass: ColorRect
+var _trail := {} ## per line of the display: its text now, the text before, and when it changed
 var _switches: Control
 var _alert: ColorRect
 var _letters: Control
@@ -65,6 +68,11 @@ func _ready() -> void:
 	material.shader = PLASTIC
 	_plastic.material = material
 	add_child(_plastic)
+	_glass = ColorRect.new()
+	_glass.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_glass.material = ShaderMaterial.new()
+	(_glass.material as ShaderMaterial).shader = GLASS
+	add_child(_glass)
 	_switches = SWITCHES.new()
 	add_child(_switches)
 	_letters = Control.new()
@@ -444,12 +452,15 @@ func show_mode(wanted: Mode) -> void:
 func _display(rect: Rect2) -> void:
 	var window := StyleBoxFlat.new()
 	window.bg_color = Color(0.01, 0.03, 0.015)
-	window.set_corner_radius_all(6)
+	window.set_corner_radius_all(10)
 	window.set_border_width_all(3)
 	window.border_color = Color(0.22, 0.24, 0.27)
 	window.anti_aliasing = true
 	draw_style_box(window, rect)
-	var inner := rect.grow(-12.0)
+	_glass.position = rect.position + Vector2(3.0, 3.0)
+	_glass.size = rect.size - Vector2(6.0, 6.0)
+	(_glass.material as ShaderMaterial).set_shader_parameter("panel_size", _glass.size)
+	var inner := rect.grow(-14.0)
 	if message != "":
 		_write(BlockFont.wrap(message, 2.0, inner.size.x), inner.position, 2.0, 24.0)
 	elif mode == Mode.NAV:
@@ -466,8 +477,8 @@ func _display(rect: Rect2) -> void:
 
 ## Lines of the block lettering, `scale` pixels to the dot.
 func _write(lines: Array, at: Vector2, scale: float, pitch_px: float) -> void:
-	for i in lines.size():
-		BlockFont.draw(self, lines[i], at + Vector2(0.0, i * pitch_px), scale, LED)
+	for i in 8:
+		_crt("line%d" % i, lines[i] if i < lines.size() else "", at + Vector2(0.0, i * pitch_px), scale, 1.0)
 
 
 ## The position and the headings: the numbers big, their names small.
@@ -477,9 +488,25 @@ func _nav(inner: Rect2) -> void:
 	for i in cells.size():
 		var cell: Array = cells[i]
 		var origin := inner.position + Vector2(0.0 if i < 3 else column, (i % 3) * 30.0)
-		BlockFont.draw(self, cell[0], origin + Vector2(0.0, 12.0), 1.2, Color(LED, 0.75))
+		_crt("name%d" % i, cell[0], origin + Vector2(0.0, 12.0), 1.2, 0.75)
 		var label_width := 16.0 if i < 3 else 58.0
-		var text := str(nav[cell[1]]).lpad(cell[2], " ")
-		BlockFont.draw(self, text, origin + Vector2(label_width, 0.0), 3.0, LED)
+		_crt("value%d" % i, str(nav[cell[1]]).lpad(cell[2], " "), origin + Vector2(label_width, 0.0), 3.0, 1.0)
 	var going := "" if GameState.target_planet < 0 else " > %s" % GameState.STAR_NAMES[GameState.target_planet]
-	BlockFont.draw(self, "%s%s" % [GameState.STAR_NAMES[GameState.current_planet], going], inner.position + Vector2(0.0, 96.0), 1.3, Color(LED, 0.9))
+	_crt("where", "%s%s" % [GameState.STAR_NAMES[GameState.current_planet], going], inner.position + Vector2(0.0, 96.0), 1.3, 0.9)
+
+
+## One line of the display, as a phosphor draws it: lit at a brightness that
+## flickers a little, and when its text changes the old text fades away over a
+## moment instead of going at once.
+func _crt(key: String, text: String, at: Vector2, scale: float, strength: float) -> void:
+	var now := Time.get_ticks_msec() / 1000.0
+	var entry: Array = _trail.get(key, [text, "", -10.0])
+	if entry[0] != text:
+		entry = [text, entry[0], now]
+	_trail[key] = entry
+	var flicker := 1.0 - 0.04 * absf(sin(now * 37.0) * sin(now * 11.3))
+	var colour := Color(LED.r * flicker * strength, LED.g * flicker * strength, LED.b * flicker * strength)
+	var fade: float = 1.0 - (now - float(entry[2])) / 0.12
+	if fade > 0.0 and entry[1] != "":
+		BlockFont.draw(self, entry[1], at, scale, Color(colour, 0.25 * fade))
+	BlockFont.draw(self, text, at, scale, colour)
