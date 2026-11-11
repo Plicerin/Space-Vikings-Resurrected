@@ -17,8 +17,16 @@ SHORE LEAVE's bounce), sol, tech_0 to tech_4, clamp, early_key (a key
 during line 185), none (no transports; 38207 = 1 and 38208 = 1), twice
 (a planet taken twice in one visit).
 
-The port is not written yet. Times measured for it, in emulated ms (a
-video frame is 16.67):
+The port keeps the rules and not the screen:
+`godot-remake/scripts/rules/ground_rules.gd` is played through every
+route here by `godot-remake/tests/check_ground_rules.gd` (the keys, the
+values RND gave, and at each stop the bytes, the variables, line 4010's
+numbers and what was printed). Two things no route reaches, so they rest
+on the listing alone: a retreat with morale already 0 (line 1121), and
+line 305's `POKE 38150,0` on a primitive planet whose 38150 was not 0
+already. The scene (`scripts/ui/ground_forces.gd`) is Godot's own and
+takes only its pauses from the times below, in emulated ms (a video
+frame is 16.67):
 
 | what | ms |
 |---|---|

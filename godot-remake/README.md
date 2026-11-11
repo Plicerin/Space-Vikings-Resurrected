@@ -13,11 +13,25 @@ This file says what the port is today. How each fact was found is in the
 parent repository's analysis documents (`CALL_SITES.md` first) and in
 the git history.
 
-## Two kinds of screen
+## Three kinds of screen
 
 The original is a dozen BASIC programs that chain to each other and
 share one hi-res page, with machine code for the 3D view, the text and
-the panel lamps. The port has that game in two states.
+the panel lamps. The port has that game in three states, and is moving
+all of it to the first: the same game by the same rules, shown the way
+Godot shows things. Anyone after the Apple's own picture, speed and
+disk habits has the real disk and an emulator.
+
+**Native, rules held to the real game.** The rules are a class of
+their own with no screen in it, played through recordings of the real
+game (its keys, the numbers its `RND` gave) and compared with the real
+game's memory, variables and printed text at every stop. The screen is
+a Godot scene: controls, a theme (`theme/space_vikings.tres`), numbers
+that count, waits a key can cut short.
+
+| Original program | Rules | Scene | Held to the real game by |
+|---|---|---|---|
+| `GROUND FORCES`, `RECALL`, `COLLECT` | `scripts/rules/ground_rules.gd` | `scripts/ui/ground_forces.gd` | `check_ground_rules` (the rules), `drive_ground_forces` (the scene) |
 
 **Ported faithfully.** The screen is a software copy of the Apple's
 hi-res page, drawn by the original's own statements in the original's
@@ -45,12 +59,11 @@ game running in MAME.
 
 **Standing in.** The rules are the original's (formulas, gates, order of
 effects, quirks) but the screen is Godot buttons and labels, not the
-hi-res page, and nothing is timed. These are next in line to be ported
-the first way:
+hi-res page, nothing is timed, and nothing holds them to the real
+game yet. These are next in line to be made native:
 
 | Original program | Stand-in |
 |---|---|
-| `GROUND FORCES`, `COLLECT`, recall | `ground_forces.gd`, `collect.gd`, `recall.gd` |
 | `SHORE LEAVE` | `shore_leave.gd`, `enlist.gd`, `buy_weapons.gd`, `sell_loot.gd`, `establish_base.gd`, `cryogenics.gd`, `repair_ship.gd` |
 | `START` (title, new or old game) | `start_screen.gd` |
 
@@ -273,6 +286,7 @@ a difference.
     godot --headless --path . res://tests/check_radar_ship_1.tscn    # with the space lab
     godot --headless --path . res://tests/check_radar_ship_4.tscn    # with the heavy cruiser
     godot --headless --path . res://tests/check_save.tscn            # record copy, save, the boot, an old game's panel
+    godot --headless --path . res://tests/check_ground_rules.tscn    # GROUND FORCES, RECALL, COLLECT: 14 recorded routes through the rules, state and text
     godot --headless --path . -s res://tests/check_flight_core.gd    # flight arithmetic against the model
     godot --headless --path . -s res://tests/check_a2_3d1.gd         # 200 views against tools/a2_3d1_view.py
     godot --headless --fixed-fps 60 --path . res://tests/drive_flight.tscn   # the flight scene, by key events
@@ -280,8 +294,9 @@ a difference.
     godot --headless --fixed-fps 60 --path . res://tests/drive_com.tscn      # the console scene, by keys, every way out of it, and both reports through and back
     godot --headless --fixed-fps 60 --path . res://tests/drive_radar.tscn    # the radar scene, by keys: from flight, from the console, an I.D. and back, no radar
     godot --headless --fixed-fps 60 --path . res://tests/drive_save.tscn     # title, END, save, continue, SYSTEM ERROR, three boots, END GAME
+    godot --headless --fixed-fps 60 --path . res://tests/drive_ground_forces.tscn   # the ground forces scene, by keys: refusals, recall, a win, a retreat, a loss
 
-The first twenty-one need the recordings in `../analysis/live/`. A compared
+The first twenty-two need the recordings in `../analysis/live/`. A compared
 byte is never adjusted to make a test pass: both times a test differed
 from the real game by a handful of bytes, the difference was something
 the original does that nobody had noticed (the seventeen-byte copy;
@@ -367,19 +382,31 @@ Where the port departs from the original on purpose:
 - **END GAME closes the application** a second after the screen goes
   black. The original leaves a dead machine to be switched off.
 - **Ground battle retreat.** In the original any key at all retreats.
-  The stand-in has a Retreat button.
+  The scene has a RETREAT button (and R). As in the original, the order
+  is obeyed after the round in hand, which is fought and paid for.
+- **Ground battle reports** wait about as long as the original's, but
+  a key or a click moves on; a refusal is said under the menu, which
+  stays up; the numbers are on show from the start.
 - **Shore leave numbers** are typed into a spin box, not the original's
   digit-by-digit entry.
 - **The stand-in screens** (above) in general.
 
 ## Not ported, estimated, or unverified
 
-- One of the programs `COM` runs, `GROUND FORCES`, is still a
-  stand-in. A stand-in leaves the hi-res page as it found it, so on
-  the way back `COM` starts over the console's last screen, not over
-  what the original's program would have left; and no stand-in sets
-  the marker (38151 = 7) that makes `COM` draw its console and go
-  straight back to `GROUND FORCES`.
+- One of the programs `COM` runs, `GROUND FORCES`, is a Godot scene.
+  It leaves the hi-res page as it found it, so on the way back `COM`
+  starts over the console's last screen, not over what the original's
+  program would have left. Every command of the original's ends by
+  running `COM` with a marker (38151 = 7) that sends it straight back
+  to `GROUND FORCES`; the scene just stays up.
+- `GROUND FORCES`: two rules rest on the listing alone, as no
+  recording reaches them (a retreat with morale already 0; a primitive
+  planet whose strength was not 0 already). Line 172 (one escort
+  fighter, a planet that has given in) puts the battle screen up and
+  takes it down with nothing said, as the original does.
+- `COLLECT`'s two slips are kept, as they decide what a planet is
+  worth: a primitive planet's silver is set to its gold, and titanium
+  is never collected.
 - The radar's A2-3D1 prices are fitted to four recordings (64 to 144
   frames a call). A picture with far more in it than those had could
   be some frames out.
@@ -403,8 +430,6 @@ Where the port departs from the original on purpose:
   the program left; from a program with a narrower one the message
   would wrap differently. The port keeps the window but not the old
   text-screen contents that would show round it.
-- `GROUND FORCES` never sets the "fought and not paid" marker
-  (`morale_flag`) that `H_D` punishes on the next jump.
 - The load of `STARSHIP SIMULATOR` after an old game's or CONTINUE's
   lamps (`FlightLoop.LOAD_SIMULATOR_SPINNING`) is worked out from the
   real game's totals with the drive still turning, not timed on its

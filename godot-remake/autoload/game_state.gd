@@ -313,7 +313,6 @@ var gf_missiles: float = 0.0         # M, $38153 (blob: 0) — ground-combat
 	# missile COUNT, NOT the same register as ship_missile_system below
 	# (that's $38187, a totally different "missile system health"
 	# value the real source also happens to call "MISSILES")
-var gf_reserve_troops: float = 0.0   # T9 (held back when transport capacity is exceeded)
 var gf_planet_surrendered: bool = true # $38208 — real default confirmed
 	# true (see start_new_game()'s own comment on this)
 
@@ -556,7 +555,6 @@ func start_new_game() -> void:
 	gf_transports = 6.0
 	gf_tanks = 0.0
 	gf_missiles = 0.0
-	gf_reserve_troops = 0.0
 	defender_damage_points = 0.0
 	damage_alert_active = false
 	# START.bas line 220: load the starting planet's record. For SOL

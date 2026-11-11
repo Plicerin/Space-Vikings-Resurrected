@@ -20,6 +20,10 @@ InputSetup="*res://autoload/input_setup.gd"
 GameState="*res://autoload/game_state.gd"
 AudioManager="*res://autoload/audio_manager.gd"
 
+[gui]
+
+theme/custom="res://theme/space_vikings.tres"
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
