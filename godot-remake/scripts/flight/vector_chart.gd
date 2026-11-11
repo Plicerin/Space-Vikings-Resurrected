@@ -3,8 +3,8 @@ extends Control
 ## (scripts/flight/vector_radar.gd): the twenty stars as the original has them
 ## placed, marked by how far off they are (a ring and a dot for near, a ring for
 ## middle, a cross for far), violet where the planet is secured, a square round
-## the star the ship is at, and a crosshair to point with (the mouse, or the
-## arrow keys). Everything written goes on the console's display: what is
+## the star the ship is at, and a crosshair to point with: the mouse, or the
+## arrow keys, which go from star to star. Everything written goes on the console's display: what is
 ## pointed at, what the chart says of a star on Enter, and its question
 ## "DO YOU WISH FURTHER INFORMATION?", "Y" to which runs the console with that
 ## star's page. What a click finds and what is said is
@@ -86,13 +86,13 @@ func handle_key(key: InputEventKey) -> bool:
 			if not key.echo:
 				select()
 		KEY_LEFT:
-			_move(Vector2(-ARROW_STEP.x, 0.0))
+			_nudge(Vector2.LEFT)
 		KEY_RIGHT:
-			_move(Vector2(ARROW_STEP.x, 0.0))
+			_nudge(Vector2.RIGHT)
 		KEY_UP:
-			_move(Vector2(0.0, -ARROW_STEP.y))
+			_nudge(Vector2.UP)
 		KEY_DOWN:
-			_move(Vector2(0.0, ARROW_STEP.y))
+			_nudge(Vector2.DOWN)
 		_:
 			return false
 	return true
@@ -118,6 +118,31 @@ func point_at(dots: Vector2) -> void:
 func _move(by: Vector2) -> void:
 	point_at(_cursor + by)
 
+
+## An arrow key goes to the next star that way: the nearest one in that
+## direction (a little across counts for more than a lot along), the cursor
+## put right on it. Where there is none the cursor just steps, so that the
+## whole map can still be reached by keys.
+func _nudge(direction: Vector2) -> void:
+	var here := ChartRules.star_at(_cursor)
+	var best := 0
+	var best_cost := INF
+	for star in range(1, ChartRules.STARS + 1):
+		if star == here:
+			continue
+		var off := ChartRules.place(star) - _cursor
+		var along := off.dot(direction)
+		if along < 1.0:
+			continue
+		var across := absf(off.dot(Vector2(-direction.y, direction.x)))
+		var cost := along + across * 2.5
+		if cost < best_cost:
+			best_cost = cost
+			best = star
+	if best > 0:
+		point_at(ChartRules.place(best))
+	else:
+		_move(direction * ARROW_STEP)
 
 ## @witness GALAXY MAP 3210-3270
 func select() -> void:
@@ -179,7 +204,7 @@ func _write_console() -> void:
 		var over := ChartRules.star_at(_cursor)
 		lines.append("CLICK A STAR." if over == ChartRules.NO_STAR else "STAR: %s" % ChartRules.NAMES[over - 1])
 		lines.append("")
-		lines.append(columns.call("ARROWS  MOVE", "ENTER  ASK"))
+		lines.append(columns.call("ARROWS  STAR TO STAR", "ENTER  ASK"))
 		lines.append(columns.call("SPACE  CLOSE", ""))
 	console.page = lines
 
