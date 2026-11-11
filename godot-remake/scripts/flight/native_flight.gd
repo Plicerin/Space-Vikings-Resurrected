@@ -34,7 +34,7 @@ const Craft = preload("res://scripts/world/craft.gd")
 const FightEffects = preload("res://scripts/flight/fight_effects.gd")
 
 const COM := "res://scenes/com.tscn"
-const RADAR := "res://scenes/radar.tscn"
+const VectorRadar = preload("res://scripts/flight/vector_radar.gd")
 
 const PLANET_RADIUS := 780.0
 ## The game's own points nearer than this to the planet are its cluster; the
@@ -53,6 +53,7 @@ const STICK_FINE := 0.35
 var _rules := FlightRules.new()
 var _combat := CombatRules.new()
 var _effects: Node3D
+var _radar: Control
 ## Seconds since the last pass of fighting, and whether the fire key was
 ## pressed since (a tap between two passes still fires).
 var _fight_clock := 0.0
@@ -96,6 +97,14 @@ func _ready() -> void:
 	_effects.flashed.connect(_flash_screen)
 	_effects.shaken.connect(func(amount: float) -> void: _shake = maxf(_shake, amount))
 	add_child(_effects)
+	_radar = VectorRadar.new()
+	$Hud.add_child(_radar)
+	_radar.closed.connect(func(to_console: bool) -> void:
+		if to_console:
+			_leave(COM))
+	if GameState.show_radar_on_arrival: # the console's RADAR
+		GameState.show_radar_on_arrival = false
+		_radar.open()
 	_overlay.camera = _camera
 	_overlay.target = _defender
 	_update_camera()
@@ -139,6 +148,10 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if event.is_action("fire"):
 		_fire_tapped = true
 		return
+	var viewport := get_viewport() # the radar's X may leave for the console
+	if _radar.handle_key(key):
+		viewport.set_input_as_handled()
+		return
 	match key.keycode:
 		KEY_1: _rules.change_speed(-3.0)
 		KEY_2: _rules.change_speed(3.0)
@@ -153,7 +166,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		KEY_C:
 			_leave(COM)
 		KEY_R:
-			_leave(RADAR)
+			_radar.open()
 		KEY_H:
 			_hyperdrive()
 

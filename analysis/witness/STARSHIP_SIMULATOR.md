@@ -144,10 +144,10 @@ none
 | 177 | L |  |  | `IF  PEEK (P1) < 195 AND  PEEK (P1) > 127 THEN  POKE P1,195` |
 | 180 | L |  |  | `DRAW 13 AT TX,133: DRAW 14 AT 136,VY: DRAW 13 AT SX,133: DRAW 13 AT EX,133: IF OO = 1 THEN` |
 | 182 | L |  |  | `IF  PEEK (38149) = 7 THEN  POKE 38149,0: GOTO 200` |
-| 185 | L | godot-remake/scripts/flight/native_flight.gd:172<br>godot-remake/scripts/rules/combat_rules.gd:109 |  | `IF  PEEK ( - 16287) > 127 THEN  GOSUB 1500` |
-| 189 | L | godot-remake/scripts/flight/native_flight.gd:172<br>godot-remake/scripts/rules/combat_rules.gd:109 |  | `IF  PEEK (38282 +  PEEK (38209)) < 2 THEN 200` |
-| 190 | L | godot-remake/scripts/flight/native_flight.gd:172<br>godot-remake/scripts/rules/combat_rules.gd:109 |  | `IF  PEEK (38208) = 0 AND  PEEK (38210) = 1 THEN  GOSUB 3000: IF  RND (1) < .5 AND  PEEK (3` |
-| 192 | L | godot-remake/scripts/flight/native_flight.gd:172<br>godot-remake/scripts/rules/combat_rules.gd:109 |  | `IF  PEEK (38208) = 0 AND X >  - 3500 AND X < 4500 AND Y >  - 3000 AND Y < 3000 AND Z >  - ` |
+| 185 | L | godot-remake/scripts/flight/native_flight.gd:185<br>godot-remake/scripts/rules/combat_rules.gd:109 |  | `IF  PEEK ( - 16287) > 127 THEN  GOSUB 1500` |
+| 189 | L | godot-remake/scripts/flight/native_flight.gd:185<br>godot-remake/scripts/rules/combat_rules.gd:109 |  | `IF  PEEK (38282 +  PEEK (38209)) < 2 THEN 200` |
+| 190 | L | godot-remake/scripts/flight/native_flight.gd:185<br>godot-remake/scripts/rules/combat_rules.gd:109 |  | `IF  PEEK (38208) = 0 AND  PEEK (38210) = 1 THEN  GOSUB 3000: IF  RND (1) < .5 AND  PEEK (3` |
+| 192 | L | godot-remake/scripts/flight/native_flight.gd:185<br>godot-remake/scripts/rules/combat_rules.gd:109 |  | `IF  PEEK (38208) = 0 AND X >  - 3500 AND X < 4500 AND Y >  - 3000 AND Y < 3000 AND Z >  - ` |
 | 200 | L |  |  | `K =  PEEK ( - 16384): IF K < 128 THEN  NEXT : GOTO 15` |
 | 201 | L | godot-remake/scripts/rules/flight_rules.gd:96 |  | `IF K - 176 > 0 THEN K = K - 176: POKE  - 16368,0: ON K GOSUB 311,312,313,314` |
 | 202 | L | godot-remake/scripts/rules/flight_rules.gd:96 |  | `IF K < 17 THEN 207` |
@@ -157,7 +157,7 @@ none
 | 206 | L | godot-remake/scripts/rules/flight_rules.gd:96 |  | `ON K - 33 GOTO 320,321` |
 | 207 | L | godot-remake/scripts/rules/flight_rules.gd:96 |  | `IF S < 0 THEN S = 0` |
 | 208 | L | godot-remake/scripts/rules/flight_rules.gd:96 |  | `IF S > 120 THEN S = 120` |
-| 209 | L | godot-remake/scripts/flight/native_flight.gd:228 |  | `IF K = 24 THEN  PRINT "RUNH/D"` |
+| 209 | L | godot-remake/scripts/flight/native_flight.gd:241 |  | `IF K = 24 THEN  PRINT "RUNH/D"` |
 | 210 | L |  |  | `POKE 38157,S:K = 0: NEXT : GOTO 15` |
 | 311 | P |  |  | `S = S - 3: RETURN` |
 | 312 | P |  |  | `S = S + 3: RETURN` |

@@ -12,7 +12,6 @@ extends Node
 
 const FLIGHT := "res://scenes/native_flight.tscn"
 const COM := "res://scenes/com.tscn"
-const RADAR := "res://scenes/radar.tscn"
 const TIMEOUT_FRAMES := 60 * 20
 
 var _driver := false
@@ -221,8 +220,8 @@ func _drive() -> void:
 	_check("C runs the command console", _path() == COM)
 	await _flight(func() -> void: pass)
 	_tap(KEY_R)
-	await _scene_is(RADAR)
-	_check("R runs the radar", _path() == RADAR)
+	await _frames(3)
+	_check("R puts the radar up over the flight", get_tree().current_scene.get("_radar").visible and _path() == FLIGHT)
 
 	print("native flight driven: %d wrong" % _bad)
 	get_tree().quit(1 if _bad > 0 else 0)

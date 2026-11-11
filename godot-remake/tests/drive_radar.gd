@@ -1,16 +1,15 @@
 extends Node
-## Uses the radar and the ship I.D. (scenes/radar.tscn, scenes/ship_id.tscn)
-## the way a player would: from the flight and from the console's 3, keys
-## and buttons, and a look at where each goes. What the I.D. says and where
-## the radar goes back to is held to the real game in check_radar_rules.gd.
+## Uses the vector radar and the ship I.D. (scripts/flight/vector_radar.gd, an
+## overlay on the flight) the way a player would: R in the flight and the
+## console's 3, I for the I.D., X back, and the radar shot away. What the
+## I.D. says and where the radar goes back to is held to the real game in
+## check_radar_rules.gd.
 ##
 ##   godot --headless --fixed-fps 60 --path godot-remake res://tests/drive_radar.tscn
 ##
 ## The scenes replace one another, so the driver is a node of its own
-## under the root (see drive_flight.gd).
+## under the root.
 
-const RADAR := "res://scenes/radar.tscn"
-const SHIP_ID := "res://scenes/ship_id.tscn"
 const COM := "res://scenes/com.tscn"
 const FLIGHT := "res://scenes/native_flight.tscn"
 const TIMEOUT_FRAMES := 60 * 20
@@ -31,55 +30,65 @@ func _ready() -> void:
 
 
 func _drive() -> void:
-	# from the flight: R, and X back
+	# from the flight: R opens it over the flight, X closes it
 	await _go(FLIGHT, func() -> void: pass)
+	var radar: Control = _scene().get("_radar")
+	_check("the radar is down until asked for", not radar.visible)
 	_tap(KEY_R)
-	await _scene_is(RADAR)
-	_check("R in flight runs the radar", _path() == RADAR)
-	var readout := (_scene().get_node("Center/Columns/Info/VBox/Readout") as Label).text
-	_check("which says where the ship is (%s)" % readout.replace("\n", " "), readout.begins_with("X "))
+	await _frames(3)
+	_check("R puts the radar up over the flight", radar.visible and _path() == FLIGHT and not radar.identify)
 	_tap(KEY_X)
-	await _scene_is(FLIGHT)
-	_check("X goes back to the flight", _path() == FLIGHT)
+	await _frames(3)
+	_check("X takes it down; still the flight", not radar.visible and _path() == FLIGHT)
 
-	# any other key: the I.D. of what is in orbit, and any key back
-	await _go(RADAR, func() -> void: GameState.orbital_defender_tier = 2; GameState.flight_scene = FLIGHT)
-	_tap(KEY_SPACE)
-	await _scene_is(SHIP_ID)
-	_check("another key runs the I.D.", _path() == SHIP_ID)
-	var said := (_scene().get_node("Center/Columns/Info/VBox/Said") as Label).text
-	_check("a defender of type 2 gets the light cruiser's (%s)" % said.replace("\n", " / "),
-			said == "LIGHT CRUISER\nWITH LASERS,\nMISSILES AND\nFIGHTER COVER.")
-	_check("and a ship turning on a turntable", _scene()._turntable != null)
-	_tap(KEY_Q)
-	await _scene_is(RADAR)
-	_check("a key there is the radar again", _path() == RADAR)
+	# I: the I.D. of what is in orbit, and I again the radar
+	await _go(FLIGHT, func() -> void: GameState.orbital_defender_tier = 2)
+	radar = _scene().get("_radar")
+	_tap(KEY_R)
+	await _frames(2)
+	_tap(KEY_I)
+	await _frames(3)
+	_check("I shows the I.D.", radar.identify)
+	var program: int = radar.RadarRules.ship_id_program(GameState.orbital_defender_tier)
+	_check("a defender of type 2 gets the light cruiser's: %s" % str(radar.RadarRules.ship_id_text(program)),
+			radar.RadarRules.ship_id_text(program)[1] == "LIGHT CRUISER" and radar._model_lines.size() > 0)
+	_tap(KEY_I)
+	await _frames(3)
+	_check("I again is the radar", radar.visible and not radar.identify)
+	_tap(KEY_R)
+	await _frames(3)
+	_check("R closes it too", not radar.visible)
 
-	await _go(SHIP_ID, func() -> void: GameState.orbital_defender_tier = 0)
-	_check("with no defender: there is no starship in this system",
-			(_scene().get_node("Center/Columns/Info/VBox/Said") as Label).text == "THERE IS NO\nSTARSHIP IN\nTHIS SYSTEM." and _scene()._turntable == null)
-	await _go(SHIP_ID, func() -> void: GameState.orbital_defender_tier = 4)
-	_check("a heavy cruiser's has the fighters line too",
-			(_scene().get_node("Center/Columns/Info/VBox/Said") as Label).text.ends_with("20-40 FIGHTERS"))
+	# no defender: nothing to see
+	await _go(FLIGHT, func() -> void: GameState.orbital_defender_tier = 0)
+	radar = _scene().get("_radar")
+	_tap(KEY_R)
+	await _frames(2)
+	_tap(KEY_I)
+	await _frames(3)
+	_check("with no defender the I.D. says so", radar.RadarRules.ship_id_text(0)[1] == "THERE IS NO" and radar.identify)
 
-	# from the console's 3: X goes back to the console
+	# from the console's 3: the flight with the radar up, and X back to the console
 	await _go(COM, func() -> void: pass)
 	await _frames(3)
 	_tap(KEY_3)
-	await _scene_is(RADAR)
-	_check("the console's 3 runs the radar, and says who did (38388 = 2)", _path() == RADAR and GameState.handover == 2)
+	await _scene_is(FLIGHT)
+	await _frames(3)
+	radar = _scene().get("_radar")
+	_check("the console's 3 shows the radar over the flight, and says who did (38388 = 2)",
+			radar.visible and GameState.handover == 2)
 	_tap(KEY_X)
 	await _scene_is(COM)
 	_check("X goes back to the console, the mark taken", _path() == COM and GameState.handover == 0)
 
 	# the radar shot away: nothing drawn, nothing asked
 	await _go(FLIGHT, func() -> void: GameState.ship_radar = 0.0)
+	radar = _scene().get("_radar")
 	_tap(KEY_R)
-	await _frames(30) # the radar scene is up for a frame and gone
-	await _scene_is(FLIGHT)
-	_check("with no radar R comes straight back to the flight", _path() == FLIGHT)
+	await _frames(5)
+	_check("with no radar R shows nothing", not radar.visible and _path() == FLIGHT)
 
-	print("radar scene driven: %d wrong" % _bad)
+	print("radar driven: %d wrong" % _bad)
 	get_tree().quit(1 if _bad > 0 else 0)
 
 

@@ -43,7 +43,7 @@ data in `tests/golden/`.
 | `STARSHIP SIMULATOR` (flight, fighting, keys) | `scripts/rules/flight_rules.gd`, `combat_rules.gd` | `scripts/flight/native_flight.gd` (3D), `fight_effects.gd` | `check_flight_rules`, `check_combat_rules`, `drive_native_flight` |
 | `H_D` (hyperdrive), `RE`, `ORBIT` (into and out of the atmosphere) | `hyperdrive_rules.gd`, `flight_rules.gd` | `native_flight.gd`, `hyperspace_effect.gd` | `check_hyperdrive_rules`, `check_flight_rules` |
 | `EX`, `DMG`, `S/X` (the ends of a fight) | `combat_rules.gd` | `native_flight.gd` | `check_combat_rules` |
-| `RADAR`, `SHIP # 0 I.D.`, `# 1`, `# 3`, `# 4` | `radar_rules.gd` | `scripts/radar/radar_console.gd` (a plan view), `ship_id.gd` (a turntable) | `check_radar_rules`, `drive_radar` |
+| `RADAR`, `SHIP # 0 I.D.`, `# 1`, `# 3`, `# 4` | `radar_rules.gd` | `scripts/flight/vector_radar.gd` (a vector overlay on the flight) | `check_radar_rules`, `drive_radar` |
 | `START` (title), save and load, planet records, new-game data | `autoload/game_state.gd` | `scripts/ui/start_screen.gd` | `check_save`, `drive_save` |
 
 ## The code witness
@@ -236,7 +236,7 @@ a difference.
     godot --headless --path . res://tests/check_shore_rules.tscn     # SHORE LEAVE: 7 recorded routes through the rules, state and text
     godot --headless --fixed-fps 60 --path . res://tests/drive_chart.tscn    # the chart scene, by pointer and keys: a click, the question, Y and N, Space, the way to the console and back
     godot --headless --fixed-fps 60 --path . res://tests/drive_com.tscn      # the console scene, by keys: the lamps, every menu, a course, the directory, every way out of it
-    godot --headless --fixed-fps 60 --path . res://tests/drive_radar.tscn    # the native radar and I.D. scenes, by keys
+    godot --headless --fixed-fps 60 --path . res://tests/drive_radar.tscn    # the vector radar and I.D. over the flight, by keys
     godot --headless --fixed-fps 60 --path . res://tests/drive_save.tscn     # title, END, save, CONTINUE
     godot --headless --fixed-fps 60 --path . res://tests/drive_ground_forces.tscn   # the ground forces scene, by keys: refusals, recall, a win, a retreat, a loss
     godot --headless --fixed-fps 60 --path . res://tests/drive_end.tscn             # END's menu, by keys: a save, a refused save, continue
@@ -277,13 +277,19 @@ rules' (`scripts/rules/report_rules.gd`, held to the recordings by
 
 ### The radar
 
-`RADAR` is a native top-down plan of the stars about the ship with the
-firing box and the ship's arrow; X goes back, any other key shows the
-I.D. of what is in orbit (a turntable of its low-poly model, with the
-original's text). With the radar shot away it does nothing and goes
-back. Whether it works, which I.D. text a defender gets (type 2 gets the
-light cruiser's) and where X goes back to are `radar_rules.gd`, held to
-the recordings by `check_radar_rules`.
+`RADAR` is a vector display over the front window, in the manner of an early
+arcade game (`scripts/flight/vector_radar.gd`): thin glowing lines, nothing
+filled, drawn live while the flight goes on behind it. A plan of the world
+from above shows the planet as a wire sphere, the stars, the dashed box the
+defender fires from, the defender as its own wire-frame (the original's
+model data), and the ship as an arrow along its heading, with a sweep turning
+round the planet. `I` swaps the plan for the SHIP I.D.: the defender's
+wire-frame turning slowly, and what the original's I.D. program says of it.
+`R`, `X` or Escape close it; the console's RADAR shows it over the flight and
+X goes back to the console. With the radar shot away it shows nothing. Whether
+it works, which I.D. text a defender gets (type 2 gets the light cruiser's) and
+where it goes back to are `radar_rules.gd`, held to the recordings by
+`check_radar_rules`; `drive_radar` goes through it by keys.
 
 ### Fighting, hyperdrive, the atmosphere
 

@@ -17,7 +17,6 @@ extends Control
 const ComRules = preload("res://scripts/rules/com_rules.gd")
 
 const GROUND_FORCES := "res://scenes/ground_forces.tscn"
-const RADAR := "res://scenes/radar.tscn"
 const END := "res://scenes/end_game.tscn"
 const CHART := "res://scenes/star_chart.tscn"
 const STATUS := "res://scenes/status.tscn"
@@ -191,7 +190,8 @@ func _command_picked(choice: int) -> void:
 	elif goes == ComRules.Goes.GROUND_FORCES:
 		_go(GROUND_FORCES)
 	elif goes == ComRules.Goes.RADAR:
-		_go(RADAR)
+		GameState.show_radar_on_arrival = true
+		_go(GameState.flight_scene)
 	elif goes == ComRules.Goes.END:
 		_go(END)
 	else:

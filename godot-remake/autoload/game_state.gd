@@ -27,6 +27,8 @@ var in_atmosphere: bool = false  # $38210
 ## RADAR. 0 is nothing.
 ## The flight scene the game is in, which the console, the radar and END go
 ## back to: each flight scene puts its own path here as it starts.
+## The console's RADAR: the flight is shown with the radar already up.
+var show_radar_on_arrival := false
 var flight_scene: String = "res://scenes/native_flight.tscn"
 var handover: int = 0
 ## $38151 = 7: COLLECT and GROUND FORCES run COM to have the console
