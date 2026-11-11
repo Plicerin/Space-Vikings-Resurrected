@@ -3,6 +3,7 @@ extends Control
 ## drawn by Godot. What a command does and what the crew says of it is
 ## scripts/rules/ground_rules.gd, which is held to the real game
 ## (tests/check_ground_rules.gd); this shows it and keeps the time.
+## Commands 3 to 8 are scenes/shore_leave.tscn's, put up over the menu.
 ##
 ## Where it parts from the original, on purpose:
 ## - a refusal or a recall is said under the menu, which stays up; the
@@ -17,11 +18,9 @@ extends Control
 ##   printed them first with the first round.
 
 const GroundRules = preload("res://scripts/rules/ground_rules.gd")
+const ShoreRules = preload("res://scripts/rules/shore_rules.gd")
+const SHORE := preload("res://scenes/shore_leave.tscn")
 const COM := "res://scenes/com.tscn"
-## Commands 3-8, SHORE LEAVE.bas's six: each a scene of its own here.
-const ELSEWHERE := {
-	3: "shore_leave", 4: "enlist", 5: "sell_loot", 6: "repair_ship", 7: "establish_base", 8: "cryogenics",
-}
 
 # Seconds.
 const REPORT := 3.0    ## a report from the landing
@@ -111,7 +110,24 @@ func _command(number: int) -> void:
 		9:
 			GameState.goto_scene(COM)
 		_:
-			GameState.goto_scene("res://scenes/%s.tscn" % ELSEWHERE[number])
+			_shore(number)
+
+
+## Commands 3 to 8, SHORE LEAVE.bas's six.
+func _shore(number: int) -> void:
+	var why := ShoreRules.refusal(number)
+	if not why.is_empty():
+		_open_menu(why)
+		return
+	_menu.hide()
+	get_viewport().gui_release_focus()
+	var shore := SHORE.instantiate()
+	shore.command = number
+	shore.pace = pace
+	add_child(shore)
+	await shore.done
+	shore.queue_free()
+	_open_menu()
 
 
 func _attack() -> void:

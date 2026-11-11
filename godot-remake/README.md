@@ -32,6 +32,7 @@ that count, waits a key can cut short.
 | Original program | Rules | Scene | Held to the real game by |
 |---|---|---|---|
 | `GROUND FORCES`, `RECALL`, `COLLECT` | `scripts/rules/ground_rules.gd` | `scripts/ui/ground_forces.gd` | `check_ground_rules` (the rules), `drive_ground_forces` (the scene) |
+| `SHORE LEAVE` (shore leave, enlisting and weapons, loot, repairs, a base, cryogenics) | `scripts/rules/shore_rules.gd` | `scripts/ui/shore_leave.gd`, one panel over the ground forces menu | `check_shore_rules`, `drive_shore_leave` |
 
 **Ported faithfully.** The screen is a software copy of the Apple's
 hi-res page, drawn by the original's own statements in the original's
@@ -60,14 +61,11 @@ game running in MAME.
 **Standing in.** The rules are the original's (formulas, gates, order of
 effects, quirks) but the screen is Godot buttons and labels, not the
 hi-res page, nothing is timed, and nothing holds them to the real
-game yet. These are next in line to be made native:
+game yet. One is left:
 
 | Original program | Stand-in |
 |---|---|
-| `SHORE LEAVE` | `shore_leave.gd`, `enlist.gd`, `buy_weapons.gd`, `sell_loot.gd`, `establish_base.gd`, `cryogenics.gd`, `repair_ship.gd` |
 | `START` (title, new or old game) | `start_screen.gd` |
-
-Each stand-in's doc comment lists the BASIC lines it follows.
 
 ## How a faithful port is put together
 
@@ -287,6 +285,7 @@ a difference.
     godot --headless --path . res://tests/check_radar_ship_4.tscn    # with the heavy cruiser
     godot --headless --path . res://tests/check_save.tscn            # record copy, save, the boot, an old game's panel
     godot --headless --path . res://tests/check_ground_rules.tscn    # GROUND FORCES, RECALL, COLLECT: 14 recorded routes through the rules, state and text
+    godot --headless --path . res://tests/check_shore_rules.tscn     # SHORE LEAVE: 7 recorded routes through the rules, state and text
     godot --headless --path . -s res://tests/check_flight_core.gd    # flight arithmetic against the model
     godot --headless --path . -s res://tests/check_a2_3d1.gd         # 200 views against tools/a2_3d1_view.py
     godot --headless --fixed-fps 60 --path . res://tests/drive_flight.tscn   # the flight scene, by key events
@@ -295,8 +294,9 @@ a difference.
     godot --headless --fixed-fps 60 --path . res://tests/drive_radar.tscn    # the radar scene, by keys: from flight, from the console, an I.D. and back, no radar
     godot --headless --fixed-fps 60 --path . res://tests/drive_save.tscn     # title, END, save, continue, SYSTEM ERROR, three boots, END GAME
     godot --headless --fixed-fps 60 --path . res://tests/drive_ground_forces.tscn   # the ground forces scene, by keys: refusals, recall, a win, a retreat, a loss
+    godot --headless --fixed-fps 60 --path . res://tests/drive_shore_leave.tscn     # commands 3 to 8, by keys: every question, every refusal, what each leaves behind
 
-The first twenty-two need the recordings in `../analysis/live/`. A compared
+The first twenty-three need the recordings in `../analysis/live/`. A compared
 byte is never adjusted to make a test pass: both times a test differed
 from the real game by a handful of bytes, the difference was something
 the original does that nobody had noticed (the seventeen-byte copy;
@@ -387,9 +387,15 @@ Where the port departs from the original on purpose:
 - **Ground battle reports** wait about as long as the original's, but
   a key or a click moves on; a refusal is said under the menu, which
   stays up; the numbers are on show from the start.
-- **Shore leave numbers** are typed into a spin box, not the original's
-  digit-by-digit entry.
-- **The stand-in screens** (above) in general.
+- **Shore leave, enlisting, weapons, repairs, base.** A number is typed
+  into a field that takes digits only; the original made what it could
+  of any characters, so a number below zero or a part of a troop could
+  be enlisted. Y and N are asked for by name; the original took any key
+  but N as yes to the repair bill, and asked it even of a bill of
+  nothing. TOO MANY TROOPS asks again where the original began the
+  command again. What is said stays up about as long as the original's,
+  and a key or a click moves on.
+- **The title screen** (the stand-in above).
 
 ## Not ported, estimated, or unverified
 
@@ -404,6 +410,11 @@ Where the port departs from the original on purpose:
   planet whose strength was not 0 already). Line 172 (one escort
   fighter, a planet that has given in) puts the battle screen up and
   takes it down with nothing said, as the original does.
+- `SHORE LEAVE`: the cost of mending anything but the energy is worked
+  from `100 - D`, where Applesoft's `100 - ((D / 100) * 100)` is off by
+  about one part in 10^8 for some D (`../analysis/live/shore/`); a cost
+  could be one credit out where the product falls that close to a whole
+  number. Every bill in the recordings comes out the same.
 - `COLLECT`'s two slips are kept, as they decide what a planet is
   worth: a primitive planet's silver is set to its gold, and titanium
   is never collected.

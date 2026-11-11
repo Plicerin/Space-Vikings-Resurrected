@@ -113,12 +113,18 @@ func _drive() -> void:
 	await _frames(3)
 	_check("Enter moves on to the next", _battle().visible and _text("Said") != "ALL TRANSPORTS AWAY, SIR!")
 
-	var elsewhere: Dictionary = load("res://scripts/ui/ground_forces.gd").ELSEWHERE
-	var missing := []
-	for number in range(3, 9):
-		if not ResourceLoader.exists("res://scenes/%s.tscn" % elsewhere.get(number, "?")):
-			missing.append(number)
-	_check("commands 3 to 8 each have a scene to go to", missing.is_empty())
+	# commands 3 to 8 are SHORE LEAVE's (drive_shore_leave.gd)
+	await _fresh(func() -> void: pass)
+	_tap(KEY_3, "3")
+	await _frames(3)
+	_check("3 before the planet has surrendered: said under the menu",
+			_menu().visible and _menu_said() == "SIR! THE PLANET\nHASN'T SURRENDERED!")
+	_tap(KEY_8, "8")
+	await _frames(3)
+	_check("8 all the same: its panel is up in the menu's place", not _menu().visible and _scene.has_node("ShoreLeave"))
+	await _until(func() -> bool: return _menu().visible)
+	await _frames(2)
+	_check("and the menu is back after it", not _scene.has_node("ShoreLeave") and GameState.troop_location == 0)
 
 	print("ground forces scene driven: %d wrong" % _bad)
 	get_tree().quit(1 if _bad > 0 else 0)

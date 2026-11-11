@@ -350,10 +350,7 @@ var flight_escort_fighters: int = 30         # $38207 — a flight-encounter
 # $38187 (blob said 100, the explicit `POKE 38187,60` overrides it to
 # 60 — the value actually used).
 #
-# All twelve are driven generically by REPAIR_SYSTEMS below
-# (label/getter/setter/multiplier/max, in the original's exact DATA
-# order) rather than one-off repair functions per field — see
-# scripts/ui/repair_ship.gd.
+# What mending each costs is scripts/rules/shore_rules.gd's.
 var ship_shield: float = 100.0        # $38200
 var ship_energy: float = 63.0         # $38199 — special: repairs cap at
 	# 63, not 100 (SHORE LEAVE.bas line 2524's distinct formula; the
@@ -377,53 +374,6 @@ var ship_missile_system: float = 60.0 # $38187 — ship-system condition,
 	# the real source just happens to label both "MISSILES"
 var ship_laser: float = 100.0         # $38186
 var ship_nav_computer: float = 100.0  # $38184
-
-# label, cost multiplier, full-health value — in the original's exact
-# DATA order (SHORE LEAVE.bas line 2500). repair_ship.gd reads/writes
-# the matching ship_* field above by index (same match-by-index
-# pattern buy_weapons.gd already uses for its 4 categories).
-const REPAIR_LABELS := [
-	"SHIELD", "ENERGY", "# 1 ENGINE", "# 2 ENGINE", "COMPUTER", "RADAR",
-	"ENV. CONTROL", "HULL DMG.", "HYPERDRIVE", "MISSILES", "LASER", "NAV. COMP.",
-]
-const REPAIR_MULTIPLIERS: Array[float] = [
-	150.0, 200.0, 150.0, 150.0, 150.0, 150.0, 150.0, 150.0, 150.0, 100.0, 150.0, 150.0,
-]
-const REPAIR_MAX_HEALTH: Array[float] = [
-	100.0, 63.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0,
-]
-
-
-func get_ship_system_health(index: int) -> float:
-	match index:
-		0: return ship_shield
-		1: return ship_energy
-		2: return ship_engine1
-		3: return ship_engine2
-		4: return ship_computer
-		5: return ship_radar
-		6: return ship_env_control
-		7: return ship_hull
-		8: return ship_hyperdrive
-		9: return ship_missile_system
-		10: return ship_laser
-		_: return ship_nav_computer
-
-
-func set_ship_system_health(index: int, value: float) -> void:
-	match index:
-		0: ship_shield = value
-		1: ship_energy = value
-		2: ship_engine1 = value
-		3: ship_engine2 = value
-		4: ship_computer = value
-		5: ship_radar = value
-		6: ship_env_control = value
-		7: ship_hull = value
-		8: ship_hyperdrive = value
-		9: ship_missile_system = value
-		10: ship_laser = value
-		_: ship_nav_computer = value
 
 # --- Loot / goods inventory ---
 # Original: $38171-$38183, 13 bytes, shared between COLLECT.bas's loot
