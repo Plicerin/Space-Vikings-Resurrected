@@ -14,13 +14,14 @@ const RED := Color(1.0, 0.25, 0.2)
 const TARGET := Color(1.0, 0.6, 0.2)
 const BULB := preload("res://assets/shaders/bulb.gdshader")
 const BALL := preload("res://assets/shaders/ball.gdshader")
+const RING := preload("res://assets/shaders/ring.gdshader")
 const PLASTIC := preload("res://assets/shaders/plastic.gdshader")
 const AMBER_TEXT := Color(1.0, 0.69, 0.0) ## an 80s terminal's amber
 const GAUGE_RADIUS := 52.0
 const TILE := 46.0
 const ALERT := preload("res://assets/shaders/alert.gdshader")
 const TIGHT := 0.8 ## letters on a lamp's arc, closer than their usual spacing
-const PANEL_HEIGHT := 140.0
+const PANEL_HEIGHT := 150.0
 
 var camera: Camera3D
 var target: Node3D ## null when there is none
@@ -35,6 +36,7 @@ var range_scale := 0.5
 var _bulbs: Array[ColorRect] = []
 var _bulb_next := 0
 var _ball: ColorRect
+var _ring: ColorRect
 var _plastic: ColorRect
 var _alert: ColorRect
 var _letters: Control
@@ -132,6 +134,25 @@ func _draw_gauge() -> void:
 	var material := _ball.material as ShaderMaterial
 	material.set_shader_parameter("pitch", pitch * TAU / 256.0)
 	material.set_shader_parameter("bank", bank * TAU / 256.0)
+	if _ring == null:
+		_ring = ColorRect.new()
+		_ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var ring_material := ShaderMaterial.new()
+		ring_material.shader = RING
+		_ring.material = ring_material
+		_ring.show_behind_parent = true
+		add_child(_ring)
+	var in_orbit := not GameState.in_atmosphere
+	_ring.position = centre - Vector2.ONE * GAUGE_RADIUS * 1.5
+	_ring.size = Vector2.ONE * GAUGE_RADIUS * 3.0
+	var ring_material := _ring.material as ShaderMaterial
+	ring_material.set_shader_parameter("radius", GAUGE_RADIUS * 1.13 / (GAUGE_RADIUS * 1.5))
+	ring_material.set_shader_parameter("lit", 1.0 if in_orbit else 0.0)
+	var badge := centre + Vector2(1.0, 1.0).normalized() * GAUGE_RADIUS * 1.13
+	draw_circle(badge, 10.0, Color(0.03, 0.035, 0.04))
+	draw_set_transform(badge, 0.0, Vector2(0.5, 0.5))
+	_icon_orbit(Vector2.ZERO, Color(0.35, 0.8, 1.0) if in_orbit else Color(0.35, 0.8, 1.0, 0.22))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	draw_line(centre + Vector2(-16, 0), centre + Vector2(-6, 0), GREEN, 2.0, true)
 	draw_line(centre + Vector2(6, 0), centre + Vector2(16, 0), GREEN, 2.0, true)
 	draw_circle(centre, 2.0, GREEN)
@@ -172,13 +193,13 @@ func _draw_panel() -> void:
 
 
 func _lamp_centre(index: int) -> Vector2:
-	return _damage_box.position + Vector2(_damage_box.size.x * (1.0 + 2.0 * (index % 6)) / 12.0, 54.0 + (index / 6) * 44.0)
+	return _damage_box.position + Vector2(_damage_box.size.x * (1.0 + 2.0 * (index % 6)) / 12.0, 84.0 + (index / 6) * 36.0)
 
 
 ## The raised amber lettering on the plastic: drawn on `_letters`, a node over it.
 func _draw_letters() -> void:
 	var font := get_theme_default_font()
-	_raised_string(_letters, font, _damage_box.position + Vector2(10.0, 17.0), "DAMAGE CONTROL", 11)
+	_draw_damage(_letters, _damage_box)
 	for i in _damage_lamps.size():
 		_arc_text(_letters, font, _lamp_name(i, _damage_lamps[i]), _lamp_centre(i), 17.0)
 
@@ -234,8 +255,8 @@ func _bar(font: Font, name: String, track: Rect2, amount: float, centred: bool) 
 
 ## The telltales along the top left, as on a car's dash, without frames: A / M
 ## and missile / laser, each pair one tile with a slash between and one side
-## lit; the orbit lamp; and the damage scanner in a border that is the shield
-## (blue and lit with its small icon when the shields are up, dark when not).
+## lit. (The orbit lamp is a ring round the attitude ball, the damage scanner
+## is in the damage-control panel.)
 func _draw_lamps() -> void:
 	var blue := Color(0.35, 0.8, 1.0)
 	var x := 16.0
@@ -244,9 +265,6 @@ func _draw_lamps() -> void:
 	x += TILE * 2.0 + 22.0
 	_pair(x, y, ["missile", GameState.missile_mode_active, TARGET], ["laser", not GameState.missile_mode_active, blue])
 	x += TILE * 2.0 + 22.0
-	_symbol("orbit", Rect2(x, y, TILE, TILE).get_center(), blue, not GameState.in_atmosphere)
-	x += TILE + 34.0
-	_draw_rolling(Vector2(x + 14.0, y + TILE / 2.0 - 11.0))
 
 
 ## Two symbols side by side with a slanted line between: either lit.
@@ -295,9 +313,9 @@ func _icon_laser(c: Vector2, colour: Color) -> void:
 	draw_circle(c, 6.0, Color(colour, colour.a * 0.3))
 
 
-func _icon_shield(c: Vector2, colour: Color) -> void:
-	draw_colored_polygon(PackedVector2Array([c + Vector2(-11, -11), c + Vector2(11, -11), c + Vector2(11, 1), c + Vector2(0, 13), c + Vector2(-11, 1)]), colour)
-	draw_colored_polygon(PackedVector2Array([c + Vector2(-6, -7), c + Vector2(6, -7), c + Vector2(6, 0), c + Vector2(0, 8), c + Vector2(-6, 0)]), Color(0.04, 0.045, 0.05, 0.6))
+func _icon_shield(c: Vector2, colour: Color, canvas: CanvasItem = self) -> void:
+	canvas.draw_colored_polygon(PackedVector2Array([c + Vector2(-11, -11), c + Vector2(11, -11), c + Vector2(11, 1), c + Vector2(0, 13), c + Vector2(-11, 1)]), colour)
+	canvas.draw_colored_polygon(PackedVector2Array([c + Vector2(-6, -7), c + Vector2(6, -7), c + Vector2(6, 0), c + Vector2(0, 8), c + Vector2(-6, 0)]), Color(0.04, 0.045, 0.05, 0.6))
 
 
 func _icon_orbit(c: Vector2, colour: Color) -> void:
@@ -310,29 +328,29 @@ func _icon_orbit(c: Vector2, colour: Color) -> void:
 	draw_circle(c + Vector2(15.0, 0.0).rotated(-0.45) * 0.9, 2.5, colour)
 
 
-## Sixteen segments; with the alert on a bright patch with a fading tail sweeps
-## along and back, in amber, otherwise they sit dim.
-func _draw_rolling(at: Vector2) -> void:
-	var count := 16
+## The damage scanner, in the damage-control panel on `canvas`: its name over
+## a row of LEDs, in a frame that is the shield (blue and lit with its small
+## icon, lower right, when the shields are up; dark when not). With the damage
+## alert on, a bright patch with a fading tail sweeps along and back, in amber.
+func _draw_damage(canvas: CanvasItem, box: Rect2) -> void:
+	var count := 24
 	var shield := GameState.shields_up
+	var frame_rect := Rect2(box.position + Vector2(10.0, 22.0), Vector2(box.size.x - 20.0, 28.0))
 	var frame := StyleBoxFlat.new()
-	frame.bg_color = Color(0.03, 0.035, 0.04, 0.8)
-	frame.set_corner_radius_all(9)
+	frame.bg_color = Color(0.02, 0.022, 0.026, 0.9)
+	frame.set_corner_radius_all(8)
 	frame.set_border_width_all(2)
 	frame.border_color = Color(0.35, 0.8, 1.0, 0.95) if shield else Color(0.22, 0.24, 0.28, 0.8)
 	frame.anti_aliasing = true
 	if shield:
 		frame.shadow_color = Color(0.35, 0.8, 1.0, 0.4)
-		frame.shadow_size = 9
-	var box := Rect2(at - Vector2(14.0, 11.0), Vector2(count * 15.0 + 12.0, 44.0))
-	draw_style_box(frame, box)
-	# the shield's icon sits in the lower right corner, over the border
-	var corner := box.end - Vector2(16.0, 0.0)
-	draw_circle(corner, 11.0, Color(0.03, 0.035, 0.04))
-	var scale := 0.55
-	draw_set_transform(corner, 0.0, Vector2(scale, scale))
-	_icon_shield(Vector2.ZERO, Color(0.35, 0.8, 1.0) if shield else Color(0.35, 0.8, 1.0, 0.2))
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		frame.shadow_size = 7
+	canvas.draw_style_box(frame, frame_rect)
+	var corner := frame_rect.end - Vector2(18.0, 0.0)
+	canvas.draw_circle(corner, 10.0, Color(0.075, 0.078, 0.087))
+	canvas.draw_set_transform(corner, 0.0, Vector2(0.5, 0.5))
+	_icon_shield(Vector2.ZERO, Color(0.35, 0.8, 1.0) if shield else Color(0.35, 0.8, 1.0, 0.22), canvas)
+	canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	var alert := GameState.damage_alert_active
 	var sweep := 0.0
 	var direction := 1.0
@@ -340,19 +358,21 @@ func _draw_rolling(at: Vector2) -> void:
 		var phase := fmod(Time.get_ticks_msec() / 1000.0 * 1.4, 2.0)
 		sweep = (phase if phase < 1.0 else 2.0 - phase) * (count - 1)
 		direction = 1.0 if phase < 1.0 else -1.0
+	var pitch_px := (frame_rect.size.x - 24.0) / count
 	for i in count:
 		var level := 0.0
 		if alert:
 			var behind := (sweep - i) * direction # positive on the tail
-			level = exp(-pow(behind / 1.0, 2.0)) if behind <= 0.0 else exp(-behind / 2.2)
+			level = exp(-pow(behind / 1.0, 2.0)) if behind <= 0.0 else exp(-behind / 2.4)
 		var style := StyleBoxFlat.new()
 		style.bg_color = Color(0.16, 0.1, 0.03).lerp(Color(1.0, 0.62, 0.05), level)
-		style.set_corner_radius_all(3)
+		style.set_corner_radius_all(2)
 		style.anti_aliasing = true
 		if level > 0.25:
 			style.shadow_color = Color(1.0, 0.6, 0.05, 0.35 * level)
-			style.shadow_size = 5
-		draw_style_box(style, Rect2(at + Vector2(i * 15.0, 8.0), Vector2(12.0, 22.0)))
+			style.shadow_size = 4
+		canvas.draw_style_box(style, Rect2(frame_rect.position + Vector2(12.0 + i * pitch_px, 7.0), Vector2(pitch_px - 3.0, 14.0)))
+	_raised_string(canvas, get_theme_default_font(), box.position + Vector2(12.0, 16.0), "DAMAGE", 11)
 
 
 ## Where `world_at` lies as seen from the ship, on the ball: straight ahead is
