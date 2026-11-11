@@ -1,131 +1,159 @@
 extends Control
-## GALAXY MAP on the screen. Everything the original does is in
-## chart_loop.gd (and chart_program.gd under it), which draws on hi-res
-## page 1; this scene gives that loop a clock, a picture, a keyboard and
-## something to be the paddles.
+## The star chart, GALAXY MAP: the twenty stars as the original has them
+## placed, marked by how far off they are, violet where the planet is
+## secured, a box round the star the ship is at. Point at one (mouse or
+## the arrow keys) and click (or Enter) and it says what the star is
+## called, where it is and how far; "Y" to "DO YOU WISH FURTHER
+## INFORMATION?" runs the console with that star's page. Space goes back
+## to the console. What a click finds and what is said is
+## scripts/rules/chart_rules.gd, held to the real game
+## (tests/check_chart_rules.gd); this shows it.
 ##
-## The keyboard is the Apple's: every key goes into the latch. The chart
-## leaves on any key at all (the screen asks for SPACE), and its two
-## questions take a key each.
-##
-## What the original had and a PC has not is the pair of paddles that
-## move the cross, and their button. Here, and this is the port's choice:
-##
-##  - The mouse is the paddles. The original's cross is at PDL(0) * 1.19
-##    across and PDL(1) down, so the paddles are set to whatever puts
-##    the cross under the pointer. It still moves the way the original's
-##    did: twelve times a second, and it flickers (chart_loop.gd).
-##  - The arrow keys turn the same two paddles, a step for every turn of
-##    the chart's loop they are held through.
-##  - A mouse click or ENTER is the button. A press is remembered until
-##    the program next looks (line 3130).
-##
-## While GALAXY MAP loads the screen still shows what COM left on the
-## page, as the original's does. Both ways out run COM (scenes/com.tscn).
+## Where it parts from the original, on purpose: the cursor is a mouse
+## pointer (or arrow keys), not a flickering cross; the star under it is
+## named as it is pointed at; only Space and Escape leave, where any key
+## did; N and Escape answer no, where any key but Y did.
 
-const ChartLoop = preload("res://scripts/chart/chart_loop.gd")
-const HgrView = preload("res://scripts/shapes/hgr_view.gd")
-const HgrScreen = preload("res://scripts/shapes/hgr_screen.gd")
+const ChartRules = preload("res://scripts/rules/chart_rules.gd")
 
-const FRAME := 1.0 / 60.0
-## Paddle units an arrow key turns in one turn of the loop.
-const ARROW_STEP_X := 5
-const ARROW_STEP_Y := 4
+const COM := "res://scenes/com.tscn"
 
-@onready var _view: HgrView = $HGRCanvas/HgrView
+## Dots to a pixel of the map: the original's chart is 280 across.
+const SCALE := 3.0
+const ARROW_STEP := Vector2(5.0, 4.0) ## dots an arrow key moves the cursor
+const SAID := 2.0 ## seconds a "no star there" stays
 
-var _loop := ChartLoop.new()
-var _now := 0.0
-var _due := 0.0
-var _paddles := [128, 96]
-var _button := false
+const NEAR_COLOR := Color(0.95, 0.95, 0.95)
+const SECURED_COLOR := Color(0.72, 0.5, 1.0)
+const CURSOR_COLOR := Color(1.0, 0.42, 0.24)
+const FRAME_COLOR := Color(0.35, 0.35, 0.35)
+const RADIUS := {ChartRules.Mark.NEAR: 3.2, ChartRules.Mark.MIDDLE: 2.2, ChartRules.Mark.FAR: 1.3}
+
+## Tests shorten every wait by this.
+var pace := 1.0
+
+var _cursor := Vector2(140.0, 75.0)
+## The star the player is being asked about, or 0.
+var _asking := 0
+
+@onready var _hold: Timer = $Hold
+@onready var _map: Control = $Center/Columns/MapPanel/VBox/Map
+@onready var _said: Label = $Center/Columns/Info/VBox/Said
+@onready var _question: Label = $Center/Columns/Info/VBox/Question
+@onready var _answers: HBoxContainer = $Center/Columns/Info/VBox/Answers
 
 
 func _ready() -> void:
-	_show_page()
-	_point(_view.get_local_mouse_position())
-	_loop.wait = _wait
-	_loop.read_paddles = func() -> Array: return _paddles
-	_loop.read_button = _read_button
-	_loop.watch = _watch
-	_chart()
-
-
-func _chart() -> void:
-	if await _loop.run() == ChartLoop.Left.COM:
-		GameState.goto_scene("res://scenes/com.tscn")
-
-
-func _process(delta: float) -> void:
-	_now += delta
-	_show_page()
-
-
-func _show_page() -> void:
-	var page: HgrScreen = GameState.view3d.pages[GameState.view3d.shown]
-	if _view.screen != page:
-		_view.screen = page
-		_view.queue_redraw()
-
-
-## chart_loop.gd's clock; see space_flight.gd.
-func _wait(frames: float) -> void:
-	_due = maxf(_due, _now - 2.0 * FRAME) + frames * FRAME
-	while _now < _due and is_inside_tree(): # a scene taken down mid-wait stops waiting
-		await get_tree().process_frame
-
-
-func _watch(what: String) -> void:
-	if what == "turn":
-		_turn_paddle(0, "stick_left", "stick_right", ARROW_STEP_X)
-		_turn_paddle(1, "stick_forward", "stick_back", ARROW_STEP_Y)
-
-
-func _turn_paddle(paddle: int, down: String, up: String, step: int) -> void:
-	if Input.is_action_pressed(down):
-		_paddles[paddle] = maxi(_paddles[paddle] - step, 0)
-	if Input.is_action_pressed(up):
-		_paddles[paddle] = mini(_paddles[paddle] + step, 255)
-
-
-func _read_button() -> bool:
-	var down := _button or Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) \
-			or Input.is_key_pressed(KEY_ENTER)
-	_button = false
-	return down
+	_map.draw.connect(_draw_map)
+	_map.gui_input.connect(_map_input)
+	_hold.timeout.connect(_clear)
+	($Center/Columns/Info/VBox/Answers/Yes as Button).pressed.connect(_answer.bind(true))
+	($Center/Columns/Info/VBox/Answers/No as Button).pressed.connect(_answer.bind(false))
+	($Center/Columns/Info/VBox/Return as Button).pressed.connect(_leave)
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion:
-		_point(_view.make_input_local(event).position)
-	elif event is InputEventMouseButton:
-		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-			_button = true
-	elif event is InputEventKey:
-		_key(event)
-
-
-## The paddles that put the cross at a place on the hi-res screen.
-func _point(at: Vector2) -> void:
-	_paddles[0] = clampi(roundi(at.x / 1.19), 0, 255)
-	_paddles[1] = clampi(roundi(at.y), 0, 255)
-
-
-func _key(event: InputEventKey) -> void:
-	if not event.pressed or event.echo:
+	var key := event as InputEventKey
+	if key == null or not key.pressed:
 		return
-	for action: String in ["stick_forward", "stick_back", "stick_left", "stick_right"]:
-		if event.is_action(action):
-			return
-	if event.keycode == KEY_ENTER or event.keycode == KEY_KP_ENTER:
-		_button = true
+	get_viewport().set_input_as_handled()
+	if _asking > 0:
+		if key.keycode == KEY_Y:
+			_answer(true)
+		elif key.keycode == KEY_N or key.keycode == KEY_ESCAPE:
+			_answer(false)
 		return
-	var code: int = event.unicode
-	if event.keycode == KEY_ESCAPE:
-		code = 27
-	if code == 27 or (code >= 32 and code < 127):
-		_loop.program.press(String.chr(code))
+	match key.keycode:
+		KEY_SPACE, KEY_ESCAPE:
+			_leave()
+		KEY_ENTER, KEY_KP_ENTER:
+			_select()
+		KEY_LEFT:
+			_move(Vector2(-ARROW_STEP.x, 0.0))
+		KEY_RIGHT:
+			_move(Vector2(ARROW_STEP.x, 0.0))
+		KEY_UP:
+			_move(Vector2(0.0, -ARROW_STEP.y))
+		KEY_DOWN:
+			_move(Vector2(0.0, ARROW_STEP.y))
 
 
-func _exit_tree() -> void:
-	_loop.stop = true # a scene taken down mid-run has nothing to wait for
+## @witness GALAXY MAP 3110-3130
+func _map_input(event: InputEvent) -> void:
+	var motion := event as InputEventMouseMotion
+	if motion != null:
+		_cursor = ChartRules.clamp_cursor(motion.position / SCALE)
+		_map.queue_redraw()
+	var click := event as InputEventMouseButton
+	if click != null and click.pressed and click.button_index == MOUSE_BUTTON_LEFT:
+		_cursor = ChartRules.clamp_cursor(click.position / SCALE)
+		_select()
+
+
+func _move(by: Vector2) -> void:
+	_cursor = ChartRules.clamp_cursor(_cursor + by)
+	_map.queue_redraw()
+
+
+## @witness GALAXY MAP 3210-3270
+func _select() -> void:
+	if _asking > 0:
+		return
+	var star := ChartRules.star_at(_cursor)
+	if star == ChartRules.NO_STAR:
+		_said.text = ChartRules.SAID_NO_STAR
+		_hold.start(maxf(SAID * pace, 0.001))
+		return
+	_asking = star
+	_said.text = "\n".join(ChartRules.said(star))
+	_question.text = ChartRules.QUESTION
+	_question.show()
+	_answers.show()
+
+
+func _answer(yes: bool) -> void:
+	if _asking == 0:
+		return
+	if yes:
+		ChartRules.further(_asking)
+		GameState.goto_scene(COM)
+		return
+	_asking = 0
+	_clear()
+
+
+func _clear() -> void:
+	if _asking > 0:
+		return
+	_said.text = "CLICK A STAR."
+	_question.hide()
+	_answers.hide()
+
+
+## @witness GALAXY MAP 1, 3125
+## Back to the console, as the original's way out by INSTRUMENTS and
+## line 1 is: the marks it set are cleared.
+func _leave() -> void:
+	GameState.handover = 0
+	GameState.goto_scene(COM)
+
+
+## @witness GALAXY MAP 3000-3100
+func _draw_map() -> void:
+	var size := _map.size
+	_map.draw_rect(Rect2(Vector2.ZERO, size), Color.BLACK)
+	_map.draw_rect(Rect2(Vector2.ONE, size - Vector2(2, 2)), FRAME_COLOR, false, 2.0)
+	var over := ChartRules.star_at(_cursor)
+	for star in range(1, ChartRules.STARS + 1):
+		var at := ChartRules.place(star) * SCALE
+		var color := SECURED_COLOR if ChartRules.secured(star) else NEAR_COLOR
+		_map.draw_circle(at, RADIUS[ChartRules.mark(star)] * SCALE, color)
+		if ChartRules.here(star):
+			_map.draw_rect(Rect2(at - Vector2(5, 5) * SCALE, Vector2(10, 10) * SCALE), SECURED_COLOR, false, 2.0)
+		if star == over:
+			_map.draw_arc(at, 7.0 * SCALE, 0.0, TAU, 32, CURSOR_COLOR, 2.0)
+			_map.draw_string(ThemeDB.fallback_font, at + Vector2(8, -10) * SCALE / 2.0, ChartRules.NAMES[star - 1],
+					HORIZONTAL_ALIGNMENT_LEFT, -1, 14, CURSOR_COLOR)
+	var pointer := _cursor * SCALE
+	_map.draw_line(pointer - Vector2(8, 0), pointer + Vector2(8, 0), CURSOR_COLOR, 1.0)
+	_map.draw_line(pointer - Vector2(0, 8), pointer + Vector2(0, 8), CURSOR_COLOR, 1.0)

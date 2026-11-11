@@ -425,7 +425,7 @@ Source: `detokenized/H_D.bas`. Port: `godot-remake/scripts/flight/flight_program
 
 ## GALAXY MAP.bas — the star-chart screen
 
-Source: `detokenized/GALAXY MAP.bas`. Port: `godot-remake/scripts/chart/chart_program.gd` (the statements), `chart_loop.gd` (the order and the measured time), `star_chart.gd` (the scene). ✅ ported whole 2026-11-10: `tests/check_chart.tscn` compares hi-res page 1 and the text cursor with the real game's at nine stops of a route through every branch (`analysis/live/chart/`), no difference.
+Source: `detokenized/GALAXY MAP.bas`. Port (2026-11-11, native): `godot-remake/scripts/rules/chart_rules.gd` (the rules, `@witness`-tagged, held to a 50-probe MAME recording by `tests/check_chart_rules.gd`), `scripts/chart/star_chart.gd` (the scene, `tests/drive_chart.gd`). The hi-res program and loop, and the rows below that name them (`chart_program.gd`, `chart_loop.gd`), are in git history before that date; ledger: `analysis/witness/GALAXY_MAP.md`.
 
 This screen is an information browser. A paddle-driven cursor moves
 over a 2-D chart; the button on a star shows its name, coordinates and

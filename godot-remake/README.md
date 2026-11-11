@@ -33,6 +33,7 @@ that count, waits a key can cut short.
 |---|---|---|---|
 | `GROUND FORCES`, `RECALL`, `COLLECT` | `scripts/rules/ground_rules.gd` | `scripts/ui/ground_forces.gd` | `check_ground_rules` (the rules), `drive_ground_forces` (the scene) |
 | `SHORE LEAVE` (shore leave, enlisting and weapons, loot, repairs, a base, cryogenics) | `scripts/rules/shore_rules.gd` | `scripts/ui/shore_leave.gd`, one panel over the ground forces menu | `check_shore_rules`, `drive_shore_leave` |
+| `GALAXY MAP` (star chart) | `scripts/rules/chart_rules.gd` | `scripts/chart/star_chart.gd` | `check_chart_rules`, `drive_chart` |
 | `COM` (command console, central and navigation computers, galaxy directory, damage-control lamps) | `scripts/rules/com_rules.gd` | `scripts/com/com_console.gd` | `check_com_rules`, `drive_com` |
 | `STATUS`, `SUPPLY` (the central computer's two reports) | `scripts/rules/report_rules.gd` | `scripts/reports/report_console.gd`, one panel each | `check_report_rules`, `drive_reports` |
 
@@ -49,7 +50,6 @@ game running in MAME.
 | `H_D` (hyperdrive) | `flight_program.gd`, `flight_loop.gd` | `check_jump` |
 | `EX`, `DMG`, `S/X` (the ends of a fight) | `flight_combat.gd`, `scripts/combat/combat_fx.gd` | `check_jump` |
 | A2-3D1 (the 3D view, machine code) | `scripts/shapes/a2_3d1_view.gd`, `a2_3d1_trig.gd` | `check_a2_3d1` |
-| `GALAXY MAP` (star chart) | `scripts/chart/chart_program.gd`, `chart_loop.gd` | `check_chart` |
 | `END` (save, continue, end game) | `scripts/end/end_program.gd`, `end_loop.gd` | `check_end`, `check_end_atmosphere` |
 | DOS's error routine (SYSTEM ERROR, reboot) | `scripts/dos/system_error.gd`, `scripts/shapes/text_screen.gd` | `check_end` |
 | `RADAR` | `scripts/radar/radar_program.gd`, `radar_loop.gd` | `check_radar` and the six beside it |
@@ -89,15 +89,15 @@ ledger's open items are the two COLLECT lines no recording runs: 820
 
 Three files per program:
 
-- **the program** (`flight_program.gd`, `chart_program.gd`,
+- **the program** (`flight_program.gd`,
   `end_program.gd`): the BASIC
   statements, a function for each stretch between which time passes on
   the real machine. No timing.
-- **the loop** (`flight_loop.gd`, `chart_loop.gd`, `end_loop.gd`): a
+- **the loop** (`flight_loop.gd`, `end_loop.gd`): a
   coroutine that
   calls those in order with the measured waits between, in video frames.
   Everything that takes time goes through one `wait` callable.
-- **the scene** (`space_flight.gd`, `star_chart.gd`, `end_console.gd`):
+- **the scene** (`space_flight.gd`, `end_console.gd`):
   points `wait` at a
   real clock, shows whichever hi-res page the original would have on
   show, and turns keyboard and mouse into the Apple's keyboard latch,
@@ -161,33 +161,35 @@ have the full lists:
 
 ## Star chart
 
-The central computer's "GALAXY MAP". Twenty stars by X and Y, a
+The central computer's "GALAXY MAP", one panel (`scripts/chart/star_chart.gd`
+over `scripts/rules/chart_rules.gd`, held to a recording that put the
+paddles to fifty places: `check_chart_rules`). Twenty stars by X and Y, a
 different mark for near, middle and far Z, violet for a secured one, a
-box round the star the ship is at. The paddles move a cross; the button
-asks about the star under it (name, position, distance from here) and
-offers the directory page. It does not set a course: that is the
-navigation computer's job.
+box round the star the ship is at. Point at a star and click (or the
+arrow keys and Enter) and it says what the star is called, where it is
+and how far from here; "Y" to the question runs the console with that
+star's page. It does not set a course: that is the navigation
+computer's job.
 
-Kept from the original:
+Kept from the original (and what the recording confirms):
 
-- One turn of the chart's loop takes 82 ms and the cross is on the
-  screen for about two fifths of it, so it flickers and moves twelve
-  times a second.
-- The answer takes longer the further down the list the star is (43 ms a
-  star), and "THERE IS NO STAR SYSTEM THERE" takes the whole list.
-- The cross is taken off with a black `DRAW`, which takes the star under
-  it off too until the chart is drawn again.
-- Any key leaves, not only the space the screen asks for.
-- Leaving goes through `INSTRUMENTS`, which redraws the panel without
-  calling TRANLIT; the chart then paints the eight lamps itself as plain
-  blocks. They stay like that until a lamp key is pressed in flight.
-- "Y" at the question writes into the byte `SHORE LEAVE` keeps its
-  once-a-trip base flag in, and the directory page clears it: asking the
-  chart about a star gives the base its turn back.
+- A star's cell is three columns of ten dots and two rows of five, and
+  the first star in the list whose cell the cursor is in wins: aiming at
+  VARCAR finds BARNARD'S STAR, which is a row below it and earlier, and
+  aiming at CYGNI finds PROCYON.
+- The cursor is held between 10 and 270 across and 10 and 145 down.
+- "Y" at the question gives the once-a-trip base flag back (the original
+  writes an 8 into the byte `SHORE LEAVE` keeps it in).
 - Star 16 is "GROOMBRIDGE 168" here and in `COM`, "GROOMBRIDGE 1618" in
   `STATUS` (and the port's reports) and `COLLECT`.
 - Applesoft's `INT(H * 1.19)` puts paddle readings 100 and 200 one dot
   left of where exact arithmetic would.
+
+Not kept: the flickering cross and the black `DRAW` that took the star
+under it off, the search taking longer the further down the list a star
+is, any key at all leaving (Space and Escape do), any key but Y meaning
+no (N and Escape do), and the eight flight-panel lamps the original
+paints on the way out (the flight scene does its own).
 
 ## The planet record and SOL's flag
 
@@ -283,7 +285,7 @@ a difference.
 
     godot --headless --path . res://tests/check_flight_passes.tscn   # 50 passes of flight, both pages, every byte
     godot --headless --path . res://tests/check_jump.tscn            # 42 passes: fighting, hyperdrive, arrival
-    godot --headless --path . res://tests/check_chart.tscn           # the chart at 9 stops, page and text cursor
+    godot --headless --path . res://tests/check_chart_rules.tscn     # GALAXY MAP: 50 recorded paddle positions through the rules, and the 18 stars' marks on the recorded page
     godot --headless --path . res://tests/check_com_rules.tscn       # COM: 5 recorded routes through the rules, 201 screens rebuilt from the characters it drew
     godot --headless --path . res://tests/check_end.tscn             # END at 20 stops and back in flight; its keys; SYSTEM ERROR dot for dot
     godot --headless --path . res://tests/check_end_atmosphere.tscn  # END's refusal in an atmosphere, 6 stops
@@ -301,7 +303,7 @@ a difference.
     godot --headless --path . -s res://tests/check_flight_core.gd    # flight arithmetic against the model
     godot --headless --path . -s res://tests/check_a2_3d1.gd         # 200 views against tools/a2_3d1_view.py
     godot --headless --fixed-fps 60 --path . res://tests/drive_flight.tscn   # the flight scene, by key events
-    godot --headless --fixed-fps 60 --path . res://tests/drive_chart.tscn    # the chart scene, by mouse and keys
+    godot --headless --fixed-fps 60 --path . res://tests/drive_chart.tscn    # the chart scene, by pointer and keys: a click, the question, Y and N, Space, the way to the console and back
     godot --headless --fixed-fps 60 --path . res://tests/drive_com.tscn      # the console scene, by keys: the lamps, every menu, a course, the directory, every way out of it
     godot --headless --fixed-fps 60 --path . res://tests/drive_radar.tscn    # the radar scene, by keys: from flight, from the console, an I.D. and back, no radar
     godot --headless --fixed-fps 60 --path . res://tests/drive_save.tscn     # title, END, save, continue, SYSTEM ERROR, three boots, END GAME

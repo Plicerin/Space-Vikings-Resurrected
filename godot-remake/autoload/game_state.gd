@@ -116,7 +116,7 @@ var base_built_this_trip: bool = false
 const PLANET_COUNT := 20
 # STATUS.bas's and COLLECT.bas's 20-name DATA line. COM.bas and GALAXY
 # MAP.bas have the same list with one name different: star 16 is
-# "GROOMBRIDGE 168" there (chart_program.gd, star_name()).
+# "GROOMBRIDGE 168" there (com_rules.gd and chart_rules.gd, NAMES).
 const STAR_NAMES := [
 	"SOL", "ALPHA CENTAURI", "BARNARD'S STAR", "WOLF 359", "LUYTEN",
 	"LALANDE 21185", "SIRIUS", "VARCAR", "XANADON", "EPSILON ERIDANA",

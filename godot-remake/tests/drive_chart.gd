@@ -1,34 +1,24 @@
 extends Node
-## Uses the star chart scene (scenes/star_chart.tscn) the way a player
-## would: mouse and key events put into Godot's input queue, on the
-## scene's own clock, and a look at what came of them. What the chart
-## draws is held to the real game in check_chart.gd; this is for the
-## scene round it, that the mouse and the keys reach the program as
-## paddles, button and keyboard, and that its two ways out lead to the
-## command console (scenes/com.tscn) and, from a star's page there, back.
+## Uses the star chart (scenes/star_chart.tscn) the way a player would:
+## the pointer moved over the map and clicked, keys put into Godot's
+## input queue, and a look at what the chart says and where it goes. What
+## a click finds and what is said is held to the real game in
+## check_chart_rules.gd; this is for the scene round it.
 ##
 ##   godot --headless --fixed-fps 60 --path godot-remake res://tests/drive_chart.tscn
 ##
-## Add `-- --shots <directory>` to save the page on show after each step.
-##
-## The chart replaces the current scene when it leaves, so the driver is
-## a node of its own under the root (see drive_flight.gd).
+## The scenes replace one another, so the driver is a node of its own
+## under the root (see drive_radar.gd).
 
 const CHART := "res://scenes/star_chart.tscn"
 const COM := "res://scenes/com.tscn"
-const REFERENCE := "../analysis/live/chart/"
-## Where SIRIUS is on the hi-res screen, and a place with no star.
-const SIRIUS := Vector2(135, 115)
-const NOWHERE := Vector2(30, 30)
-## Frames before a step is given up.
-const TIMEOUT_FRAMES := 60 * 120
+const ChartRules = preload("res://scripts/rules/chart_rules.gd")
+const INFO := "Center/Columns/Info/VBox/"
+const SIRIUS := 7
+const TIMEOUT_FRAMES := 60 * 30
 
 var _driver := false
-var _seen := {}
 var _bad := 0
-var _shots := ""
-## The page when the loop last said "turn" (the cross off) and "cross".
-var _page_at := {}
 
 
 func _ready() -> void:
@@ -43,180 +33,147 @@ func _ready() -> void:
 
 
 func _drive() -> void:
-	var args := OS.get_cmdline_user_args()
-	if args.size() == 2 and args[0] == "--shots":
-		_shots = args[1]
-	GameState.start_new_game()
-	# as flight leaves the page: the panel, and TRANLIT's four switches
-	var flight: RefCounted = load("res://scripts/flight/flight_program.gd").new()
-	flight.instruments()
-	GameState.goto_scene(CHART)
-	await _scene_is(CHART)
-	var scene := _hook()
-	var view: Node2D = scene.get_node("HGRCanvas/HgrView")
-
-	await _seen_more("turn")
-	_check("the chart is the real one's", _page_at["turn"] == _live("chart_clean"))
-
-	_mouse_to(view, SIRIUS)
-	await _seen_more("cross", 2)
-	_check("the mouse on SIRIUS sets the paddles (%s)" % str(scene._paddles),
-			scene._paddles == [113, 115])
-	_check("and the cross is where the real one's was", _page_at["cross"] == _live("chart_cursor"))
-	_shot("1_cross")
-
+	await _chart()
+	_check("a new chart says to click a star", _said() == "CLICK A STAR." and not _answers().visible)
+	_point(ChartRules.place(SIRIUS))
 	_click()
-	await _seen_more("question")
-	_check("a click asks about the star", _page_at["question"] == _live("chart_info"))
-	_shot("2_sirius")
-
-	var drawn: int = _seen["drawn"]
-	_tap(KEY_N, "n")
-	await _seen_more("turn")
-	_check("N is not a Y: the chart is drawn again", _seen["drawn"] == drawn + 1)
-
-	var before: Array = scene._paddles.duplicate()
-	_key(KEY_LEFT, true)
-	_key(KEY_UP, true)
-	await _seen_more("turn", 3)
-	_key(KEY_LEFT, false)
-	_key(KEY_UP, false)
-	_check("the arrows turn the paddles (%s -> %s)" % [str(before), str(scene._paddles)],
-			scene._paddles[0] < before[0] and scene._paddles[1] < before[1])
-
-	_mouse_to(view, NOWHERE)
-	await _seen_more("turn", 2)
-	_tap(KEY_ENTER, "")
-	await _seen_more("message")
-	_check("ENTER where there is no star says so", true)
-	_shot("3_no_star")
-	await _seen_more("turn")
-	_check("and the message goes", _page_at["turn"] == _live("chart_clean"))
-
-	_mouse_to(view, SIRIUS)
-	await _seen_more("cross", 2)
+	await _frames(2)
+	var said: Array = ChartRules.said(SIRIUS)
+	_check("a click on SIRIUS: its name, place and distance", _said() == "\n".join(said) and said[0] == "STAR SYSTEM : SIRIUS")
+	_check("and the question, with Y and N", _question().visible and _answers().visible and _question().text == ChartRules.QUESTION)
 	_click()
-	await _seen_more("question")
-	_tap(KEY_Y, "y")
-	await _scene_is(COM)
-	_check("Y runs the command console", _current_path() == COM)
-	await _frames(3)
-	var console := get_tree().current_scene.get_node("Center/Columns/Console/VBox")
-	_check("for SIRIUS's page", (console.get_node("Title") as Label).text == "SIRIUS STAR SYSTEM")
-	_shot("4_page")
+	await _frames(2)
+	_check("another click while asked changes nothing", _said() == "\n".join(said))
+	_tap(KEY_N)
+	await _frames(2)
+	_check("N: the question goes", _said() == "CLICK A STAR." and not _question().visible and not _answers().visible)
 
-	(console.get_node("Buttons").get_child(0) as Button).pressed.emit()
+	_point(Vector2(20, 20))
+	_click()
+	await _frames(2)
+	_check("a click on nothing: no star there", _said() == ChartRules.SAID_NO_STAR and not _answers().visible)
+	await _until(func() -> bool: return _said() == "CLICK A STAR.")
+	_check("and it goes by itself", _said() == "CLICK A STAR.")
+
+	# the keys: the cursor moves, Enter asks
+	await _chart()
+	_point(ChartRules.place(SIRIUS) - Vector2(10, 0))
+	_tap(KEY_RIGHT)
+	_tap(KEY_RIGHT)
+	await _frames(2)
+	_tap(KEY_ENTER)
+	await _frames(2)
+	_check("two arrows right and Enter ask about SIRIUS", _said().begins_with("STAR SYSTEM : SIRIUS"))
+	_tap(KEY_Y)
+	await _scene_is(COM)
+	_check("Y runs the console with SIRIUS's page", _path() == COM and GameState.handover == SIRIUS)
+	await _frames(3)
+	_check("which has it up", (_scene().get_node("Center/Columns/Console/VBox/Title") as Label).text == "SIRIUS STAR SYSTEM")
+	(_scene().get_node("Center/Columns/Console/VBox/Buttons").get_child(0) as Button).pressed.emit()
 	await _scene_is(CHART)
-	_check("a key there runs the chart again", _current_path() == CHART)
-	_hook()
-	await _seen_more("turn")
-	_check("drawn as it was", _page_at["turn"] == _live("chart_clean"))
+	_check("and its RETURN runs the chart again, the mark taken", _path() == CHART and GameState.handover == 0)
 
-	_tap(KEY_SPACE, " ")
-	await _seen_more("panel")
-	_shot("5_panel")
+	await _chart()
+	GameState.base_built_this_trip = true
+	_point(ChartRules.place(SIRIUS))
+	_click()
+	await _frames(2)
+	_tap(KEY_Y)
 	await _scene_is(COM)
-	_check("SPACE leaves for the command console", _current_path() == COM)
+	_check("Y gives the once-a-trip base flag back", not GameState.base_built_this_trip)
+
+	await _chart()
+	_tap(KEY_SPACE)
+	await _scene_is(COM)
+	_check("Space goes to the console, nothing asked", _path() == COM and GameState.handover == 0)
 	await _frames(3)
-	_check("at its command menu", (get_tree().current_scene.get_node("Center/Columns/Console/VBox/Title") as Label).text == "COMMAND MODE")
-	_shot("6_command")
+	_check("which is at its command menu", (_scene().get_node("Center/Columns/Console/VBox/Title") as Label).text == "COMMAND MODE")
+
+	await _chart()
+	(_scene().get_node(INFO + "Return") as Button).pressed.emit()
+	await _scene_is(COM)
+	_check("the button goes to the console", _path() == COM)
 
 	print("chart scene driven: %d wrong" % _bad)
 	get_tree().quit(1 if _bad > 0 else 0)
 
 
-## Listens in on the current scene's loop.
-func _hook() -> Node:
+## A new game, the chart up.
+func _chart() -> void:
+	GameState.start_new_game()
+	GameState.goto_scene(CHART)
+	await _scene_is(CHART)
+	await _frames(3)
+	_scene().pace = 0.1
+
+
+func _scene() -> Control:
+	return get_tree().current_scene
+
+
+func _said() -> String:
+	return (_scene().get_node(INFO + "Said") as Label).text
+
+
+func _question() -> Label:
+	return _scene().get_node(INFO + "Question")
+
+
+func _answers() -> Control:
+	return _scene().get_node(INFO + "Answers")
+
+
+## The pointer at a place in the chart's dots.
+func _point(dots: Vector2) -> void:
+	var event := InputEventMouseMotion.new()
+	event.position = dots * 3.0
+	_scene()._map_input(event)
+
+
+func _click() -> void:
+	var event := InputEventMouseButton.new()
+	event.button_index = MOUSE_BUTTON_LEFT
+	event.pressed = true
+	event.position = _scene()._cursor * 3.0
+	_scene()._map_input(event)
+
+
+func _path() -> String:
 	var scene := get_tree().current_scene
-	var theirs: Callable = scene._loop.watch
-	scene._loop.watch = func(what: String) -> void:
-		theirs.call(what)
-		_seen[what] = _seen.get(what, 0) + 1
-		if what == "turn" or what == "cross" or what == "question":
-			_page_at[what] = GameState.view3d.pages[0].mem.duplicate()
-	return scene
+	return scene.scene_file_path if scene != null else ""
+
+
+func _scene_is(path: String) -> void:
+	for i in TIMEOUT_FRAMES:
+		if _path() == path:
+			return
+		await get_tree().process_frame
+	_check("never reached %s" % path, false)
+
+
+func _until(done: Callable) -> void:
+	for i in TIMEOUT_FRAMES:
+		if done.call():
+			return
+		await get_tree().process_frame
+	_check("waited for too long", false)
+
+
+func _frames(n: int) -> void:
+	for i in n:
+		await get_tree().process_frame
+
+
+func _tap(keycode: Key) -> void:
+	for down in [true, false]:
+		var event := InputEventKey.new()
+		event.keycode = keycode
+		event.physical_keycode = keycode
+		event.pressed = down
+		Input.parse_input_event(event)
 
 
 func _check(what: String, ok: bool) -> void:
 	print("%s  %s" % ["ok   " if ok else "WRONG", what])
 	if not ok:
 		_bad += 1
-
-
-func _live(name_: String) -> PackedByteArray:
-	return FileAccess.get_file_as_bytes(REFERENCE.path_join("%s_p1.bin" % name_))
-
-
-func _current_path() -> String:
-	var scene := get_tree().current_scene
-	return scene.scene_file_path if scene != null else ""
-
-
-func _scene_is(path: String) -> void:
-	for i in range(TIMEOUT_FRAMES):
-		if _current_path() == path:
-			return
-		await get_tree().process_frame
-	print("WRONG  never reached %s" % path)
-	_bad += 1
-
-
-## Waits until the loop has said `what` that many more times.
-func _seen_more(what: String, times: int = 1) -> void:
-	var until: int = _seen.get(what, 0) + times
-	for i in range(TIMEOUT_FRAMES):
-		if _seen.get(what, 0) >= until:
-			return
-		await get_tree().process_frame
-	print("WRONG  the program never came to \"%s\"" % what)
-	_bad += 1
-	get_tree().quit(1)
-
-
-## Moves the pointer to a dot of the hi-res screen.
-func _mouse_to(view: Node2D, dot: Vector2) -> void:
-	var at: Vector2 = view.get_global_transform_with_canvas() * dot
-	at = get_tree().root.get_final_transform() * at
-	var event := InputEventMouseMotion.new()
-	event.position = at
-	event.global_position = at
-	Input.parse_input_event(event)
-
-
-func _click() -> void:
-	for down: bool in [true, false]:
-		var event := InputEventMouseButton.new()
-		event.button_index = MOUSE_BUTTON_LEFT
-		event.pressed = down
-		Input.parse_input_event(event)
-
-
-func _key(keycode: Key, down: bool, character: String = "") -> void:
-	var event := InputEventKey.new()
-	event.keycode = keycode
-	event.physical_keycode = keycode
-	event.pressed = down
-	if down and character != "":
-		event.unicode = character.unicode_at(0)
-	Input.parse_input_event(event)
-
-
-func _tap(keycode: Key, character: String) -> void:
-	_key(keycode, true, character)
-	_key(keycode, false)
-
-
-func _shot(name_: String) -> void:
-	if _shots == "":
-		return
-	var page: RefCounted = GameState.view3d.pages[GameState.view3d.shown]
-	var picture := Image.create(280, 192, false, Image.FORMAT_RGBA8)
-	picture.fill(Color.BLACK)
-	var drawn: Image = page.image()
-	picture.blend_rect(drawn, Rect2i(0, 0, 280, 192), Vector2i.ZERO)
-	picture.save_png(_shots.path_join("%s.png" % name_))
-
-
-func _frames(n: int) -> void:
-	for i in n:
-		await get_tree().process_frame

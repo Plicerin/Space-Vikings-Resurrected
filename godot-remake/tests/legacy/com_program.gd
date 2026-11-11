@@ -45,7 +45,7 @@ const HgrScreen = preload("res://scripts/shapes/hgr_screen.gd")
 const ShapeTable = preload("res://scripts/shapes/shape_table.gd")
 const CharGenerator = preload("res://scripts/shapes/char_generator.gd")
 const FlightProgram = preload("res://scripts/flight/flight_program.gd")
-const ChartProgram = preload("res://scripts/chart/chart_program.gd")
+const ComRules = preload("res://scripts/rules/com_rules.gd")
 
 const STARS := 20
 const BLUE := 6
@@ -120,7 +120,7 @@ static func val(typed: String) -> int:
 
 ## S$(), lines 15100-15130: the same names as the chart's.
 static func star_name(star: int) -> String:
-	return ChartProgram.star_name(star)
+	return ComRules.NAMES[star - 1]
 
 
 ## PEEK(ST(J1)), line 15140.

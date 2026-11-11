@@ -102,7 +102,7 @@ def executed(name, spec):
     for pattern in spec["logs"]:
         for path in sorted(glob.glob(os.path.join(ROOT, pattern))):
             lines = set()
-            inside = "after_get" not in spec and "ran" not in spec and "from_key" not in spec
+            inside = "after_get" not in spec and "ran" not in spec and "from_key" not in spec and "windows" not in spec
             after_key = False
             with open(path) as f:
                 texts = f.read().split("\n")
@@ -111,6 +111,18 @@ def executed(name, spec):
                 keys = [i for i, t in enumerate(texts) if "-- key" in t]
                 start = next((i for i in keys if "-- key '%s'" % spec["from_key"] in texts[i]), 0)
                 texts = texts[start:keys[-1] if keys else len(texts)]
+                inside = True
+            if "windows" in spec:
+                # [from key, to key or "end"] pairs: the lines between each pair
+                kept = []
+                for first, last in spec["windows"]:
+                    a = next((i for i, t in enumerate(texts) if "-- key '%s'" % first in t), None)
+                    if a is None:
+                        continue
+                    b = len(texts) if last == "end" else next(
+                        (i for i, t in enumerate(texts) if i > a and "-- key '%s'" % last in t), len(texts))
+                    kept += texts[a:b]
+                texts = kept
                 inside = True
             if True:
                 for text in texts:

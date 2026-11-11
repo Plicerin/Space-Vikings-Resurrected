@@ -49,6 +49,21 @@
         "analysis/live/com/com_edges.log"
       ],
       "from_key": "C"
+    },
+    "GALAXY MAP": {
+      "logs": [
+        "analysis/live/chart/lines_live.log"
+      ],
+      "windows": [
+        [
+          "3",
+          "Y"
+        ],
+        [
+          "X",
+          "end"
+        ]
+      ]
     }
   },
   "waive": {
@@ -92,6 +107,41 @@
       "15020": "DATA, read by the lamps' loop and not run: the lamps' words are in COM_RULES",
       "15030": "DATA, read by the lamps' loop and not run: the lamps' words are in COM_RULES",
       "897": "never reached: nothing goes to it (the original's own dead line)"
+    },
+    "GALAXY MAP": {
+      "5": "DIM, the hi-res switch and the names",
+      "3000": "text window of the page",
+      "3002": "text window",
+      "3096": "SCALE=1 for the shapes",
+      "3100": "the caption: the title and 'press space'",
+      "3245": "never reached (the original's dead line)",
+      "15100": "S$() names (the rules' NAMES)",
+      "15110": "S$() names",
+      "15120": "S$() names",
+      "15130": "S$() names",
+      "15140": "RETURN of the names",
+      "10000": "never called by this program (a leftover of COM's lamp test)",
+      "10010": "never called by this program",
+      "5000": "repaints the flight panel's lamps: the flight scene's HUD does it",
+      "5010": "flight panel lamps",
+      "5020": "flight panel lamps",
+      "5030": "flight panel lamps",
+      "5040": "flight panel lamps",
+      "5050": "flight panel lamps",
+      "5060": "flight panel lamps",
+      "5065": "flight panel lamps",
+      "5070": "flight panel lamps",
+      "5080": "flight panel lamps",
+      "5090": "flight panel lamps",
+      "5100": "flight panel lamps",
+      "5110": "flight panel lamps",
+      "5120": "flight panel lamps",
+      "5130": "flight panel lamps",
+      "5140": "flight panel lamps",
+      "5150": "flight panel lamps",
+      "5160": "flight panel lamps",
+      "5500": "flight panel lamps: draws a lamp block",
+      "2": "the 77 trampoline into flight (END's CONTINUE, START's old game) is the flight loop's own (flight_loop.gd run()), not run through this scene"
     }
   }
 }
