@@ -197,19 +197,14 @@ var planet_surrendered: Array[bool] = []         # byte 4 <-> gf_planet_surrende
 # substitutes 3 for it (START.bas 230, H_D.bas 38, ORBIT.bas 31,
 # RADAR.bas 5002) and nothing else tells 2 from 3, so
 # load_planet_record() does that substitution once. Confirmed live in
-# MAME 2026-11-07: this is exactly which SHIP # N wireframe RADAR.bas
-# renders -- see A2-3D1_ENGINE_ANALYSIS.md and
-# scripts/shapes/a2_3d1_model.gd.
+# MAME 2026-11-07: this is exactly which SHIP # N wireframe is in the
+# flight program's picture, and RADAR.bas's -- see
+# A2-3D1_ENGINE_ANALYSIS.md. The I.D. programs and their text are
+# scripts/radar/ship_id_program.gd.
 #
 # The only BASIC write is EX.bas's `POKE 38205,0` when the defender is
 # destroyed; every other value arrives through the record copy above,
 # which is why a grep for POKEs never found a setter.
-const DEFENDER_TIER_LABELS := {
-	0: "THERE IS NO STARSHIP IN THIS SYSTEM.",
-	1: "SMALL SPACE LAB AND OBSERVATORY\nMINIMUM WEAPONS AND ARMOR.",
-	3: "LIGHT CRUISER WITH LASERS,\nMISSILES AND FIGHTER COVER.",
-	4: "HEAVY CRUISER WITH PHOTON\nMISSILES AND HEAVY LASERS.\n20-40 FIGHTERS.",
-}
 var orbital_defender_tier: int = 0 # $38205 ("ET")
 
 

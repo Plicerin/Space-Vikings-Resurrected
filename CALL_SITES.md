@@ -155,7 +155,7 @@ key codes and groups the outcomes.
 | `B` | 203 → 318 → 500 | `POKE LT,3: CALL 38402` — step the condition | ✅ `keys()` → `tranlit(3)` |
 | `C` | 203 → 319 | `RUN COM` | ✅ leaves flight for the command console (see `COM.bas` below) |
 | `H` | 204 → 207 → 208 → 209 | `RUN H/D` — hyperdrive | ✅ `flight_loop.gd::_hyperdrive()`, held to a live recording (`tests/check_jump.gd`) |
-| `R` | 206 → 320 | `RUN RADAR` | ✅ leaves flight for the radar (a stand-in screen) |
+| `R` | 206 → 320 | `RUN RADAR` | ✅ leaves flight for the radar (see `RADAR.bas` below) |
 | `S` | 206 → 321 → 500 | `POKE LT,1: CALL 38402` — shields on/off | ✅ `keys()` → `tranlit(1)` |
 | `W` | 205 → 500 | `POKE LT,2: CALL 38402` — missile/laser | ✅ `keys()` → `tranlit(2)` |
 | any other key | … → 210 | nothing | ⬜ |
@@ -347,7 +347,8 @@ pointer the firmware follows from then on:
 ✅ both ported: `scripts/shapes/char_generator.gd` is the character
 generator (its modes, text window, form feed and wrap), and
 `shape_table.gd` with `hgr_screen.gd` the ROM's `DRAW`/`XDRAW`. The
-Godot UI stand-ins (COM, RADAR, GROUND FORCES, …) do not use them yet.
+Godot UI stand-ins (GROUND FORCES and the programs under it) do not use
+them yet.
 The mapper checks for the other vectors too (KSW, `&`, `USR`, RESET);
 none is used.
 
@@ -629,6 +630,54 @@ then died of it: `STARSHIP SIMULATOR` 173-180 draws the gauge's marker
 at `199 + E`, off the screen, an ILLEGAL QUANTITY and so the SYSTEM
 ERROR screen. Nothing in the game takes the energy past 63.
 
+## RADAR.bas, SHIP # n I.D. — the radar (live 2026-11-10)
+
+Recorded with `tools/mame/radar_live.lua`, seven routes: `radar` (R in
+flight, X), `radar_ids` (R, and a key at the radar and a key at the
+I.D. six times over with 38205 poked to 1, 2, 3, 4 and 0), `radar_com`
+(COM's "3", an I.D. and back, X, COM again), `radar_dead` (38195 poked
+to 0, from the console and from flight) and `radar_ship_0`, `_1`, `_4`
+(another `SHIP # n` loaded at `$7879` and the ship put right over it).
+The records are in `analysis/live/radar/`. Ported as
+`scripts/radar/radar_program.gd` and `ship_id_program.gd` (statements),
+`radar_loop.gd` and `ship_id_loop.gd` (order and frames) and
+`radar_console.gd` (one scene for both). `check_radar*` compare pages 1
+and 2, the text cursor and window, 973/974, A2-3D1's bytes 29461-29475
+and 38388 at every stop of every route, and page 1 back in flight: 38
+stops, 0 bytes different.
+
+| Line(s) | What it does | Seen live | Port |
+|---|---|---|---|
+| `RADAR` 10 | `IF PEEK(38195) = 0 THEN 2058` | **With the radar shot away nothing is drawn and nothing is said**: the program loads (165 frames), wipes the text rows and runs whichever program ran it. From flight that skips line 2057 as well | ✅ `dead()`; route `radar_dead` |
+| `RADAR` 1500-2000 | the eye's height and pitch and bank kept, then `POKE P1,63`, height 20000 (`GOSUB 6000` splits it into bytes), `POKE B1,0` | the eye straight down from 20000 up. **The heading (29475) is not touched: the map turns with the ship** | ✅ `look_down()` |
+| `RADAR` 2005 | `POKE 29463,0: POKE 29465,0: POKE 974,32: CALL 24576: CALL 37936: POKE -16300,0`, the violet frame | A2-3D1 draws its whole list on page 1: opcode 8 clears all 8192 bytes of the page, **the flight panel with them**, in 2.6 frames; then the star field's 195 points, three or four a frame, and whatever `SHIP # n` is loaded. `CALL 37936` copies the panel back from page 2 (3.6 frames). The call took 64.8 frames with nothing in orbit, 105.5 over SOL's light cruiser from the game's starting place, 112.7 right over the space lab, 143.9 right over the heavy cruiser | ✅ `view_open()`, `view_step()`, `panel()`, `frame()`; the picture comes record by record, as the Apple's does |
+| `RADAR` 2010 | `VTAB 24`, eighteen spaces, `HTAB 26`, thirteen spaces | the panel's coordinates and heading blanked; the lamps stay | ✅ `blank_row()` |
+| `RADAR` 2032-2045 | the frame's inner edge, two diagonals and a cross that stop short of the middle, `HCOLOR= 1` and a box with a dot in it; pitch and bank put back | 18.7 frames for lines 2010 to 2050 | ✅ `lines()`, `box()` |
+| `RADAR` 2050-2056 | `GET A$`, `VTAB 1: HTAB 1`, the height put back; X or anything else | | ✅ `key_taken()` |
+| `RADAR` 2057 | `HCOLOR= 0` and `DRAW 25` over the two rows of gauge markers | on the way back to flight as well as to COM | ✅ `marker()` |
+| `RADAR` 2058 | `POKE 974,64: IF PEEK(38388) > 0 THEN POKE 38388,0: PRINT " ": RUN COM` | 38388 is 2 when COM ran it (COM line 133). The space goes on page 2 | ✅ `back_to_com()`, `Left.COM` |
+| `RADAR` 2059 | sixteen rows of forty spaces (on page 2: 974 is 64), `COLOR= 15` and 47 `HLIN`s on the lo-res screen behind, `RUN STARSHIP SIMULATOR` | 2.75 frames a row, 22.4 for the lo-res fill; the flight program's line 0 comes 414 frames after | ✅ `wipe_row()`, `Left.FLIGHT`. The lo-res screen is not kept: nothing ever shows it |
+| `RADAR` 5000-5005 | `POKE 974,64: PRINT " "`; `IF PEEK(38205) = 2 THEN RUN SHIP # 3 I.D.`; `POKE 38151,5: RUN SHIP # n I.D.` | a type 2 gets the light cruiser's page (`radar_ids`). **The poke of 38205 changes which I.D. runs and not what the radar draws**: that is whatever `SHIP # n` `H_D` or `START` last loaded at `$7879` | ✅ `identify()`, `Left.SHIP_ID`. 38151 = 5 is read by nothing found, and is not kept |
+| `SHIP # n I.D.` 10-14 | sixteen rows of spaces over the radar's picture, `POKE 35,16`, a green frame and a grid on the left 160 dots | 2.6 to 2.75 frames a row, 1.2 an upright and 1.3 a level line. **Green is the odd dots only, and the uprights are five dots apart: every other one is at an even dot and is not there** | ✅ `clear_row()`, `frame()`, `grid_column()`, `grid_row()` |
+| `SHIP # n I.D.` 20-50 | `READ` a code and two numbers: 1 moves, 2 draws a line to there, 77 moves the centre down for the side view, 127 ends | two frames a point: the space lab's drawing is three seconds coming and the heavy cruiser's five. `# 0` has no DATA and no drawing | ✅ `ShipIdProgram`'s DATA and `read()` |
+| `SHIP # n I.D.` text | a title and four or five lines, at `HTAB 25` | **four copies that are not alike**: the title is ` -SHIP I.D.-`, `-SHIP I.D.-` or `  -SHIP I.D.-`; rows 4, 6, 8, 10 for `# 0` and `# 1`, 3, 5, 7, 9 for the cruisers; the heavy cruiser's fifth line is printed where the others wait, so it waits a row lower and a column to the left; the light cruiser's `GET` is on line 1060 and the others' on 1070 | ✅ `texts()`, `prompt()`; `GET_LINE` |
+| `SHIP # n I.D.` end | `GET`, `PRINT " "`, `RUN RADAR` | the whole radar is drawn again, stars and all. The text window is left sixteen rows high, and RADAR and the flight program after it print in that | ✅ `Left.RADAR` |
+
+A2-3D1's call is priced by the record in the port (`radar_loop.gd`'s
+`VIEW_` constants: a point brought into view space, the same projected
+and plotted, an end of a line, a dot of a line, the page clear), fitted
+to the four calls above and to the video frame each star's bytes were
+stored in. All four come within a third of a frame, and every star
+within half a frame of the frame the Apple drew it in. These are not
+the flight loop's prices for the same routine, which were fitted to the
+flight's own pictures and are 7% short on the radar's.
+
+Not held: the stretch between one stop for a key and the next as a
+whole. The recorder notices a `GET` some five frames late and a key
+takes four more to be seen, and two loads of the same program differ by
+up to nine frames, so only the lines' own times and the call are
+compared.
+
 ## Summary
 
 **Ported in the 2026-11-10 reconcile**
@@ -669,14 +718,15 @@ ERROR screen. Nothing in the game takes the energy past 63.
   and the SYSTEM ERROR screen every error in the game ends at (the END
   table above).
 - `STATUS.bas` and `SUPPLY.bas` on the hi-res page (the table above).
+- `RADAR.bas` and the four `SHIP # n I.D.` programs (the table above).
 
 **Not ported yet**
 
-1. **The programs under `COM.bas` on the hi-res page** (`RADAR`,
-   `GROUND FORCES`, `COLLECT`, `SHORE LEAVE`) and `START`'s title on
-   the text screen. Their rules are in the port as Godot UI; their
-   screens and timing are not. (`COM`, `END`, `STATUS` and `SUPPLY`
-   are ported: their tables above.)
+1. **The programs under `COM.bas` on the hi-res page** (`GROUND
+   FORCES`, `COLLECT`, `SHORE LEAVE`) and `START`'s title on the text
+   screen. Their rules are in the port as Godot UI; their screens and
+   timing are not. (`COM`, `END`, `STATUS`, `SUPPLY` and `RADAR` are
+   ported: their tables above.)
 2. `GROUND FORCES.bas` setting `38170 = 17`, which `H_D.bas` 12-13
    reads.
 3. Record byte 2 (`38206`).

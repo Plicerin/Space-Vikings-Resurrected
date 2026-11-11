@@ -119,7 +119,12 @@ func _drive() -> void:
 	_tap(KEY_3, "3")
 	await _left_for("3", "radar")
 	_check("RADAR is told who ran it (38388 = 2)", GameState.handover == 2)
-	_tap(KEY_SPACE, " ")
+	# RADAR's scene makes a loop for each run of it, and has a `watch`
+	# of its own (see drive_radar.gd, which drives the rest of it)
+	get_tree().current_scene.watch = func(what: String) -> void:
+		_seen[what] = _seen.get(what, 0) + 1
+	await _seen_more("radar")
+	_tap(KEY_X, "x")
 	await _scene_is(COM)
 	_check("and comes back to the console, not to flight",
 			_current_path() == COM and GameState.handover == 0)

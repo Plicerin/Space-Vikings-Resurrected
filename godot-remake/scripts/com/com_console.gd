@@ -11,11 +11,12 @@ extends Control
 ## While COM loads the screen still shows what the last program left on
 ## the page, as the original's does.
 ##
-## The programs under COM that are not on the hi-res page yet (GROUND
-## FORCES, RADAR) are still Godot screens. They come back here, which
-## runs COM from the top again as theirs do, and so do STATUS and
-## SUPPLY, which are on the page (report_console.gd). END is on the
-## page too (end_console.gd) and goes on to flight, not back here.
+## GROUND FORCES and the programs under it are not on the hi-res page
+## yet and are still Godot screens. They come back here, which runs COM
+## from the top again as theirs do, and so do STATUS and SUPPLY
+## (report_console.gd) and RADAR (radar_console.gd), which are on the
+## page. END is on the page too (end_console.gd) and goes on to flight,
+## not back here.
 
 const ComLoop = preload("res://scripts/com/com_loop.gd")
 const HgrView = preload("res://scripts/shapes/hgr_view.gd")

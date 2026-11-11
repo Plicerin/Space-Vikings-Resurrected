@@ -123,6 +123,7 @@ var _matrix := [0x7FFD, 0, 0, 0, 0x7FFD, 0, 0, 0, 0x7FFD]
 var _last_end := Point.new() # the end point of the last line, unclipped
 var _screen_a := Vector2i.ZERO # where the last line's ends were drawn
 var _screen_b := Vector2i.ZERO
+var _at := DATABASE # the record step() is at
 
 
 func _init(page_1: HgrScreen = null, page_2: HgrScreen = null) -> void:
@@ -277,7 +278,15 @@ static func clip(a: Point, b: Point) -> void:
 
 ## CALL 24576: run the list at $7300 once.
 func run() -> void:
-	var m := memory
+	begin()
+	while step() >= 0:
+		pass
+
+
+## The call a record at a time, for a caller that wants to show the
+## picture growing as the Apple's does (radar_loop.gd): begin(), then
+## step() until it returns -1.
+func begin() -> void:
 	_no_clip = 0
 	_eye = [0, 0, 0]
 	_matrix = [0x7FFD, 0, 0, 0, 0x7FFD, 0, 0, 0, 0x7FFD]
@@ -288,63 +297,73 @@ func run() -> void:
 	records_run = 0
 	projections = 0
 	clip_steps = 0
-	var at := DATABASE
-	while at < 0xFFF0:
-		var op: int = m[at]
-		if op >= 0x12:
-			return
-		records_run += 1
-		match op:
-			0:
-				var p := _transform(at)
-				at += 7
-				if p.out == 0:
-					_screen_a = _project(p)
-					_plot(_screen_a.x, _screen_a.y)
-			1:
-				var a := _transform(at)
-				var b := _transform(at + 7)
-				_last_end = b.copy()
-				at += 14
-				_line(a, b, 0)
-			2:
-				var a := _last_end.copy()
-				var b := _transform(at)
-				_last_end = b.copy()
-				at += 7
-				_line(a, b, 1)
-			3:
-				var b := _last_end.copy()
-				var a := _transform(at)
-				at += 7
-				_line(a, b, 2)
-			4:
-				_no_clip = m[at + 1]
-				at += 2
-			5:
-				_eye = [m[at + 1] | (m[at + 2] << 8), m[at + 3] | (m[at + 4] << 8), m[at + 5] | (m[at + 6] << 8)]
-				_build_matrix(m[at + 7], m[at + 8], m[at + 9])
-				at += 10
-			7:
-				if m[at + 1] == 0x54 or m[at + 1] == 0x55:
-					shown = m[at + 1] - 0x54
-				at += 2
-			8:
-				# the whole page, all 192 rows
-				pages[1 if m[at + 1] == 1 else 0].clear()
-				at += 2
-			9:
-				_target = 1 if m[at + 1] != 0 else 0
-				at += 2
-			14:
-				_window = [((m[at + 1] >> 1) - 1) & 0xFF, ((m[at + 2] >> 1) - 1) & 0xFF, m[at + 3], m[at + 4]]
-				at += 5
-			15:
-				_axis_scale = [m[at + 1] | (m[at + 2] << 8), m[at + 3] | (m[at + 4] << 8), m[at + 5] | (m[at + 6] << 8)]
-				at += 7
-			_:
-				push_error("A2-3D1: opcode %d at $%04X is not modelled" % [op, at])
-				return
+	_at = DATABASE
+
+
+## The next record of the list. Returns its opcode, or -1 at the end of
+## the list, where nothing is done.
+func step() -> int:
+	var m := memory
+	var at := _at
+	if at >= 0xFFF0:
+		return -1
+	var op: int = m[at]
+	if op >= 0x12:
+		return -1
+	records_run += 1
+	match op:
+		0:
+			var p := _transform(at)
+			at += 7
+			if p.out == 0:
+				_screen_a = _project(p)
+				_plot(_screen_a.x, _screen_a.y)
+		1:
+			var a := _transform(at)
+			var b := _transform(at + 7)
+			_last_end = b.copy()
+			at += 14
+			_line(a, b, 0)
+		2:
+			var a := _last_end.copy()
+			var b := _transform(at)
+			_last_end = b.copy()
+			at += 7
+			_line(a, b, 1)
+		3:
+			var b := _last_end.copy()
+			var a := _transform(at)
+			at += 7
+			_line(a, b, 2)
+		4:
+			_no_clip = m[at + 1]
+			at += 2
+		5:
+			_eye = [m[at + 1] | (m[at + 2] << 8), m[at + 3] | (m[at + 4] << 8), m[at + 5] | (m[at + 6] << 8)]
+			_build_matrix(m[at + 7], m[at + 8], m[at + 9])
+			at += 10
+		7:
+			if m[at + 1] == 0x54 or m[at + 1] == 0x55:
+				shown = m[at + 1] - 0x54
+			at += 2
+		8:
+			# the whole page, all 192 rows
+			pages[1 if m[at + 1] == 1 else 0].clear()
+			at += 2
+		9:
+			_target = 1 if m[at + 1] != 0 else 0
+			at += 2
+		14:
+			_window = [((m[at + 1] >> 1) - 1) & 0xFF, ((m[at + 2] >> 1) - 1) & 0xFF, m[at + 3], m[at + 4]]
+			at += 5
+		15:
+			_axis_scale = [m[at + 1] | (m[at + 2] << 8), m[at + 3] | (m[at + 4] << 8), m[at + 5] | (m[at + 6] << 8)]
+			at += 7
+		_:
+			push_error("A2-3D1: opcode %d at $%04X is not modelled" % [op, at])
+			return -1
+	_at = at
+	return op
 
 
 ## Forget what a call leaves behind in the engine's own code (window,

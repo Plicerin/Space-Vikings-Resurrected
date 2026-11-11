@@ -38,6 +38,8 @@ game running in MAME.
 | DOS's error routine (SYSTEM ERROR, reboot) | `scripts/dos/system_error.gd`, `scripts/shapes/text_screen.gd` | `check_end` |
 | `STATUS` (ship and troop report) | `scripts/reports/status_program.gd`, `status_loop.gd` | `check_status`, `check_status_poked`, `check_status_odd`, `check_status_morale` |
 | `SUPPLY` (supply report) | `scripts/reports/supply_program.gd`, `supply_loop.gd` | `check_supply`, `check_supply_poked` |
+| `RADAR` | `scripts/radar/radar_program.gd`, `radar_loop.gd` | `check_radar` and the six beside it |
+| `SHIP # 0 I.D.`, `# 1`, `# 3`, `# 4` (what is in orbit) | `scripts/radar/ship_id_program.gd`, `ship_id_loop.gd` | `check_radar_ids`, `check_radar_com` |
 | Planet record copy, new-game data, save and load | `autoload/game_state.gd` | `check_save`, `check_jump` |
 | An old game's way into flight (`START` 3000-3030, `INSTRUMENTS` 210, `GALAXY MAP` 2), and `END`'s CONTINUE | `flight_loop.gd` (`run()`, `lamps()`) | `check_save` |
 
@@ -48,7 +50,6 @@ the first way:
 
 | Original program | Stand-in |
 |---|---|
-| `RADAR`, `SHIP # N I.D.` | `radar_screen.gd` (a Godot 3D camera on the real model), `ship_id_screen.gd` |
 | `GROUND FORCES`, `COLLECT`, recall | `ground_forces.gd`, `collect.gd`, `recall.gd` |
 | `SHORE LEAVE` | `shore_leave.gd`, `enlist.gd`, `buy_weapons.gd`, `sell_loot.gd`, `establish_base.gd`, `cryogenics.gd`, `repair_ship.gd` |
 | `START` (title, new or old game) | `start_screen.gd` |
@@ -264,15 +265,23 @@ a difference.
     godot --headless --path . res://tests/check_status_morale.tscn   # the other morales, places and conditions, 22 stops
     godot --headless --path . res://tests/check_supply.tscn          # SUPPLY at 8 stops: both pages, "1" and round again
     godot --headless --path . res://tests/check_supply_poked.tscn    # loot of four and five digits, and what the units do to it
+    godot --headless --path . res://tests/check_radar.tscn           # RADAR from flight, and X back to it
+    godot --headless --path . res://tests/check_radar_ids.tscn       # RADAR and each of the four I.D. programs, round and round, 14 stops; a type 2
+    godot --headless --path . res://tests/check_radar_com.tscn       # RADAR from the console and back to it, and by way of an I.D.
+    godot --headless --path . res://tests/check_radar_dead.tscn      # the radar shot away, from flight and from the console
+    godot --headless --path . res://tests/check_radar_ship_0.tscn    # the radar's picture with nothing in orbit, and how long it takes
+    godot --headless --path . res://tests/check_radar_ship_1.tscn    # with the space lab
+    godot --headless --path . res://tests/check_radar_ship_4.tscn    # with the heavy cruiser
     godot --headless --path . res://tests/check_save.tscn            # record copy, save, the boot, an old game's panel
     godot --headless --path . -s res://tests/check_flight_core.gd    # flight arithmetic against the model
     godot --headless --path . -s res://tests/check_a2_3d1.gd         # 200 views against tools/a2_3d1_view.py
     godot --headless --fixed-fps 60 --path . res://tests/drive_flight.tscn   # the flight scene, by key events
     godot --headless --fixed-fps 60 --path . res://tests/drive_chart.tscn    # the chart scene, by mouse and keys
     godot --headless --fixed-fps 60 --path . res://tests/drive_com.tscn      # the console scene, by keys, every way out of it, and both reports through and back
+    godot --headless --fixed-fps 60 --path . res://tests/drive_radar.tscn    # the radar scene, by keys: from flight, from the console, an I.D. and back, no radar
     godot --headless --fixed-fps 60 --path . res://tests/drive_save.tscn     # title, END, save, continue, SYSTEM ERROR, three boots, END GAME
 
-The first fourteen need the recordings in `../analysis/live/`. A compared
+The first twenty-one need the recordings in `../analysis/live/`. A compared
 byte is never adjusted to make a test pass: both times a test differed
 from the real game by a handful of bytes, the difference was something
 the original does that nobody had noticed (the seventeen-byte copy;
@@ -310,6 +319,32 @@ show that a tidy report would not:
   with the output on hi-res page 2, and the three prompts leave three
   marks there.
 
+### The radar
+
+`RADAR` is the flight program's own picture from somewhere else: the
+eye lifted to 20000 above the stars and pointed straight down, A2-3D1
+run once, and a violet frame, two diagonals, a cross and a small green
+box for the ship drawn over it. What the recordings show that a radar
+would not:
+
+- It takes two seconds to draw, every time: the stars come a few to a
+  frame, and coming back from an I.D. the whole of it is drawn again.
+- A2-3D1 clears all of page 1 for it, so the flight panel is gone while
+  the stars come and is copied back afterwards.
+- The eye's heading is left alone: the map turns with the ship.
+- With the radar shot away (38195 = 0) it draws nothing, says nothing,
+  and goes back to whichever program ran it.
+- X goes back. Any other key runs the I.D. program of what is in
+  orbit: a drawing on a green grid and four or five lines of text, a
+  character at a time, and a key from there runs `RADAR` again. With
+  nothing in orbit that is a page saying so.
+- A defender of type 2 (three planets have one) has no I.D. program of
+  its own and gets the light cruiser's.
+
+A2-3D1's call is timed record by record in the port (so much a point,
+so much an end of a line, so much a dot), with prices fitted to four
+recordings; the whole call comes within a third of a frame of each.
+
 ## Liberties
 
 Where the port departs from the original on purpose:
@@ -324,7 +359,7 @@ Where the port departs from the original on purpose:
   two to eight seconds. Those waits are kept in proportion and cut to
   15% (`FlightLoop.DISK_WAIT_SCALE`). Nothing the machine computed or
   drew is sped up.
-- **Key hints** on the flight, chart, console, report and END screens,
+- **Key hints** on the flight, chart, console, report, radar and END screens,
   outside the Apple's picture. END's says what a wrong key costs.
   `STATUS`'s adds the star the troops were left at when they are not
   aboard: the original's report says only PLANETSIDE or SHORE LEAVE,
@@ -333,20 +368,23 @@ Where the port departs from the original on purpose:
   black. The original leaves a dead machine to be switched off.
 - **Ground battle retreat.** In the original any key at all retreats.
   The stand-in has a Retreat button.
-- **Radar** shows the defender's real A2-3D1 model through a Godot
-  camera, slowly turning; the original's is still.
 - **Shore leave numbers** are typed into a spin box, not the original's
   digit-by-digit entry.
 - **The stand-in screens** (above) in general.
 
 ## Not ported, estimated, or unverified
 
-- Two of the programs `COM` runs (`GROUND FORCES`, `RADAR`) are still
-  stand-ins. A stand-in leaves the hi-res page as it found it, so on
-  the way back `COM` and flight start over the console's last screen,
-  not over what the original's program would have left; and no
-  stand-in sets the marker (38151 = 7) that makes `COM` draw its
-  console and go straight back to `GROUND FORCES`.
+- One of the programs `COM` runs, `GROUND FORCES`, is still a
+  stand-in. A stand-in leaves the hi-res page as it found it, so on
+  the way back `COM` starts over the console's last screen, not over
+  what the original's program would have left; and no stand-in sets
+  the marker (38151 = 7) that makes `COM` draw its console and go
+  straight back to `GROUND FORCES`.
+- The radar's A2-3D1 prices are fitted to four recordings (64 to 144
+  frames a call). A picture with far more in it than those had could
+  be some frames out.
+- `RADAR` pokes 38151 with 5 on its way to an I.D. program. Nothing
+  found reads a 5 there, and the port does not keep it.
 - `STATUS` reads the star's name with one `READ` for each place down
   its list. That was timed at SOL only (2.8 frames), and the port waits
   the same for every star: some fraction of a second short at the far

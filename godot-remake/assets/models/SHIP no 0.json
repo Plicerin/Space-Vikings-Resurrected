@@ -1,9 +1,0 @@
-{
- "source_file": "SHIP no 0.payload.bin",
- "skip_header": 0,
- "status": "terminated",
- "clean_decode": true,
- "num_points": 0,
- "num_lines": 0,
- "segments": []
-}
