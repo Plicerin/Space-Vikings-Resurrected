@@ -1,7 +1,8 @@
 extends Control
 ## A planet as a vector globe, for the ground forces: a circle, the outline of
 ## a sphere, with the planet's cities projected on it in 3D as points of light,
-## front and back (the far side dimmer). No land, no sea, no grid. The lights are the enemy's, red,
+## front and back (a filled circle on this side, an open one on the far side,
+## as on the attitude ball). No land, no sea, no grid. The lights are the enemy's, red,
 ## and as the landing force wins them they change colour, a few at a time
 ## from where it came down, like flags taken in a capture-the-flag game: the
 ## ones on the edge of the fight flicker between the two. `capture` is how
@@ -71,11 +72,14 @@ func _draw() -> void:
 		elif i >= int(taken): # the edge of the fight: the flags going over
 			colour = ENEMY if sin(_turn * 13.0 + i * 1.7) > 0.0 else OURS
 		var front := rotated.z > 0.0
-		var alpha := 1.0 if front else 0.35
-		var at := centre + Vector2(rotated.x, -rotated.y) * radius * 1.0
-		var size_px := 3.2 if front else 2.0
-		draw_circle(at, size_px * 2.6, Color(colour, 0.12 * alpha))
-		draw_circle(at, size_px, Color(colour.r * flicker, colour.g * flicker, colour.b * flicker, alpha))
+		var at := centre + Vector2(rotated.x, -rotated.y) * radius
+		var lit := Color(colour.r * flicker, colour.g * flicker, colour.b * flicker)
+		# as on the attitude ball: a filled circle on this side, an open one on the far side
+		if front:
+			draw_circle(at, 8.0, Color(colour, 0.12))
+			draw_circle(at, 3.4, lit)
+		else:
+			draw_arc(at, 3.2, 0.0, TAU, 16, Color(lit, 0.75), 1.3, true)
 
 
 ## The sphere is only its outline: a circle of light. The lights are projected
