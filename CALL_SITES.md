@@ -234,8 +234,9 @@ new game enters flight under manual control, at condition RED, with
 is a side effect of reusing the toggles to draw, it is what the game
 does. Port: ✅ all four start states (`start_new_game()`).
 
-One oddity left ❓: `STATUS.bas` 1386 reads `38167` (the mode byte) as
-the high byte of a troop count.
+`STATUS.bas` 1386 reads `38167` (the mode byte) as the high byte of
+what looks like a troop count. Settled live: it is no count, and the
+line cannot print (the STATUS table below).
 
 ### 3. `POKE 38823,<planet>: POKE 38824,<mode>: CALL 38825` — the per-planet record copy
 
@@ -581,6 +582,53 @@ game's TRANLIT-to-third-pass is 824 with a cold load of 400, so the load
 here is taken as 400 − 66 = 334 (`LOAD_SIMULATOR_SPINNING`). That one is
 derived, not timed on its own.
 
+## STATUS.bas, SUPPLY.bas — the two reports (live 2026-11-10)
+
+Recorded with `tools/mame/reports_live.lua` (routes `status`,
+`status_poked`, `status_odd`, `status_morale`, `supply`,
+`supply_poked`): a new game, `C`, `1` (the central computer), `4` or
+`5`, a key a page, and `5` back to flight. The records are in
+`analysis/live/reports/`. Ported as `scripts/reports/status_program.gd`
+and `supply_program.gd` (statements), `status_loop.gd` and
+`supply_loop.gd` (order and frames) and `report_console.gd` (the scene
+for both). `check_status*` and `check_supply*` compare page 1, the text
+cursor and window and 973/974 at every stop of every route, page 2 at
+the reports' own stops, and page 1 back in flight: 53 stops, 0 bytes
+different.
+
+Both paint the view green a row at a time (`HCOLOR= 1`, 124 `HPLOT`s,
+four seconds), lay a white sheet of inverse spaces on it and print in
+inverse; both read `SD`, `TR` and `CR` from `MISC FILE` first, and both
+end with `RUN COM`, which starts the console from its top.
+
+| Line(s) | What it does | Seen live | Port |
+|---|---|---|---|
+| `STATUS` 10-20 | `VTAB 1: HTAB 2: POKE 32,1: POKE 33,39`, the green fill | load 203 frames with COM's menu on show; 1.90 frames a row | ✅ `open()`, `fill_row()` |
+| `STATUS` 30-60, 5000 | `POKE 973,255: POKE 974,64`, the three `INPUT`s from `MISC FILE`, `POKE 974,32` | **Each `INPUT`'s prompt is a NUL, and the character generator draws it**: three inverse glyph-0 cells at columns 1-3 of row 0 on page 2, 108, 122 and 123 frames after the `OPEN`. Nothing else of the file shows | ✅ `misc_open()`, `misc_prompt()`, `misc_close()`; page 2 is compared |
+| `STATUS` 1230 | fifteen rows of 38 inverse spaces from column 1 | 2.67 frames a row; the left column and the last four dots of the view stay green | ✅ `wipe_row()` |
+| `STATUS` 1235-1310, 5100-5120 | the ship's page | `ENERGY` is `INT(PEEK(38199) / 62 * 100)`, capped at 100: a full ship (63) is 101 before the cap, 31 is 50%. `HULL DMG` is 100 less the byte (a whole hull reads 0%). `ENV.` and `NAV.COMP.` are the constant 100. `MISSILES` is 38187 | ✅ `title()` … `engines()`; held with every number poked (`status_poked`) |
+| `STATUS` 1290-1294, 1350-1360, 1380-1384 | the words for condition, morale and the troops' place, an `IF` each | **A value with no word prints nothing, not even the end of the line**, and the next `PRINT` carries on from there round the edge of the sheet (`status_odd`: condition 0, morale 0, place 4). Morale 0 is reachable: `H_D.bas` 12 takes it down to 0 | ✅ `_word()`; all five other morales, three places and BLUE in `status_morale` |
+| `STATUS` 1386 | `IF PEEK(38167) * 256 + PEEK(38159) = 0 THEN PRINT "THE TROOPS ARE ALL DEAD!";` | **It cannot print.** 38167 is `LT`, the lamp TRANLIT last flipped (3 at the console of a new game), and 38159 is 20 from `SHIP'S DATA-M` and written by nothing: no BASIC line and no machine code stores there. Neither is the troop count (`TR`, in `MISC FILE`). With both poked to 0 it prints on the row under GROUND MISSILES (`status_poked`) | ✅ `all_dead()`, with the two bytes as fields of the program that only the test changes |
+| `STATUS` 1390-1400 | `GET`, `PRINT " "`, `POKE 973,0`, `RUN COM` | COM's load is 434 frames | ✅ `close()`, `Left.COM` |
+| `SUPPLY` 5-19 | `HTAB 2`, the window (`POKE 34,0: POKE 35,15` as well), `POKE 974,64`, `MISC FILE` | load 155 frames. The NULs are at columns 1-3 of row 11 on page 2 and **not** inverse: this program reads the file before its `POKE 973,255`, with the cursor on the row COM left it. The read is 58 frames to the first prompt, the drive still turning | ✅ `open()`, `misc_prompt()`, `misc_close()` |
+| `SUPPLY` 1400 | fifteen rows of **39** spaces from column 1, the title | one more than fits: each row's last space is the first of the next row, and the fifteenth's is the first row's (the window ends at 15). 2.79 frames a row | ✅ `wipe_row()`, `title()` |
+| `SUPPLY` 1410-1490 | `PRINT name;: HTAB 19: PRINT "= ";n;: HTAB 24: PRINT unit` for the thirteen bytes of loot, some times 10, 20 or 100 | `HTAB` does not clear. **A number of four digits or more loses what is past its third under the unit**: byte 255 of platinum (2550 pounds) reads `= 255POUNDS`, 100 of wine (10000 cases) `= 100CASES` (`supply_poked`). `COLLECT.bas` 915 lets a byte reach 255, so this happens in play. And `* ELECTRONIC PARTS` is a letter too wide: it reads `* ELECTRONIC PART= 0` in every game | ✅ `entry()`, `credits()` |
+| `SUPPLY` 1450-1520 | a key for the second page; there `1` is the first page again, any other key `POKE 973,0: POKE 974,64: PRINT " ": RUN COM` | the last `PRINT " "` is on page 2 (column 32, row 11); COM's line 8 puts the generator back on page 1 | ✅ `Left.COM`; `1` and the second round in the `supply` route |
+
+Numbers: `SD`, `TR` and `CR` are printed as Applesoft prints any number
+(`CharGenerator.float_text()`: nine digits, no leading zero, `E` form
+from a thousand million up and under a hundredth); the rest are bytes.
+
+Not measured: the `READ`s of STATUS line 1235 for a star other than SOL
+(one more `READ` for each place down the `DATA`; the port waits SOL's
+2.8 frames for all of them).
+
+A thing seen on the way: the `status_odd` route poked the energy to 200.
+STATUS capped it to 100% as the listing says, and the flight program
+then died of it: `STARSHIP SIMULATOR` 173-180 draws the gauge's marker
+at `199 + E`, off the screen, an ILLEGAL QUANTITY and so the SYSTEM
+ERROR screen. Nothing in the game takes the energy past 63.
+
 ## Summary
 
 **Ported in the 2026-11-10 reconcile**
@@ -620,20 +668,20 @@ derived, not timed on its own.
 - `END.bas` on the hi-res page, its numeric `GET`, its dead machine,
   and the SYSTEM ERROR screen every error in the game ends at (the END
   table above).
+- `STATUS.bas` and `SUPPLY.bas` on the hi-res page (the table above).
 
 **Not ported yet**
 
-1. **The programs under `COM.bas` on the hi-res page** (`STATUS`,
-   `SUPPLY`, `RADAR`, `GROUND FORCES`, `COLLECT`, `SHORE LEAVE`) and
-   `START`'s title on the text screen. Their rules are in the port as
-   Godot UI; their screens and timing are not. (`COM` and `END`
-   themselves are ported: their tables above.)
+1. **The programs under `COM.bas` on the hi-res page** (`RADAR`,
+   `GROUND FORCES`, `COLLECT`, `SHORE LEAVE`) and `START`'s title on
+   the text screen. Their rules are in the port as Godot UI; their
+   screens and timing are not. (`COM`, `END`, `STATUS` and `SUPPLY`
+   are ported: their tables above.)
 2. `GROUND FORCES.bas` setting `38170 = 17`, which `H_D.bas` 12-13
    reads.
 3. Record byte 2 (`38206`).
 
-**Open ❓:** `STATUS.bas` 1386 reading the toggle mode byte as a troop
-count; record byte 2's stored ground strengths being zeroed before
+**Open ❓:** record byte 2's stored ground strengths being zeroed before
 use; `COM.bas` line 140's `GOTO 30`, a line that does not exist, not
 yet run live.
 

@@ -115,3 +115,40 @@ func print_line(text: String) -> void:
 ## Applesoft's `PRINT` of a whole number: no space before or after it.
 static func number_text(value: float) -> String:
 	return str(int(floor(value)))
+
+
+## Applesoft's `PRINT` of any number (FOUT, $ED34): nine significant
+## digits, rounded, with the zeros at the end dropped and no zero
+## before a decimal point; from a thousand million up, and under a
+## hundredth, a mantissa and "E+nn". So 100.3 is "100.3", a half is
+## ".5" and 10000 is "10000".
+##
+## Applesoft's numbers have 32 bits of mantissa and these have 53, so a
+## sum that Applesoft would print with a stray ninth digit can come out
+## clean here. The numbers the game keeps this way (the stardate, the
+## troops, the credits) go through MISC FILE as printed text between
+## programs, which rounds them the same way each time.
+static func float_text(value: float) -> String:
+	if value == 0.0:
+		return "0"
+	var sign := "-" if value < 0.0 else ""
+	var v := absf(value)
+	var exponent := int(floor(log(v) / log(10.0)))
+	var mantissa := int(round(v / pow(10.0, exponent - 8)))
+	if mantissa >= 1000000000:
+		mantissa /= 10
+		exponent += 1
+	elif mantissa < 100000000:
+		mantissa = int(round(v / pow(10.0, exponent - 9)))
+		exponent -= 1
+	var digits := str(mantissa).rstrip("0")
+	if exponent > 8 or exponent < -2:
+		var text := digits.substr(0, 1)
+		if digits.length() > 1:
+			text += "." + digits.substr(1)
+		return "%s%sE%s%02d" % [sign, text, "+" if exponent >= 0 else "-", absi(exponent)]
+	if exponent < 0:
+		return sign + "." + "0".repeat(-exponent - 1) + digits
+	if digits.length() <= exponent + 1:
+		return sign + digits + "0".repeat(exponent + 1 - digits.length())
+	return sign + digits.substr(0, exponent + 1) + "." + digits.substr(exponent + 1)

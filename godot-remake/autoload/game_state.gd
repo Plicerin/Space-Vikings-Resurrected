@@ -438,7 +438,8 @@ func set_ship_system_health(index: int, value: float) -> void:
 var loot: Array[float] = []
 # Real labels for all thirteen, confirmed directly 2026-11-09 by
 # SUPPLY.bas lines 1410-1490 ("SUPPLY REPORT," reached from the
-# Command Console's COMPUTER sub-menu, see supply_report.gd) — it
+# Command Console's COMPUTER sub-menu, see
+# scripts/reports/supply_program.gd) — it
 # enumerates every one of $38171-$38183 unambiguously by address.
 # This REPLACES an earlier, wrong guess: the previous version of this
 # table had only 3 of 13 labels "confirmed" (from a different,
@@ -452,19 +453,11 @@ const LOOT_LABELS := [
 	"WEAPONS", "ELECTRONIC PARTS", "FISSIONABLES", "STEEL",
 	"COLLAPSIUM", "TITANIUM", "PLATINUM", "SILVER", "GOLD",
 ]
-# SUPPLY.bas's own per-category real-world unit scale + unit name,
-# same index order — e.g. index 10 (PLATINUM, $38181) displays as
-# `loot[10] * 10` POUNDS. Cosmetic (Supplies Report display only, see
-# supply_report.gd) — does NOT affect compute_loot_value() below,
-# which uses the raw counts exactly as SHORE LEAVE.bas's own formula
-# does.
-const LOOT_UNIT_SCALE: Array[float] = [
-	10.0, 100.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 10.0, 20.0, 10.0,
-]
-const LOOT_UNIT_NAMES := [
-	"UNITS", "CASES", "CASES", "CRATES", "CRATES", "CRATES", "POUNDS",
-	"TONS", "TONS", "THOUSAND POUNDS", "POUNDS", "POUNDS", "POUNDS",
-]
+# SUPPLY.bas shows some of these multiplied (ten pounds of platinum
+# to the byte, a hundred cases of wine): that is its display only, in
+# scripts/reports/supply_program.gd, and does NOT affect
+# compute_loot_value() below, which uses the raw counts exactly as
+# SHORE LEAVE.bas's own formula does.
 # SHORE LEAVE.bas lines 2400-2406: "SELL LOOT"'s exact per-category
 # credit multiplier, in loot[] index order (0 = $38171 ... 12 =
 # $38183). Index 0 alone also rolls an extra RND(1) each sale (not
