@@ -2,6 +2,7 @@
 
 **Project:** Reverse-engineer SubLOGIC's *Space Vikings* (1982, Apple II)
 toward a modern remake.
+**In appreciation:** see [`APPRECIATION.md`](APPRECIATION.md) for the programmer and the craft behind the game.
 **Status as of handover:** Disk cataloged, file system fully extracted,
 boot chain decoded, memory map drafted. Disassembly not yet started.
 **Estimated effort to playable port from here:** 3-5 months part-time

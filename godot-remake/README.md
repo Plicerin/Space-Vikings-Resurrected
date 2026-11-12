@@ -4,7 +4,7 @@ A Godot 4 fan remake of *Space Vikings* (Apple II, 1982), the game by
 Mitchell Robbins, published by SubLOGIC (original © 1982 Mitchell Robbins;
 the A2-3D1 graphics package © 1979 SubLOGIC Company, as the manual credits
 them). This is an unofficial remake, not the original and not affiliated with
-its authors; the title screen says so. It is built from the
+its authors; the title screen says so. See [`APPRECIATION.md`](../APPRECIATION.md) for why we cared. It is built from the
 disassembly and analysis in the parent repository. It replaces the
 non-functional `js-remake/`.
 
@@ -438,4 +438,5 @@ code, and definitions are grouped by topic rather than by kind, so those two rul
 
 *Space Vikings* is by Mitchell Robbins, published by SubLOGIC in 1982 (© 1982 Mitchell Robbins);
 the A2-3D1 graphics package is © 1979 SubLOGIC Company. This remake is unofficial, built from
-the original's disassembly, and not affiliated with them.
+the original's disassembly, and not affiliated with them. A longer appreciation of the original and of the digital
+archaeology behind this remake is in [`APPRECIATION.md`](../APPRECIATION.md).
