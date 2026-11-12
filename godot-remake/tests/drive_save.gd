@@ -42,9 +42,17 @@ func _drive() -> void:
 
 	# nothing saved
 	await _title()
-	_check("CONTINUE is off with nothing saved", _continue().disabled)
+	_check("CONTINUE is off with nothing saved", not get_tree().current_scene.can_continue)
+	var title := get_tree().current_scene
+	_check("the first choice is NEW GAME", title._selected == 0)
+	_tap(KEY_DOWN, "")
+	await _frames(2)
+	_check("DOWN skips CONTINUE (it is off) to QUIT", title._selected == 2)
+	_tap(KEY_UP, "")
+	await _frames(2)
+	_check("UP comes back to NEW GAME", title._selected == 0)
 
-	await _press("VBox/NewGameButton")
+	_tap(KEY_1, "1")
 	await _scene_is(FLIGHT)
 	GameState.credits = 1234.0
 	await _to_end()
@@ -52,19 +60,21 @@ func _drive() -> void:
 	await _frames(3)
 	_check("1) SAVE GAME saves, and says so", FileAccess.file_exists(PATH) and _end_said() == "GAME SAVED.")
 
+	_tap(KEY_SPACE, "") # a key cuts the "GAME SAVED." message short
+	await _frames(3)
 	_tap(KEY_2, "2")
-	await _scene_is(FLIGHT)
-	_check("2) CONTINUE goes back to the flight", _current_path() == FLIGHT)
+	await _frames(5) # the key is the console's before the scene is changed
+	_check("2) CONTINUE goes back to the flight", _current_path() == FLIGHT and not get_tree().current_scene.get("_console").active())
 
 	# the title offers the game, and keeps offering it
 	GameState.credits = 0.0
 	await _title()
-	_check("CONTINUE is on with a game saved", not _continue().disabled)
-	await _press("VBox/ContinueButton")
+	_check("CONTINUE is on with a game saved", get_tree().current_scene.can_continue)
+	_tap(KEY_2, "2")
 	await _scene_is(FLIGHT)
 	_check("it is the saved game (credits %s)" % GameState.credits, GameState.credits == 1234.0)
 	await _title()
-	_check("and is still there afterwards", not _continue().disabled)
+	_check("and is still there afterwards", get_tree().current_scene.can_continue)
 
 	_remove_file()
 	print("save driven: %d wrong" % _bad)

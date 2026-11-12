@@ -6,8 +6,10 @@ non-functional `js-remake/`.
 
     godot --path godot-remake
 
-boots to `scenes/start.tscn`: NEW GAME, and CONTINUE when a game has been
-saved. Developed and tested on Godot 4.7.
+boots to `scenes/start.tscn`: SPACE VIKINGS in the game's block lettering over a
+slowly turning night planet with its cities lit, and a menu on glass: 1) NEW GAME,
+2) CONTINUE (when a game has been saved), 3) QUIT, by the keys, the arrows and Enter,
+or the mouse. Developed and tested on Godot 4.7.
 
 The aim is a small, simple Godot game with the original's rules and
 experience, none of the Apple's hardware to fight with. Anyone after the
