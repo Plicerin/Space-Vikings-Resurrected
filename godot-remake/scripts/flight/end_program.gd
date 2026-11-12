@@ -20,7 +20,7 @@ var rules := EndRules.new()
 ## @witness END 70-100
 func run(console: Node, quit: Callable) -> bool:
 	while true:
-		var choice: int = await console.menu("END GAME", EndRules.CHOICES)
+		var choice: int = await console.menu("END GAME", EndRules.CHOICES, [], [], 2) # Escape: CONTINUE PRESENT GAME
 		match choice:
 			1:
 				await console.say(["-END GAME-"] + console.flow(rules.save()), SAID)

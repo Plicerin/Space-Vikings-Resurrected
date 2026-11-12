@@ -47,7 +47,7 @@ func run(console: Node, host: Dictionary) -> void:
 ## One turn of the command menu. Returns false to leave for the flight.
 ## @witness COM 90-135
 func _command_menu() -> bool:
-	var choice: int = await _console.menu("COMMAND MODE", ComRules.COMMANDS)
+	var choice: int = await _console.menu("COMMAND MODE", ComRules.COMMANDS, [], [], ComRules.COMMANDS.size())
 	match ComRules.command(choice):
 		ComRules.Goes.CENTRAL:
 			await _central()
@@ -68,7 +68,7 @@ func _central() -> void:
 	if ComRules.computer_out():
 		await _console.say(["-CENTRAL COMPUTER-"] + _console.flow(ComRules.SAID_COMPUTER_OUT), SAID)
 		return
-	var choice: int = await _console.menu("CENTRAL COMPUTER", ComRules.CENTRAL)
+	var choice: int = await _console.menu("CENTRAL COMPUTER", ComRules.CENTRAL, [], [], ComRules.CENTRAL.size())
 	match ComRules.central(choice):
 		ComRules.Central.NAVIGATION:
 			await _navigation()
@@ -97,7 +97,7 @@ func _chart_pages(star: int) -> void:
 ## @witness COM 800-850
 func _navigation() -> void:
 	while true:
-		var choice: int = await _console.menu("NAVIGATION COMPUTER", ComRules.NAVIGATION)
+		var choice: int = await _console.menu("NAVIGATION COMPUTER", ComRules.NAVIGATION, [], [], ComRules.NAVIGATION.size())
 		if choice == 1:
 			await _directory()
 			return # its RETURN is the command menu
@@ -109,7 +109,9 @@ func _navigation() -> void:
 ## @witness COM 860-897
 func _course() -> void:
 	while true:
-		var asked: float = await _console.ask_number(["-NAVIGATION COMPUTER-"], "ENTER DESIRED DESTINATION (1-20) ", true)
+		_host.pick.call(true) # the galaxy map is up to click a star on, and the star's name is under what is typed
+		var asked: float = await _console.ask_number(["-NAVIGATION COMPUTER-"], "ENTER DESIRED DESTINATION (1-20) ", true, _star_name)
+		_host.pick.call(false)
 		if asked < 0.0: # given up (Escape): back to the navigation menu
 			return
 		var c := int(asked)
@@ -118,6 +120,11 @@ func _course() -> void:
 		await _console.say(["-NAVIGATION COMPUTER-"] + _console.flow(said), COURSE_SET if course_set else SAID)
 		if course_set:
 			return
+
+
+## The name of the star a number is, for the foot of a prompt for one.
+func _star_name(number: int) -> String:
+	return ComRules.NAMES[number - 1] if ComRules.is_star(number) else ""
 
 
 ## The twenty stars, two columns.
@@ -132,11 +139,13 @@ func _star_rows() -> Array:
 func _directory() -> void:
 	var rows := _star_rows()
 	while true:
-		var choice: int = await _console.menu("GALAXY DIRECTORY", ["DISPLAY PLANETARY DATA", "RETURN"], [], rows)
+		var choice: int = await _console.menu("GALAXY DIRECTORY", ComRules.DIRECTORY, [], rows, ComRules.DIRECTORY.size())
 		if choice == 2:
 			return
 		while true:
-			var c := int(await _console.ask_number(["-GALAXY DIRECTORY-"] + rows, "WHICH SYSTEM? (0 TO RETURN) ", true))
+			_host.pick.call(true)
+			var c := int(await _console.ask_number(["-GALAXY DIRECTORY-"] + rows, "WHICH SYSTEM? (0 TO RETURN) ", true, _star_name))
+			_host.pick.call(false)
 			if c <= 0:
 				break
 			if ComRules.is_star(c):

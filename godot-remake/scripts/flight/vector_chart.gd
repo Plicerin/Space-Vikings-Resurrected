@@ -18,6 +18,8 @@ const ChartRules = preload("res://scripts/rules/chart_rules.gd")
 const HudOverlay = preload("res://scripts/flight/hud_overlay.gd")
 
 signal closed(to_console: bool)
+## A star was clicked while the chart is up to pick one for a prompt.
+signal picked(star: int)
 
 const SAID := 2.0 ## seconds a "no star there" stays
 const PHOSPHOR := Color(0.7, 1.0, 0.82)
@@ -29,6 +31,9 @@ var console: Control
 ## Opened by the console's GALAXY MAP: Space goes back to the console. Opened
 ## from the flight it just closes.
 var from_console := false
+## Up to pick a star for a prompt of the console's (the destination, a system): a click names a star to
+## the console and asks nothing, and the console has the display and the keys.
+var picking := false
 
 var _cursor := Vector2(140.0, 75.0)
 var _asking := 0 ## the star the player is being asked about, or 0
@@ -51,6 +56,28 @@ func open(console_asked := false) -> void:
 	_asking = 0
 	_said_no_star = false
 	mouse_filter = Control.MOUSE_FILTER_STOP
+
+
+func pick(on: bool) -> void:
+	picking = on
+	visible = on
+	mouse_filter = Control.MOUSE_FILTER_STOP if on else Control.MOUSE_FILTER_IGNORE
+	_asking = 0
+	_said_no_star = false
+	_focus = 0
+	if console != null:
+		console.hide_target = on
+
+
+## The star the prompt has typed, ringed (0 for none).
+func focus_star(star: int) -> void:
+	if not picking:
+		return
+	if star >= 1 and star <= ChartRules.STARS:
+		_cursor = ChartRules.clamp_cursor(ChartRules.place(star))
+		_focus = star
+	else:
+		_focus = 0
 
 
 func close(to_console := false) -> void:
@@ -145,6 +172,9 @@ func select() -> void:
 		_said_no_star = true
 		_said_until = _turn + SAID
 		return
+	if picking:
+		picked.emit(star)
+		return
 	AudioManager.play_select()
 	_asking = star
 
@@ -182,7 +212,7 @@ func _process(delta: float) -> void:
 
 ## What the chart writes on the console's display.
 func _write_console() -> void:
-	if console == null:
+	if console == null or picking:
 		return
 	console.hide_target = true
 	var columns: Callable = console.columns

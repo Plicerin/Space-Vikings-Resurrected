@@ -57,7 +57,7 @@ func run(console: Node, globe: Control) -> void:
 			_globe.capture = 1.0
 		elif GameState.gf_enemy_strength > 0.0:
 			_globe.capture = clampf(GameState.gf_victory_progress / GameState.gf_enemy_strength, 0.0, 1.0)
-		var number: int = await _console.menu("GROUND FORCES", COMMANDS, said)
+		var number: int = await _console.menu("GROUND FORCES", COMMANDS, said, [], COMMANDS.size())
 		said = await _command(number)
 		if number == 9 and said.is_empty():
 			break

@@ -14,6 +14,8 @@ extends Node
 
 signal key_pressed(keycode: int)
 signal resolved
+## What is typed in a number being asked changed (to the number, or 0 for nothing): for a map to follow.
+signal typed_changed(value: int)
 
 const COLUMNS := 40
 const BlockFont = preload("res://scripts/flight/block_font.gd")
@@ -25,6 +27,8 @@ var pace := 1.0
 
 var _mode := "" ## "", "menu", "yesno", "number", "wait", "key"
 var _count := 0 ## items in the menu being asked
+var _back := 0 ## the menu's item that goes back (Escape takes it), or 0
+var _hint: Callable ## says something of the number being typed, on the line at the foot
 var _skippable := true
 var _answer: Variant = null
 var _typed := ""
@@ -61,8 +65,9 @@ func close() -> void:
 
 ## A numbered menu, in two columns when it has more than five items, with
 ## what the last command said (if anything) under it, and `header` lines (a list
-## the choices are about) between the title and the items. Returns the number.
-func menu(title: String, items: Array, said: Array = [], header: Array = []) -> int:
+## the choices are about) between the title and the items. Returns the number. Escape
+## takes the item `back` (the one that goes back or leaves), if there is one.
+func menu(title: String, items: Array, said: Array = [], header: Array = [], back := 0) -> int:
 	var lines: Array = ["-%s-" % title]
 	lines.append_array(header)
 	var rows := (items.size() + 1) / 2 if items.size() > 5 else items.size()
@@ -77,6 +82,7 @@ func menu(title: String, items: Array, said: Array = [], header: Array = []) -> 
 		AudioManager.play_refuse()
 	show(lines)
 	_count = items.size()
+	_back = back
 	_mode = "menu"
 	await resolved
 	return int(_answer)
@@ -92,9 +98,12 @@ func ask_yes_no(lines: Array) -> bool:
 
 
 ## A whole number from the digits typed, Enter to end it; nothing typed is 0.
-## Escape is 0, or -1 if the question may be given up (`cancellable`).
-func ask_number(lines: Array, prompt := "", cancellable := false) -> float:
+## Escape is 0, or -1 if the question may be given up (`cancellable`). `hint` (a function of
+## the number typed so far, giving a line or "") puts a line at the foot of the display, such as
+## the name of the star a number is.
+func ask_number(lines: Array, prompt := "", cancellable := false, hint := Callable()) -> float:
 	_cancellable = cancellable
+	_hint = hint
 	_fixed = lines
 	_prompt = prompt
 	_typed = ""
@@ -151,6 +160,9 @@ func handle_key(key: InputEventKey) -> bool:
 			if number >= 1 and number <= _count:
 				AudioManager.play_select()
 				_finish(number)
+			elif key.keycode == KEY_ESCAPE and _back > 0:
+				AudioManager.play_select()
+				_finish(_back)
 		"yesno":
 			if key.keycode == KEY_Y:
 				_finish(true)
@@ -160,8 +172,10 @@ func handle_key(key: InputEventKey) -> bool:
 			var number := _digit(key)
 			if number >= 0 and _typed.length() < 6:
 				_typed += str(number)
+				typed_changed.emit(int(_typed))
 			elif key.keycode == KEY_BACKSPACE:
 				_typed = _typed.left(maxi(_typed.length() - 1, 0))
+				typed_changed.emit(int(_typed))
 			elif key.keycode == KEY_ENTER or key.keycode == KEY_KP_ENTER:
 				_finish(float(_typed) if _typed != "" else 0.0)
 			elif key.keycode == KEY_ESCAPE:
@@ -172,6 +186,15 @@ func handle_key(key: InputEventKey) -> bool:
 		"key":
 			_finish(key.keycode)
 	return true
+
+
+## A number put into the one being asked, as if typed (a click on a map).
+func type_number(value: int) -> void:
+	if _mode != "number":
+		return
+	_typed = str(value)
+	typed_changed.emit(value)
+	AudioManager.play_select()
 
 
 func _finish(value: Variant) -> void:
@@ -204,6 +227,10 @@ func _show_number() -> void:
 		last += typed
 	asked.append(last + ("_" if int(_time * 2.0) % 2 == 0 else " "))
 	lines.append_array(asked)
+	if _hint.is_valid():
+		var note: String = _hint.call(int(_typed) if _typed != "" else 0)
+		if note != "":
+			lines.append(note)
 	show(lines)
 
 

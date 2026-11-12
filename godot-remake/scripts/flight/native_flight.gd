@@ -168,6 +168,8 @@ func _ready() -> void:
 	_chart = VectorChart.new()
 	_chart.console = $Hud/Overlay
 	$Hud.add_child(_chart)
+	_chart.picked.connect(_console.type_number) # a click on a star types its number into the prompt
+	_console.typed_changed.connect(_chart.focus_star)
 	_chart.closed.connect(func(to_console: bool) -> void: # a chart opened by G: its "Y" runs the console with the star's page
 		if to_console and not _com_waiting and GameState.handover > 0:
 			_run_command_console.call_deferred())
@@ -293,6 +295,7 @@ func _run_command_console() -> void:
 		"ground_forces": func() -> void: await GroundForcesProgram.new().run(_console, _globe),
 		"radar": _com_radar,
 		"chart": _com_chart,
+		"pick": _chart.pick,
 		"end": _com_end,
 	}
 	_computer_running = true
