@@ -144,7 +144,10 @@ func enter_orbit() -> void:
 	heading = 190.0 # 29
 
 
-## @witness STARSHIP SIMULATOR 21, 112-129
+## @witness STARSHIP SIMULATOR 21, 73-74, 112-129, 175, 177
+## @witness-asm 24582, 24585
+## (CALL CSN at 24582 and 24585 read the paddles into the stick bytes; the
+## clamps of lines 175 and 177 are `_stick`'s limits.)
 ## What the stick does to pitch and bank a pass: how far over it is, from
 ## 0 to 4 steps. The original reads a paddle (128 centred) against four
 ## thresholds a side ($5A, $46, $32, $1F below and $AA, $BE, $D2, $E6 above):

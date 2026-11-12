@@ -164,6 +164,10 @@ func _process(delta: float) -> void:
 			_overlay.message = ""
 
 
+## @witness STARSHIP SIMULATOR 200, 210, 500
+## @witness-asm 38402
+## (Line 200 reads a key; 210 puts the speed keys' result in the speed byte; 500's
+## CALL 38402 is the A, B, S and W handler: the switches below.)
 func _unhandled_key_input(event: InputEvent) -> void:
 	var key := event as InputEventKey
 	if key == null or not key.pressed or (key.echo and not _chart.visible): # a held arrow moves the chart's cursor
@@ -634,6 +638,10 @@ func _update_atmosphere() -> void:
 		_fog.fog_density = lerpf(0.000035, 0.000012, up)
 
 
+## @witness STARSHIP SIMULATOR 153
+## @witness-asm 36899, 37888, 37936
+## (The calls draw the flight's view and flip the hi-res pages; the camera of this
+## scene, which sees what the ship sees, is what replaces them.)
 func _update_camera() -> void:
 	var eye := FlightRules.place(Vector3(_rules.x, _rules.y, _rules.z))
 	var basis := FlightRules.camera_basis(_rules.pitch, _rules.bank, _rules.heading)

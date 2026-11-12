@@ -122,6 +122,12 @@
         "analysis/live/radar/radar_radar_ship_4.log"
       ],
       "from_key": "R"
+    },
+    "STARSHIP SIMULATOR": {
+      "logs": [
+        "analysis/live/combat/combat.log"
+      ],
+      "ran": "STARSHIP_SIMULATOR"
     }
   },
   "waive": {
@@ -204,7 +210,12 @@
     "END": {
       "120": "POKE the saved-game mark and run GALAXY MAP: CONTINUE just returns to the flight; the mark is gone (the save stays until saved over)"
     },
-    "STARSHIP SIMULATOR": {},
+    "STARSHIP SIMULATOR": {
+      "6000": "stores or reads a number as two bytes (HI%, LO%, H): the game's own whole numbers, which GameState keeps as numbers",
+      "6010": "stores or reads a number as two bytes (HI%, LO%, H): the game's own whole numbers, which GameState keeps as numbers",
+      "6030": "stores or reads a number as two bytes (HI%, LO%, H): the game's own whole numbers, which GameState keeps as numbers",
+      "6600": "stores or reads a number as two bytes (HI%, LO%, H): the game's own whole numbers, which GameState keeps as numbers"
+    },
     "H_D": {
       "6000": "stores a number as two bytes (HI%, LO%): the game's own whole numbers",
       "6005": "the same helper",
@@ -247,7 +258,5 @@
       "30": "the end of the rays (EX: also the defender's 38205, which the rules take: line 30 is cited there)"
     }
   },
-  "in_progress": [
-    "STARSHIP SIMULATOR"
-  ]
+  "in_progress": []
 }

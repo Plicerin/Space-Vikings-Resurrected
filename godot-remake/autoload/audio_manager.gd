@@ -53,12 +53,17 @@ func play_laser() -> void: _play("laser", -4.0)
 func play_enemy_fire() -> void: _play("enemy_fire", -6.0)
 func play_missile() -> void: _play("missile", -3.0)
 ## GOSUB 4110: the light damage flashes, a fighter's strafing hit and the turrets' answer.
+## @witness STARSHIP SIMULATOR 4110
+## @witness-asm 37494
 func play_hit_light() -> void: _play("hit_light", -4.0)
 ## GOSUB 4120: the heavier incoming-damage flash.
+## @witness STARSHIP SIMULATOR 4120
 func play_hit_medium() -> void: _play("hit_medium", -2.0)
 ## GOSUB 4100: the missile's miss and hit.
+## @witness STARSHIP SIMULATOR 4100
 func play_hit_heavy() -> void: _play("hit_heavy", -1.0)
 ## EX.bas: the defender destroyed.
+## @witness STARSHIP SIMULATOR 1205
 func play_explosion() -> void: _play("explosion", 0.0)
 func play_small_explosion() -> void: _play("small_explosion", -3.0)
 ## S_X.bas: the ship's own destruction.

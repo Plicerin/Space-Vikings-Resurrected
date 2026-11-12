@@ -61,9 +61,13 @@ lines no recording ever ran, the ones the rules rest on the listing
 alone for. `python3 tools/witness.py --check` is part of the suite.
 
 It covers every program the rules came from (the ledgers are in
-`analysis/witness/`); `STARSHIP SIMULATOR` is still listed as in
-progress. COLLECT lines 820 (a planet with no technology) and 1090 (the
-superior one's loot) are the ones no recording runs.
+`analysis/witness/`), the flight program included: every line of it that does
+something to the game is cited by a rule, or waived with a reason (the
+two-byte number helpers), and each of its machine-code calls is accounted for.
+The lines no recording runs are COLLECT's 820 (a planet with no technology) and
+1090 (the superior one's loot), and the flight's 74 (a stick-read variant) and
+its speed and switch keys, 201 to 210 and 500, whose rules rest on the listing
+alone.
 
 ## Flight
 

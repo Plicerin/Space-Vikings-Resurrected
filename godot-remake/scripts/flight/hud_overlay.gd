@@ -253,6 +253,8 @@ func _arc_text(canvas: CanvasItem, font: Font, text: String, centre: Vector2, ra
 	canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
+## @witness STARSHIP SIMULATOR 159, 180
+## (The gauges' markers: TX, SX, EX along the dials and VV, VY down the pitch one.)
 ## An old radio's tuning dial: a window with a scale printed behind it and a
 ## small plastic triangle that slides in it, about a third of the window's
 ## width across. `amount` is 0 to 1 along the window; `vertical` for VERT.

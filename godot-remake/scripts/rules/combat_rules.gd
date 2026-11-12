@@ -87,6 +87,7 @@ var l := 0
 var te := 0
 
 
+## @witness STARSHIP SIMULATOR 8-9, 182
 ## Lines 1-9, next to the start of the flight program: `fresh` is true for
 ## RUN (every variable zero) and false for line 500's GOTO 1.
 func start(fresh: bool) -> void:
@@ -147,6 +148,9 @@ func _in_firing_box(eye: Vector3) -> bool:
 # -- 1500: the fire button --------------------------------------------------
 
 
+## @witness STARSHIP SIMULATOR 1500-1502, 1505
+## @witness-asm 37585
+## (CALL LA at 37585 is the laser's chirp: the audio manager's laser.)
 func _fire(events: Array, eye: Vector3, attitude: Vector2, vv: float, factors: Array) -> Outcome:
 	if GameState.gf_planet_surrendered: # 1500
 		GameState.gf_planet_surrendered = false
@@ -163,6 +167,9 @@ func _fire(events: Array, eye: Vector3, attitude: Vector2, vv: float, factors: A
 # -- 1000: the missile ------------------------------------------------------
 
 
+## @witness STARSHIP SIMULATOR 1000, 1010, 1050, 1060, 1085, 1100
+## @witness-asm 37494
+## (CALL SG at 37494 is the noise of a hit or a miss: the audio manager's.)
 func _missile(events: Array, eye: Vector3, attitude: Vector2, vv: float, factors: Array) -> Outcome:
 	# the step: BASIC's four factors if it is given them (zp, zh, xh, yp), or
 	# the model's: ahead along the heading, climbing or diving by the pitch
@@ -194,6 +201,7 @@ func _missile(events: Array, eye: Vector3, attitude: Vector2, vv: float, factors
 	return Outcome.NONE
 
 
+## @witness STARSHIP SIMULATOR 1090, 3380
 ## Line 1090.
 func _missile_cost() -> void:
 	GameState.ship_missile_system = float(maxi(int(GameState.ship_missile_system) - 2, 0))
@@ -202,6 +210,7 @@ func _missile_cost() -> void:
 # -- 1535: what a shot is worth ---------------------------------------------
 
 
+## @witness STARSHIP SIMULATOR 1535, 1540, 1550, 1560
 ## J1 to the planet's victory points, J2 to the defender's damage, each
 ## divided by the planet's technology plus one.
 func _score(events: Array, j1: float, j2: float) -> Outcome:
@@ -224,6 +233,8 @@ func _score(events: Array, j1: float, j2: float) -> Outcome:
 # -- 3000: the defender fires -----------------------------------------------
 
 
+## @witness STARSHIP SIMULATOR 3000-3001, 3010, 3019, 3030, 3032, 3200
+## (3019, 3032 and 5098's CALL SG are the audio manager's hits, 37494.)
 func _defender_fire(events: Array) -> Outcome:
 	if GameState.orbital_defender_tier == 0 and not GameState.in_atmosphere: # 3000
 		return Outcome.NONE
@@ -244,6 +255,7 @@ func _defender_fire(events: Array) -> Outcome:
 	return _wear()
 
 
+## @witness STARSHIP SIMULATOR 3205, 3207, 3230, 3260, 3270, 3350, 3360, 3380
 ## Lines 3205-3360.
 func _wear() -> Outcome:
 	if _shield_holds(): # 3205
@@ -281,6 +293,7 @@ func _worn(value: float, most: float) -> float:
 # -- 5000: a fighter pass ---------------------------------------------------
 
 
+## @witness STARSHIP SIMULATOR 5000, 5045, 5050, 5060, 5080, 5090, 5095, 5098, 5200, 5210, 5230, 5240, 5250
 ## The pass: where the fighter comes in, which way it goes, and at each step
 ## whether it strafes (the shield wears; at condition RED the turrets
 ## answer and may shoot it down, which ends the pass and costs a missile's
