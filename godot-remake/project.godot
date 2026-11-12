@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="Space Vikings Remake"
+config/name="Space Vikings Resurrected"
 run/main_scene="res://scenes/start.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")
 

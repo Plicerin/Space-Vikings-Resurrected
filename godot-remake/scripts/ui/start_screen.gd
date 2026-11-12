@@ -201,9 +201,14 @@ func _draw() -> void:
 	BlockFont.draw(self, title, title_at, title_scale, Color(AMBER, 0.95))
 	for line in range(int(title_at.y), int(title_at.y + 8.0 * title_scale), 4):
 		draw_line(Vector2(title_at.x, line), Vector2(title_at.x + BlockFont.width(title, title_scale), line), Color(0.0, 0.0, 0.0, 0.25), 1.0)
-	var tagline := "AN APPLE II SPACE WAR, 1982"
-	var tag_scale := 1.8 * scale
-	BlockFont.draw(self, tagline, Vector2((size.x - BlockFont.width(tagline, tag_scale)) / 2.0, title_at.y + 9.5 * title_scale), tag_scale, Color(LED, 0.8))
+	var tagline := "RESURRECTED"
+	var tag_scale := 3.2 * scale
+	BlockFont.draw(self, tagline, Vector2((size.x - BlockFont.width(tagline, tag_scale)) / 2.0, title_at.y + 9.5 * title_scale), tag_scale, Color(LED, 0.85))
+	# the credit: this is a fan remake of someone else's game, and says so
+	var credit_scale := 1.3 * scale
+	var credits := ["A FAN REMAKE OF SPACE VIKINGS (1982)", "BY MITCHELL ROBBINS, PUBLISHED BY SUBLOGIC", "(C) 1982 MITCHELL ROBBINS", "A2-3D1 (C) 1979 SUBLOGIC COMPANY"]
+	for i in credits.size():
+		BlockFont.draw(self, credits[i], Vector2(size.x * 0.08, size.y - (92.0 - i * 18.0) * scale), credit_scale, Color(AMBER, 0.6))
 	# the menu: a glass panel with the console's block lettering
 	var panel := Rect2(size.x * 0.08, size.y * 0.52, 400.0 * scale, 190.0 * scale)
 	var glass := StyleBoxFlat.new()
