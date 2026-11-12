@@ -8,14 +8,13 @@ extends Control
 ## ones on the edge of the fight flicker between the two. `capture` is how
 ## much has been taken, 0 to 1.
 ##
-## The lights are the game's own cluster of points round the planet
-## (assets/a2_3d1/planet_0.bin), as many of them as the planet's technology
-## has cities (the same as the planet in the flight).
-
-const DisplayList = preload("res://scripts/world/display_list.gd")
+## The lights are spread evenly over the sphere (a spiral of points, a little
+## shaken, differently for each planet), as many as the planet's technology has
+## cities (the same as the planet in the flight), so that no part of it is
+## bare: what has not been taken is red wherever it is.
 
 const CITIES := [0, 14, 40, 90, 144] ## as the planet in the flight has
-const CLUSTER_RADIUS := 1500.0
+const GOLDEN_ANGLE := 2.399963
 const PHOSPHOR := Color(0.7, 1.0, 0.82)
 const ENEMY := Color(1.0, 0.27, 0.2)
 const OURS := Color(0.4, 1.0, 0.6)
@@ -28,14 +27,13 @@ var radius_fraction := 0.36
 
 var _lights := PackedVector3Array() ## in the order they are taken
 var _count := 0
-var _tech := -1
+var _lit_for := Vector2i(-1, -1) ## the planet and the number of lights `_lights` is for
 var _turn := 0.0
 
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	visible = false
-	_load()
 
 
 func _process(delta: float) -> void:
@@ -47,21 +45,27 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 
-## The planet's lights, nearest the landing first.
-func _load() -> void:
-	var cluster := PackedVector3Array()
-	for point in DisplayList.load_file("planet_0.bin").points:
-		if point.length() < CLUSTER_RADIUS:
-			cluster.append(Vector3(point.x, point.y, -point.z).normalized())
-	var ordered := Array(cluster)
-	ordered.sort_custom(func(a: Vector3, b: Vector3) -> bool: return a.distance_to(landing) < b.distance_to(landing))
-	_lights = PackedVector3Array(ordered)
-	_tech = -1
+## `count` lights over the sphere, nearest the landing first.
+func _scatter(count: int, planet: int) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = planet * 7919 + 13
+	var points: Array[Vector3] = []
+	for i in count:
+		var y := 1.0 - (i + 0.5) * 2.0 / count # down the sphere, round and round
+		var ring := sqrt(maxf(1.0 - y * y, 0.0))
+		var angle := i * GOLDEN_ANGLE
+		var at := Vector3(cos(angle) * ring, y, sin(angle) * ring)
+		points.append((at + Vector3(rng.randfn(0.0, 0.05), rng.randfn(0.0, 0.05), rng.randfn(0.0, 0.05))).normalized())
+	points.sort_custom(func(a: Vector3, b: Vector3) -> bool: return a.distance_to(landing) < b.distance_to(landing))
+	_lights = PackedVector3Array(points)
+	_lit_for = Vector2i(planet, count)
 
 
 func _draw() -> void:
 	var tech := int(GameState.planet_tech[GameState.current_planet])
-	_count = mini(CITIES[clampi(tech, 0, 4)], _lights.size())
+	_count = CITIES[clampi(tech, 0, 4)]
+	if _lit_for != Vector2i(GameState.current_planet, _count):
+		_scatter(_count, GameState.current_planet)
 	var centre := Vector2(size.x * 0.5, (size.y - 150.0) * 0.5)
 	var radius := minf(size.x, size.y - 150.0) * radius_fraction
 	draw_rect(Rect2(centre - Vector2(radius, radius) * 1.25, Vector2(radius, radius) * 2.5), Color(0.0, 0.03, 0.02, 0.7)) # the glass

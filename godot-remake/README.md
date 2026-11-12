@@ -132,7 +132,8 @@ lists):
   fired nose-down in the atmosphere (it hits the ground, as the original's
   `Y0 < VV` test has it), adds to the same progress the ground battle works to,
   and a planet that has had enough surrenders. The display shows the percent
-  taken, and the globe starts from it.
+  taken, and the globe starts from it. The globe's lights are spread evenly over the sphere, as many
+as the planet has cities, so that what is not yet taken is red wherever it is.
 - Once raised shields have taken a hit, every later pass in range wears
   them down whether or not anything is seen to hit.
 - The missile is tested against the place the defender would be, whether
