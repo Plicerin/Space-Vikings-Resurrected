@@ -29,7 +29,7 @@ none
 | 50 | P |  | 3 | `GOSUB 5000` |
 | 60 | P |  | 3 | `POKE 974,32` |
 | 1230 | P |  | 3 | `FOR C = 1 TO 15: VTAB C: HTAB 2: PRINT "                                      ": NEXT : VT` |
-| 1232 | L | godot-remake/scripts/reports/report_console.gd:34 | 3 | `IF R = 4 THEN R = 0: RETURN` |
+| 1232 | L | godot-remake/scripts/flight/reports_program.gd:14 | 3 | `IF R = 4 THEN R = 0: RETURN` |
 | 1235 | P | godot-remake/scripts/rules/report_rules.gd:52 | 3 | `FOR C = 1 TO  PEEK (A): READ S$: NEXT` |
 | 1240 | P | godot-remake/scripts/rules/report_rules.gd:52 | 3 | `HTAB 9: PRINT "-SHIP STATUS REPORT-": PRINT` |
 | 1250 | L | godot-remake/scripts/rules/report_rules.gd:52 | 3 | `PRINT "LOCATION :";S$: PRINT : PRINT "STARDATE :";SD: PRINT` |
@@ -44,7 +44,7 @@ none
 | 1300 | L | godot-remake/scripts/rules/report_rules.gd:52 | 3 | `PRINT "HULL DMG:";100 -  PEEK (38193);"%"; TAB( 22);"MISSILES :"; PEEK (38187)` |
 | 1305 | P | godot-remake/scripts/rules/report_rules.gd:52 | 3 | `GOSUB 5100` |
 | 1310 | L | godot-remake/scripts/rules/report_rules.gd:52 | 3 | `PRINT "ENGINE#1:"; PEEK (38198);"%"; TAB( 22);"ENGINE#2 :"; PEEK (38197);"%"` |
-| 1315 | L | godot-remake/scripts/reports/report_console.gd:34 | 3 | `GET I$:R = 4: GOSUB 1230` |
+| 1315 | L | godot-remake/scripts/flight/reports_program.gd:14 | 3 | `GET I$:R = 4: GOSUB 1230` |
 | 1320 | P | godot-remake/scripts/rules/report_rules.gd:69 | 3 | `PRINT : PRINT  TAB( 12);"-TROOP STATUS-": PRINT` |
 | 1330 | L | godot-remake/scripts/rules/report_rules.gd:69 | 3 | `PRINT "NO. OF TROOPS"; TAB( 18);"-"; TAB( 24);TR` |
 | 1340 | L | godot-remake/scripts/rules/report_rules.gd:69 | 3 | `PRINT "TROOP MORALE"; TAB( 18);"-"; TAB( 24);:M =  PEEK (38203)` |
@@ -61,10 +61,10 @@ none
 | 1384 | L | godot-remake/scripts/rules/report_rules.gd:69 | 3 | `IF L = 2 THEN  PRINT "SHORE LEAVE"` |
 | 1385 | P | godot-remake/scripts/rules/report_rules.gd:69 | 3 | `GOSUB 5200` |
 | 1386 | L | godot-remake/scripts/rules/report_rules.gd:84 | 3 | `IF ( PEEK (38167) * 256) +  PEEK (38159) = 0 THEN  PRINT "THE TROOPS ARE ALL DEAD!";` |
-| 1390 | L | godot-remake/scripts/reports/report_console.gd:34 | 3 | `GET A$` |
+| 1390 | L | godot-remake/scripts/flight/reports_program.gd:14 | 3 | `GET A$` |
 | 1395 | P |  | 3 | `PRINT " "` |
 | 1396 | P |  | 3 | `POKE 973,0` |
-| 1400 | L | godot-remake/scripts/reports/report_console.gd:34 | 3 | `PRINT "RUN COM` |
+| 1400 | L | godot-remake/scripts/flight/reports_program.gd:14 | 3 | `PRINT "RUN COM` |
 | 5000 | W |  | 3 | `PRINT "OPEN MISC FILE": PRINT "READ MISC FILE": INPUT SD: INPUT TR: INPUT CR: PRINT "CL` |
 | 5010 | W |  |  | `INPUT SD: INPUT TR: INPUT CR` |
 | 5020 | P |  |  | `PRINT "CLOSE MISC FILE"` |

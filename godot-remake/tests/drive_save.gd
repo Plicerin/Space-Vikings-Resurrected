@@ -15,8 +15,6 @@ extends Node
 
 const START := "res://scenes/start.tscn"
 const FLIGHT := "res://scenes/native_flight.tscn"
-const COM := "res://scenes/com.tscn"
-const END := "res://scenes/end_game.tscn"
 const PATH := "user://drive_save.json"
 ## Frames before a step is given up.
 const TIMEOUT_FRAMES := 60 * 240
@@ -87,18 +85,15 @@ func _remove_file() -> void:
 ## The command console's 4) END, from flight.
 func _to_end() -> void:
 	_tap(KEY_C, "c")
-	await _scene_is(COM)
-	await get_tree().process_frame
-	await get_tree().process_frame
-	var asked: bool = (get_tree().current_scene.get_node("Center/Columns/Console/VBox/Title") as Label).text == "COMMAND MODE"
-	_check("the command console asks for a command", asked)
+	await _frames(5)
+	var overlay: Control = get_tree().current_scene.get_node("Hud/Overlay")
+	_check("the command console asks for a command", overlay.program[0] == "-COMMAND MODE-")
 	_tap(KEY_4, "4")
-	await _scene_is(END)
-	await _frames(3)
+	await _frames(4)
 
 
 func _end_said() -> String:
-	return (get_tree().current_scene.get_node("Center/Panel/VBox/Said") as Label).text
+	return str(get_tree().current_scene.get_node("Hud/Overlay").program[1])
 
 
 ## The title scene started afresh.

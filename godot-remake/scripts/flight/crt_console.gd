@@ -28,6 +28,7 @@ var _count := 0 ## items in the menu being asked
 var _skippable := true
 var _answer: Variant = null
 var _typed := ""
+var _cancellable := false
 var _fixed: Array = [] ## the lines above the prompt of a number being asked
 var _prompt := ""
 var _token := 0
@@ -59,9 +60,11 @@ func close() -> void:
 
 
 ## A numbered menu, in two columns when it has more than five items, with
-## what the last command said (if anything) under it. Returns the number.
-func menu(title: String, items: Array, said: Array = []) -> int:
+## what the last command said (if anything) under it, and `header` lines (a list
+## the choices are about) between the title and the items. Returns the number.
+func menu(title: String, items: Array, said: Array = [], header: Array = []) -> int:
 	var lines: Array = ["-%s-" % title]
+	lines.append_array(header)
 	var rows := (items.size() + 1) / 2 if items.size() > 5 else items.size()
 	for row in rows:
 		var left := "%d) %s" % [row + 1, items[row]]
@@ -87,7 +90,9 @@ func ask_yes_no(lines: Array) -> bool:
 
 
 ## A whole number from the digits typed, Enter to end it; nothing typed is 0.
-func ask_number(lines: Array, prompt := "") -> float:
+## Escape is 0, or -1 if the question may be given up (`cancellable`).
+func ask_number(lines: Array, prompt := "", cancellable := false) -> float:
+	_cancellable = cancellable
 	_fixed = lines
 	_prompt = prompt
 	_typed = ""
@@ -153,7 +158,7 @@ func handle_key(key: InputEventKey) -> bool:
 			elif key.keycode == KEY_ENTER or key.keycode == KEY_KP_ENTER:
 				_finish(float(_typed) if _typed != "" else 0.0)
 			elif key.keycode == KEY_ESCAPE:
-				_finish(0.0)
+				_finish(-1.0 if _cancellable else 0.0)
 		"wait":
 			if _skippable:
 				_finish(null)

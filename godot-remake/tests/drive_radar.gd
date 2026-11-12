@@ -10,7 +10,6 @@ extends Node
 ## The scenes replace one another, so the driver is a node of its own
 ## under the root.
 
-const COM := "res://scenes/com.tscn"
 const FLIGHT := "res://scenes/native_flight.tscn"
 const TIMEOUT_FRAMES := 60 * 20
 
@@ -68,18 +67,18 @@ func _drive() -> void:
 	await _frames(3)
 	_check("with no defender the I.D. says so", radar.RadarRules.ship_id_text(0)[1] == "THERE IS NO" and radar.identify)
 
-	# from the console's 3: the flight with the radar up, and X back to the console
-	await _go(COM, func() -> void: pass)
-	await _frames(3)
-	_tap(KEY_3)
-	await _scene_is(FLIGHT)
-	await _frames(3)
+	# from the console's 3: the radar over the flight, and X back to the console
+	await _go(FLIGHT, func() -> void: pass)
 	radar = _scene().get("_radar")
+	_tap(KEY_C)
+	await _frames(4)
+	_tap(KEY_3)
+	await _frames(4)
 	_check("the console's 3 shows the radar over the flight, and says who did (38388 = 2)",
 			radar.visible and GameState.handover == 2)
 	_tap(KEY_X)
-	await _scene_is(COM)
-	_check("X goes back to the console, the mark taken", _path() == COM and GameState.handover == 0)
+	await _frames(4)
+	_check("X goes back to the console, the mark taken", _scene().get_node("Hud/Overlay").program[0] == "-COMMAND MODE-" and GameState.handover == 0)
 
 	# the radar shot away: nothing drawn, nothing asked
 	await _go(FLIGHT, func() -> void: GameState.ship_radar = 0.0)

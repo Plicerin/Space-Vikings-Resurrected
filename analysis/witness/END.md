@@ -25,11 +25,11 @@ none
 | 40 | P |  | 3 | `PRINT " ": HTAB 16: PRINT "END GAME": PRINT : PRINT` |
 | 50 | P |  | 3 | `PRINT  TAB( 7);"1) SAVE GAME"` |
 | 60 | P |  | 3 | `PRINT  TAB( 7);"2) CONTINUE PRESENT GAME": PRINT  TAB( 7);"3) END GAME": PRINT : PRINT` |
-| 70 | L | godot-remake/scripts/end/end_console.gd:48 | 3 | `PRINT "ENTER CHOICE.  ";: GET C: IF C < 1 OR C > 3 THEN 30` |
-| 75 | P | godot-remake/scripts/end/end_console.gd:48 | 3 | `PRINT " "` |
-| 80 | L | godot-remake/scripts/end/end_console.gd:48 | 3 | `IF C = 1 THEN  GOSUB 190: GOTO 30` |
-| 90 | L | godot-remake/scripts/end/end_console.gd:48 | 3 | `IF C = 2 THEN  GOTO 110` |
-| 100 | L | godot-remake/scripts/end/end_console.gd:48 | 1 | `IF C = 3 THEN  FOR J = 1 TO 5000: POKE J,0: NEXT : END` |
+| 70 | L | godot-remake/scripts/flight/end_program.gd:20 | 3 | `PRINT "ENTER CHOICE.  ";: GET C: IF C < 1 OR C > 3 THEN 30` |
+| 75 | P | godot-remake/scripts/flight/end_program.gd:20 | 3 | `PRINT " "` |
+| 80 | L | godot-remake/scripts/flight/end_program.gd:20 | 3 | `IF C = 1 THEN  GOSUB 190: GOTO 30` |
+| 90 | L | godot-remake/scripts/flight/end_program.gd:20 | 3 | `IF C = 2 THEN  GOTO 110` |
+| 100 | L | godot-remake/scripts/flight/end_program.gd:20 | 1 | `IF C = 3 THEN  FOR J = 1 TO 5000: POKE J,0: NEXT : END` |
 | 110 | P |  | 2 | `REM  RESTART` |
 | 120 | W |  | 3 | `POKE 38391,77: PRINT "RUNGALAXY MAP"` |
 | 190 | L | godot-remake/scripts/rules/end_rules.gd:27<br>godot-remake/scripts/rules/end_rules.gd:33 | 2 | `IF  PEEK (38210) = 1 THEN  SPEED= 128: PRINT : PRINT "YOU MUST BE IN ORBIT TO SAVE GAME": ` |

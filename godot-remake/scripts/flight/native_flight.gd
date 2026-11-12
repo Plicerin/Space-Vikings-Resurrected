@@ -33,12 +33,14 @@ const DisplayList = preload("res://scripts/world/display_list.gd")
 const Craft = preload("res://scripts/world/craft.gd")
 const FightEffects = preload("res://scripts/flight/fight_effects.gd")
 
-const COM := "res://scenes/com.tscn"
 const VectorRadar = preload("res://scripts/flight/vector_radar.gd")
 const VectorChart = preload("res://scripts/flight/vector_chart.gd")
 const CrtConsole = preload("res://scripts/flight/crt_console.gd")
 const VectorGlobe = preload("res://scripts/flight/vector_globe.gd")
 const GroundForcesProgram = preload("res://scripts/flight/ground_forces_program.gd")
+const CommandConsoleProgram = preload("res://scripts/flight/command_console_program.gd")
+const EndProgram = preload("res://scripts/flight/end_program.gd")
+const RadarRules = preload("res://scripts/rules/radar_rules.gd")
 
 const PLANET_RADIUS := 780.0
 ## The game's own points nearer than this to the planet are its cluster; the
@@ -61,6 +63,7 @@ var _radar: Control
 var _chart: Control
 var _console: Node
 var _globe: Control
+var _com_waiting := false ## the console is waiting for the chart to close
 ## Seconds since the last pass of fighting, and whether the fire key was
 ## pressed since (a tap between two passes still fires).
 var _fight_clock := 0.0
@@ -107,29 +110,17 @@ func _ready() -> void:
 	_radar = VectorRadar.new()
 	_radar.console = $Hud/Overlay
 	$Hud.add_child(_radar)
-	_radar.closed.connect(func(to_console: bool) -> void:
-		if to_console:
-			_leave(COM))
-	if GameState.show_radar_on_arrival: # the console's RADAR
-		GameState.show_radar_on_arrival = false
-		_radar.open()
 	_console = CrtConsole.new()
 	_console.overlay = $Hud/Overlay
 	add_child(_console)
 	_globe = VectorGlobe.new()
 	$Hud.add_child(_globe)
-	if GameState.show_ground_forces_on_arrival: # the console's GROUND FORCES
-		GameState.show_ground_forces_on_arrival = false
-		_run_ground_forces.call_deferred()
 	_chart = VectorChart.new()
 	_chart.console = $Hud/Overlay
 	$Hud.add_child(_chart)
-	_chart.closed.connect(func(to_console: bool) -> void:
-		if to_console:
-			_leave(COM))
-	if GameState.show_chart_on_arrival: # the console's GALAXY MAP
-		GameState.show_chart_on_arrival = false
-		_chart.open(true)
+	_chart.closed.connect(func(to_console: bool) -> void: # a chart opened by G: its "Y" runs the console with the star's page
+		if to_console and not _com_waiting and GameState.handover > 0:
+			_run_command_console.call_deferred())
 	_overlay.camera = _camera
 	_overlay.target = _defender
 	_update_camera()
@@ -189,7 +180,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		KEY_S: GameState.shields_up = not GameState.shields_up
 		KEY_W: GameState.missile_mode_active = not GameState.missile_mode_active
 		KEY_C:
-			_leave(COM)
+			_run_command_console.call_deferred()
 		KEY_R:
 			if not _chart.visible:
 				_radar.open()
@@ -215,10 +206,45 @@ func _leave(scene: String) -> void:
 ## @witness DMG 10
 ## @witness S_X 40-70
 ## A pass of fighting: the rules decide, the effects play it.
-## GROUND FORCES on the console, over the flight, to its RETURN and back to the command console.
-func _run_ground_forces() -> void:
-	await GroundForcesProgram.new().run(_console, _globe)
-	_leave(COM)
+## The command console, on the display: its menus, and on from them to the
+## programs of the original that ran from it, which are this scene's own.
+## @witness COM 1-12
+func _run_command_console() -> void:
+	if _console.active() or _radar.visible or _chart.visible or _dead or _jumping:
+		return
+	var host := {
+		"ground_forces": func() -> void: await GroundForcesProgram.new().run(_console, _globe),
+		"radar": _com_radar,
+		"chart": _com_chart,
+		"end": _com_end,
+	}
+	await CommandConsoleProgram.new().run(_console, host)
+	_rules.store_state()
+
+
+## The console's RADAR: the vector radar over the flight, to its X. With the radar
+## shot away it draws nothing and goes straight back.
+func _com_radar() -> void:
+	_console.close()
+	if not RadarRules.works():
+		RadarRules.back()
+		return
+	_radar.open()
+	await _radar.closed
+
+
+## The console's GALAXY MAP, to its Space, or to its "Y".
+func _com_chart() -> void:
+	_console.close()
+	_com_waiting = true
+	_chart.open(true)
+	await _chart.closed
+	_com_waiting = false
+
+
+## The console's END: true to go on with the game.
+func _com_end() -> bool:
+	return await EndProgram.new().run(_console, get_tree().quit)
 
 
 func _fight() -> void:

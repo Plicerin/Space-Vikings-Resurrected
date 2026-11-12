@@ -1,26 +1,28 @@
 extends Node
-## Uses the command console (scenes/com.tscn) the way a player would:
-## keys put into Godot's input queue, and a look at what is on show and
-## where each choice goes. What the console says and does is held to the
-## real game in check_com_rules.gd; this is for the scene round it.
+## Uses the command console (scripts/flight/command_console_program.gd), the
+## reports (reports_program.gd) and END (end_program.gd) the way a player would:
+## C in the flight, keys put into Godot's input queue, on the console's own
+## clock, and a look at what the display says and where each choice goes. What
+## each choice does and says is held to the real game in check_com_rules.gd,
+## check_report_rules.gd and check_end_rules.gd; this is for the programs round
+## them.
 ##
 ##   godot --headless --fixed-fps 60 --path godot-remake res://tests/drive_com.tscn
-##
-## The scenes replace one another, so the driver is a node of its own
-## under the root (see drive_radar.gd).
 
-const COM := "res://scenes/com.tscn"
 const FLIGHT := "res://scenes/native_flight.tscn"
-const END := "res://scenes/end_game.tscn"
-const STATUS := "res://scenes/status.tscn"
-const SUPPLY := "res://scenes/supply_report.tscn"
-const CONSOLE := "Center/Columns/Console/VBox/"
+const ChartRules = preload("res://scripts/rules/chart_rules.gd")
+const QUICK := 0.02
+const SAVE := "user://drive_com_save.json"
 const TIMEOUT_FRAMES := 60 * 30
 
 var _driver := false
 var _bad := 0
+var _scene: Node
+var _console: Node
+var _overlay: Control
 
 
+## The scenes replace one another, so the driver is a node of its own under the root.
 func _ready() -> void:
 	if _driver:
 		_drive.call_deferred()
@@ -33,58 +35,62 @@ func _ready() -> void:
 
 
 func _drive() -> void:
-	# the command menu and the lamps
-	await _console(func() -> void: GameState.ship_computer = 0.0; GameState.ship_energy = 10.0)
-	_check("the command menu", _title() == "COMMAND MODE" and _buttons() == [
-			"1) COMPUTER", "2) GROUND FORCES", "3) RADAR", "4) END", "5) RETURN"])
-	var lamps: Array = _scene().get_node("Center/Columns/Lamps/VBox/Grid").get_children()
-	_check("twelve lamps, the computer's and the power's out", lamps.size() == 12 and _out(lamps) == [2, 6])
+	GameState.save_path = SAVE
+	# the command menu
+	await _open(func() -> void: GameState.ship_computer = 0.0)
+	_check("C puts the console up: the command menu", _lines() == ["-COMMAND MODE-", "1) COMPUTER", "2) GROUND FORCES", "3) RADAR", "4) END", "5) RETURN"]
+			and _overlay.program_open)
 	_tap(KEY_X)
 	await _frames(3)
 	_check("a key that is not a choice is not a choice", _title() == "COMMAND MODE")
-
 	_tap(KEY_1)
 	await _frames(3)
-	_check("1 with the computer out: said, and the menu again", _title() == "CENTRAL COMPUTER" and _said() == "COMPUTER NOT\nFUNCTIONING.")
+	_check("1 with the computer out: said, and the menu again", _title() == "CENTRAL COMPUTER" and _lines()[1] == "COMPUTER NOT FUNCTIONING.")
 	await _until(func() -> bool: return _title() == "COMMAND MODE")
 	_check("and the command menu is back", _title() == "COMMAND MODE")
 
 	# the central computer, and the navigation computer
-	await _console(func() -> void: pass)
+	await _open(func() -> void: pass)
 	_tap(KEY_1)
 	await _frames(3)
-	_check("the central computer", _buttons() == ["1) NAVIGATION COMP.", "2) GALAXY DIRECTORY", "3) GALAXY MAP",
-			"4) SHIP STATUS", "5) SUPPLIES REPORT", "6) RETURN"])
+	_check("the central computer: six choices in two columns", _lines() == ["-CENTRAL COMPUTER-",
+			_console.columns("1) NAVIGATION COMP.", "4) SHIP STATUS"), _console.columns("2) GALAXY DIRECTORY", "5) SUPPLIES REPORT"),
+			_console.columns("3) GALAXY MAP", "6) RETURN")])
 	_tap(KEY_1)
 	await _frames(3)
-	_check("the navigation computer", _title() == "NAVIGATION COMPUTER" and _buttons() == ["1) DIRECTORY", "2) SET COURSE", "3) RETURN"])
+	_check("the navigation computer", _lines() == ["-NAVIGATION COMPUTER-", "1) DIRECTORY", "2) SET COURSE", "3) RETURN"])
 	_tap(KEY_2)
 	await _frames(3)
-	_check("a course is asked for", _entry().visible and _entry_field().has_focus())
+	_check("a course is asked for", _console._mode == "number" and _lines().back().begins_with("ENTER DESIRED DESTINATION (1-20) "))
 	_tap(KEY_A)
 	_tap(KEY_7)
 	await _frames(2)
-	_check("digits only", _entry_field().text == "7")
+	_check("digits only", _lines().back().begins_with("ENTER DESIRED DESTINATION (1-20) 7"))
 	_tap(KEY_ENTER)
-	await _frames(3)
-	_check("7: SIRIUS, course set", _said() == "SIRIUS\nCOURSE SET." and GameState.target_planet == 6)
-	await _until(func() -> bool: return _title() == "NAVIGATION COMPUTER" and _buttons().size() == 3)
+	await _until(func() -> bool: return _lines().size() > 1 and _lines()[1] == "SIRIUS COURSE SET.")
+	_check("7: SIRIUS, course set", _lines()[1] == "SIRIUS COURSE SET." and GameState.target_planet == 6)
+	await _until(func() -> bool: return _title() == "NAVIGATION COMPUTER" and _lines().size() == 4)
 	_tap(KEY_2)
 	await _frames(3)
 	_tap(KEY_2)
 	_tap(KEY_1)
 	_tap(KEY_ENTER)
 	await _frames(3)
-	_check("21: <ERROR>, the course as it was", _said() == "<ERROR>" and GameState.target_planet == 6)
-	await _until(func() -> bool: return _entry().visible and _entry_field().text == "")
+	_check("21: <ERROR>, the course as it was", _lines()[1] == "<ERROR>" and GameState.target_planet == 6)
+	await _until(func() -> bool: return _console._mode == "number")
 	_tap(KEY_1)
 	_tap(KEY_ENTER)
 	await _frames(3)
-	_check("1: where we are", _said() == "THAT'S WHERE WE\nARE NOW, SIR!")
-	await _until(func() -> bool: return _entry().visible and _said() == "")
+	_check("1: where we are", _lines()[1] == "THAT'S WHERE WE ARE NOW, SIR!")
+	await _until(func() -> bool: return _console._mode == "number")
+	_tap(KEY_ESCAPE)
+	await _until(func() -> bool: return _title() == "NAVIGATION COMPUTER")
+	_tap(KEY_3)
+	await _frames(3)
+	_check("RETURN is the command menu", _title() == "COMMAND MODE")
 
 	# the directory
-	await _console(func() -> void:
+	await _open(func() -> void:
 		GameState.planet_scouted[1] = true
 		GameState.planet_tech[1] = 3
 		GameState.planet_has_base[1] = true)
@@ -92,133 +98,175 @@ func _drive() -> void:
 	await _frames(3)
 	_tap(KEY_2)
 	await _frames(3)
-	_check("the directory: twenty stars", _title() == "GALAXY DIRECTORY" and _node("Stars").get_child_count() == 20
-			and (_node("Stars").get_child(1) as Button).text == "2) ALPHA CENTAURI")
+	_check("the directory: twenty stars in two columns", _title() == "GALAXY DIRECTORY"
+			and _lines()[1] == _console.columns("1) SOL", "11) CYGNI") and _lines()[2] == _console.columns("2) ALPHA CENTAURI", "12) PROCYON")
+			and _lines()[10] == _console.columns("10) EPSILON ERIDANA", "20) SHIVANDA") and _lines().has("1) DISPLAY PLANETARY DATA"))
+	_tap(KEY_1)
+	await _frames(3)
 	_tap(KEY_3)
 	_tap(KEY_ENTER)
 	await _frames(3)
 	_check("3: BARNARD'S STAR, of which nothing is known",
-			_title() == "BARNARD'S STAR STAR SYSTEM" and _said() == "NO INFORMATION AVAILABLE AT THIS TIME.\n")
-	(_node("Buttons").get_child(0) as Button).pressed.emit()
+			_title() == "BARNARD'S STAR STAR SYSTEM" and _lines()[1] == "NO INFORMATION AVAILABLE AT THIS TIME.")
+	_tap(KEY_SPACE)
 	await _frames(3)
-	_check("RETURN is the directory", _title() == "GALAXY DIRECTORY")
-	(_node("Stars").get_child(1) as Button).pressed.emit()
+	_check("a key is the directory again", _title() == "GALAXY DIRECTORY")
+	_tap(KEY_1)
 	await _frames(3)
-	_check("a star's button: what is known of ALPHA CENTAURI", _title() == "ALPHA CENTAURI STAR SYSTEM"
-			and _said().contains("SOPHISTICATED TECHNOLOGY WITH") and _said().contains("ORBITING DEFENSE CAPABILITY --")
-			and _said().contains("THERE IS AN OPERATIONAL REPAIR BASE"))
-	(_node("Buttons").get_child(0) as Button).pressed.emit()
+	_tap(KEY_2)
+	_tap(KEY_ENTER)
+	await _frames(3)
+	var page := _text()
+	_check("2: what is known of ALPHA CENTAURI", _title() == "ALPHA CENTAURI STAR SYSTEM" and page.contains("SOPHISTICATED TECHNOLOGY WITH")
+			and page.contains("ORBITING DEFENSE CAPABILITY --") and page.contains("THERE IS AN OPERATIONAL REPAIR BASE"))
+	_tap(KEY_SPACE)
+	await _frames(3)
+	_tap(KEY_1)
 	await _frames(3)
 	_tap(KEY_3)
 	_tap(KEY_0)
 	_tap(KEY_ENTER)
 	await _frames(3)
-	_check("30 is no star: said, and still asked", _said() == "TRY AGAIN PLEASE." and _title() == "GALAXY DIRECTORY")
-	(_node("Buttons").get_child(0) as Button).pressed.emit()
+	_check("30 is no star: said", _lines().has("TRY AGAIN PLEASE.") and _title() == "GALAXY DIRECTORY")
+	await _until(func() -> bool: return _console._mode == "number")
+	_check("and still asked", _console._mode == "number")
+	_tap(KEY_ESCAPE)
+	await _frames(3)
+	_tap(KEY_2)
 	await _frames(3)
 	_check("the directory's RETURN is the command menu", _title() == "COMMAND MODE")
 
 	# on from the menus
-	for case: Array in [[KEY_2, FLIGHT], [KEY_3, FLIGHT], [KEY_4, END], [KEY_5, FLIGHT]]:
-		await _console(func() -> void: pass)
-		_tap(case[0])
-		await _scene_is(case[1])
-		_check("command %d goes to %s" % [case[0] - KEY_0, case[1]], _path() == case[1])
-		if case[0] == KEY_2:
-			await _frames(5)
-			_check("GROUND FORCES is the console's program over the flight", _scene().get("_console").active())
-		if case[0] == KEY_3:
-			_check("RADAR is told who ran it (38388 = 2)", GameState.handover == 2)
-	for case: Array in [[KEY_3, FLIGHT], [KEY_4, STATUS], [KEY_5, SUPPLY]]:
-		await _console(func() -> void: pass)
-		_tap(KEY_1)
-		await _frames(3)
-		_tap(case[0])
-		await _scene_is(case[1])
-		_check("the central computer's %d goes to %s" % [case[0] - KEY_0, case[1]], _path() == case[1])
+	await _open(func() -> void: pass)
+	_tap(KEY_2)
+	await _frames(4)
+	_check("2: GROUND FORCES, on the console, the globe up", _title() == "GROUND FORCES" and _scene.get("_globe").visible)
+	_tap(KEY_9)
+	await _frames(4)
+	_check("its RETURN is the command menu", _title() == "COMMAND MODE" and not _scene.get("_globe").visible)
 
-	# run by the others: the chart's question, and RECALL's and SHORE LEAVE's bounce
-	await _console(func() -> void:
-		GameState.handover = 5
-		GameState.planet_scouted[4] = true)
-	_check("the chart's Y: LUYTEN's page, straight away", _title() == "LUYTEN STAR SYSTEM")
-	(_node("Buttons").get_child(0) as Button).pressed.emit()
-	await _scene_is(FLIGHT)
+	_tap(KEY_3)
+	await _frames(4)
+	_check("3: the radar, over the flight; told who ran it (38388 = 2)", _scene.get("_radar").visible and GameState.handover == 2 and not _console.active())
+	_tap(KEY_X)
+	await _frames(4)
+	_check("X goes back to the command menu, the mark taken", _title() == "COMMAND MODE" and GameState.handover == 0 and not _scene.get("_radar").visible)
+
+	await _open(func() -> void: GameState.ship_radar = 0.0)
+	_tap(KEY_3)
+	await _frames(4)
+	_check("with no radar: nothing shown, back at the command menu", not _scene.get("_radar").visible and _title() == "COMMAND MODE" and GameState.handover == 0)
+
+	_tap(KEY_5)
+	await _frames(4)
+	_check("5: RETURN closes the console", not _console.active() and not _overlay.program_open)
+	_tap(KEY_C)
+	await _frames(4)
+	_check("and C brings it up again", _title() == "COMMAND MODE")
+
+	# the galaxy map
+	await _open(func() -> void: GameState.planet_scouted[4] = true)
+	_tap(KEY_1)
 	await _frames(3)
-	_check("and RETURN runs the chart again, the mark taken", _scene().get("_chart").visible and GameState.handover == 0)
-	GameState.start_new_game()
-	GameState.ground_forces_due = true
-	GameState.goto_scene(COM)
-	await _scene_is(FLIGHT)
-	await _frames(5)
-	_check("the bounce goes straight back to GROUND FORCES (its menu up over the flight)",
-			_scene().get("_console").active() and _scene().get_node("Hud/Overlay").program[0] == "-GROUND FORCES-" and not GameState.ground_forces_due)
+	_tap(KEY_3)
+	await _frames(4)
+	var chart: Control = _scene.get("_chart")
+	_check("1, 3: the galaxy map, over the flight", chart.visible and chart.from_console and not _console.active())
+	chart.point_at(ChartRules.place(5))
+	chart.select()
+	await _frames(2)
+	_tap(KEY_Y)
+	await _frames(4)
+	_check("the map's Y: LUYTEN's page, on the console", _title() == "LUYTEN STAR SYSTEM" and GameState.handover == 5)
+	_tap(KEY_SPACE)
+	await _frames(4)
+	_check("a key there runs the map again, the mark taken", chart.visible and GameState.handover == 0)
+	_tap(KEY_SPACE)
+	await _frames(4)
+	_check("Space goes back to the command menu, nothing asked", _title() == "COMMAND MODE" and GameState.handover == 0)
 
-	print("com scene driven: %d wrong" % _bad)
+	# the two reports
+	await _open(func() -> void: pass)
+	_tap(KEY_1)
+	await _frames(3)
+	_tap(KEY_4)
+	await _frames(3)
+	_check("4: the ship status, its first page", _title() == "SHIP STATUS REPORT" and _lines()[1] == "LOCATION  SOL"
+			and _lines().has(_console.columns("ENERGY    100%", "CREDITS   10000")))
+	_tap(KEY_SPACE)
+	await _frames(3)
+	_check("a key: the troops", _title() == "TROOP STATUS" and _lines()[1].begins_with("TROOPS 2000"))
+	_tap(KEY_SPACE)
+	await _frames(3)
+	_check("and a key, the command menu", _title() == "COMMAND MODE")
+	_tap(KEY_1)
+	await _frames(3)
+	_tap(KEY_5)
+	await _frames(3)
+	_check("5: the supply report, its first page", _title() == "SUPPLY REPORT" and _lines().size() == 9 and _lines()[1].begins_with("PLATINUM"))
+	_tap(KEY_SPACE)
+	await _frames(3)
+	_check("a key: the rest, and the credits", _lines().back() == "ANY KEY  RETURN" and _lines()[-2].begins_with("CREDITS"))
+	_tap(KEY_SPACE)
+	await _frames(3)
+	_check("and a key, the command menu", _title() == "COMMAND MODE")
+
+	# END
+	_remove_save()
+	await _open(func() -> void: pass)
+	_tap(KEY_4)
+	await _frames(4)
+	_check("4: END, three choices", _lines() == ["-END GAME-", "1) SAVE GAME", "2) CONTINUE PRESENT GAME", "3) END GAME"])
+	_tap(KEY_X)
+	_tap(KEY_9)
+	await _frames(3)
+	_check("a key that is no choice is no choice", _title() == "END GAME" and _lines().size() == 4)
+	_tap(KEY_1)
+	await _frames(4)
+	_check("1 saves, and says so", _lines()[1] == "GAME SAVED." and FileAccess.file_exists(SAVE))
+	await _until(func() -> bool: return _lines().size() == 4)
+	await _open(func() -> void: GameState.in_atmosphere = true)
+	_remove_save()
+	_tap(KEY_4)
+	await _frames(4)
+	_tap(KEY_1)
+	await _frames(4)
+	_check("in the atmosphere a save is refused", _lines()[1] == "YOU MUST BE IN ORBIT TO SAVE GAME" and not FileAccess.file_exists(SAVE))
+	await _until(func() -> bool: return _lines().size() == 4)
+	_tap(KEY_2)
+	await _frames(4)
+	_check("2 goes on with the game: the console is closed", not _console.active() and not _overlay.program_open)
+
+	_remove_save()
+	print("command console driven: %d wrong" % _bad)
 	get_tree().quit(1 if _bad > 0 else 0)
 
 
-## A new game with `with` done to it, and the console up.
-func _console(with: Callable) -> void:
+## A new game, changed by `with`, the flight up, the console opened with C.
+func _open(with: Callable) -> void:
 	GameState.start_new_game()
+	GameState.save_path = SAVE
 	with.call()
-	GameState.goto_scene(COM)
-	await _scene_is(COM)
-	await _frames(3)
-	_scene().pace = 0.15
+	GameState.goto_scene(FLIGHT)
+	await _frames(4)
+	_scene = get_tree().current_scene
+	_console = _scene.get("_console")
+	_overlay = _scene.get_node("Hud/Overlay")
+	_console.pace = QUICK
+	_tap(KEY_C)
+	await _frames(4)
 
 
-func _scene() -> Node:
-	return get_tree().current_scene
-
-
-func _node(path: String) -> Control:
-	return _scene().get_node(CONSOLE + path)
+func _lines() -> Array:
+	return _overlay.program
 
 
 func _title() -> String:
-	return (_node("Title") as Label).text
+	return str(_lines()[0]).trim_prefix("-").trim_suffix("-") if not _lines().is_empty() else ""
 
 
-func _said() -> String:
-	return (_node("Said") as Label).text
-
-
-func _entry() -> Control:
-	return _node("Entry")
-
-
-func _entry_field() -> LineEdit:
-	return _node("Entry/Field")
-
-
-func _buttons() -> Array:
-	var out := []
-	for button: Button in _node("Buttons").get_children():
-		out.append(button.text)
-	return out
-
-
-func _out(lamps: Array) -> Array:
-	var out := []
-	for i in lamps.size():
-		var style := (lamps[i] as PanelContainer).get_theme_stylebox("panel") as StyleBoxFlat
-		if style.bg_color.r > 0.5:
-			out.append(i)
-	return out
-
-
-func _path() -> String:
-	var scene := get_tree().current_scene
-	return scene.scene_file_path if scene != null else ""
-
-
-func _scene_is(path: String) -> void:
-	for i in TIMEOUT_FRAMES:
-		if _path() == path:
-			return
-		await get_tree().process_frame
-	_check("never reached %s" % path, false)
+func _text() -> String:
+	return "\n".join(_lines().slice(1))
 
 
 func _until(done: Callable) -> void:
@@ -227,6 +275,11 @@ func _until(done: Callable) -> void:
 			return
 		await get_tree().process_frame
 	_check("waited for too long", false)
+
+
+func _remove_save() -> void:
+	if FileAccess.file_exists(SAVE):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE))
 
 
 func _frames(n: int) -> void:
@@ -240,9 +293,9 @@ func _tap(keycode: Key) -> void:
 		event.keycode = keycode
 		event.physical_keycode = keycode
 		event.pressed = down
-		if down and keycode >= KEY_0 and keycode <= KEY_9:
+		if keycode >= KEY_0 and keycode <= KEY_9:
 			event.unicode = keycode
-		elif down and keycode >= KEY_A and keycode <= KEY_Z:
+		elif keycode >= KEY_A and keycode <= KEY_Z:
 			event.unicode = keycode + 32
 		Input.parse_input_event(event)
 
@@ -251,3 +304,5 @@ func _check(what: String, ok: bool) -> void:
 	print("%s  %s" % ["ok   " if ok else "WRONG", what])
 	if not ok:
 		_bad += 1
+		if not _lines().is_empty():
+			print("   page: ", _lines())

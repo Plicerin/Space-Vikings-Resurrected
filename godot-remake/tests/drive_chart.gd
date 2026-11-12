@@ -11,7 +11,6 @@ extends Node
 ## under the root (see drive_radar.gd).
 
 const FLIGHT := "res://scenes/native_flight.tscn"
-const COM := "res://scenes/com.tscn"
 const ChartRules = preload("res://scripts/rules/chart_rules.gd")
 const SIRIUS := 7
 const TIMEOUT_FRAMES := 60 * 30
@@ -83,14 +82,13 @@ func _drive() -> void:
 	await _frames(2)
 	_check("Enter asks about it", _page().has("STAR SYSTEM : SIRIUS"))
 	_tap(KEY_Y)
-	await _scene_is(COM)
-	_check("Y runs the console with that star's page", _path() == COM and GameState.handover == before)
-	await _frames(3)
-	_check("which has it up", (_scene().get_node("Center/Columns/Console/VBox/Title") as Label).text == "%s STAR SYSTEM" % ChartRules.NAMES[before - 1])
-	(_scene().get_node("Center/Columns/Console/VBox/Buttons").get_child(0) as Button).pressed.emit()
-	await _scene_is(FLIGHT)
-	await _frames(3)
-	_check("and its RETURN runs the chart again, the mark taken", _scene().get("_chart").visible and GameState.handover == 0)
+	await _frames(4)
+	var overlay: Control = _scene().get_node("Hud/Overlay")
+	_check("Y runs the console with that star's page", _scene().get("_console").active() and GameState.handover == before
+			and overlay.program[0] == "-%s STAR SYSTEM-" % ChartRules.NAMES[before - 1])
+	_tap(KEY_SPACE)
+	await _frames(4)
+	_check("and a key there runs the chart again, the mark taken", chart.visible and GameState.handover == 0)
 
 	chart = await _chart()
 	GameState.base_built_this_trip = true
@@ -98,7 +96,7 @@ func _drive() -> void:
 	chart.select()
 	await _frames(2)
 	_tap(KEY_Y)
-	await _scene_is(COM)
+	await _frames(4)
 	_check("Y gives the once-a-trip base flag back", not GameState.base_built_this_trip)
 
 	# opened from the flight, Space just closes it
@@ -115,17 +113,21 @@ func _drive() -> void:
 
 	# run by the console, Space goes back to the console
 	GameState.start_new_game()
-	GameState.show_chart_on_arrival = true
 	GameState.goto_scene(FLIGHT)
 	await _scene_is(FLIGHT)
 	await _frames(3)
 	chart = _scene().get("_chart")
+	_tap(KEY_C)
+	await _frames(4)
+	_tap(KEY_1)
+	await _frames(3)
+	_tap(KEY_3)
+	await _frames(4)
 	_check("the console's GALAXY MAP shows the chart over the flight", chart.visible)
 	_tap(KEY_SPACE)
-	await _scene_is(COM)
-	_check("Space goes to the console, nothing asked", _path() == COM and GameState.handover == 0)
-	await _frames(3)
-	_check("which is at its command menu", (_scene().get_node("Center/Columns/Console/VBox/Title") as Label).text == "COMMAND MODE")
+	await _frames(4)
+	_check("Space goes back to the console's command menu, nothing asked", not chart.visible and GameState.handover == 0
+			and _scene().get_node("Hud/Overlay").program[0] == "-COMMAND MODE-")
 
 	print("chart driven: %d wrong" % _bad)
 	get_tree().quit(1 if _bad > 0 else 0)

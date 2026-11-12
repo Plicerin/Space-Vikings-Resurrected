@@ -11,7 +11,6 @@ extends Node
 ## under the root (see drive_radar.gd).
 
 const FLIGHT := "res://scenes/native_flight.tscn"
-const COM := "res://scenes/com.tscn"
 const TIMEOUT_FRAMES := 60 * 20
 
 var _driver := false
@@ -216,8 +215,8 @@ func _drive() -> void:
 	# on to the console, and the radar
 	await _flight(func() -> void: pass)
 	_tap(KEY_C)
-	await _scene_is(COM)
-	_check("C runs the command console", _path() == COM)
+	await _frames(4)
+	_check("C runs the command console", get_tree().current_scene.get("_console").active())
 	await _flight(func() -> void: pass)
 	_tap(KEY_R)
 	await _frames(3)

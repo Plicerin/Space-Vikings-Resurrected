@@ -436,7 +436,6 @@ func _stacked(font: Font, text: String, at: Vector2, pitch_px: float) -> void:
 # --- the display: a green panel that can be written to ---
 
 const COLUMNS := 40 ## the Apple's text screen
-const PROGRAM_EXTRA := 30.0 ## how much taller the display is while a program has it
 const HELP := [
 	"ARROWS  STICK          1 2 3 4  SPEED",
 	"SPACE   FIRE           A  AUTO",
@@ -455,8 +454,11 @@ func show_mode(wanted: Mode) -> void:
 
 
 func _display(rect: Rect2) -> void:
-	if program_open: # a program has it: up over the window, a screenful tall
-		rect = Rect2(rect.position.x, rect.position.y - PROGRAM_EXTRA, rect.size.x, rect.size.y + PROGRAM_EXTRA)
+	if program_open: # a program has it: up over the window as far as its page is tall
+		var pitch := (BlockFont.HEIGHT + 1.0) * (rect.size.x - 28.0) / (COLUMNS * BlockFont.ADVANCE)
+		var rows := int((rect.size.y - 28.0) / pitch)
+		var extra := ceilf(maxf(program.size() - rows, 0.0) * pitch)
+		rect = Rect2(rect.position.x, rect.position.y - extra, rect.size.x, rect.size.y + extra)
 	var window := StyleBoxFlat.new()
 	window.bg_color = Color(0.01, 0.03, 0.015)
 	window.set_corner_radius_all(10)
