@@ -436,7 +436,7 @@ func _stacked(font: Font, text: String, at: Vector2, pitch_px: float) -> void:
 # --- the display: a green panel that can be written to ---
 
 const COLUMNS := 40 ## the Apple's text screen
-const PROGRAM_EXTRA := 150.0 ## how much taller the display is while a program has it
+const PROGRAM_EXTRA := 100.0 ## how much taller the display is while a program has it
 const HELP := [
 	"ARROWS  STICK          1 2 3 4  SPEED",
 	"SPACE   FIRE           A  AUTO",
