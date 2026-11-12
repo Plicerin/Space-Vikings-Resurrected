@@ -44,6 +44,10 @@ const CommandConsoleProgram = preload("res://scripts/flight/command_console_prog
 const EndProgram = preload("res://scripts/flight/end_program.gd")
 const RadarRules = preload("res://scripts/rules/radar_rules.gd")
 
+## The world is this much bigger than the original's units: every distance, size and range of the
+## game's world, its speeds with them, so the time to reach anything is what it was; the weapons'
+## own sizes (a missile, a burst, a fighter) are not, so they are small in it.
+const WORLD_SCALE := 3.0
 const PLANET_RADIUS := 780.0
 ## How much bigger the planet is drawn than the original's, with the box that takes the ship down
 ## to it: from orbit it fills more of the sky, and the defender is smaller beside it.
@@ -118,11 +122,15 @@ func _ready() -> void:
 	GameState.flight_scene = scene_file_path
 	_rules.load_state()
 	_rules.planet_scale = PLANET_SCALE
+	_camera.far = 400000.0 * WORLD_SCALE
+	_overlay.range_scale = 0.5 / WORLD_SCALE # the readout is in the original's units
 	_combat.hit_scale = DEFENDER_SCALE
 	_environment()
 	_space_root = Node3D.new()
+	_space_root.scale = Vector3.ONE * WORLD_SCALE
 	add_child(_space_root)
 	_air_root = Node3D.new()
+	_air_root.scale = Vector3.ONE * WORLD_SCALE
 	add_child(_air_root)
 	_sun_light.look_at_from_position(Vector3.ZERO, -FlightRules.place(SUN))
 	_sun_light.light_energy = 1.6
@@ -138,6 +146,7 @@ func _ready() -> void:
 	_make_ground()
 	_combat.start(true)
 	_effects = FightEffects.new()
+	_effects.world_scale = WORLD_SCALE
 	_effects.camera = _camera
 	_effects.flashed.connect(_flash_screen)
 	_effects.shaken.connect(func(amount: float) -> void: _shake = maxf(_shake, amount))
@@ -328,7 +337,7 @@ func _fight() -> void:
 		CombatRules.Outcome.DEFENDER_DESTROYED:
 			_say("THE DEFENDER IS DESTROYED.")
 			if _defender != null:
-				_effects.explosion(_defender.global_position, 300.0)
+				_effects.explosion(_defender.global_position, 300.0 * WORLD_SCALE)
 				_defender.queue_free()
 				_defender = null
 				_overlay.target = null
@@ -366,7 +375,7 @@ func _play(event: Dictionary) -> void:
 				_say("DIRECT HIT ON THE DEFENDER: %d%%" % mini(int(worn * 100.0), 99))
 			elif event["hit"] and ground != Vector3.INF:
 				_say("DIRECT HIT ON THE PLANET")
-				var flight := maxf(_camera.global_position.distance_to(ground) / 160.0, 1.0) * FightEffects.MISSILE_STEP
+				var flight := maxf(_camera.global_position.distance_to(ground) / (160.0 * WORLD_SCALE), 1.0) * FightEffects.MISSILE_STEP
 				get_tree().create_timer(flight).timeout.connect(_strike.bind(ground, 160.0))
 		"surrendered":
 			_say("THE PLANET HAS SURRENDERED")
@@ -389,17 +398,17 @@ func _ground_ahead(reach: float) -> Vector3:
 	if direction.y > -0.02:
 		return Vector3.INF
 	var start := _camera.global_position
-	var distance := (start.y - FlightRules.GROUND) / -direction.y
-	if distance > reach or distance < 1.0:
+	var distance := (start.y - FlightRules.GROUND * WORLD_SCALE) / -direction.y
+	if distance > reach * WORLD_SCALE or distance < 1.0:
 		return Vector3.INF
 	return start + direction * distance
 
 
 ## A strike on the ground with a blast `radius` wide: a city it reaches burns.
 func _strike(at: Vector3, radius: float) -> void:
-	if not is_inside_tree() or _cities.hit(at, radius) < 0:
+	if not is_inside_tree() or _cities.hit(_air_root.to_local(at), radius) < 0:
 		return
-	_effects.fire(at, 45.0)
+	_effects.fire(at, 45.0, WORLD_SCALE)
 	_say("CITY DESTROYED")
 
 
@@ -525,7 +534,7 @@ func _make_environment(air: bool) -> Environment:
 		environment.sky = sky
 		environment.fog_enabled = true
 		environment.fog_light_color = Color(0.66, 0.80, 0.95)
-		environment.fog_density = 0.000035
+		environment.fog_density = 0.000035 / WORLD_SCALE
 		_fog = environment
 	else:
 		environment.background_mode = Environment.BG_COLOR
@@ -579,6 +588,7 @@ func _make_ground() -> void:
 	material.shader = load("res://assets/shaders/ground.gdshader")
 	material.set_shader_parameter("tech", float(GameState.planet_tech[planet]))
 	material.set_shader_parameter("seed", float(planet + 1))
+	material.set_shader_parameter("world_scale", WORLD_SCALE)
 	_ground_material = material
 	var ground := MeshInstance3D.new()
 	ground.mesh = plane
@@ -615,6 +625,7 @@ func _make_clouds() -> void:
 	material.set_shader_parameter("seed", float(GameState.current_planet + 1))
 	material.set_shader_parameter("sun_direction", FlightRules.place(SUN))
 	material.set_shader_parameter("layer_height", CLOUD_HEIGHT)
+	material.set_shader_parameter("world_scale", WORLD_SCALE)
 	_clouds = MeshInstance3D.new()
 	_clouds.mesh = plane
 	_clouds.material_override = material
@@ -744,7 +755,7 @@ func _update_atmosphere() -> void:
 		_sky_material.sky_horizon_color = Color(0.66, 0.80, 0.95).lerp(Color(0.10, 0.18, 0.34), up)
 		_sky_material.ground_horizon_color = _sky_material.sky_horizon_color
 		_fog.fog_light_color = _sky_material.sky_horizon_color
-		_fog.fog_density = lerpf(0.000035, 0.000012, up)
+		_fog.fog_density = lerpf(0.000035, 0.000012, up) / WORLD_SCALE
 
 
 ## @witness STARSHIP SIMULATOR 153
@@ -752,15 +763,15 @@ func _update_atmosphere() -> void:
 ## (The calls draw the flight's view and flip the hi-res pages; the camera of this
 ## scene, which sees what the ship sees, is what replaces them.)
 func _update_camera() -> void:
-	var eye := FlightRules.place(Vector3(_rules.x, _rules.y, _rules.z))
+	var eye := FlightRules.place(Vector3(_rules.x, _rules.y, _rules.z)) # in the original's units
 	var basis := FlightRules.camera_basis(_rules.pitch, _rules.bank, _rules.heading)
 	if _shake > 0.001:
 		var jolt := Vector3(randf() - 0.5, randf() - 0.5, 0.0) * _shake * 0.06
 		basis = basis * Basis.from_euler(jolt)
 		_shake = move_toward(_shake, 0.0, get_process_delta_time() * 1.6)
-	_camera.transform = Transform3D(basis, eye)
+	_camera.transform = Transform3D(basis, eye * WORLD_SCALE)
 	if _sky != null:
-		_sky.position = eye
+		_sky.position = eye # in the scaled world's own units
 
 
 # --- the panel ---

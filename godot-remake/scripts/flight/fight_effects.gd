@@ -21,6 +21,9 @@ const GREEN := Color(0.45, 1.0, 0.55)
 const RED := Color(1.0, 0.3, 0.25)
 
 var camera: Camera3D
+## How much bigger the world is than the original's units: a missile covers that much more space
+## in the same time. The weapons' own sizes are not scaled.
+var world_scale := 1.0
 
 var _glow_texture: GradientTexture2D
 var _ring_texture: GradientTexture2D
@@ -56,14 +59,14 @@ func missile(direction: Vector3, steps: int, hit: bool, ground := Vector3.INF, t
 	AudioManager.play_missile()
 	var basis := camera.global_transform.basis
 	var start := camera.global_position + basis * Vector3(0.0, -0.9, -3.0)
-	var end := camera.global_position + direction * 160.0 * steps
+	var end := camera.global_position + direction * 160.0 * world_scale * steps
 	var seconds := steps * MISSILE_STEP
 	if hit and ground != Vector3.INF: # aimed at the ground: it goes there, and bursts on it
 		end = ground
-		seconds = maxf(start.distance_to(end) / 160.0, 1.0) * MISSILE_STEP
+		seconds = maxf(start.distance_to(end) / (160.0 * world_scale), 1.0) * MISSILE_STEP
 	elif hit and target != Vector3.INF: # at a ship: it bursts on its hull, not at the end of its range
 		end = target
-		seconds = maxf(start.distance_to(end) / 160.0, 1.0) * MISSILE_STEP
+		seconds = maxf(start.distance_to(end) / (160.0 * world_scale), 1.0) * MISSILE_STEP
 	var sideways := basis.x * 2.2
 	for side in [-1.0, 1.0]: # the left, then the right
 		var pair_start: Vector3 = start + sideways * side
@@ -313,19 +316,19 @@ func ground_burst(at: Vector3, size: float) -> void:
 
 
 ## A city burning: flames and a column of smoke, for `seconds`, then it dies down.
-func fire(at: Vector3, seconds: float) -> void:
+func fire(at: Vector3, seconds: float, size := 1.0) -> void:
 	var flames := CPUParticles3D.new()
 	flames.amount = 40
 	flames.lifetime = 1.4
 	flames.direction = Vector3.UP
 	flames.spread = 25.0
 	flames.gravity = Vector3(0.0, 30.0, 0.0)
-	flames.initial_velocity_min = 30.0
-	flames.initial_velocity_max = 90.0
+	flames.initial_velocity_min = 30.0 * size
+	flames.initial_velocity_max = 90.0 * size
 	flames.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
-	flames.emission_sphere_radius = 110.0
-	flames.scale_amount_min = 35.0
-	flames.scale_amount_max = 80.0
+	flames.emission_sphere_radius = 110.0 * size
+	flames.scale_amount_min = 35.0 * size
+	flames.scale_amount_max = 80.0 * size
 	var ramp := Gradient.new()
 	ramp.colors = PackedColorArray([Color(1.0, 0.85, 0.4, 0.8), Color(1.0, 0.4, 0.1, 0.55), Color(0.2, 0.08, 0.04, 0.0)])
 	ramp.offsets = PackedFloat32Array([0.0, 0.4, 1.0])
@@ -340,12 +343,12 @@ func fire(at: Vector3, seconds: float) -> void:
 	smoke.direction = Vector3.UP
 	smoke.spread = 10.0
 	smoke.gravity = Vector3(0.0, 25.0, 0.0)
-	smoke.initial_velocity_min = 60.0
-	smoke.initial_velocity_max = 120.0
+	smoke.initial_velocity_min = 60.0 * size
+	smoke.initial_velocity_max = 120.0 * size
 	smoke.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
-	smoke.emission_sphere_radius = 90.0
-	smoke.scale_amount_min = 80.0
-	smoke.scale_amount_max = 200.0
+	smoke.emission_sphere_radius = 90.0 * size
+	smoke.scale_amount_min = 80.0 * size
+	smoke.scale_amount_max = 200.0 * size
 	var grey := Gradient.new()
 	grey.colors = PackedColorArray([Color(0.1, 0.09, 0.08, 0.0), Color(0.12, 0.11, 0.1, 0.45), Color(0.2, 0.2, 0.2, 0.0)])
 	grey.offsets = PackedFloat32Array([0.0, 0.2, 1.0])

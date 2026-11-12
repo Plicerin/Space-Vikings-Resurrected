@@ -12,6 +12,7 @@ extends Node
 
 const FLIGHT := "res://scenes/native_flight.tscn"
 const TIMEOUT_FRAMES := 60 * 20
+const WORLD_SCALE := 3.0 # the flight scene's, see native_flight.gd
 
 var _driver := false
 var _bad := 0
@@ -32,7 +33,7 @@ func _drive() -> void:
 	await _flight(func() -> void:
 		GameState.ship_y = 3000
 		GameState.ship_speed = 0)
-	var at := Vector3(GameState.ship_x, GameState.ship_y, -GameState.ship_z) # Godot's z is the original's reversed
+	var at := Vector3(GameState.ship_x, GameState.ship_y, -GameState.ship_z) * WORLD_SCALE # Godot's z is the original's reversed
 	_check("a new flight: the camera is at the ship (%s, the game has %s)" % [_camera().global_position, at],
 			_camera().global_position.is_equal_approx(at))
 	_check("the panel: no speed, full shields", _speed() == 0.0 and GameState.ship_shield == 100.0)
@@ -267,7 +268,8 @@ func _drive() -> void:
 		GameState.gf_victory_progress = 40.0)
 	var flight := get_tree().current_scene
 	var struck: Vector3 = flight._ground_ahead(12000.0)
-	_check("nose down in the atmosphere: the line of fire meets the ground (%s)" % str(struck), struck != Vector3.INF and absf(struck.y - 20.0) < 1.0)
+	_check("nose down in the atmosphere: the line of fire meets the ground (%s)" % str(struck),
+			struck != Vector3.INF and absf(struck.y - 20.0 * WORLD_SCALE) < 1.0)
 	flight._play({"kind": "missile", "hit": true, "steps": 8, "defender": false})
 	await _frames(3)
 	_check("a missile that hits says so", _node("Hud/Overlay").message == "DIRECT HIT ON THE PLANET")

@@ -17,6 +17,8 @@ uniform float seed = 1.0;
 uniform float scale = 0.00018;
 uniform float sea_level = 0.5;
 uniform float relief = 5200.0;
+// How much bigger the scene's world is than the units the map is drawn in.
+uniform float world_scale = 1.0;
 // Where on the planet's sphere the ground's middle is (a direction from its centre), and how
 // much ground a radian of the sphere is: the continents are the planet's own, as seen from orbit.
 uniform vec3 site = vec3(0.0, 0.0, 1.0);
@@ -65,11 +67,11 @@ float height(vec2 w) {
 }
 
 void vertex() {
-	world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz / world_scale;
 }
 
 void fragment() {
-	vec3 cam = INV_VIEW_MATRIX[3].xyz;
+	vec3 cam = INV_VIEW_MATRIX[3].xyz / world_scale;
 	float dist = distance(world, cam);
 	vec2 w = world.xz;
 	float h = height(w);

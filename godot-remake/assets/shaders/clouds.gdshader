@@ -9,6 +9,7 @@ uniform float coverage = 0.52;
 uniform vec3 sun_direction = vec3(0.6, 0.25, -0.75);
 uniform float layer_height = 2200.0;
 
+uniform float world_scale = 1.0; // how much bigger the scene's world is than the units the clouds are drawn in
 varying vec3 world;
 
 float hash(vec2 p) {
@@ -29,11 +30,11 @@ float fbm(vec2 p) {
 }
 
 void vertex() {
-	world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz / world_scale;
 }
 
 void fragment() {
-	vec3 cam = INV_VIEW_MATRIX[3].xyz;
+	vec3 cam = INV_VIEW_MATRIX[3].xyz / world_scale;
 	vec2 drift = vec2(TIME * 14.0, TIME * 6.0);
 	vec2 p = (world.xz + drift) * 0.00045;
 	float density = fbm(p);
