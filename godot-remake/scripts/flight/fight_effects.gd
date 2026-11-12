@@ -14,6 +14,7 @@ signal shaken(strength: float)
 ## Seconds to a step of a fighter's pass, and to a step of a missile's flight.
 const FIGHTER_STEP := 0.09
 const MISSILE_STEP := 0.04
+const TWIN_GAP := 0.28 ## the second missile's burst follows the first's (1200 bursts the left, then the right)
 
 const FLAME := Color(1.0, 0.62, 0.2)
 const GREEN := Color(0.45, 1.0, 0.55)
@@ -47,12 +48,14 @@ func laser() -> void:
 # --- the missile ---------------------------------------------------------------
 
 
-## A missile from the ship along `direction` for `steps` steps of 160 units,
-## bursting at the end if it hit. It leaves slowly and gathers speed, rolling on
-## its way, a flame behind it and a smoke trail left in the air.
+## A pair of missiles from the ship along `direction` for `steps` steps of 160 units, as
+## the original fired them: one from each side, drawn together up the screen, bursting at
+## the end, the left and then the right, if they hit. They leave slowly and gather speed,
+## rolling on their way, a flame behind each and a smoke trail left in the air.
 func missile(direction: Vector3, steps: int, hit: bool, ground := Vector3.INF, target := Vector3.INF) -> void:
 	AudioManager.play_missile()
-	var start := camera.global_position + camera.global_transform.basis * Vector3(0.0, -0.9, -3.0)
+	var basis := camera.global_transform.basis
+	var start := camera.global_position + basis * Vector3(0.0, -0.9, -3.0)
 	var end := camera.global_position + direction * 160.0 * steps
 	var seconds := steps * MISSILE_STEP
 	if hit and ground != Vector3.INF: # aimed at the ground: it goes there, and bursts on it
@@ -61,6 +64,22 @@ func missile(direction: Vector3, steps: int, hit: bool, ground := Vector3.INF, t
 	elif hit and target != Vector3.INF: # at a ship: it bursts on its hull, not at the end of its range
 		end = target
 		seconds = maxf(start.distance_to(end) / 160.0, 1.0) * MISSILE_STEP
+	var sideways := basis.x * 2.2
+	for side in [-1.0, 1.0]: # the left, then the right
+		var pair_start: Vector3 = start + sideways * side
+		var pair_end: Vector3 = end + sideways * side * 0.12 # they draw in as they go
+		var burst: Callable
+		if not hit: # out of range: it self-destructs, a smaller burst than a hit (the manual)
+			burst = explosion.bind(pair_end, 70.0)
+		elif ground != Vector3.INF:
+			burst = ground_burst.bind(pair_end, 260.0)
+		else:
+			burst = explosion.bind(pair_end, 260.0)
+		_launch(pair_start, pair_end, direction, seconds, burst, 0.0 if side < 0.0 else TWIN_GAP)
+
+
+## One missile, flying from `start` to `end` and bursting there `late` seconds after arriving.
+func _launch(start: Vector3, end: Vector3, direction: Vector3, seconds: float, burst: Callable, late: float) -> void:
 	var rocket := Node3D.new()
 	add_child(rocket)
 	rocket.global_transform = Transform3D(Basis.looking_at(direction, Vector3.UP), start)
@@ -82,10 +101,7 @@ func missile(direction: Vector3, steps: int, hit: bool, ground := Vector3.INF, t
 	flight.tween_property(rocket, "global_position", end, seconds).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	flight.tween_property(body, "rotation:z", TAU * 3.0, seconds)
 	flight.chain().tween_callback(_finish_rocket.bind(rocket))
-	if hit:
-		flight.tween_callback(ground_burst.bind(end, 260.0) if ground != Vector3.INF else explosion.bind(end, 260.0))
-	else: # out of range: it self-destructs, a smaller burst than a hit (the manual)
-		flight.tween_callback(explosion.bind(end, 70.0))
+	flight.tween_callback(burst).set_delay(late)
 
 
 ## Stops a rocket's engine and lets its trail thin out before the node goes.
