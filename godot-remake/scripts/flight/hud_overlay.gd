@@ -424,18 +424,18 @@ func _bulb(centre: Vector2, radius: float, colour: Color, lit: bool) -> void:
 	material.set_shader_parameter("lit", 1.0 if lit else 0.0)
 
 
-## Condition 2 is yellow alert, 3 red: a glow round the edge of the screen,
+## Condition 2 is blue (alert standby, the manual), 3 red: a glow round the edge of the screen,
 ## quicker for red. Green is none.
 func _update_alert() -> void:
-	var yellow := GameState.condition == 2
+	var standby := GameState.condition == 2 # the manual: green normal, blue alert standby, red battle stations
 	var red := GameState.condition == 3
-	_alert.visible = yellow or red
+	_alert.visible = standby or red
 	if not _alert.visible:
 		return
 	_alert.position = Vector2.ZERO
 	_alert.size = size
 	var material := _alert.material as ShaderMaterial
-	material.set_shader_parameter("colour", Color(1.0, 0.2, 0.1) if red else Color(1.0, 0.8, 0.1))
+	material.set_shader_parameter("colour", Color(1.0, 0.2, 0.1) if red else Color(0.25, 0.55, 1.0))
 	material.set_shader_parameter("pulse_rate", 3.0 if red else 1.2)
 	material.set_shader_parameter("screen_size", size)
 

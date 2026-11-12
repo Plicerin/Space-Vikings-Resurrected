@@ -1,5 +1,5 @@
 shader_type canvas_item;
-// The alert border: a glow along the edges of the screen, yellow or red, that
+// The alert border: a glow along the edges of the screen, blue or red, that
 // breathes while the alert is on.
 uniform vec4 colour : source_color = vec4(1.0, 0.2, 0.1, 1.0);
 uniform float strength = 1.0;

@@ -116,7 +116,7 @@ the damage-control panel (dark plastic, raised amber lettering, twelve
 LED bulbs, a scanner of LEDs that sweeps while the damage alert is on);
 the attitude ball (a shaded sphere, with the orbit ring and pointers to
 the enemy and the planet); a target bracket on the defender; and a
-yellow or red line round the screen for condition 2 or 3. **AUTO** is as
+blue or red line round the screen for condition 2 or 3 (the manual's alert standby and battle stations; green, normal, has none). **AUTO** is as
 the original had it: the stick is not read, so the ship keeps the stick
 position it had when AUTO went on; a new game starts in manual.
 
