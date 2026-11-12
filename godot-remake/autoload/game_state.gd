@@ -31,6 +31,8 @@ var in_atmosphere: bool = false  # $38210
 var show_radar_on_arrival := false
 ## The console's GALAXY MAP: the flight is shown with the chart already up.
 var show_chart_on_arrival := false
+## The console's GROUND FORCES: the flight is shown with its program already up.
+var show_ground_forces_on_arrival := false
 var flight_scene: String = "res://scenes/native_flight.tscn"
 var handover: int = 0
 ## $38151 = 7: COLLECT and GROUND FORCES run COM to have the console

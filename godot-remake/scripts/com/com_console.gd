@@ -16,7 +16,6 @@ extends Control
 
 const ComRules = preload("res://scripts/rules/com_rules.gd")
 
-const GROUND_FORCES := "res://scenes/ground_forces.tscn"
 const END := "res://scenes/end_game.tscn"
 const STATUS := "res://scenes/status.tscn"
 const SUPPLY := "res://scenes/supply_report.tscn"
@@ -52,7 +51,8 @@ func _ready() -> void:
 	_field.text_submitted.connect(func(text: String) -> void: _entered.call(text.to_int()))
 	_show_lamps()
 	if ComRules.ground_forces_due(): # RECALL's and SHORE LEAVE's bounce
-		_go.call_deferred(GROUND_FORCES)
+		GameState.show_ground_forces_on_arrival = true
+		_go.call_deferred(GameState.flight_scene)
 		return
 	var star := ComRules.chart_star() # the chart's "Y"
 	if star > 0:
@@ -187,7 +187,8 @@ func _command_picked(choice: int) -> void:
 	if goes == ComRules.Goes.CENTRAL:
 		_central()
 	elif goes == ComRules.Goes.GROUND_FORCES:
-		_go(GROUND_FORCES)
+		GameState.show_ground_forces_on_arrival = true
+		_go(GameState.flight_scene)
 	elif goes == ComRules.Goes.RADAR:
 		GameState.show_radar_on_arrival = true
 		_go(GameState.flight_scene)

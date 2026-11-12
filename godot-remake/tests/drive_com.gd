@@ -11,7 +11,6 @@ extends Node
 
 const COM := "res://scenes/com.tscn"
 const FLIGHT := "res://scenes/native_flight.tscn"
-const GROUND_FORCES := "res://scenes/ground_forces.tscn"
 const END := "res://scenes/end_game.tscn"
 const STATUS := "res://scenes/status.tscn"
 const SUPPLY := "res://scenes/supply_report.tscn"
@@ -120,11 +119,14 @@ func _drive() -> void:
 	_check("the directory's RETURN is the command menu", _title() == "COMMAND MODE")
 
 	# on from the menus
-	for case: Array in [[KEY_2, GROUND_FORCES], [KEY_3, FLIGHT], [KEY_4, END], [KEY_5, FLIGHT]]:
+	for case: Array in [[KEY_2, FLIGHT], [KEY_3, FLIGHT], [KEY_4, END], [KEY_5, FLIGHT]]:
 		await _console(func() -> void: pass)
 		_tap(case[0])
 		await _scene_is(case[1])
 		_check("command %d goes to %s" % [case[0] - KEY_0, case[1]], _path() == case[1])
+		if case[0] == KEY_2:
+			await _frames(5)
+			_check("GROUND FORCES is the console's program over the flight", _scene().get("_console").active())
 		if case[0] == KEY_3:
 			_check("RADAR is told who ran it (38388 = 2)", GameState.handover == 2)
 	for case: Array in [[KEY_3, FLIGHT], [KEY_4, STATUS], [KEY_5, SUPPLY]]:
@@ -147,8 +149,10 @@ func _drive() -> void:
 	GameState.start_new_game()
 	GameState.ground_forces_due = true
 	GameState.goto_scene(COM)
-	await _scene_is(GROUND_FORCES)
-	_check("the bounce goes straight back to GROUND FORCES", _path() == GROUND_FORCES and not GameState.ground_forces_due)
+	await _scene_is(FLIGHT)
+	await _frames(5)
+	_check("the bounce goes straight back to GROUND FORCES (its menu up over the flight)",
+			_scene().get("_console").active() and _scene().get_node("Hud/Overlay").program[0] == "-GROUND FORCES-" and not GameState.ground_forces_due)
 
 	print("com scene driven: %d wrong" % _bad)
 	get_tree().quit(1 if _bad > 0 else 0)

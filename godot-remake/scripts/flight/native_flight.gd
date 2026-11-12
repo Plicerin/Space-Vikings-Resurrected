@@ -37,6 +37,8 @@ const COM := "res://scenes/com.tscn"
 const VectorRadar = preload("res://scripts/flight/vector_radar.gd")
 const VectorChart = preload("res://scripts/flight/vector_chart.gd")
 const CrtConsole = preload("res://scripts/flight/crt_console.gd")
+const VectorGlobe = preload("res://scripts/flight/vector_globe.gd")
+const GroundForcesProgram = preload("res://scripts/flight/ground_forces_program.gd")
 
 const PLANET_RADIUS := 780.0
 ## The game's own points nearer than this to the planet are its cluster; the
@@ -58,6 +60,7 @@ var _effects: Node3D
 var _radar: Control
 var _chart: Control
 var _console: Node
+var _globe: Control
 ## Seconds since the last pass of fighting, and whether the fire key was
 ## pressed since (a tap between two passes still fires).
 var _fight_clock := 0.0
@@ -113,6 +116,11 @@ func _ready() -> void:
 	_console = CrtConsole.new()
 	_console.overlay = $Hud/Overlay
 	add_child(_console)
+	_globe = VectorGlobe.new()
+	$Hud.add_child(_globe)
+	if GameState.show_ground_forces_on_arrival: # the console's GROUND FORCES
+		GameState.show_ground_forces_on_arrival = false
+		_run_ground_forces.call_deferred()
 	_chart = VectorChart.new()
 	_chart.console = $Hud/Overlay
 	$Hud.add_child(_chart)
@@ -207,6 +215,12 @@ func _leave(scene: String) -> void:
 ## @witness DMG 10
 ## @witness S_X 40-70
 ## A pass of fighting: the rules decide, the effects play it.
+## GROUND FORCES on the console, over the flight, to its RETURN and back to the command console.
+func _run_ground_forces() -> void:
+	await GroundForcesProgram.new().run(_console, _globe)
+	_leave(COM)
+
+
 func _fight() -> void:
 	var button := _fire_tapped or Input.is_action_pressed("fire")
 	_fire_tapped = false

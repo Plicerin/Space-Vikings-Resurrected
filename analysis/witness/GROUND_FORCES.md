@@ -27,13 +27,13 @@ none
 | 30 | P |  | 21 | `PRINT "1) ATTACK PLANET": PRINT "2) RECALL TROOPS": PRINT "3) SHORE LEAVE"` |
 | 40 | P |  | 21 | `PRINT "4) ENLIST TROOPS": PRINT "5) SELL LOOT": PRINT "6) REPAIR/RESTOCK"` |
 | 50 | P |  | 21 | `PRINT "7) ESTABLISH BASE": PRINT "8) CRYOGENICS": PRINT "9) RETURN"` |
-| 60 | L | godot-remake/scripts/ui/ground_forces.gd:98 | 21 | `HCOLOR= 1: GET COM$:COM =  VAL (COM$): IF COM < 1 THEN 60` |
-| 62 | P | godot-remake/scripts/ui/ground_forces.gd:98 | 21 | `HPLOT 1,1 TO 139,1 TO 139,110 TO 1,110 TO 1,1` |
-| 65 | L | godot-remake/scripts/rules/ground_rules.gd:74<br>godot-remake/scripts/ui/ground_forces.gd:98 | 21 | `R = 5: GOSUB 12: VTAB 2: IF COM > 2 AND COM < 7 AND  PEEK (38303 +  PEEK (38209)) = 0 THEN` |
-| 66 | L | godot-remake/scripts/rules/ground_rules.gd:74<br>godot-remake/scripts/ui/ground_forces.gd:98 | 21 | `IF COM = 4 AND  PEEK (38158) <  >  PEEK (38209) THEN  PRINT : PRINT "DO YOU REALLY": PRINT` |
-| 67 | L | godot-remake/scripts/rules/ground_rules.gd:74<br>godot-remake/scripts/ui/ground_forces.gd:98 | 21 | `IF COM = 1 AND  PEEK (38158) <  >  PEEK (38209) THEN  PRINT : PRINT "YOU CAN'T ATTACK!": P` |
-| 70 | L | godot-remake/scripts/ui/ground_forces.gd:98 | 21 | `POKE 974,64: PRINT : ON COM GOTO 100,2000,2080,2150,2160,2170,2180,2190` |
-| 75 | L | godot-remake/scripts/ui/ground_forces.gd:98 | 21 | `IF COM = 9 THEN  PRINT D$;"RUN COM"` |
+| 60 | L | godot-remake/scripts/flight/ground_forces_program.gd:65 | 21 | `HCOLOR= 1: GET COM$:COM =  VAL (COM$): IF COM < 1 THEN 60` |
+| 62 | P | godot-remake/scripts/flight/ground_forces_program.gd:65 | 21 | `HPLOT 1,1 TO 139,1 TO 139,110 TO 1,110 TO 1,1` |
+| 65 | L | godot-remake/scripts/flight/ground_forces_program.gd:65<br>godot-remake/scripts/rules/ground_rules.gd:74 | 21 | `R = 5: GOSUB 12: VTAB 2: IF COM > 2 AND COM < 7 AND  PEEK (38303 +  PEEK (38209)) = 0 THEN` |
+| 66 | L | godot-remake/scripts/flight/ground_forces_program.gd:65<br>godot-remake/scripts/rules/ground_rules.gd:74 | 21 | `IF COM = 4 AND  PEEK (38158) <  >  PEEK (38209) THEN  PRINT : PRINT "DO YOU REALLY": PRINT` |
+| 67 | L | godot-remake/scripts/flight/ground_forces_program.gd:65<br>godot-remake/scripts/rules/ground_rules.gd:74 | 21 | `IF COM = 1 AND  PEEK (38158) <  >  PEEK (38209) THEN  PRINT : PRINT "YOU CAN'T ATTACK!": P` |
+| 70 | L | godot-remake/scripts/flight/ground_forces_program.gd:65 | 21 | `POKE 974,64: PRINT : ON COM GOTO 100,2000,2080,2150,2160,2170,2180,2190` |
+| 75 | L | godot-remake/scripts/flight/ground_forces_program.gd:65 | 21 | `IF COM = 9 THEN  PRINT D$;"RUN COM"` |
 | 80 | P |  |  | `GOTO 12` |
 | 100 | P |  | 10 | `POKE 974,32: POKE 32,0: POKE 33,40: POKE 34,0: POKE 35,16: HOME : FOR C = 1 TO 16: VTAB C:` |
 | 110 | P |  | 10 | `HCOLOR= 5: HPLOT 7,12 TO 271,12 TO 271,76 TO 7,76 TO 7,12` |
@@ -102,11 +102,11 @@ none
 | 1130 | L | godot-remake/scripts/rules/ground_rules.gd:151 | 2 | `POKE 38151,7: PRINT D$;"RUN COM"` |
 | 2000 | P |  | 3 | `PRINT "RUN RECALL"` |
 | 2080 | P |  | 4 | `PRINT "RUN SHORE LEAVE"` |
-| 2150 | L | godot-remake/scripts/ui/ground_forces.gd:118 | 4 | `POKE 38388,1: PRINT "RUNSHORE LEAVE"` |
-| 2160 | L | godot-remake/scripts/ui/ground_forces.gd:118 | 5 | `POKE 38388,2: PRINT "RUNSHORE LEAVE"` |
-| 2170 | L | godot-remake/scripts/ui/ground_forces.gd:118 | 4 | `POKE 38388,3: PRINT "RUNSHORE LEAVE"` |
-| 2180 | L | godot-remake/scripts/ui/ground_forces.gd:118 | 5 | `POKE 38388,4: PRINT "RUNSHORE LEAVE"` |
-| 2190 | L | godot-remake/scripts/ui/ground_forces.gd:118 | 2 | `POKE 38388,5: PRINT "RUNSHORE LEAVE"` |
+| 2150 | L | godot-remake/scripts/flight/ground_forces_program.gd:84 | 4 | `POKE 38388,1: PRINT "RUNSHORE LEAVE"` |
+| 2160 | L | godot-remake/scripts/flight/ground_forces_program.gd:84 | 5 | `POKE 38388,2: PRINT "RUNSHORE LEAVE"` |
+| 2170 | L | godot-remake/scripts/flight/ground_forces_program.gd:84 | 4 | `POKE 38388,3: PRINT "RUNSHORE LEAVE"` |
+| 2180 | L | godot-remake/scripts/flight/ground_forces_program.gd:84 | 5 | `POKE 38388,4: PRINT "RUNSHORE LEAVE"` |
+| 2190 | L | godot-remake/scripts/flight/ground_forces_program.gd:84 | 2 | `POKE 38388,5: PRINT "RUNSHORE LEAVE"` |
 | 4000 | L | godot-remake/scripts/rules/ground_rules.gd:151 | 8 | `P =  INT (P):TP =  INT (TP):TR =  INT (TR):T =  INT (T):M =  INT (M):PS =  INT ((PS * 100)` |
 | 4001 | L | godot-remake/scripts/rules/ground_rules.gd:151 | 8 | `IF PS > 100 THEN PS = 100` |
 | 4010 | L | godot-remake/scripts/rules/ground_rules.gd:151 | 8 | `POKE 973,0: VTAB 4: HTAB 33: PRINT P;" ": HTAB 33: PRINT TP;" ": HTAB 33: PRINT TR;" ": HT` |

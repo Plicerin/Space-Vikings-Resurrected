@@ -24,7 +24,7 @@ const OURS := Color(0.4, 1.0, 0.6)
 var capture := 0.0
 ## Where the force came down: a direction on the globe.
 var landing := Vector3(0.35, 0.25, 0.9).normalized()
-var radius_fraction := 0.34
+var radius_fraction := 0.36
 
 var _lights := PackedVector3Array() ## in the order they are taken
 var _count := 0
@@ -34,10 +34,15 @@ var _turn := 0.0
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	visible = false
 	_load()
 
 
 func _process(delta: float) -> void:
+	if not visible:
+		return
+	position = Vector2.ZERO
+	size = get_viewport_rect().size # a canvas layer has no layout to fill
 	_turn += delta
 	queue_redraw()
 
@@ -57,8 +62,9 @@ func _load() -> void:
 func _draw() -> void:
 	var tech := int(GameState.planet_tech[GameState.current_planet])
 	_count = mini(CITIES[clampi(tech, 0, 4)], _lights.size())
-	var centre := size / 2.0
-	var radius := minf(size.x, size.y) * radius_fraction
+	var centre := Vector2(size.x * 0.5, (size.y - 150.0) * 0.5)
+	var radius := minf(size.x, size.y - 150.0) * radius_fraction
+	draw_rect(Rect2(centre - Vector2(radius, radius) * 1.25, Vector2(radius, radius) * 2.5), Color(0.0, 0.03, 0.02, 0.7)) # the glass
 	var flicker := 1.0 - 0.04 * absf(sin(_turn * 31.0) * sin(_turn * 9.7))
 	var spin := _turn * 0.22
 	var tilt := 0.38

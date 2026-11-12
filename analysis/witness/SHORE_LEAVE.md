@@ -32,7 +32,7 @@ none
 | 2080 | P | godot-remake/scripts/rules/shore_rules.gd:73 | 7 | `SPEED= 255: VTAB 2: HTAB 2: FOR C = 2 TO 13: VTAB C: PRINT "                  ": NEXT : SP` |
 | 2081 | L | godot-remake/scripts/rules/shore_rules.gd:73 | 7 | `VTAB 2: IF R = 7 THEN R = 0: RETURN` |
 | 2082 | L | godot-remake/scripts/rules/shore_rules.gd:73 | 2 | `PRINT "TROOPS READY FOR": PRINT "SHORE LEAVE, SIR.": PRINT "BACK PAY COMES TO": PRINT TR;"` |
-| 2085 | L | godot-remake/scripts/rules/shore_rules.gd:73<br>godot-remake/scripts/ui/shore_leave.gd:88 | 2 | `PRINT "PAY THEM (Y/N)?";: GET P$: IF P$ <  > "Y" AND P$ <  > "N" THEN 2085` |
+| 2085 | L | godot-remake/scripts/flight/shore_leave_program.gd:55<br>godot-remake/scripts/rules/shore_rules.gd:73 | 2 | `PRINT "PAY THEM (Y/N)?";: GET P$: IF P$ <  > "Y" AND P$ <  > "N" THEN 2085` |
 | 2087 | L | godot-remake/scripts/rules/shore_rules.gd:83 | 2 | `POKE 38170,70` |
 | 2088 | L | godot-remake/scripts/rules/shore_rules.gd:83 | 2 | `IF P$ = "N" THEN M =  PEEK (38203):M = M - 2: IF M < 1 THEN M = 1` |
 | 2089 | L | godot-remake/scripts/rules/shore_rules.gd:83 | 2 | `IF P$ = "N" THEN  POKE 38203,M` |
@@ -49,7 +49,7 @@ none
 | 2107 | L | godot-remake/scripts/rules/shore_rules.gd:104 | 2 | `POKE 38149,1` |
 | 2110 | L | godot-remake/scripts/rules/shore_rules.gd:104 | 2 | `PRINT "SIR! IT WILL COST": PRINT  INT (C);" TO BUILD A": PRINT "BASE HERE.": PRINT : PRINT` |
 | 2130 | L | godot-remake/scripts/rules/shore_rules.gd:104 | 2 | `IF CR < C THEN  PRINT "YOU DON'T HAVE": PRINT "ENOUGH CREDITS TO": PRINT "BUILD A BASE HER` |
-| 2140 | L | godot-remake/scripts/ui/shore_leave.gd:99 | 2 | `VTAB 8: PRINT "BUILD A BASE?": PRINT "(Y/N)";: GET A$: IF A$ = "N" THEN  GOTO 2099` |
+| 2140 | L | godot-remake/scripts/flight/shore_leave_program.gd:66 | 2 | `VTAB 8: PRINT "BUILD A BASE?": PRINT "(Y/N)";: GET A$: IF A$ = "N" THEN  GOTO 2099` |
 | 2150 | L | godot-remake/scripts/rules/shore_rules.gd:129 | 2 | `IF A$ <  > "Y" THEN 2140` |
 | 2155 | P | godot-remake/scripts/rules/shore_rules.gd:129 | 2 | `PRINT " "` |
 | 2159 | L | godot-remake/scripts/rules/shore_rules.gd:129 | 2 | `CR =  INT (CR - C)` |
@@ -113,13 +113,13 @@ none
 | 4000 | L | godot-remake/scripts/rules/shore_rules.gd:292 | 1 | `R = 7: GOSUB 2080: VTAB 4: IF  PEEK (38166) = 1 OR  PEEK (38166) = 2 THEN  PRINT "TROOPS N` |
 | 4010 | L | godot-remake/scripts/rules/shore_rules.gd:292 | 1 | `IF  PEEK (38166) = 3 THEN  PRINT "TROOPS ARE BEING": PRINT "REVIVED, SIR.": POKE 38166,0: ` |
 | 4020 | L | godot-remake/scripts/rules/shore_rules.gd:292 | 1 | `PRINT "TROOPS ARE BEING": PRINT "PUT IN CRYOGENICS": POKE 38166,3: GOTO 2099` |
-| 5000 | L | godot-remake/scripts/ui/shore_leave.gd:213 | 2 | `HTAB H + J: VTAB V: GET C$: IF C$ <  >  CHR$ (8) THEN J = J + 1` |
-| 5001 | L | godot-remake/scripts/ui/shore_leave.gd:213 | 2 | `IF C$ =  CHR$ (8) THEN J = J - 1: IF J < 0 THEN J = 0` |
-| 5002 | L | godot-remake/scripts/ui/shore_leave.gd:213 | 2 | `IF C$ =  CHR$ (8) THEN  VTAB V: HTAB H + J: PRINT "  ";: IF J = 0 THEN C1$ = "": VTAB V: G` |
-| 5003 | L | godot-remake/scripts/ui/shore_leave.gd:213 | 2 | `IF C$ =  CHR$ (8) AND J > 0 THEN C1$ =  LEFT$ (C1$,J): VTAB V: GOTO 5000` |
-| 5004 | L | godot-remake/scripts/ui/shore_leave.gd:213 | 2 | `IF C$ =  CHR$ (13) THEN 5010` |
-| 5006 | P | godot-remake/scripts/ui/shore_leave.gd:213 | 2 | `VTAB V: HTAB H + J - 1: PRINT C$;:C1$ = C1$ + C$: GOTO 5000` |
-| 5010 | P | godot-remake/scripts/ui/shore_leave.gd:213 | 2 | `CC =  VAL (C1$):C1$ = ""` |
+| 5000 | L | godot-remake/scripts/flight/shore_leave_program.gd:86 | 2 | `HTAB H + J: VTAB V: GET C$: IF C$ <  >  CHR$ (8) THEN J = J + 1` |
+| 5001 | L | godot-remake/scripts/flight/shore_leave_program.gd:86 | 2 | `IF C$ =  CHR$ (8) THEN J = J - 1: IF J < 0 THEN J = 0` |
+| 5002 | L | godot-remake/scripts/flight/shore_leave_program.gd:86 | 2 | `IF C$ =  CHR$ (8) THEN  VTAB V: HTAB H + J: PRINT "  ";: IF J = 0 THEN C1$ = "": VTAB V: G` |
+| 5003 | L | godot-remake/scripts/flight/shore_leave_program.gd:86 | 2 | `IF C$ =  CHR$ (8) AND J > 0 THEN C1$ =  LEFT$ (C1$,J): VTAB V: GOTO 5000` |
+| 5004 | L | godot-remake/scripts/flight/shore_leave_program.gd:86 | 2 | `IF C$ =  CHR$ (13) THEN 5010` |
+| 5006 | P | godot-remake/scripts/flight/shore_leave_program.gd:86 | 2 | `VTAB V: HTAB H + J - 1: PRINT C$;:C1$ = C1$ + C$: GOTO 5000` |
+| 5010 | P | godot-remake/scripts/flight/shore_leave_program.gd:86 | 2 | `CC =  VAL (C1$):C1$ = ""` |
 | 5015 | P |  | 2 | `J = JJ` |
 | 5020 | P |  | 2 | `PRINT : RETURN` |
 | 63999 | P |  |  | `PRINT : PRINT "INT"` |

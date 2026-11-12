@@ -34,8 +34,8 @@ data in `tests/golden/`.
 
 | Original program | Rules | Scene | Held to the real game by |
 |---|---|---|---|
-| `GROUND FORCES`, `RECALL`, `COLLECT` | `scripts/rules/ground_rules.gd` | `scripts/ui/ground_forces.gd` | `check_ground_rules` (the rules), `drive_ground_forces` (the scene) |
-| `SHORE LEAVE` (shore leave, enlisting and weapons, loot, repairs, a base, cryogenics) | `scripts/rules/shore_rules.gd` | `scripts/ui/shore_leave.gd`, one panel over the ground forces menu | `check_shore_rules`, `drive_shore_leave` |
+| `GROUND FORCES`, `RECALL`, `COLLECT` | `scripts/rules/ground_rules.gd` | `scripts/flight/ground_forces_program.gd` (on the console, with `vector_globe.gd` over the window) | `check_ground_rules` (the rules), `drive_ground_forces` (the scene) |
+| `SHORE LEAVE` (shore leave, enlisting and weapons, loot, repairs, a base, cryogenics) | `scripts/rules/shore_rules.gd` | `scripts/flight/shore_leave_program.gd`, on the console | `check_shore_rules`, `drive_ground_forces` |
 | `GALAXY MAP` (star chart) | `scripts/rules/chart_rules.gd` | `scripts/flight/vector_chart.gd` (a vector overlay on the flight) | `check_chart_rules`, `drive_chart` |
 | `END` (save, continue, end game) | `scripts/rules/end_rules.gd` | `scripts/end/end_console.gd` | `check_end_rules`, `drive_end` |
 | `COM` (command console, central and navigation computers, galaxy directory, damage-control lamps) | `scripts/rules/com_rules.gd` | `scripts/com/com_console.gd` | `check_com_rules`, `drive_com` |
@@ -241,11 +241,11 @@ a difference.
     godot --headless --fixed-fps 60 --path . res://tests/drive_com.tscn      # the console scene, by keys: the lamps, every menu, a course, the directory, every way out of it
     godot --headless --fixed-fps 60 --path . res://tests/drive_radar.tscn    # the vector radar and I.D. over the flight, by keys
     godot --headless --fixed-fps 60 --path . res://tests/drive_save.tscn     # title, END, save, CONTINUE
-    godot --headless --fixed-fps 60 --path . res://tests/drive_ground_forces.tscn   # the ground forces scene, by keys: refusals, recall, a win, a retreat, a loss
+    godot --headless --fixed-fps 60 --path . res://tests/drive_ground_forces.tscn   # GROUND FORCES and SHORE LEAVE's six commands on the console, by keys: refusals, recall, a win, a retreat, a loss, every question and refusal
     godot --headless --fixed-fps 60 --path . res://tests/drive_end.tscn             # END's menu, by keys: a save, a refused save, continue
     godot --headless --fixed-fps 60 --path . res://tests/drive_native_flight.tscn   # the native flight scene: the stick, the speed keys, the lamps, C and R
     godot --headless --fixed-fps 60 --path . res://tests/drive_reports.tscn         # the two report panels: what is on show, and the way back to the console
-    godot --headless --fixed-fps 60 --path . res://tests/drive_shore_leave.tscn     # commands 3 to 8, by keys: every question, every refusal, what each leaves behind
+    godot --headless --fixed-fps 60 --path . res://tests/drive_console.tscn         # the console's menus, yes/no, number entry and waits
 
 The `check_*_rules` tests need the recordings in `../analysis/live/` (and `tests/golden/`). A compared
 byte is never adjusted to make a test pass: both times a test differed
