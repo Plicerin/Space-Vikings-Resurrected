@@ -437,8 +437,8 @@ func _stacked(font: Font, text: String, at: Vector2, pitch_px: float) -> void:
 
 const COLUMNS := 40 ## the Apple's text screen
 const HELP := [
-	"ARROWS  STICK          1 2 3 4  SPEED",
-	"SPACE   FIRE           A  AUTO",
+	"UP DIVE  DOWN CLIMB    1 2 3 4  SPEED",
+	"LEFT RIGHT  BANK       A  AUTO",
 	"S  SHIELD              W  WEAPON",
 	"B  ALERT               C  CONSOLE",
 	"R  RADAR               G  GALAXY MAP",
@@ -486,8 +486,12 @@ func _display(rect: Rect2) -> void:
 	elif mode == Mode.HELP:
 		lines = HELP
 	else:
-		lines = [GameState.STAR_NAMES[GameState.current_planet], "IN ORBIT" if not GameState.in_atmosphere else "IN THE ATMOSPHERE",
-				"", columns("N  NAV DATA", "F1 KEYS")]
+		lines = [GameState.STAR_NAMES[GameState.current_planet], "IN ORBIT" if not GameState.in_atmosphere else "IN THE ATMOSPHERE"]
+		if GameState.in_atmosphere: # the way out is up: past 4000 in the ship's units, 2000 on the readout
+			lines.append("ALTITUDE %d" % (GameState.ship_y / 2))
+			lines.append("CLIMB TO 2000 TO REACH ORBIT")
+		lines.append("")
+		lines.append(columns("N  NAV DATA", "F1 KEYS"))
 	_write(lines.slice(0, rows), inner.position, scale, pitch_px)
 	# a faint scan over the glass
 	for line in range(int(rect.position.y) + 4, int(rect.end.y) - 2, 3):

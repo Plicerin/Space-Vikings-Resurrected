@@ -212,6 +212,20 @@ func _drive() -> void:
 	_check("at (700, 200, 2000), heading 190 (%d, %d, %d, %d)" % [GameState.ship_x, GameState.ship_y, GameState.ship_z, GameState.ship_heading],
 			GameState.ship_x == 700 and GameState.ship_y == 200 and GameState.ship_z == 2000 and GameState.ship_heading == 190)
 
+	# the way out by the keys: held back (DOWN) in the atmosphere, the nose comes up and the
+	# ship climbs past 4000 into orbit
+	await _flight(func() -> void:
+		GameState.in_atmosphere = true
+		GameState.ship_x = 0
+		GameState.ship_y = 3700
+		GameState.ship_z = -3000
+		GameState.ship_pitch = 0
+		GameState.ship_speed = 120)
+	Input.action_press("stick_back")
+	await _until(func() -> bool: return not GameState.in_atmosphere, 60 * 40)
+	Input.action_release("stick_back")
+	_check("DOWN held in the atmosphere climbs out into orbit (altitude shown to the end)", not GameState.in_atmosphere)
+
 	# on to the console, and the radar
 	await _flight(func() -> void: pass)
 	_tap(KEY_C)
