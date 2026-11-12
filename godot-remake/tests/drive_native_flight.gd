@@ -154,6 +154,7 @@ func _drive() -> void:
 	Input.action_release("fire")
 	_check("three seconds with the fire button down at SOL: the laser scores (%.0f to %.0f)" % [before_progress, GameState.gf_victory_progress],
 			GameState.gf_victory_progress > before_progress)
+	await _until(func() -> bool: return GameState.ship_shield < 100.0, 60 * 60) # its fire is a matter of chance, a pass in a few
 	_check("and the defender's fire wears the shields (%.0f)" % GameState.ship_shield, GameState.ship_shield < 100.0)
 
 	# the defender: only destroying it removes it, and then its wreckage is there
