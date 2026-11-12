@@ -229,9 +229,14 @@ func _drive() -> void:
 		GameState.ship_y = 200
 		GameState.ship_z = 100
 		GameState.ship_speed = 0)
+	var scene_before := get_tree().current_scene
 	await _until(func() -> bool: return GameState.in_atmosphere, 60 * 8)
 	_check("within 900 of the planet: down into the atmosphere", GameState.in_atmosphere)
-	await _frames(10)
+	await _frames(60 * 2)
+	var down := get_tree().current_scene
+	_check("it is the same scene: the world changed, nothing reloaded", down == scene_before)
+	_check("the ground and clouds are shown, the planet and stars not", down.get("_air_root").visible and not down.get("_space_root").visible)
+	_check("and the flight is on again after the fade", not down.get("_jumping") and down.get("_fade").color.a == 0.0)
 	_check("x with its low byte put to 188 (from 300: 444), 1024 up and 7000 short of the planet along z, heading 20 (%d, %d, %d, %d)" % [
 			GameState.ship_x, GameState.ship_y, GameState.ship_z, GameState.ship_heading],
 			GameState.ship_x == 444 and GameState.ship_z == -7000 and GameState.ship_heading == 20 and GameState.ship_y < 1100)
@@ -243,7 +248,8 @@ func _drive() -> void:
 		GameState.ship_speed = 0)
 	await _until(func() -> bool: return not GameState.in_atmosphere, 60 * 8)
 	_check("above 4000 in the atmosphere: up into orbit", not GameState.in_atmosphere)
-	await _frames(10)
+	await _frames(60 * 2)
+	_check("and the planet is shown again", get_tree().current_scene.get("_space_root").visible and not get_tree().current_scene.get("_air_root").visible)
 	_check("at (700, 200, 2000), heading 190 (%d, %d, %d, %d)" % [GameState.ship_x, GameState.ship_y, GameState.ship_z, GameState.ship_heading],
 			GameState.ship_x == 700 and GameState.ship_y == 200 and GameState.ship_z == 2000 and GameState.ship_heading == 190)
 
@@ -308,7 +314,7 @@ func _drive() -> void:
 ## How many fields of wreckage (a multimesh of rocks) the flight scene has.
 func _wreck_count() -> int:
 	var count := 0
-	for child in get_tree().current_scene.get_children():
+	for child in get_tree().current_scene.get("_space_root").get_children():
 		if child is MultiMeshInstance3D and (child as MultiMeshInstance3D).multimesh.instance_count == 50:
 			count += 1
 	return count

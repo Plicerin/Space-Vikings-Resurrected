@@ -97,6 +97,13 @@ Keys are the original's: `1` `2` `3` `4` speed, `A` autopilot, `B`
 condition, `S` shields, `W` missile or laser, `C` command console, `R`
 radar, `H` hyperdrive. The arrow keys are the stick (or a joystick axis
 mapped to the stick actions) and SPACE is the button. On the radar SPACE (or I) is the ship I.D., as the manual says.
+Re-entry and the climb to orbit are not a scene change. Both worlds are built once (the planet, its
+defender and the stars; the ground, clouds and cities) and the ship's world decides which is shown, with a
+half-second fade over the original's teleport (RE and ORBIT put the ship where they always did). The
+ground below is the part of the planet's own map round where the ship went down (`GameState.reentry_site`,
+`scripts/world/terrain.gd`, `ground.gdshader` and `planet.gdshader` read the same noise), so the continents
+seen from orbit are the land flown over, and the cities are placed on that land.
+
 The instrument panel is tall enough that the console's window holds the longest page (the galaxy directory and its question, 15 rows) without growing over the view, the forty columns set small enough to keep the panel to about 230 pixels, with the gauges, the switches and the damage lamps spread to fill it (`HudOverlay.panel_height`; the radar, chart and globe keep clear of it). The computer's screens (the command console and what runs from it, the radar, the chart) stop the
 flight, as each was a program of its own in the original: the ship, the fighting's clock and the engine's
 hum wait, so a planet can't be entered, or an attack disturbed, from behind a screen. Every planet of

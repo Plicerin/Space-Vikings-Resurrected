@@ -33,6 +33,7 @@ const DisplayList = preload("res://scripts/world/display_list.gd")
 const Craft = preload("res://scripts/world/craft.gd")
 const FightEffects = preload("res://scripts/flight/fight_effects.gd")
 const Cities = preload("res://scripts/flight/cities.gd")
+const Terrain = preload("res://scripts/world/terrain.gd")
 
 const VectorRadar = preload("res://scripts/flight/vector_radar.gd")
 const VectorChart = preload("res://scripts/flight/vector_chart.gd")
@@ -73,6 +74,13 @@ var _globe: Control
 var _clouds: MeshInstance3D
 var _cities := Cities.new()
 var _fog: Environment
+var _space_root: Node3D ## the planet, its defender and the stars: what is there in orbit
+var _air_root: Node3D ## the ground, the clouds and the cities: what is there in the atmosphere
+var _world_env: WorldEnvironment
+var _space_env: Environment
+var _air_env: Environment
+var _fade: ColorRect
+var _ground_material: ShaderMaterial
 var _sky_material: ProceduralSkyMaterial
 var _computer_running := false ## the command console is on, whatever page it is at
 var _com_waiting := false ## the console is waiting for the chart to close
@@ -103,6 +111,10 @@ func _ready() -> void:
 	GameState.flight_scene = scene_file_path
 	_rules.load_state()
 	_environment()
+	_space_root = Node3D.new()
+	add_child(_space_root)
+	_air_root = Node3D.new()
+	add_child(_air_root)
 	_sun_light.look_at_from_position(Vector3.ZERO, -FlightRules.place(SUN))
 	_sun_light.light_energy = 1.6
 	# a cool fill from the other side, so that the dark side of a ship still has its shape
@@ -111,12 +123,10 @@ func _ready() -> void:
 	fill.light_energy = 0.55
 	add_child(fill)
 	fill.look_at_from_position(Vector3.ZERO, FlightRules.place(SUN) + Vector3(0.0, -0.4, 0.0) * FlightRules.place(SUN).length())
-	if _rules.in_atmosphere:
-		_make_ground()
-	else:
-		_make_planet()
-		_make_defender()
-		_make_stars()
+	_make_planet() # both worlds are built, and which is shown follows the ship: no scene change
+	_make_defender()
+	_make_stars()
+	_make_ground()
 	_combat.start(true)
 	_effects = FightEffects.new()
 	_effects.camera = _camera
@@ -138,7 +148,13 @@ func _ready() -> void:
 		if to_console and not _com_waiting and GameState.handover > 0:
 			_run_command_console.call_deferred())
 	_overlay.camera = _camera
-	_overlay.target = _defender
+	_fade = ColorRect.new()
+	_fade.color = Color(0.0, 0.0, 0.0, 0.0)
+	_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_fade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	$Hud.add_child(_fade)
+	$Hud.move_child(_fade, 0) # over the view, under the instruments
+	_apply_world()
 	_update_camera()
 	_update_hud()
 
@@ -160,7 +176,7 @@ func _process(delta: float) -> void:
 	_update_atmosphere()
 	_update_hud()
 	if _rules.is_over_planet():
-		_change_world("REENTRY SEQUENCE START", _rules.reenter)
+		_change_world("REENTRY SEQUENCE START", _reenter)
 		return
 	if _rules.is_leaving_atmosphere():
 		_change_world("ORBITAL INSERTION START", _rules.enter_orbit)
@@ -438,10 +454,33 @@ func _hyperdrive() -> void:
 func _change_world(words: String, move: Callable) -> void:
 	_jumping = true
 	_say(words)
-	await get_tree().create_timer(2.0).timeout
+	await get_tree().create_timer(1.0).timeout
+	await _fade_to(1.0, 0.4)
 	move.call()
 	_rules.store_state()
-	get_tree().reload_current_scene()
+	_combat.start(true) # the flight program runs again from its start
+	_fight_clock = 0.0
+	_apply_world()
+	_update_camera()
+	_update_atmosphere()
+	await _fade_to(0.0, 0.5)
+	_jumping = false
+
+
+## The view fades to black or back, behind the instruments.
+func _fade_to(alpha: float, seconds: float) -> void:
+	var tween := create_tween()
+	tween.tween_property(_fade, "color:a", alpha, seconds)
+	await tween.finished
+
+
+## Shows the world the ship is in: what is in orbit, or what is in the atmosphere.
+func _apply_world() -> void:
+	var air := _rules.in_atmosphere
+	_space_root.visible = not air
+	_air_root.visible = air
+	_world_env.environment = _air_env if air else _space_env
+	_overlay.target = null if air else _defender
 
 
 func _say(text: String) -> void:
@@ -453,8 +492,16 @@ func _say(text: String) -> void:
 
 
 func _environment() -> void:
+	_space_env = _make_environment(false)
+	_air_env = _make_environment(true)
+	_world_env = WorldEnvironment.new()
+	add_child(_world_env)
+
+
+## The sky and fog of the atmosphere, or the black of space.
+func _make_environment(air: bool) -> Environment:
 	var environment := Environment.new()
-	if _rules.in_atmosphere:
+	if air:
 		var sky := Sky.new()
 		_sky_material = ProceduralSkyMaterial.new()
 		_sky_material.sky_top_color = Color(0.16, 0.36, 0.74)
@@ -480,9 +527,7 @@ func _environment() -> void:
 	environment.glow_enabled = true
 	environment.glow_intensity = 0.8
 	environment.glow_bloom = 0.1
-	var world := WorldEnvironment.new()
-	world.environment = environment
-	add_child(world)
+	return environment
 
 
 func _make_planet() -> void:
@@ -508,7 +553,7 @@ func _make_planet() -> void:
 	_planet = MeshInstance3D.new()
 	_planet.mesh = sphere
 	_planet.material_override = material
-	add_child(_planet)
+	_space_root.add_child(_planet)
 
 
 ## The game's 195 points: a cluster round the planet and some stars.
@@ -525,12 +570,30 @@ func _make_ground() -> void:
 	material.shader = load("res://assets/shaders/ground.gdshader")
 	material.set_shader_parameter("tech", float(GameState.planet_tech[planet]))
 	material.set_shader_parameter("seed", float(planet + 1))
+	_ground_material = material
 	var ground := MeshInstance3D.new()
 	ground.mesh = plane
 	ground.material_override = material
-	add_child(ground)
-	_cities.build(self, float(planet + 1), GameState.planet_tech[planet])
+	_air_root.add_child(ground)
 	_make_clouds()
+	_land_at(GameState.reentry_site)
+
+
+## The ground below is the part of the planet's map round `site` (a direction from its centre),
+## and the cities are on its land.
+func _land_at(site: Vector3) -> void:
+	var planet := GameState.current_planet
+	_ground_material.set_shader_parameter("site", site)
+	_cities.clear()
+	_cities.build(_air_root, Terrain.new(float(planet + 1), site), GameState.planet_tech[planet])
+
+
+## Down into the atmosphere over the part of the planet the ship was nearest.
+func _reenter() -> void:
+	var over := FlightRules.place(Vector3(_rules.x, _rules.y, _rules.z))
+	GameState.reentry_site = over.normalized() if over.length() > 1.0 else Vector3(0.0, 0.0, 1.0)
+	_land_at(GameState.reentry_site)
+	_rules.reenter()
 
 
 ## A layer of cloud over the ground, at 2200: the way out of the atmosphere
@@ -548,7 +611,7 @@ func _make_clouds() -> void:
 	_clouds.material_override = material
 	_clouds.position.y = CLOUD_HEIGHT
 	_clouds.extra_cull_margin = 90000.0
-	add_child(_clouds)
+	_air_root.add_child(_clouds)
 
 
 ## What is left of a defender: the game's own fifty points of wreckage.
@@ -567,7 +630,7 @@ func _make_debris() -> void:
 	var wreck := MultiMeshInstance3D.new()
 	wreck.multimesh = multimesh
 	wreck.material_override = Craft.material(Color(0.5, 0.48, 0.45))
-	add_child(wreck)
+	_space_root.add_child(wreck)
 
 
 ## What defends the planet, if anything does: a low-poly craft, flat
@@ -590,7 +653,7 @@ func _make_defender() -> void:
 	body.material_override = Craft.material(Color(0.62, 0.68, 0.78))
 	_defender.add_child(body)
 	_defender.position = FlightRules.place(DEFENDER_AT)
-	add_child(_defender)
+	_space_root.add_child(_defender)
 
 
 ## The stars: the original's own 195 points, a little bigger, and a sky of
@@ -623,7 +686,7 @@ func _make_stars() -> void:
 		multimesh.set_instance_color(i, Color(0.85, 0.92, 1.0))
 	var near_stars := MultiMeshInstance3D.new()
 	near_stars.multimesh = multimesh
-	add_child(near_stars)
+	_space_root.add_child(near_stars)
 
 	var far := MultiMesh.new()
 	far.transform_format = MultiMesh.TRANSFORM_3D
@@ -640,7 +703,7 @@ func _make_stars() -> void:
 		far.set_instance_color(i, Color(1.0, 0.85 + 0.15 * warm, 0.75 + 0.25 * warm).lerp(Color(0.7, 0.8, 1.0), 1.0 - warm))
 	_sky = MultiMeshInstance3D.new()
 	_sky.multimesh = far
-	add_child(_sky)
+	_space_root.add_child(_sky)
 
 
 ## A round, soft star: white in the middle, nothing at the edge.
@@ -661,7 +724,7 @@ func _star_texture() -> GradientTexture2D:
 
 ## The cloud layer under the eye, and the sky going dark as the ship climbs out.
 func _update_atmosphere() -> void:
-	if _clouds == null:
+	if not _rules.in_atmosphere:
 		return
 	_clouds.position.x = _rules.x
 	_clouds.position.z = -_rules.z

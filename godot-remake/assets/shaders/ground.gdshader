@@ -17,6 +17,10 @@ uniform float seed = 1.0;
 uniform float scale = 0.00018;
 uniform float sea_level = 0.5;
 uniform float relief = 5200.0;
+// Where on the planet's sphere the ground's middle is (a direction from its centre), and how
+// much ground a radian of the sphere is: the continents are the planet's own, as seen from orbit.
+uniform vec3 site = vec3(0.0, 0.0, 1.0);
+const float UNITS_PER_RADIAN = 30000.0;
 
 varying vec3 world;
 
@@ -26,6 +30,21 @@ float hash(vec2 p) {
 	return fract(p.x * p.y * (p.x + p.y));
 }
 
+float hash3(vec3 p) {
+	p = fract(p * 0.3183099 + vec3(0.1, 0.2, 0.3) + seed * 0.137);
+	p *= 17.0;
+	return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+}
+
+float value_noise3(vec3 p) {
+	vec3 i = floor(p);
+	vec3 f = fract(p);
+	f = f * f * (3.0 - 2.0 * f);
+	float a = mix(mix(hash3(i), hash3(i + vec3(1, 0, 0)), f.x), mix(hash3(i + vec3(0, 1, 0)), hash3(i + vec3(1, 1, 0)), f.x), f.y);
+	float b = mix(mix(hash3(i + vec3(0, 0, 1)), hash3(i + vec3(1, 0, 1)), f.x), mix(hash3(i + vec3(0, 1, 1)), hash3(i + vec3(1, 1, 1)), f.x), f.y);
+	return mix(a, b, f.z);
+}
+
 float value_noise(vec2 p) {
 	vec2 i = floor(p);
 	vec2 f = fract(p);
@@ -33,11 +52,16 @@ float value_noise(vec2 p) {
 	return mix(mix(hash(i), hash(i + vec2(1, 0)), f.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x), f.y);
 }
 
-// The map: broad continents and coasts, ridges on them.
+// The map: the planet's continents and coasts, ridges on them.
 float height(vec2 w) {
+	vec3 east = cross(vec3(0.0, 1.0, 0.0), site);
+	east = length(east) > 0.001 ? normalize(east) : vec3(1.0, 0.0, 0.0);
+	vec3 north = cross(site, east);
+	vec3 n = normalize(site + (east * w.x + north * w.y) / UNITS_PER_RADIAN);
+	// the planet's own map (planet.gdshader), with local relief on it
+	float h = value_noise3(n * 3.0 + seed) * 0.6 + value_noise3(n * 7.0) * 0.3 + value_noise3(n * 15.0) * 0.1;
 	vec2 p = w * scale;
-	float h = value_noise(p * 3.0 + seed) * 0.55 + value_noise(p * 9.0) * 0.28 + value_noise(p * 31.0) * 0.12 + value_noise(p * 97.0) * 0.05;
-	return h;
+	return h + (value_noise(p * 31.0) - 0.5) * 0.10 + (value_noise(p * 97.0) - 0.5) * 0.05;
 }
 
 void vertex() {

@@ -165,6 +165,10 @@ var planet_surrendered: Array[bool] = []         # byte 4 <-> gf_planet_surrende
 # which is why a grep for POKEs never found a setter.
 var orbital_defender_tier: int = 0 # $38205 ("ET")
 
+## Where on the planet the ship went down: a direction from its centre, so that the ground
+## below is that part of the planet's own map. Not saved (a loaded game starts over a default).
+var reentry_site := Vector3(0.0, 0.0, 1.0)
+
 
 ## The byte after the twentieth record ($9921), which the copy reaches
 ## when the ship is at SHIVANDA. `P/F-M` has 255 there.

@@ -2,6 +2,7 @@ extends SceneTree
 ## Cities stand on land, and a strike burns the one it reaches.
 
 const Cities = preload("res://scripts/flight/cities.gd")
+const Terrain = preload("res://scripts/world/terrain.gd")
 
 
 func _init() -> void:
@@ -9,12 +10,12 @@ func _init() -> void:
 	get_root().add_child(root)
 	var wrong := 0
 	var cities := Cities.new()
-	cities.build(root, 3.0, 4)
+	cities.build(root, Terrain.new(3.0, Vector3(0.3, 0.5, 0.8)), 4)
 	if cities.sites.size() < 20:
 		print("few cities: ", cities.sites.size())
 		wrong += 1
 	var none := Cities.new()
-	none.build(root, 3.0, 0)
+	none.build(root, Terrain.new(3.0, Vector3(0.3, 0.5, 0.8)), 0)
 	if not none.sites.is_empty():
 		wrong += 1
 	var at: Vector3 = cities.sites[0]

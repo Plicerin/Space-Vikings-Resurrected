@@ -7,7 +7,6 @@ extends RefCounted
 ## know of them (a hit on the ground counts for the planet whether it is a city
 ## or open ground, as in the original); they are what the strikes are aimed at.
 
-const Terrain = preload("res://scripts/world/terrain.gd")
 
 const COUNTS := [0, 0, 12, 26, 44] ## by technology
 const SPREAD := 17000.0
@@ -21,20 +20,31 @@ var _bodies: Array[MultiMeshInstance3D] = []
 var _pads: Array[MeshInstance3D] = []
 
 
-## Puts the cities of the planet with map `seed` and technology `tech` under `parent`.
-func build(parent: Node3D, seed: float, tech: int) -> void:
+## Takes the cities down (the ground has changed under them).
+func clear() -> void:
+	for node in _nodes:
+		node.queue_free()
+	sites.clear()
+	burning.clear()
+	_nodes.clear()
+	_bodies.clear()
+	_pads.clear()
+
+
+## Puts the cities of the planet with map `terrain` and technology `tech` under `parent`.
+func build(parent: Node3D, terrain: RefCounted, tech: int) -> void:
 	var want: int = COUNTS[clampi(tech, 0, COUNTS.size() - 1)]
 	if want == 0:
 		return
 	var rng := RandomNumberGenerator.new()
-	rng.seed = int(seed * 7919.0) + 11
+	rng.seed = int(terrain.map_seed * 7919.0) + 11
 	var candidates: Array[Vector2] = []
 	var cell := -SPREAD
 	while cell < SPREAD:
 		var row := -SPREAD
 		while row < SPREAD:
 			var at := Vector2(cell + rng.randf() * SPACING, row + rng.randf() * SPACING)
-			if Terrain.is_building_land(at, seed) and at.length() > 1500.0: # not on the planet's own landing ground
+			if terrain.is_building_land(at) and at.length() > 1500.0: # not on the planet's own landing ground
 				candidates.append(at)
 			row += SPACING
 		cell += SPACING
