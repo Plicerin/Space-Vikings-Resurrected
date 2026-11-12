@@ -51,7 +51,7 @@ none
 | 140 | P | godot-remake/scripts/rules/flight_rules.gd:259 | 1 | `BV% = X: GOSUB 6000: POKE XI,LO%: POKE XI + 1,HI%:BV% = Y: GOSUB 6000: POKE YI,LO%: POKE Y` |
 | 147 | L | godot-remake/scripts/rules/flight_rules.gd:259 | 1 | `POKE 29461,84 + OO:OP =  ABS (OO - 1): POKE 29463,OP: POKE 29465,OP: IF  PEEK (38210) = 1 ` |
 | 150 | L | godot-remake/scripts/rules/flight_rules.gd:259 | 1 | `CALL CA: IF OO = 1 THEN  POKE 974,32: CALL 37936` |
-| 153 | L | godot-remake/scripts/flight/native_flight.gd:761 | 1 | `IF OO = 0 THEN  POKE 974,64: CALL 37888` |
+| 153 | L | godot-remake/scripts/flight/native_flight.gd:762 | 1 | `IF OO = 0 THEN  POKE 974,64: CALL 37888` |
 | 155 | P |  | 1 | `VTAB 24: HTAB 1: PRINT  INT (X / 2);" ";: HTAB 7: PRINT  INT (Y / 2);" ";: HTAB 13: PRINT ` |
 | 156 | L | godot-remake/scripts/rules/flight_rules.gd:113 | 1 | `POKE 973,1: VTAB 8: HTAB 18: PRINT "-"; CHR$ (91);"  "; CHR$ (93);"-": POKE 973,0: IF  ABS` |
 | 158 | L | godot-remake/scripts/rules/flight_rules.gd:113<br>godot-remake/scripts/rules/flight_rules.gd:121 | 1 | `IF  PEEK (38210) = 1 AND Y > 4000 THEN  PRINT "RUNORBIT"` |

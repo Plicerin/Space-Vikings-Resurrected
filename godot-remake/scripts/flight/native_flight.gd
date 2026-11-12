@@ -589,6 +589,7 @@ func _make_ground() -> void:
 	material.set_shader_parameter("tech", float(GameState.planet_tech[planet]))
 	material.set_shader_parameter("seed", float(planet + 1))
 	material.set_shader_parameter("world_scale", WORLD_SCALE)
+	material.set_shader_parameter("planet_radius", Terrain.PLANET_RADIUS)
 	_ground_material = material
 	var ground := MeshInstance3D.new()
 	ground.mesh = plane

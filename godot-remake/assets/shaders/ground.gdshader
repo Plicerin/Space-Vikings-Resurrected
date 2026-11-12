@@ -20,9 +20,10 @@ uniform float relief = 5200.0;
 // How much bigger the scene's world is than the units the map is drawn in.
 uniform float world_scale = 1.0;
 // Where on the planet's sphere the ground's middle is (a direction from its centre), and how
-// much ground a radian of the sphere is: the continents are the planet's own, as seen from orbit.
+// much ground a radian of the sphere is (the planet's radius): the continents are the planet's own,
+// as seen from orbit.
 uniform vec3 site = vec3(0.0, 0.0, 1.0);
-const float UNITS_PER_RADIAN = 30000.0;
+uniform float planet_radius = 45000.0;
 
 varying vec3 world;
 
@@ -59,7 +60,7 @@ float height(vec2 w) {
 	vec3 east = cross(vec3(0.0, 1.0, 0.0), site);
 	east = length(east) > 0.001 ? normalize(east) : vec3(1.0, 0.0, 0.0);
 	vec3 north = cross(site, east);
-	vec3 n = normalize(site + (east * w.x + north * w.y) / UNITS_PER_RADIAN);
+	vec3 n = normalize(site + (east * w.x + north * w.y) / planet_radius);
 	// the planet's own map (planet.gdshader), with local relief on it
 	float h = value_noise3(n * 3.0 + seed) * 0.6 + value_noise3(n * 7.0) * 0.3 + value_noise3(n * 15.0) * 0.1;
 	vec2 p = w * scale;

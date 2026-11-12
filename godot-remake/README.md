@@ -97,7 +97,7 @@ Keys are the original's: `1` `2` `3` `4` speed, `A` autopilot, `B`
 condition, `S` shields, `W` missile or laser, `C` command console, `R`
 radar, `H` hyperdrive. The arrow keys are the stick (or a joystick axis
 mapped to the stick actions) and SPACE is the button. On the radar SPACE (or I) is the ship I.D., as the manual says.
-Re-entry and the climb to orbit are not a scene change. Both worlds are built once (the planet, its
+The planet's radius is the anchor of the sizes (`Terrain.PLANET_RADIUS`, 45,000 of the ground's units): the atmosphere (4000 up) is under a tenth of it, the ground the flight covers (the world wraps at 20,000 each way) under half a radian of it, and the map's continents are the planet's own at that size. The sphere seen from orbit is the same planet at the orbit's own scale; the original's two worlds were never one scale, and its re-entry teleport is the joint between them. Re-entry and the climb to orbit are not a scene change. Both worlds are built once (the planet, its
 defender and the stars; the ground, clouds and cities) and the ship's world decides which is shown, with a
 half-second fade over the original's teleport (RE and ORBIT put the ship where they always did). The
 ground below is the part of the planet's own map round where the ship went down (`GameState.reentry_site`,
