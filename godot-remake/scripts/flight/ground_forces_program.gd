@@ -52,7 +52,11 @@ func run(console: Node, globe: Control) -> void:
 	while true:
 		_rules = GroundRules.new()
 		_rules.open_menu()
-		_globe.capture = 1.0 if GameState.gf_planet_surrendered else (clampf(GameState.gf_victory_progress / GameState.gf_enemy_strength, 0.0, 1.0) if GameState.gf_enemy_strength > 0.0 else 0.0)
+		_globe.capture = 0.0
+		if GameState.gf_planet_surrendered:
+			_globe.capture = 1.0
+		elif GameState.gf_enemy_strength > 0.0:
+			_globe.capture = clampf(GameState.gf_victory_progress / GameState.gf_enemy_strength, 0.0, 1.0)
 		var number: int = await _console.menu("GROUND FORCES", COMMANDS, said)
 		said = await _command(number)
 		if number == 9 and said.is_empty():

@@ -60,15 +60,15 @@ func _route(route: String) -> void:
 			_poke(pokes[applied][1], pokes[applied][2])
 			applied += 1
 		seen += 1
-		var name_ := "%s, page %d (%d)" % [route, page["number"], seen]
+		var label := "%s, page %d (%d)" % [route, page["number"], seen]
 		if route.begins_with("supply"):
-			_supply(name_, page)
+			_supply(label, page)
 		else:
-			_status(name_, page)
+			_status(label, page)
 	_check("%s: pages were found (%d)" % [route, pages.size()], pages.size() >= 2)
 
 
-func _status(name_: String, page: Dictionary) -> void:
+func _status(label: String, page: Dictionary) -> void:
 	var rows := _rows(page, true)
 	var expected: Array[String] = []
 	var unworded := false
@@ -85,17 +85,17 @@ func _status(name_: String, page: Dictionary) -> void:
 			expected.append(_plain(entry[0] + "-" + entry[1]))
 		if rows.has("THETROOPSAREALLDEAD!"):
 			rows.erase("THETROOPSAREALLDEAD!")
-			_check("%s: the troops are all dead is the rules' to say by troops" % name_, true)
+			_check("%s: the troops are all dead is the rules' to say by troops" % label, true)
 	if unworded:
 		_skipped += 1
 		return
 	_checked += 1
-	_check("%s: %s" % [name_, str(expected)], rows == expected)
+	_check("%s: %s" % [label, str(expected)], rows == expected)
 	if rows != expected:
 		print("       the real game: %s" % str(rows))
 
 
-func _supply(name_: String, page: Dictionary) -> void:
+func _supply(label: String, page: Dictionary) -> void:
 	var first := _rows(page, true)
 	var last := _rows(page, false)
 	var supply := ReportRules.supply()
@@ -119,7 +119,7 @@ func _supply(name_: String, page: Dictionary) -> void:
 			print("       %s: wanted %s, the real game drew %s and %s" % [row[0], str(row), shown, last[i] if i < last.size() else ""])
 	if page["number"] == 2:
 		ok = ok and first.size() > wanted.size() and first[wanted.size()] == "*CREDITS=" + ReportRules.supply_credits()
-	_check(name_, ok)
+	_check(label, ok)
 
 
 ## The labels as the original spelt them, for the one that is not

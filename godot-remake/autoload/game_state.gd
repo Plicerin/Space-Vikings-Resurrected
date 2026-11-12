@@ -332,26 +332,10 @@ var ship_nav_computer: float = 100.0  # $38184
 # tables and SHORE LEAVE.bas's "SELL LOOT" valuation — see
 # GROUND_COMBAT_ANALYSIS.md. Index 0 = $38171 ... index 12 = $38183.
 var loot: Array[float] = []
-# Real labels for all thirteen, confirmed directly 2026-11-09 by
-# SUPPLY.bas lines 1410-1490 ("SUPPLY REPORT," reached from the
-# Command Console's COMPUTER sub-menu, see
-# scripts/reports/supply_program.gd) — it
-# enumerates every one of $38171-$38183 unambiguously by address.
-# This REPLACES an earlier, wrong guess: the previous version of this
-# table had only 3 of 13 labels "confirmed" (from a different,
-# apparently mismapped source), and two of those three were wrong —
-# $38182 (index 11) was labeled "food," it's really SILVER; $38183
-# (index 12) was labeled "wine/liquor," it's really GOLD. collect.gd's
-# own inline comments for its tech-1 loot branch had the same
-# mismapping baked in (fixed alongside this).
-const LOOT_LABELS := [
-	"ART WORKS", "WINE/LIQUOR", "LUXURY FOODS", "FIGHTER PARTS",
-	"WEAPONS", "ELECTRONIC PARTS", "FISSIONABLES", "STEEL",
-	"COLLAPSIUM", "TITANIUM", "PLATINUM", "SILVER", "GOLD",
-]
+# The thirteen goods' names are in scripts/rules/report_rules.gd (SUPPLY.bas 1410-1490).
 # SUPPLY.bas shows some of these multiplied (ten pounds of platinum
 # to the byte, a hundred cases of wine): that is its display only, in
-# scripts/reports/supply_program.gd, and does NOT affect
+# scripts/flight/reports_program.gd, and does NOT affect
 # compute_loot_value() below, which uses the raw counts exactly as
 # SHORE LEAVE.bas's own formula does.
 # SHORE LEAVE.bas lines 2400-2406: "SELL LOOT"'s exact per-category
@@ -387,16 +371,6 @@ func compute_loot_value() -> float:
 			multiplier *= randf()
 		total += loot[i] * multiplier
 	return total * 2.0
-
-
-## SHORE LEAVE.bas line 2170: `C = 20000 + ((RND(1)*5000) * (RND(1)*10))`.
-func roll_base_cost() -> float:
-	return 20000.0 + ((randf() * 5000.0) * (randf() * 10.0))
-
-# --- Stub-screen handoff (for state-graph nodes not yet built out) ---
-var stub_title: String = ""
-var stub_note: String = ""
-var stub_back_scene: String = ""
 
 
 func _ready() -> void:
@@ -500,17 +474,6 @@ func start_new_game() -> void:
 ## chaining, in one place that could later add transition effects.
 func goto_scene(path: String) -> void:
 	get_tree().change_scene_to_file(path)
-
-
-## Shows a generic "not yet built" screen for a state-graph node this
-## scaffold hasn't implemented, with a citation back to the doc covering
-## it, so the full navigation graph stays walkable while real screens
-## get filled in one at a time.
-func show_stub(title: String, note: String, back_scene: String) -> void:
-	stub_title = title
-	stub_note = note
-	stub_back_scene = back_scene
-	goto_scene("res://scenes/stub_screen.tscn")
 
 
 # --- Save / load (END.bas lines 190-220, "SAVE GAME") ---

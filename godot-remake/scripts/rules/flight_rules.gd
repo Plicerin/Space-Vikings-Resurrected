@@ -3,9 +3,8 @@ extends RefCounted
 ## stick routine CALL CA ($9023), as a continuous model: where the ship
 ## goes and how the stick turns it, per frame instead of once a pass.
 ## No screen in it (scripts/flight/native_flight.gd shows it).
-## tests/check_flight_rules.gd holds it to flight_core.gd, which is the
-## original's arithmetic one pass at a time and itself is held to a live
-## run of the real game (tests/check_flight_core.gd).
+## tests/check_flight_rules.gd holds it to the original's own answers,
+## recorded from the real game (tests/golden/flight_rules.json).
 ##
 ## A "pass" of the original is one turn of its main loop, about two
 ## seconds of an Apple drawing; here it is PASS seconds, and everything

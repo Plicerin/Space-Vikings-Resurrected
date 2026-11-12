@@ -1,0 +1,7 @@
+# The project's lint settings (gdlint from gdtoolkit). Lines carry their citations
+# of the original's code, so they run longer than the default; definitions are
+# grouped by topic (a program's state beside the rules it serves), not by kind.
+disable:
+- class-definitions-order
+max-line-length: 160
+max-returns: 30

@@ -424,3 +424,18 @@ only exists once the project has been opened in the editor, and a fresh
 clone run from the command line has none. Scripts `preload()` each other
 into a local const (see `scripts/rules/combat_rules.gd`). Scripts that
 need the `GameState` autoload are run as scenes.
+
+## Lint
+
+`.gdlintrc` holds the project's settings for `gdlint` (from `gdtoolkit`, `pip install gdtoolkit`):
+
+    find . -name '*.gd' -not -path './.godot/*' | xargs gdlint
+
+The tree passes clean. Lines run to 160 because they carry their citations of the original's
+code, and definitions are grouped by topic rather than by kind, so those two rules are relaxed.
+
+## Credits
+
+*Space Vikings* is by Mitchell Robbins, published by SubLOGIC in 1982 (© 1982 Mitchell Robbins);
+the A2-3D1 graphics package is © 1979 SubLOGIC Company. This remake is unofficial, built from
+the original's disassembly, and not affiliated with them.

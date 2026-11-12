@@ -25,7 +25,7 @@ none
 | 13 | P |  | 5 | `GOSUB 800` |
 | 15 | L | godot-remake/scripts/rules/ground_rules.gd:234 | 5 | `FOR J = 1 TO  PEEK (38209): READ S$: NEXT : RESTORE : SPEED= 255` |
 | 16 | P | godot-remake/scripts/rules/ground_rules.gd:234 | 5 | `R4 = 1: GOSUB 160: VTAB 12: HTAB 1: PRINT "OPERATION ";S$;" IS A": PRINT "SUCCESS, SIR!"` |
-| 17 | L | godot-remake/scripts/flight/ground_forces_program.gd:133 | 5 | `POKE 974,64: POKE 38151,7: PRINT "RUN COM"` |
+| 17 | L | godot-remake/scripts/flight/ground_forces_program.gd:137 | 5 | `POKE 974,64: POKE 38151,7: PRINT "RUN COM"` |
 | 160 | P |  | 5 | `POKE 973,255` |
 | 170 | W |  | 5 | `FOR C = 12 TO 15: VTAB C: PRINT "                                       ": NEXT : VTAB 12:` |
 | 800 | P | godot-remake/scripts/rules/ground_rules.gd:234 | 5 | `D$ = ""` |

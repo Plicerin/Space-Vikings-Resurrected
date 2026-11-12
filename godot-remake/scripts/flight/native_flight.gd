@@ -196,7 +196,10 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			AudioManager.play_switch()
 		KEY_B:
 			GameState.condition = {2: 3, 3: 1}.get(GameState.condition, 2)
-			AudioManager.play_alarm() if GameState.condition == 3 else AudioManager.play_select()
+			if GameState.condition == 3:
+				AudioManager.play_alarm()
+			else:
+				AudioManager.play_select()
 		KEY_S:
 			GameState.shields_up = not GameState.shields_up
 			AudioManager.play_switch()
@@ -328,7 +331,7 @@ func _play(event: Dictionary) -> void:
 				_flash_screen(0.7)
 				AudioManager.play_hit_medium()
 		"fighter":
-			_effects.fighter(event["from"], event["step"], event["steps"], event["strafes"], event["shot_down"])
+			_effects.fighter(event["from"], event["step"], event["steps"], event["strafes"])
 
 
 ## Where the line of fire meets the ground, in the atmosphere, within `reach`; INF if it

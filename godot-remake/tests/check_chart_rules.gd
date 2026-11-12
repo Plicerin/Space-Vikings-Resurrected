@@ -32,7 +32,7 @@ func _ready() -> void:
 		var w := line.split(" ", false)
 		if line.begins_with("star "):
 			var star := int(w[1])
-			_check("star %d's place is the game's (%s)" % [star, line], 
+			_check("star %d's place is the game's (%s)" % [star, line],
 					GameState.PLANET_X[star - 1] == int(w[2]) and GameState.PLANET_Y[star - 1] == int(w[3])
 					and GameState.PLANET_Z[star - 1] == int(w[4]))
 			continue
@@ -72,16 +72,16 @@ func _probe(n: int, probe: Dictionary, glyphs: Dictionary) -> void:
 	var cursor := ChartRules.cursor(pdl[0], pdl[1])
 	var star := ChartRules.star_at(cursor)
 	_checked += 1
-	var name_ := "probe %d (paddles %d, %d)" % [n, pdl[0], pdl[1]]
+	var label := "probe %d (paddles %d, %d)" % [n, pdl[0], pdl[1]]
 	# BASIC's PX has the 35 of line 3215 added by then, unless no star was there and
 	# the chart has gone round to read the paddle again
 	var shifted := absf(cursor.x + 35.0 - probe["px"]) < 0.0001
 	var read_again := absf(cursor.x - probe["px"]) < 0.0001
 	# (or the recording read PX and PY between lines 3110 and 3117, before the limits: one probe)
 	var unlimited: bool = probe["px"] == pdl[0] * 1.19 and probe["py"] == pdl[1]
-	_check("%s: the cursor is where BASIC had it (%.3f, %.3f)" % [name_, probe["px"], probe["py"]],
+	_check("%s: the cursor is where BASIC had it (%.3f, %.3f)" % [label, probe["px"], probe["py"]],
 			((shifted or (star == ChartRules.NO_STAR and read_again)) and cursor.y == probe["py"]) or unlimited)
-	_check("%s: it is on star %d, BASIC's P (%d)" % [name_, star, probe["p"]], star == probe["p"])
+	_check("%s: it is on star %d, BASIC's P (%d)" % [label, star, probe["p"]], star == probe["p"])
 	var rows := _rows(glyphs)
 	var expected: Array = []
 	if star == ChartRules.NO_STAR:
@@ -92,7 +92,7 @@ func _probe(n: int, probe: Dictionary, glyphs: Dictionary) -> void:
 		expected.append(_plain(ChartRules.QUESTION))
 	# the chart's own text is on the last rows; the rows above are what it printed first
 	rows = rows.slice(maxi(rows.size() - expected.size(), 0))
-	_check("%s: what it said %s" % [name_, str(expected)], rows == expected)
+	_check("%s: what it said %s" % [label, str(expected)], rows == expected)
 	if rows != expected:
 		print("       the real game: %s" % str(rows))
 

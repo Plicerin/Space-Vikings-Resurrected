@@ -2,7 +2,7 @@ extends RefCounted
 ## The rules of GALAXY MAP.bas, the star chart: where each star is and
 ## how it is marked, what a paddle is pointing at, and what the chart
 ## says of the star it is asked about. No screen in it
-## (scripts/chart/star_chart.gd shows it). tests/check_chart_rules.gd
+## (scripts/flight/vector_chart.gd shows it). tests/check_chart_rules.gd
 ## holds it to the real game, from the recording in
 ## analysis/live/chart/. Line numbers are the original's.
 ##

@@ -1,23 +1,19 @@
 extends Node
 ## Holds scripts/rules/flight_rules.gd, the continuous flight model, to the
-## original's. Four things:
+## original's. Four things, against answers recorded from the real game
+## (tests/golden/flight_rules.json):
 ##
-##  - the view matrix is the one the A2-3D1 engine builds from the same
-##    attitude (the engine's own transform of the same points, from
-##    scripts/shapes/a2_3d1_view.gd, which is held to the machine code);
+##  - the view matrix is the one the A2-3D1 engine builds from the same attitude;
 ##  - the camera basis in Godot's world sees a point where that view has it;
-##  - one step of the model along an attitude is flight_core.gd's step (the
-##    original's arithmetic, held to a live run) for the same pitch,
-##    heading and speed;
-##  - a stretch of flight with the stick moved about ends where the
-##    original's passes (flight_core.gd's stick and step, one a pass) end,
-##    within what the quantising of the original's angles allows.
+##  - one step of the model along an attitude is the original's step for the
+##    same pitch, heading and speed;
+##  - a stretch of flight with the stick moved about ends where the original's
+##    passes (its stick and step, one a pass) end, within what the quantising
+##    of the original's angles allows.
 ##
 ##   godot --headless --path godot-remake res://tests/check_flight_rules.tscn
 
 const FlightRules = preload("res://scripts/rules/flight_rules.gd")
-## The original's answers (the hi-res engine's code, held to the real game
-## while it was in the project) are tests/golden/flight_rules.json.
 const GOLDEN := "res://tests/golden/flight_rules.json"
 
 var _bad := 0
@@ -40,7 +36,7 @@ func _ready() -> void:
 ## and cosines are not quite true: entry 25 of its table is $6779 where the
 ## curve wants $68A7, and a negative one is built as the table entry's
 ## complement less its high byte, which is up to 0.4% too far from nothing
-## (a2_3d1_trig.gd). So the two agree to within 5% of the distance and
+## (the engine's table). So the two agree to within 5% of the distance and
 ## ten units; a wrong axis or sign is a difference of the distance itself.
 func _matrix() -> void:
 	for c: Dictionary in _golden.matrix:
@@ -183,7 +179,7 @@ func _stops() -> void:
 	sinking.y = 500.0
 	sinking.speed = 40.0
 	var core_y: float = _golden.sink_y
-	for pass_ in 10:
+	for stage in 10:
 		sinking.fly(1.0, 0.0, 0.0)
 	_checked += 1
 	_check("ten passes in the atmosphere at 40: y %.1f (original %.1f) less what the speed moved it" % [sinking.y, core_y],

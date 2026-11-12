@@ -50,15 +50,15 @@ func _route(route: String) -> void:
 		while applied < pokes.size() and pokes[applied][0] <= screen["ms"]:
 			_poke(pokes[applied][1], pokes[applied][2])
 			applied += 1
-		var name_ := "%s, line %d at %.0f" % [route, screen["first"], screen["ms"]]
+		var label := "%s, line %d at %.0f" % [route, screen["first"], screen["ms"]]
 		match screen["kind"]:
-			"lamps": _lamps(name_, screen)
-			"page": _page(name_, screen)
-			"text": _text(name_, screen)
-			"course": _course(name_, screen)
+			"lamps": _lamps(label, screen)
+			"page": _page(label, screen)
+			"text": _text(label, screen)
+			"course": _course(label, screen)
 
 
-func _lamps(name_: String, screen: Dictionary) -> void:
+func _lamps(label: String, screen: Dictionary) -> void:
 	var labels: Array = []
 	var run := ""
 	var inverse := false
@@ -78,12 +78,12 @@ func _lamps(name_: String, screen: Dictionary) -> void:
 			var seen: Array = labels[lamp * 2 + half] if labels.size() > lamp * 2 + half else ["", false]
 			ok = ok and seen[0] == lamps[lamp][half] and seen[1] == lamps[lamp][2]
 	_checked += 1
-	_check("%s: the twelve lamps (%s)" % [name_, ", ".join(lamps.map(func(l: Array) -> String: return "x" if l[2] else "."))], ok)
+	_check("%s: the twelve lamps (%s)" % [label, ", ".join(lamps.map(func(l: Array) -> String: return "x" if l[2] else "."))], ok)
 	if not ok:
 		print("       the real game: %s" % str(labels))
 
 
-func _page(name_: String, screen: Dictionary) -> void:
+func _page(label: String, screen: Dictionary) -> void:
 	var rows := _rows(screen)
 	var title: String = rows[0] if not rows.is_empty() else ""
 	var star := -1
@@ -98,12 +98,12 @@ func _page(name_: String, screen: Dictionary) -> void:
 	_checked += 1
 	var shown: Array = []
 	shown = rows.slice(1)
-	_check("%s: the page of %s" % [name_, title], star >= 0 and shown == expected)
+	_check("%s: the page of %s" % [label, title], star >= 0 and shown == expected)
 	if shown != expected:
 		print("       the real game: %s\n       the rules:     %s" % [str(shown), str(expected)])
 
 
-func _text(name_: String, screen: Dictionary) -> void:
+func _text(label: String, screen: Dictionary) -> void:
 	# line 978 clears the message after it, over the same cells
 	var rows := _rows(screen, screen["first"] == 978)
 	if screen["first"] == 978 and rows.is_empty():
@@ -136,17 +136,17 @@ func _text(name_: String, screen: Dictionary) -> void:
 		978:
 			expected = ["TRYAGAINPLEASE."]
 			# the numbers the recordings gave it: 30 and 0 (menus), 21 (edges)
-			_check("%s: what is no star" % name_, not ComRules.is_star(30) and not ComRules.is_star(0)
+			_check("%s: what is no star" % label, not ComRules.is_star(30) and not ComRules.is_star(0)
 					and not ComRules.is_star(21) and ComRules.is_star(1) and ComRules.is_star(20))
 		_:
 			return
 	_checked += 1
-	_check("%s: its words" % name_, rows == expected)
+	_check("%s: its words" % label, rows == expected)
 	if rows != expected:
 		print("       the real game: %s\n       the rules:     %s" % [str(rows), str(expected)])
 
 
-func _course(name_: String, screen: Dictionary) -> void:
+func _course(label: String, screen: Dictionary) -> void:
 	var rows := _rows(screen)
 	GameState.current_planet = 0
 	var target: int = GameState.target_planet
@@ -166,11 +166,11 @@ func _course(name_: String, screen: Dictionary) -> void:
 			if got[0] > screen["ms"]:
 				real = got[1]
 				break
-		_check("%s: the course the game was left with" % name_, real == set_to)
+		_check("%s: the course the game was left with" % label, real == set_to)
 	_checked += 1
 	var expected: Array = []
 	expected = said.map(_plain)
-	_check("%s: what a course answers" % name_, rows == expected and not said.is_empty())
+	_check("%s: what a course answers" % label, rows == expected and not said.is_empty())
 	if rows != expected:
 		print("       the real game: %s\n       the rules:     %s" % [str(rows), str(expected)])
 

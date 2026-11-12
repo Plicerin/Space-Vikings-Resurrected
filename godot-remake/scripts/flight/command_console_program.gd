@@ -101,10 +101,9 @@ func _navigation() -> void:
 		if choice == 1:
 			await _directory()
 			return # its RETURN is the command menu
-		elif choice == 2:
-			await _course()
-		else:
+		if choice != 2:
 			return
+		await _course()
 
 
 ## @witness COM 860-897
@@ -114,10 +113,10 @@ func _course() -> void:
 		if asked < 0.0: # given up (Escape): back to the navigation menu
 			return
 		var c := int(asked)
-		var set_ := c >= 1 and c <= ComRules.STARS and c != GameState.current_planet + 1
+		var course_set := c >= 1 and c <= ComRules.STARS and c != GameState.current_planet + 1
 		var said := ComRules.course(c)
-		await _console.say(["-NAVIGATION COMPUTER-"] + _console.flow(said), COURSE_SET if set_ else SAID)
-		if set_:
+		await _console.say(["-NAVIGATION COMPUTER-"] + _console.flow(said), COURSE_SET if course_set else SAID)
+		if course_set:
 			return
 
 

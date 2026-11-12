@@ -18,7 +18,6 @@ const ChartRules = preload("res://scripts/rules/chart_rules.gd")
 
 signal closed(to_console: bool)
 
-const ARROW_STEP := Vector2(5.0, 4.0) ## dots an arrow key moves the cursor
 const SAID := 2.0 ## seconds a "no star there" stays
 const PHOSPHOR := Color(0.7, 1.0, 0.82)
 const VIOLET := Color(0.75, 0.55, 1.0)

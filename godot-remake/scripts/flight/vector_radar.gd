@@ -212,7 +212,10 @@ func _plan(map: Rect2, flicker: float) -> void:
 	var h := GameState.ship_heading * TAU / 256.0
 	var ahead := Vector2(sin(h), -cos(h))
 	var side := Vector2(-ahead.y, ahead.x)
-	_vpoly(PackedVector2Array([ship + ahead * 13.0, ship - ahead * 9.0 + side * 8.0, ship - ahead * 5.0, ship - ahead * 9.0 - side * 8.0]), _tint(PHOSPHOR, flicker), true, 1.8)
+	var arrow := PackedVector2Array([
+		ship + ahead * 13.0, ship - ahead * 9.0 + side * 8.0, ship - ahead * 5.0, ship - ahead * 9.0 - side * 8.0,
+	])
+	_vpoly(arrow, _tint(PHOSPHOR, flicker), true, 1.8)
 	_vline(ship + ahead * 15.0, ship + ahead * 60.0, Color(PHOSPHOR, 0.35), 1.0)
 
 

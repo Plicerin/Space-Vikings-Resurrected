@@ -380,7 +380,7 @@ func ground_spark(at: Vector3) -> void:
 ## y 10 to 120), `strafes` the steps at which it fires (and the turret that
 ## answers, 0 for none, and whether it was shot down). It sweeps in a curve,
 ## nearer as it crosses, banking into the turn.
-func fighter(from: Vector2, step: Vector2, steps: int, strafes: Array, shot_down: bool) -> void:
+func fighter(from: Vector2, step: Vector2, steps: int, strafes: Array) -> void:
 	var craft := Node3D.new()
 	camera.add_child(craft)
 	var body := MeshInstance3D.new()

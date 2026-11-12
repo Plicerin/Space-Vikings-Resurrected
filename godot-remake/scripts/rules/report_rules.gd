@@ -1,7 +1,7 @@
 extends RefCounted
 ## What STATUS.bas and SUPPLY.bas say, the central computer's SHIP
 ## STATUS and SUPPLY STATUS: each a list of what the game holds, put
-## into words. No screen in it (scripts/reports/report_console.gd shows
+## into words. No screen in it (scripts/flight/reports_program.gd shows
 ## it). tests/check_report_rules.gd compares it with what the real
 ## game printed, taken from the recordings in analysis/live/reports/.
 ##

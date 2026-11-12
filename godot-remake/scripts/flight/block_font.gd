@@ -36,8 +36,8 @@ static func width(text: String, scale: float) -> float:
 static func draw(canvas: CanvasItem, text: String, at: Vector2, scale: float, colour: Color) -> void:
 	var atlas := _build()
 	text = text.to_upper()
-	for pass_ in 2: # a soft glow under, then the letters
-		var glow := pass_ == 0
+	for stage in 2: # a soft glow under, then the letters
+		var glow := stage == 0
 		var tint := Color(colour, 0.22) if glow else colour
 		var grow := 0.9 if glow else 0.0
 		for i in text.length():

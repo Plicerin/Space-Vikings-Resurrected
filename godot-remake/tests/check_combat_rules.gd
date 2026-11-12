@@ -85,7 +85,7 @@ func _pass(a: Dictionary, b: Dictionary, next: Dictionary) -> void:
 	var eye := Vector3(vars["X"], vars["Y"], vars["Z"])
 	var result := rules.fight(a["btn"] == 1, eye, Vector2(a["bytes"][29473], a["bytes"][29475]), vars.get("VV", 0.0),
 			[vars["ZP"], vars["ZH"], vars["XH"], vars["YP"]])
-	var name_ := "pass %s at line 182 (n=%s)" % [a["n"], a["n"]]
+	var label := "pass %s at line 182 (n=%s)" % [a["n"], a["n"]]
 	_checked += 1
 	var ok := true
 	var why := ""
@@ -127,7 +127,7 @@ func _pass(a: Dictionary, b: Dictionary, next: Dictionary) -> void:
 		_events[event["kind"]] = _events.get(event["kind"], 0) + 1
 	if not ok:
 		_bad += 1
-		print("WRONG  %s:%s" % [name_, why])
+		print("WRONG  %s:%s" % [label, why])
 		if _bad <= 4 or OS.get_cmdline_user_args().has("--all"):
 			var show := {}
 			for key: String in ["X", "Y", "Z", "P", "ZP", "ZH", "XH", "YP", "VV", "DM", "DP", "L", "TE", "S"]:

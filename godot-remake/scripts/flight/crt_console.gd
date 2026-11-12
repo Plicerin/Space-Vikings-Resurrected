@@ -13,7 +13,7 @@ extends Node
 ## key; `pace` shortens every wait, for tests.
 
 signal key_pressed(keycode: int)
-signal _resolved
+signal resolved
 
 const COLUMNS := 40
 const BlockFont = preload("res://scripts/flight/block_font.gd")
@@ -78,7 +78,7 @@ func menu(title: String, items: Array, said: Array = [], header: Array = []) -> 
 	show(lines)
 	_count = items.size()
 	_mode = "menu"
-	await _resolved
+	await resolved
 	return int(_answer)
 
 
@@ -87,7 +87,7 @@ func ask_yes_no(lines: Array) -> bool:
 	shown.append(columns("Y  YES", "N  NO"))
 	show(shown)
 	_mode = "yesno"
-	await _resolved
+	await resolved
 	return bool(_answer)
 
 
@@ -100,7 +100,7 @@ func ask_number(lines: Array, prompt := "", cancellable := false) -> float:
 	_typed = ""
 	_mode = "number"
 	_show_number()
-	await _resolved
+	await resolved
 	return float(_answer)
 
 
@@ -120,7 +120,7 @@ func wait(seconds: float, skippable := true) -> void:
 	_token += 1
 	var mine := _token
 	get_tree().create_timer(maxf(seconds * pace, 0.001)).timeout.connect(_wait_over.bind(mine))
-	await _resolved
+	await resolved
 	_mode = ""
 
 
@@ -133,7 +133,7 @@ func _wait_over(token: int) -> void:
 func any_key(lines: Array) -> int:
 	show(lines)
 	_mode = "key"
-	await _resolved
+	await resolved
 	return int(_answer)
 
 
@@ -177,7 +177,7 @@ func handle_key(key: InputEventKey) -> bool:
 func _finish(value: Variant) -> void:
 	_answer = value
 	_mode = ""
-	_resolved.emit()
+	resolved.emit()
 
 
 func _digit(key: InputEventKey) -> int:
