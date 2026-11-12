@@ -55,6 +55,10 @@ const CITIES := [0, 14, 40, 90, 144]
 ## a hand lining up a missile is not): the defender and its fighters at that pace give you
 ## the time the original did.
 const FIGHT_PASS := 2.0
+## How much bigger the defender is drawn than the original's wireframe (460 long, about 5500 from the
+## ship at the start, which is a speck): the hit box and the range stay the original's, so a missile
+## that passes through its outer hull may still miss.
+const DEFENDER_SCALE := 1.8
 const DEFENDER_AT := Vector3(400.0, -100.0, -3500.0) ## STARSHIP SIMULATOR.bas line 2: X9, Y9, Z9
 const SUN := Vector3(0.6, 0.25, -0.75)
 const SKY_STARS := 700
@@ -651,6 +655,7 @@ func _make_defender() -> void:
 		body.mesh = Craft.mesh()
 		body.scale = Vector3.ONE * 120.0
 	body.material_override = Craft.material(Color(0.62, 0.68, 0.78))
+	body.scale *= DEFENDER_SCALE
 	_defender.add_child(body)
 	_defender.position = FlightRules.place(DEFENDER_AT)
 	_space_root.add_child(_defender)
