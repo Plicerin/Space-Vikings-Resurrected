@@ -1,8 +1,12 @@
 extends SceneTree
 ## The game's ships as low-poly solids. The original's SHIP # n files are
-## wireframes: lines between corners, built of boxes and wedges. This
-## fills them in: every closed flat loop of three to six lines becomes a
-## face, flat shaded; a line that is in no face stays a thin strut. The
+## wireframes: lines between corners, built of boxes and wedges (the lines
+## are all real: a start point only begins one, a continue point and a ray
+## draw, as the A2-3D1 manual has it). This fills them in: every closed,
+## roughly flat loop of three to eight lines becomes a face, flat shaded;
+## a line that runs close beside another, with nothing between, gets the
+## panel that closes the gap (a thin hull drawn as two sides); a line left
+## in no face stays a thin strut. The
 ## models are centred on the original's place for the defender, in Godot's
 ## world (z reversed), in the original's units.
 ##
@@ -16,8 +20,12 @@ const DisplayList = preload("res://scripts/world/display_list.gd")
 const MODELS := ["ship_1", "ship_3", "ship_4"]
 const OUT := "res://assets/models/"
 ## How far from a plane a corner of a face may be, in the original's units.
-const FLAT := 1.0
+const FLAT := 10.0
+## The most lines in a loop that is made a face.
+const MAX_LOOP := 8
 const STRUT := 3.0
+## How far apart the two sides of a slab may be, in the original's units.
+const SLAB := 25.0
 
 
 func _initialize() -> void:
@@ -54,6 +62,7 @@ func _make(name: String) -> void:
 			var a: int = face[k]
 			var b: int = face[(k + 1) % face.size()]
 			covered[Vector2i(mini(a, b), maxi(a, b))] = true
+	_close_gaps(corners, edges, faces, covered)
 	# centre: the middle of the corners, taken to the model's own origin
 	var lo := corners[0]
 	var hi := corners[0]
@@ -88,6 +97,69 @@ func _make(name: String) -> void:
 			int(hi.x - lo.x), int(hi.y - lo.y), int(hi.z - lo.z)])
 
 
+## A wireframe of a thin solid has the two sides of a slab drawn as separate lines, a few units
+## apart, with nothing between them: from the side the hull is a slit. Where a line that is in no
+## face runs side by side with another, close to it, with its ends close to the other's, the gap
+## between them is a panel.
+func _close_gaps(corners: Array[Vector3], edges: Dictionary, faces: Array, covered: Dictionary) -> void:
+	var uses := {}
+	for face: Array in faces:
+		for k in face.size():
+			var a: int = face[k]
+			var b: int = face[(k + 1) % face.size()]
+			var key := Vector2i(mini(a, b), maxi(a, b))
+			uses[key] = int(uses.get(key, 0)) + 1
+	var all: Array[Vector2i] = []
+	for edge: Vector2i in edges:
+		all.append(edge)
+	for i in all.size():
+		for j in range(i + 1, all.size()):
+			var e: Vector2i = all[i]
+			var f: Vector2i = all[j]
+			if int(uses.get(e, 0)) > 0 and int(uses.get(f, 0)) > 0:
+				continue # both are the edge of a face already: only a loose line wants a panel
+			if e.x == f.x or e.x == f.y or e.y == f.x or e.y == f.y:
+				continue # they meet: that is a corner, not a slab
+			var quad := _slab(corners, e, f)
+			if quad.is_empty() or _has_face(faces, quad):
+				continue
+			faces.append(quad)
+			for k in 4:
+				var a: int = quad[k]
+				var b: int = quad[(k + 1) % 4]
+				covered[Vector2i(mini(a, b), maxi(a, b))] = true
+
+
+## The four corners of the panel between two lines that run side by side, or none.
+func _slab(corners: Array[Vector3], e: Vector2i, f: Vector2i) -> Array:
+	var ea := corners[e.x]
+	var eb := corners[e.y]
+	var fa := corners[f.x]
+	var fb := corners[f.y]
+	var along := eb - ea
+	if along.length() < 1.0 or (fb - fa).length() < 1.0:
+		return []
+	if absf(along.normalized().dot((fb - fa).normalized())) < 0.995:
+		return [] # not side by side
+	var straight := ea.distance_to(fa) <= SLAB and eb.distance_to(fb) <= SLAB
+	var crossed := ea.distance_to(fb) <= SLAB and eb.distance_to(fa) <= SLAB
+	if not straight and not crossed:
+		return []
+	return [e.x, e.y, f.x, f.y] if crossed else [e.x, e.y, f.y, f.x]
+
+
+func _has_face(faces: Array, quad: Array) -> bool:
+	var key := quad.duplicate()
+	key.sort()
+	for face: Array in faces:
+		if face.size() == 4:
+			var other := face.duplicate()
+			other.sort()
+			if other == key:
+				return true
+	return false
+
+
 ## Godot's z is the original's reversed.
 func _place(v: Vector3) -> Vector3:
 	return Vector3(v.x, v.y, -v.z)
@@ -107,7 +179,7 @@ func _walk(path: Array, adjacent: Dictionary, corners: Array[Vector3], seen: Dic
 	for next: int in adjacent[last]:
 		if next == path[0] and path.size() >= 3:
 			_try_face(path, adjacent, corners, seen, faces)
-		elif next > path[0] and not path.has(next) and path.size() < 6:
+		elif next > path[0] and not path.has(next) and path.size() < MAX_LOOP:
 			path.append(next)
 			_walk(path, adjacent, corners, seen, faces)
 			path.pop_back()
