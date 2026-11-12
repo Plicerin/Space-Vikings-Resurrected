@@ -5,7 +5,7 @@ extends Control
 ## from above (the original's units, +-20000 a side, north, the original's +z,
 ## at the top) with the planet, the stars, the firing box, the defender as its
 ## own wire-frame model and the ship as an arrow along its heading; and, with
-## "I", the SHIP I.D.: the defender's wire-frame, large, turning slowly at the
+## SPACE (or "I"), the SHIP I.D.: the defender's wire-frame, large, turning slowly at the
 ## side. Everything written goes on the console's display (`console.page`), as
 ## what the original's I.D. program says of it does. What the radar does and where it goes
 ## back to is scripts/rules/radar_rules.gd, held to the real game
@@ -69,7 +69,7 @@ func handle_key(key: InputEventKey) -> bool:
 	match key.keycode:
 		KEY_X, KEY_ESCAPE, KEY_R:
 			close()
-		KEY_I:
+		KEY_I, KEY_SPACE: # the manual's SPACE BAR scans and identifies the ship in orbit, and again returns to the radar
 			identify = not identify
 		_:
 			return false
@@ -116,7 +116,7 @@ func _write_console() -> void:
 		var lines: Array = [text[0], ""]
 		lines.append_array(BlockFont.wrap(" ".join(text.slice(1)), 1.0, 40.0 * BlockFont.ADVANCE)) # the description, run on across the forty columns
 		lines.append("")
-		lines.append(columns.call("I  RADAR", "X  CLOSE"))
+		lines.append(columns.call("SPACE  RADAR", "X  CLOSE"))
 		console.page = lines
 		return
 	var lines: Array = ["-RADAR-",
@@ -125,7 +125,7 @@ func _write_console() -> void:
 	lines[2] = columns.call("Y %d" % (GameState.ship_y / 2), _defender_line())
 	lines.append("Z %d" % (GameState.ship_z / 2))
 	lines.append("")
-	lines.append(columns.call("I  SHIP I.D.", "X  CLOSE"))
+	lines.append(columns.call("SPACE  SHIP I.D.", "X  CLOSE"))
 	console.page = lines
 
 

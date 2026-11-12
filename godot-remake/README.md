@@ -92,7 +92,8 @@ planet's coasts drawn as wire, are not used.)
 Keys are the original's: `1` `2` `3` `4` speed, `A` autopilot, `B`
 condition, `S` shields, `W` missile or laser, `C` command console, `R`
 radar, `H` hyperdrive. The arrow keys are the stick (or a joystick axis
-mapped to the stick actions) and SPACE is the button.
+mapped to the stick actions) and SPACE is the button. On the radar SPACE (or I) is the ship I.D., as the manual says.
+From the atmosphere the manual's "cities and other targets" are on the ground (`scripts/flight/cities.gd`, standing on land by the ground shader's own noise, as many as the planet's technology): a missile or laser strike burns the one it reaches. A missile that misses self-destructs in a smaller burst.
 
 The panel (`scripts/flight/hud_overlay.gd`, `switch_panel.gd`): SPEED,
 a green CRT display on the Apple's text screen (40 columns across, six rows, two-column printing) that is written to (`N` puts up the position and headings in seven-segment digits, `F1` or `?` the keys, the same key takes them down; messages such as "THE DEFENDER IS DESTROYED" appear on it); SPEED and ENERGY bars, TURN and VERT dials; three switches in a small
@@ -260,6 +261,7 @@ a difference.
     godot --headless --path . res://tests/check_com_rules.tscn       # COM: 5 recorded routes through the rules, 201 screens rebuilt from the characters it drew
     godot --headless --path . res://tests/check_radar_rules.tscn     # RADAR and the I.D. texts against the recordings
     godot --headless --path . res://tests/check_combat_rules.tscn    # fighting (missile, lasers, damage, fighters, EX/DMG/S-X) against analysis/live/combat
+    godot --headless --path . -s tests/check_cities.gd                  # cities stand on land by technology; a strike burns the one it reaches
     godot --headless --path . res://tests/check_audio.tscn            # the synthesized sounds: each lasts as it should and is heard
     godot --headless --path . res://tests/check_hyperdrive_rules.tscn # hyperdrive cost, refusals, re-entry and orbit against the verified legacy code
     godot --headless --path . res://tests/check_save.tscn            # save and load, the planet record's byte

@@ -81,6 +81,8 @@ func missile(direction: Vector3, steps: int, hit: bool, ground := Vector3.INF) -
 	flight.chain().tween_callback(_finish_rocket.bind(rocket))
 	if hit:
 		flight.tween_callback(ground_burst.bind(end, 260.0) if ground != Vector3.INF else explosion.bind(end, 260.0))
+	else: # out of range: it self-destructs, a smaller burst than a hit (the manual)
+		flight.tween_callback(explosion.bind(end, 70.0))
 
 
 ## Stops a rocket's engine and lets its trail thin out before the node goes.
@@ -289,6 +291,60 @@ func ground_burst(at: Vector3, size: float) -> void:
 	dust.global_position = at
 	dust.emitting = true
 	get_tree().create_timer(3.8).timeout.connect(dust.queue_free)
+
+
+## A city burning: flames and a column of smoke, for `seconds`, then it dies down.
+func fire(at: Vector3, seconds: float) -> void:
+	var flames := CPUParticles3D.new()
+	flames.amount = 40
+	flames.lifetime = 1.4
+	flames.direction = Vector3.UP
+	flames.spread = 25.0
+	flames.gravity = Vector3(0.0, 30.0, 0.0)
+	flames.initial_velocity_min = 30.0
+	flames.initial_velocity_max = 90.0
+	flames.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+	flames.emission_sphere_radius = 110.0
+	flames.scale_amount_min = 35.0
+	flames.scale_amount_max = 80.0
+	var ramp := Gradient.new()
+	ramp.colors = PackedColorArray([Color(1.0, 0.85, 0.4, 0.8), Color(1.0, 0.4, 0.1, 0.55), Color(0.2, 0.08, 0.04, 0.0)])
+	ramp.offsets = PackedFloat32Array([0.0, 0.4, 1.0])
+	flames.color_ramp = ramp
+	flames.mesh = _sprite(_glow_texture, true)
+	add_child(flames)
+	flames.global_position = at
+	flames.emitting = true
+	var smoke := CPUParticles3D.new()
+	smoke.amount = 30
+	smoke.lifetime = 7.0
+	smoke.direction = Vector3.UP
+	smoke.spread = 10.0
+	smoke.gravity = Vector3(0.0, 25.0, 0.0)
+	smoke.initial_velocity_min = 60.0
+	smoke.initial_velocity_max = 120.0
+	smoke.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+	smoke.emission_sphere_radius = 90.0
+	smoke.scale_amount_min = 80.0
+	smoke.scale_amount_max = 200.0
+	var grey := Gradient.new()
+	grey.colors = PackedColorArray([Color(0.1, 0.09, 0.08, 0.0), Color(0.12, 0.11, 0.1, 0.45), Color(0.2, 0.2, 0.2, 0.0)])
+	grey.offsets = PackedFloat32Array([0.0, 0.2, 1.0])
+	smoke.color_ramp = grey
+	smoke.mesh = _sprite(_glow_texture, false)
+	add_child(smoke)
+	smoke.global_position = at
+	smoke.emitting = true
+	get_tree().create_timer(seconds).timeout.connect(_put_out.bind(flames, smoke))
+
+
+func _put_out(flames: CPUParticles3D, smoke: CPUParticles3D) -> void:
+	if is_instance_valid(flames):
+		flames.emitting = false
+		get_tree().create_timer(2.0).timeout.connect(flames.queue_free)
+	if is_instance_valid(smoke):
+		smoke.emitting = false
+		get_tree().create_timer(8.0).timeout.connect(smoke.queue_free)
 
 
 ## A laser bolt striking the ground: a flash, sparks, a puff of dirt.

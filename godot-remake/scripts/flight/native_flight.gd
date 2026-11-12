@@ -32,6 +32,7 @@ const HyperspaceEffect = preload("res://scripts/flight/hyperspace_effect.gd")
 const DisplayList = preload("res://scripts/world/display_list.gd")
 const Craft = preload("res://scripts/world/craft.gd")
 const FightEffects = preload("res://scripts/flight/fight_effects.gd")
+const Cities = preload("res://scripts/flight/cities.gd")
 
 const VectorRadar = preload("res://scripts/flight/vector_radar.gd")
 const VectorChart = preload("res://scripts/flight/vector_chart.gd")
@@ -65,6 +66,7 @@ var _chart: Control
 var _console: Node
 var _globe: Control
 var _clouds: MeshInstance3D
+var _cities := Cities.new()
 var _fog: Environment
 var _sky_material: ProceduralSkyMaterial
 var _com_waiting := false ## the console is waiting for the chart to close
@@ -308,12 +310,15 @@ func _play(event: Dictionary) -> void:
 			var struck := _ground_ahead(7000.0)
 			if struck != Vector3.INF:
 				get_tree().create_timer(0.12).timeout.connect(_effects.ground_spark.bind(struck))
+				get_tree().create_timer(0.12).timeout.connect(_strike.bind(struck, 40.0))
 		"missile":
 			var ahead := -_camera.global_transform.basis.z
 			var ground := _ground_ahead(12000.0) if event["hit"] else Vector3.INF
 			_effects.missile(ahead, event["steps"], event["hit"], ground)
 			if event["hit"] and ground != Vector3.INF:
 				_say("DIRECT HIT ON THE PLANET")
+				var flight := maxf(_camera.global_position.distance_to(ground) / 160.0, 1.0) * FightEffects.MISSILE_STEP
+				get_tree().create_timer(flight).timeout.connect(_strike.bind(ground, 160.0))
 		"surrendered":
 			_say("THE PLANET HAS SURRENDERED")
 		"damage":
@@ -339,6 +344,14 @@ func _ground_ahead(reach: float) -> Vector3:
 	if distance > reach or distance < 1.0:
 		return Vector3.INF
 	return start + direction * distance
+
+
+## A strike on the ground with a blast `radius` wide: a city it reaches burns.
+func _strike(at: Vector3, radius: float) -> void:
+	if not is_inside_tree() or _cities.hit(at, radius) < 0:
+		return
+	_effects.fire(at, 45.0)
+	_say("CITY DESTROYED")
 
 
 ## A light flash of damage after `delay`, with its thump.
@@ -492,6 +505,7 @@ func _make_ground() -> void:
 	ground.mesh = plane
 	ground.material_override = material
 	add_child(ground)
+	_cities.build(self, float(planet + 1), GameState.planet_tech[planet])
 	_make_clouds()
 
 
