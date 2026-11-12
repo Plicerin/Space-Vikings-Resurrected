@@ -50,8 +50,9 @@ const RadarRules = preload("res://scripts/rules/radar_rules.gd")
 const WORLD_SCALE := 3.0
 const PLANET_RADIUS := 780.0
 ## How much bigger the planet is drawn than the original's, with the box that takes the ship down
-## to it: from orbit it fills more of the sky, and the defender is smaller beside it.
-const PLANET_SCALE := 1.5
+## to it: with 2, the ship comes up 0.4 of a radius above it and the defender sits 1.2 radii above it,
+## a low orbit; much more and the box takes the ship down at the start of the orbit.
+const PLANET_SCALE := 2.0
 ## The game's own points nearer than this to the planet are its cluster; the
 ## rest are stars.
 const CLUSTER_RADIUS := 1500.0
