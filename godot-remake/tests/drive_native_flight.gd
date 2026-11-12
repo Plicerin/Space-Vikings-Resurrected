@@ -179,6 +179,12 @@ func _drive() -> void:
 	var aabb: AABB = (ship.get_child(0) as MeshInstance3D).mesh.get_aabb()
 	_check("the missile's hit box is the ship as drawn: as long as it is (%.0f, drawn %.0f)" % [box.size.x, aabb.size.x * 1.8],
 			absf(box.size.x - aabb.size.x * 1.8) < 1.0)
+	var fighting := get_tree().current_scene
+	var eye: Vector3 = fighting.get("_camera").global_position
+	var centre: Vector3 = ship.global_position
+	var on_hull: Vector3 = fighting._hull_point(eye, (centre - eye).normalized())
+	_check("a missile bursts on the hull, not inside the ship (%.0f of %.0f away)" % [eye.distance_to(on_hull), eye.distance_to(centre)],
+			on_hull != Vector3.INF and eye.distance_to(on_hull) < eye.distance_to(centre) - 1000.0)
 	await _frames(60 * 3)
 	_check("flying on without hitting it leaves it there", get_tree().current_scene.get("_defender") != null)
 	Input.action_press("fire")
@@ -260,6 +266,22 @@ func _drive() -> void:
 	var up_moved: float = get_tree().current_scene.get("_camera").global_position.distance_to(air_spot)
 	_check("and the ship is where it was in the world (%.0f)" % up_moved, up_moved < 150.0)
 	_check("the orbit shows no clouds or cities", not get_tree().current_scene.get("_air_root").visible)
+
+	# the landing: the original's, on the sphere's ground: the ship sinks to 20, level, and is landed
+	await _flight(func() -> void:
+		GameState.in_atmosphere = true
+		GameState.ship_x = 0
+		GameState.ship_y = 30
+		GameState.ship_z = 0
+		GameState.ship_pitch = 5
+		GameState.ship_bank = 10
+		GameState.ship_speed = 0)
+	await _frames(60 * 4)
+	_check("sinking to the ground: stopped at 20, level (%d, pitch %d, bank %d)" % [GameState.ship_y, GameState.ship_pitch, GameState.ship_bank],
+			GameState.ship_y == 20 and GameState.ship_pitch == 0 and GameState.ship_bank == 0)
+	_check("and landed, as the shore leave and the repairs ask", load("res://scripts/rules/shore_rules.gd").new().landed())
+	var ship_height: float = (get_tree().current_scene.get("_camera").global_position.length() - 45000.0 * WORLD_SCALE) / WORLD_SCALE
+	_check("with the ship 20 above the ground it is drawn on (%.0f)" % ship_height, absf(ship_height - 20.0) < 1.0)
 
 	# firing at the ground from the atmosphere: the strike lands on the ground, and the
 	# display says how much of the planet the strikes have taken

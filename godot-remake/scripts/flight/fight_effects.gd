@@ -58,7 +58,7 @@ func laser() -> void:
 ## the original fired them: one from each side, drawn together up the screen, bursting at
 ## the end, the left and then the right, if they hit. They leave slowly and gather speed,
 ## rolling on their way, a flame behind each and a smoke trail left in the air.
-func missile(direction: Vector3, steps: int, hit: bool, ground := Vector3.INF, target := Vector3.INF) -> void:
+func missile(direction: Vector3, steps: int, hit: bool, ground := Vector3.INF, target := Vector3.INF, hull := Callable()) -> void:
 	AudioManager.play_missile()
 	var basis := camera.global_transform.basis
 	var start := camera.global_position + basis * Vector3(0.0, -0.9, -3.0) * size_scale
@@ -74,6 +74,12 @@ func missile(direction: Vector3, steps: int, hit: bool, ground := Vector3.INF, t
 	for side in [-1.0, 1.0]: # the left, then the right
 		var pair_start: Vector3 = start + sideways * side
 		var pair_end: Vector3 = end + sideways * side * 0.12 # they draw in as they go
+		if hit and ground == Vector3.INF and target != Vector3.INF and hull.is_valid(): # each bursts on the hull it meets
+			var on_hull: Vector3 = hull.call(pair_start, direction)
+			if on_hull == Vector3.INF:
+				on_hull = hull.call(pair_start, (target - pair_start).normalized())
+			if on_hull != Vector3.INF:
+				pair_end = on_hull
 		var burst: Callable
 		if not hit: # out of range: it self-destructs, a smaller burst than a hit (the manual)
 			burst = explosion.bind(pair_end, 70.0)

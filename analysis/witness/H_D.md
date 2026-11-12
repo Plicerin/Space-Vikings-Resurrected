@@ -20,14 +20,14 @@ none
 | line | | cited by | runs | listing |
 |---|---|---|---|---|
 | 0 | W |  |  | `ONERR  GOTO 63999` |
-| 1 | L | godot-remake/scripts/flight/native_flight.gd:433<br>godot-remake/scripts/rules/hyperdrive_rules.gd:19 |  | `POKE  - 16300,0: POKE 38392,0: IF  PEEK (38210) = 1 OR  PEEK (38209) =  PEEK (38163) OR  P` |
-| 2 | L | godot-remake/scripts/flight/native_flight.gd:433<br>godot-remake/scripts/rules/hyperdrive_rules.gd:27 |  | `IF  PEEK (38199) <  > 0 THEN 5` |
-| 3 | P | godot-remake/scripts/flight/native_flight.gd:433<br>godot-remake/scripts/rules/hyperdrive_rules.gd:27 |  | `POKE  - 16300,0: POKE 974,32: SPEED= 100: HTAB 15: VTAB 15: PRINT "OUT OF ENERGY": FOR I =` |
-| 4 | P | godot-remake/scripts/flight/native_flight.gd:433<br>godot-remake/scripts/rules/hyperdrive_rules.gd:27 |  | `PRINT "RUN S/X"` |
-| 5 | P | godot-remake/scripts/flight/native_flight.gd:433<br>godot-remake/scripts/rules/hyperdrive_rules.gd:41 |  | `GOSUB 10000: POKE 974,64: POKE 301,0` |
-| 6 | L | godot-remake/scripts/flight/native_flight.gd:433<br>godot-remake/scripts/rules/hyperdrive_rules.gd:41 |  | `PRINT "OPEN MISC FILE": PRINT "READ MISC FILE": INPUT SD: INPUT TR: INPUT CR: PRINT "CL` |
-| 7 | P | godot-remake/scripts/flight/native_flight.gd:433<br>godot-remake/scripts/rules/hyperdrive_rules.gd:41 |  | `HCOLOR= 0: POKE 974,32` |
-| 8 | P | godot-remake/scripts/flight/native_flight.gd:433<br>godot-remake/scripts/rules/hyperdrive_rules.gd:41 |  | `NOISE = 37494: PRINT "BLOADEXPL": FOR X = 200 TO 260 STEP 5: DRAW 25 AT X,133: NEXT : FOR` |
+| 1 | L | godot-remake/scripts/flight/native_flight.gd:435<br>godot-remake/scripts/rules/hyperdrive_rules.gd:19 |  | `POKE  - 16300,0: POKE 38392,0: IF  PEEK (38210) = 1 OR  PEEK (38209) =  PEEK (38163) OR  P` |
+| 2 | L | godot-remake/scripts/flight/native_flight.gd:435<br>godot-remake/scripts/rules/hyperdrive_rules.gd:27 |  | `IF  PEEK (38199) <  > 0 THEN 5` |
+| 3 | P | godot-remake/scripts/flight/native_flight.gd:435<br>godot-remake/scripts/rules/hyperdrive_rules.gd:27 |  | `POKE  - 16300,0: POKE 974,32: SPEED= 100: HTAB 15: VTAB 15: PRINT "OUT OF ENERGY": FOR I =` |
+| 4 | P | godot-remake/scripts/flight/native_flight.gd:435<br>godot-remake/scripts/rules/hyperdrive_rules.gd:27 |  | `PRINT "RUN S/X"` |
+| 5 | P | godot-remake/scripts/flight/native_flight.gd:435<br>godot-remake/scripts/rules/hyperdrive_rules.gd:41 |  | `GOSUB 10000: POKE 974,64: POKE 301,0` |
+| 6 | L | godot-remake/scripts/flight/native_flight.gd:435<br>godot-remake/scripts/rules/hyperdrive_rules.gd:41 |  | `PRINT "OPEN MISC FILE": PRINT "READ MISC FILE": INPUT SD: INPUT TR: INPUT CR: PRINT "CL` |
+| 7 | P | godot-remake/scripts/flight/native_flight.gd:435<br>godot-remake/scripts/rules/hyperdrive_rules.gd:41 |  | `HCOLOR= 0: POKE 974,32` |
+| 8 | P | godot-remake/scripts/flight/native_flight.gd:435<br>godot-remake/scripts/rules/hyperdrive_rules.gd:41 |  | `NOISE = 37494: PRINT "BLOADEXPL": FOR X = 200 TO 260 STEP 5: DRAW 25 AT X,133: NEXT : FOR` |
 | 11 | L | godot-remake/scripts/rules/hyperdrive_rules.gd:41 |  | `IF  PEEK (38166) = 0 OR  PEEK (38166) = 3 THEN  POKE 38158, PEEK (38163)` |
 | 12 | L | godot-remake/scripts/rules/hyperdrive_rules.gd:41 |  | `POKE 38823, PEEK (38209): POKE 38824,1: CALL 38825: IF  PEEK (38170) = 17 THEN PL =  PEEK ` |
 | 13 | L | godot-remake/scripts/rules/hyperdrive_rules.gd:41 |  | `IF LP = 7 THEN  POKE 38203,PL: POKE 38170,0` |

@@ -19,10 +19,10 @@ none
 | line | | cited by | runs | listing |
 |---|---|---|---|---|
 | 0 | W |  | 5 | `ONERR  GOTO 63999` |
-| 5 | W | godot-remake/scripts/flight/command_console_program.gd:33<br>godot-remake/scripts/flight/native_flight.gd:287 | 5 | `CR$ =  CHR$ (13)` |
-| 8 | W | godot-remake/scripts/flight/command_console_program.gd:33<br>godot-remake/scripts/flight/native_flight.gd:287 | 5 | `POKE 974,32: POKE 973,0: POKE  - 16300,0: HCOLOR= 0: FOR X = 200 TO 260 STEP 5: DRAW 25 AT` |
-| 10 | W | godot-remake/scripts/flight/command_console_program.gd:33<br>godot-remake/scripts/flight/native_flight.gd:287 | 5 | `DIM V(12),H(12),S$(20),ST(12)` |
-| 12 | L | godot-remake/scripts/flight/command_console_program.gd:33<br>godot-remake/scripts/flight/native_flight.gd:287<br>godot-remake/scripts/rules/com_rules.gd:87 | 5 | `GOSUB 15100: IF  PEEK (38388) > 0 THEN C =  PEEK (38388): GOTO 978` |
+| 5 | W | godot-remake/scripts/flight/command_console_program.gd:33<br>godot-remake/scripts/flight/native_flight.gd:289 | 5 | `CR$ =  CHR$ (13)` |
+| 8 | W | godot-remake/scripts/flight/command_console_program.gd:33<br>godot-remake/scripts/flight/native_flight.gd:289 | 5 | `POKE 974,32: POKE 973,0: POKE  - 16300,0: HCOLOR= 0: FOR X = 200 TO 260 STEP 5: DRAW 25 AT` |
+| 10 | W | godot-remake/scripts/flight/command_console_program.gd:33<br>godot-remake/scripts/flight/native_flight.gd:289 | 5 | `DIM V(12),H(12),S$(20),ST(12)` |
+| 12 | L | godot-remake/scripts/flight/command_console_program.gd:33<br>godot-remake/scripts/flight/native_flight.gd:289<br>godot-remake/scripts/rules/com_rules.gd:87 | 5 | `GOSUB 15100: IF  PEEK (38388) > 0 THEN C =  PEEK (38388): GOTO 978` |
 | 20 | W |  | 5 | `HCOLOR= 6: FOR Y = 0 TO 123: HPLOT 0,Y TO 279,Y: NEXT : POKE 32,0: HOME : FOR J = 1 TO 14:` |
 | 21 | W |  | 5 | `POKE 32,0: POKE 33,40: POKE 34,0: POKE 35,23: PRINT` |
 | 25 | W |  | 5 | `POKE 32,0: POKE 33,40: POKE 34,0: POKE 35,23: PRINT` |

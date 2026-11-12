@@ -1,6 +1,7 @@
 extends RefCounted
-## The low-poly craft of the game, flat shaded. Placeholders until the
-## originals' own shapes (assets/a2_3d1/ship_*.bin) are made into models.
+## The low-poly craft of the game, flat shaded.
+
+const Ships = preload("res://scripts/world/ships.gd")
 
 ## A swept craft in eight triangles, nose along -z (ahead in Godot).
 static func mesh() -> ArrayMesh:
@@ -205,17 +206,10 @@ static func material(color: Color) -> StandardMaterial3D:
 	return m
 
 
-const MODELS := "res://assets/models/"
-## Which of the game's ships a defender of each type is (ORBIT.bas line 31:
-## a type 2 has no ship of its own and is the light cruiser).
-const DEFENDER_MODEL := {1: "ship_1", 2: "ship_3", 3: "ship_3", 4: "ship_4"}
-
-
-## The model of the defender of type `tier`, or null.
+## The model of the defender of type `tier` (ORBIT.bas line 31: a type 2 has no ship of its own and is the
+## light cruiser), or null: scripts/world/ships.gd builds them clean, in the style of the originals' wireframes.
 static func defender(tier: int) -> Mesh:
-	if not DEFENDER_MODEL.has(tier):
-		return null
-	return load(MODELS + DEFENDER_MODEL[tier] + ".res") as Mesh
+	return Ships.ship(tier)
 
 
 ## A rough rock for wreckage: eight faces.

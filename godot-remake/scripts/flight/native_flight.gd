@@ -111,6 +111,8 @@ var _dead := false
 var _jumping := false
 var _planet: MeshInstance3D
 var _defender: Node3D
+var _hull_body: MeshInstance3D ## the defender's drawn hull, and its triangles, for where a missile meets it
+var _hull: TriangleMesh
 var _shake := 0.0 ## camera shake left, from a burst or a hit; dies away
 var _stick := Vector2.ZERO ## pitch and bank stick, as last read
 var _sky: MultiMeshInstance3D
@@ -369,7 +371,7 @@ func _play(event: Dictionary) -> void:
 			var ahead := -_camera.global_transform.basis.z
 			var ground := _ground_ahead(12000.0) if event["hit"] else Vector3.INF
 			var ship := _defender.global_position if event["defender"] and _defender != null and ground == Vector3.INF else Vector3.INF
-			_effects.missile(ahead, event["steps"], event["hit"], ground, ship)
+			_effects.missile(ahead, event["steps"], event["hit"], ground, ship, _hull_point)
 			if ship != Vector3.INF:
 				var worn := GameState.defender_damage_points / maxf(GameState.defender_damage_threshold, 1.0)
 				_say("DIRECT HIT ON THE DEFENDER: %d%%" % mini(int(worn * 100.0), 99))
@@ -722,8 +724,22 @@ func _make_defender() -> void:
 	body.scale *= DEFENDER_SCALE
 	_defender.add_child(body)
 	_fit_hit_box(body)
+	_hull_body = body
+	_hull = body.mesh.generate_triangle_mesh() if body.mesh != null else null
 	_defender.position = FlightRules.place(DEFENDER_AT)
 	_space_root.add_child(_defender)
+
+
+## Where a line from `from` along `direction` first meets the defender's hull, in the world; INF if it
+## misses the hull (a missile bursts there, on the ship, not inside it).
+func _hull_point(from: Vector3, direction: Vector3) -> Vector3:
+	if _defender == null or _hull == null:
+		return Vector3.INF
+	var to_local := _hull_body.global_transform.affine_inverse()
+	var hit := _hull.intersect_ray(to_local * from, (to_local.basis * direction).normalized())
+	if hit.is_empty():
+		return Vector3.INF
+	return _hull_body.global_transform * (hit["position"] as Vector3)
 
 
 ## The missile's hit box is the ship as drawn, and never smaller than the original's box (a thinner

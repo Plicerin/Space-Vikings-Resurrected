@@ -85,8 +85,7 @@ arithmetic by `check_flight_rules`. The view is a camera with the
 original's attitude convention, the planet a shaded sphere (the game's
 cluster of points round its planet are the lights of its cities, more lit
 the more advanced the planet), the rest of the game's points stars, and
-solid low-poly craft made from the original's wireframes
-(`assets/models/`, by `tools_make_models.gd`, which also closes the gaps a wireframe leaves: the open nose of the heavy cruiser, the thin hull of the light one drawn as two sides). Below the atmosphere there
+clean low-poly craft built from boxes and wedges in the style of the original's wireframes (`scripts/world/ships.gd`: the same parts in the same places, with their sides closed). Below the atmosphere there
 is a ground and a sky: land and sea from noise on the planet's map, with relief,
 beaches, fields, woods, rock and snow and a glint on the water; a layer of
 cloud at 2200 that the way out (past 4000) goes up through; and a sky that

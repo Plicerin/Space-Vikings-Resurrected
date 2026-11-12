@@ -24,16 +24,16 @@ none
 | 2 | P |  |  | `HCOLOR= 0: FOR X = 200 TO 260 STEP 5: DRAW 25 AT X,133: NEXT : FOR X = 13 TO 73 STEP 5: DR` |
 | 5 | P |  |  | `POKE  - 16300,0: POKE 974,32: POKE 973,255` |
 | 10 | P |  |  | `HCOLOR= 5: FOR Y = 0 TO 125: HPLOT 0,Y TO 279,Y: NEXT` |
-| 20 | P | godot-remake/scripts/flight/native_flight.gd:472 |  | `VTAB 7: HTAB 10: PRINT "                      ": HTAB 10: PRINT "REENTRY SEQUENCE START": ` |
-| 21 | P | godot-remake/scripts/flight/native_flight.gd:472 |  | `HCOLOR= 3: POKE 974,64` |
-| 22 | P | godot-remake/scripts/flight/native_flight.gd:472 |  | `FOR J = 153 TO 157: HPLOT 200,J TO 209,J: NEXT` |
-| 25 | L | godot-remake/scripts/flight/native_flight.gd:472<br>godot-remake/scripts/rules/flight_rules.gd:122 |  | `POKE 38210,1` |
-| 26 | P | godot-remake/scripts/flight/native_flight.gd:472<br>godot-remake/scripts/rules/flight_rules.gd:122 |  | `POKE 973,0` |
-| 27 | P | godot-remake/scripts/flight/native_flight.gd:472<br>godot-remake/scripts/rules/flight_rules.gd:122 |  | `X1 =  PEEK (XI):X2 =  PEEK (XI + 1):Y1 = 208:Y2 = 7:Z1 =  PEEK (ZI):Z2 =  PEEK (ZI + 1)` |
-| 28 | P | godot-remake/scripts/flight/native_flight.gd:472<br>godot-remake/scripts/rules/flight_rules.gd:122 |  | `P =  PEEK (P1):B =  PEEK (B1):H = 20` |
-| 29 | P | godot-remake/scripts/flight/native_flight.gd:472<br>godot-remake/scripts/rules/flight_rules.gd:122 |  | `X1 = 188:Y1 = 0:Y2 = 4:Z1 = 168:Z2 = 228` |
-| 30 | L | godot-remake/scripts/flight/native_flight.gd:472<br>godot-remake/scripts/rules/flight_rules.gd:122 |  | `PRINT " ": PRINT "BLOAD PLANET # "; PEEK (38209);",A29440"` |
-| 35 | P | godot-remake/scripts/flight/native_flight.gd:472<br>godot-remake/scripts/rules/flight_rules.gd:122 |  | `POKE XI,X1: POKE XI + 1,X2: POKE YI,Y1: POKE YI + 1,Y2: POKE ZI,Z1: POKE ZI + 1,Z2` |
-| 37 | P | godot-remake/scripts/flight/native_flight.gd:472<br>godot-remake/scripts/rules/flight_rules.gd:122 |  | `POKE P1,P: POKE B1,B: POKE H1,H` |
-| 40 | P | godot-remake/scripts/flight/native_flight.gd:472 |  | `PRINT " ": PRINT "RUN STARSHIP SIMULATOR"` |
+| 20 | P | godot-remake/scripts/flight/native_flight.gd:474 |  | `VTAB 7: HTAB 10: PRINT "                      ": HTAB 10: PRINT "REENTRY SEQUENCE START": ` |
+| 21 | P | godot-remake/scripts/flight/native_flight.gd:474 |  | `HCOLOR= 3: POKE 974,64` |
+| 22 | P | godot-remake/scripts/flight/native_flight.gd:474 |  | `FOR J = 153 TO 157: HPLOT 200,J TO 209,J: NEXT` |
+| 25 | L | godot-remake/scripts/flight/native_flight.gd:474<br>godot-remake/scripts/rules/flight_rules.gd:122 |  | `POKE 38210,1` |
+| 26 | P | godot-remake/scripts/flight/native_flight.gd:474<br>godot-remake/scripts/rules/flight_rules.gd:122 |  | `POKE 973,0` |
+| 27 | P | godot-remake/scripts/flight/native_flight.gd:474<br>godot-remake/scripts/rules/flight_rules.gd:122 |  | `X1 =  PEEK (XI):X2 =  PEEK (XI + 1):Y1 = 208:Y2 = 7:Z1 =  PEEK (ZI):Z2 =  PEEK (ZI + 1)` |
+| 28 | P | godot-remake/scripts/flight/native_flight.gd:474<br>godot-remake/scripts/rules/flight_rules.gd:122 |  | `P =  PEEK (P1):B =  PEEK (B1):H = 20` |
+| 29 | P | godot-remake/scripts/flight/native_flight.gd:474<br>godot-remake/scripts/rules/flight_rules.gd:122 |  | `X1 = 188:Y1 = 0:Y2 = 4:Z1 = 168:Z2 = 228` |
+| 30 | L | godot-remake/scripts/flight/native_flight.gd:474<br>godot-remake/scripts/rules/flight_rules.gd:122 |  | `PRINT " ": PRINT "BLOAD PLANET # "; PEEK (38209);",A29440"` |
+| 35 | P | godot-remake/scripts/flight/native_flight.gd:474<br>godot-remake/scripts/rules/flight_rules.gd:122 |  | `POKE XI,X1: POKE XI + 1,X2: POKE YI,Y1: POKE YI + 1,Y2: POKE ZI,Z1: POKE ZI + 1,Z2` |
+| 37 | P | godot-remake/scripts/flight/native_flight.gd:474<br>godot-remake/scripts/rules/flight_rules.gd:122 |  | `POKE P1,P: POKE B1,B: POKE H1,H` |
+| 40 | P | godot-remake/scripts/flight/native_flight.gd:474 |  | `PRINT " ": PRINT "RUN STARSHIP SIMULATOR"` |
 | 63999 | P |  |  | `PRINT : PRINT "INT"` |
