@@ -23,7 +23,7 @@ const GAUGE_RADIUS := 52.0
 const GAUGE_LETTERS := 7 ## the size of a damage lamp's lettering
 const ALERT := preload("res://assets/shaders/alert.gdshader")
 const TIGHT := 0.8 ## letters on a lamp's arc, closer than their usual spacing
-const DISPLAY_SHARE := 0.385 ## of the screen's width, the console's window
+const DISPLAY_SHARE := 0.286 ## of the screen's width, the console's window: the forty columns' size, so the panel's height
 const WORST_PAGE := 15 ## rows the longest page needs (the galaxy directory, 13, and its question over two)
 
 var camera: Camera3D
@@ -196,15 +196,16 @@ func _draw_panel() -> void:
 	var w := size.x
 	_display(Rect2(w * 0.012, top + 10.0, w * DISPLAY_SHARE, height - 20.0))
 	# TURN with SPEED and ENERGY spread down the column, VERT standing tall beside
-	var column := w * 0.412
+	var column := w * (0.012 + DISPLAY_SHARE + 0.015) # the gauges follow the console's window
 	_dial(font, "TURN", Rect2(column, top + height * 0.12, w * 0.088, 26.0), (bank + 48.0) / 95.0, false)
 	_bar(font, "SPEED", Rect2(column, top + height * 0.44, w * 0.088, 8.0), speed / 120.0, false)
 	_bar(font, "ENERGY", Rect2(column, top + height * 0.72, w * 0.088, 8.0), energy / 63.0, false)
 	# VERT: the nose up is the top
-	_dial(font, "VERT", Rect2(w * 0.513, top + 12.0, 26.0, height - 28.0), (-pitch + 61.0) / 120.0, true)
-	_switches.position = Vector2(w * 0.562, top + (height - _switches.size.y) / 2.0)
+	_dial(font, "VERT", Rect2(column + w * 0.101, top + 12.0, 26.0, height - 28.0), (-pitch + 61.0) / 120.0, true)
+	_switches.position = Vector2(column + w * 0.15, top + (height - _switches.size.y) / 2.0)
 	# damage control
-	var box := Rect2(w * 0.672, top + 8.0, w * 0.318, height - 16.0)
+	var box_left := column + w * 0.26 # after the switches
+	var box := Rect2(box_left, top + 8.0, w * 0.99 - box_left, height - 16.0)
 	_damage_box = box
 	_plastic.position = box.position
 	_plastic.size = box.size
