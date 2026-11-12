@@ -226,7 +226,17 @@ func _shore_leave(here: int) -> void:
 	_tap(KEY_5)
 	_tap(KEY_PERIOD)
 	await _frames(3)
-	_check("only digits are taken", _lines().back().begins_with("HOW MANY TROOPS DO YOU WANT TO ENLIST? 5"))
+	_check("only digits are taken", _flat("\n".join(_lines().slice(1))).contains("HOW MANY TROOPS DO YOU WANT TO ENLIST? 5"))
+	for digit in "123": # _type would press Enter
+		_tap(KEY_0 + digit.to_int())
+	await _frames(3)
+	var widest := 0
+	for line: String in _lines():
+		widest = maxi(widest, line.length())
+	_check("four digits after the long question stay within the forty columns (%d)" % widest, widest <= 40)
+	for i in 3:
+		_tap(KEY_BACKSPACE)
+		await _frames(2)
 	await _type("00")
 	await _until(func() -> bool: return _title() == "-BUY WEAPONS-" and _asked_a_number())
 	_check("500 enlisted", GameState.troops == 2500.0 and GameState.credits == 9500.0 and GameState.enlisted_this_trip)

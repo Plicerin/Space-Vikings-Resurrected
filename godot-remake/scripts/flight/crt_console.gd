@@ -192,7 +192,18 @@ func _digit(key: InputEventKey) -> int:
 
 func _show_number() -> void:
 	var lines := _fixed.duplicate()
-	lines.append("%s%s%s" % [_prompt, _typed, "_" if int(_time * 2.0) % 2 == 0 else " "])
+	# the prompt wraps at the forty columns, and what is typed goes on the line it
+	# fits, or the next: a long question and four digits would run off the display
+	var asked := flow([_prompt.strip_edges()])
+	var last: String = asked.pop_back() if not asked.is_empty() else ""
+	var typed := (" " if last != "" else "") + _typed
+	if last.length() + typed.length() + 1 > COLUMNS:
+		asked.append(last)
+		last = _typed
+	else:
+		last += typed
+	asked.append(last + ("_" if int(_time * 2.0) % 2 == 0 else " "))
+	lines.append_array(asked)
 	show(lines)
 
 
