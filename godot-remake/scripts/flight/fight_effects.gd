@@ -50,10 +50,14 @@ func laser() -> void:
 ## A missile from the ship along `direction` for `steps` steps of 160 units,
 ## bursting at the end if it hit. It leaves slowly and gathers speed, rolling on
 ## its way, a flame behind it and a smoke trail left in the air.
-func missile(direction: Vector3, steps: int, hit: bool) -> void:
+func missile(direction: Vector3, steps: int, hit: bool, ground := Vector3.INF) -> void:
 	AudioManager.play_missile()
 	var start := camera.global_position + camera.global_transform.basis * Vector3(0.0, -0.9, -3.0)
 	var end := camera.global_position + direction * 160.0 * steps
+	var seconds := steps * MISSILE_STEP
+	if hit and ground != Vector3.INF: # aimed at the ground: it goes there, and bursts on it
+		end = ground
+		seconds = maxf(start.distance_to(end) / 160.0, 1.0) * MISSILE_STEP
 	var rocket := Node3D.new()
 	add_child(rocket)
 	rocket.global_transform = Transform3D(Basis.looking_at(direction, Vector3.UP), start)
@@ -72,11 +76,11 @@ func missile(direction: Vector3, steps: int, hit: bool) -> void:
 	rocket.add_child(_exhaust(Vector3(0.0, 0.0, 2.6), false))
 	var flight := create_tween()
 	flight.set_parallel(true)
-	flight.tween_property(rocket, "global_position", end, steps * MISSILE_STEP).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	flight.tween_property(body, "rotation:z", TAU * 3.0, steps * MISSILE_STEP)
+	flight.tween_property(rocket, "global_position", end, seconds).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	flight.tween_property(body, "rotation:z", TAU * 3.0, seconds)
 	flight.chain().tween_callback(_finish_rocket.bind(rocket))
 	if hit:
-		flight.tween_callback(explosion.bind(end, 260.0))
+		flight.tween_callback(ground_burst.bind(end, 260.0) if ground != Vector3.INF else explosion.bind(end, 260.0))
 
 
 ## Stops a rocket's engine and lets its trail thin out before the node goes.
@@ -126,7 +130,7 @@ func _exhaust(at: Vector3, flame: bool) -> CPUParticles3D:
 
 ## A fireball with a white flash, a shockwave ring, sparks and a pulse of light;
 ## `size` is about the radius it reaches.
-func explosion(at: Vector3, size: float) -> void:
+func explosion(at: Vector3, size: float, grounded := false) -> void:
 	if size >= 150.0:
 		AudioManager.play_explosion()
 	else:
@@ -139,14 +143,32 @@ func explosion(at: Vector3, size: float) -> void:
 	burst.tween_property(flash, "scale", Vector3.ONE * 1.5, 0.14).from(Vector3.ONE * 0.3).set_ease(Tween.EASE_OUT)
 	burst.tween_property(flash, "transparency", 1.0, 0.18).from(0.0)
 	burst.chain().tween_callback(flash.queue_free)
-	var ring := _sprite_node(Color(1.0, 0.75, 0.4, 0.9), size * 2.4, true, _ring_texture)
-	add_child(ring)
-	ring.global_position = at
-	var wave := create_tween()
-	wave.set_parallel(true)
-	wave.tween_property(ring, "scale", Vector3.ONE, 0.55).from(Vector3.ONE * 0.1).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
-	wave.tween_property(ring, "transparency", 1.0, 0.55).from(0.0)
-	wave.chain().tween_callback(ring.queue_free)
+	var ring: Node3D
+	if grounded: # the wave runs out over the ground, lying flat on it
+		var disc := MeshInstance3D.new()
+		var quad := QuadMesh.new()
+		quad.size = Vector2.ONE * size * 4.8
+		quad.orientation = PlaneMesh.FACE_Y
+		quad.material = _sprite_material(_ring_texture, true)
+		disc.mesh = quad
+		ring = disc
+		add_child(ring)
+		ring.global_position = at
+		var flat := create_tween()
+		flat.set_parallel(true)
+		flat.tween_property(ring, "scale", Vector3.ONE, 0.6).from(Vector3.ONE * 0.1).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+		flat.tween_property(ring, "transparency", 1.0, 0.6).from(0.0)
+		flat.chain().tween_callback(ring.queue_free)
+	else:
+		var sprite := _sprite_node(Color(1.0, 0.75, 0.4, 0.9), size * 2.4, true, _ring_texture)
+		ring = sprite
+		add_child(ring)
+		ring.global_position = at
+		var wave := create_tween()
+		wave.set_parallel(true)
+		wave.tween_property(ring, "scale", Vector3.ONE, 0.55).from(Vector3.ONE * 0.1).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+		wave.tween_property(ring, "transparency", 1.0, 0.55).from(0.0)
+		wave.chain().tween_callback(ring.queue_free)
 	_burst(at, size, 54, 0.95, Color(1.0, 0.85, 0.45), true) # the fire
 	_burst(at, size, 24, 1.6, Color(0.3, 0.28, 0.28), false) # the smoke that follows
 	_sparks(at, size)
@@ -216,6 +238,83 @@ func _sparks(at: Vector3, size: float) -> void:
 	particles.global_position = at
 	particles.emitting = true
 	get_tree().create_timer(1.5).timeout.connect(particles.queue_free)
+
+
+## A burst on the ground: the fireball and its shockwave, and earth thrown up that
+## falls back, and a cloud of dust that hangs.
+func ground_burst(at: Vector3, size: float) -> void:
+	explosion(at + Vector3(0.0, size * 0.15, 0.0), size * 0.8, true)
+	var dirt := CPUParticles3D.new()
+	dirt.one_shot = true
+	dirt.amount = 70
+	dirt.lifetime = 1.8
+	dirt.explosiveness = 0.95
+	dirt.direction = Vector3.UP
+	dirt.spread = 55.0
+	dirt.gravity = Vector3(0.0, -size * 1.4, 0.0)
+	dirt.initial_velocity_min = size * 0.5
+	dirt.initial_velocity_max = size * 1.5
+	dirt.scale_amount_min = size * 0.03
+	dirt.scale_amount_max = size * 0.09
+	var ramp := Gradient.new()
+	ramp.colors = PackedColorArray([Color(0.45, 0.34, 0.22, 1.0), Color(0.3, 0.24, 0.17, 0.9), Color(0.2, 0.17, 0.13, 0.0)])
+	ramp.offsets = PackedFloat32Array([0.0, 0.6, 1.0])
+	dirt.color_ramp = ramp
+	dirt.mesh = _sprite(_glow_texture, false)
+	add_child(dirt)
+	dirt.global_position = at
+	dirt.emitting = true
+	get_tree().create_timer(2.4).timeout.connect(dirt.queue_free)
+	# the dust: a low brown cloud spreading
+	var dust := CPUParticles3D.new()
+	dust.one_shot = true
+	dust.amount = 36
+	dust.lifetime = 3.2
+	dust.explosiveness = 0.7
+	dust.direction = Vector3.UP
+	dust.spread = 85.0
+	dust.gravity = Vector3.ZERO
+	dust.initial_velocity_min = size * 0.2
+	dust.initial_velocity_max = size * 0.6
+	dust.damping_min = size * 0.2
+	dust.damping_max = size * 0.4
+	dust.scale_amount_min = size * 0.4
+	dust.scale_amount_max = size * 0.9
+	var dust_ramp := Gradient.new()
+	dust_ramp.colors = PackedColorArray([Color(0.5, 0.42, 0.32, 0.0), Color(0.5, 0.42, 0.32, 0.3), Color(0.5, 0.45, 0.4, 0.0)])
+	dust_ramp.offsets = PackedFloat32Array([0.0, 0.25, 1.0])
+	dust.color_ramp = dust_ramp
+	dust.mesh = _sprite(_glow_texture, false)
+	add_child(dust)
+	dust.global_position = at
+	dust.emitting = true
+	get_tree().create_timer(3.8).timeout.connect(dust.queue_free)
+
+
+## A laser bolt striking the ground: a flash, sparks, a puff of dirt.
+func ground_spark(at: Vector3) -> void:
+	_flare(at + Vector3(0.0, 4.0, 0.0), Color(1.0, 0.85, 0.5), 60.0)
+	_sparks(at + Vector3(0.0, 3.0, 0.0), 40.0)
+	var puff := CPUParticles3D.new()
+	puff.one_shot = true
+	puff.amount = 14
+	puff.lifetime = 1.0
+	puff.explosiveness = 0.9
+	puff.direction = Vector3.UP
+	puff.spread = 40.0
+	puff.gravity = Vector3(0.0, -60.0, 0.0)
+	puff.initial_velocity_min = 25.0
+	puff.initial_velocity_max = 70.0
+	puff.scale_amount_min = 10.0
+	puff.scale_amount_max = 22.0
+	var ramp := Gradient.new()
+	ramp.colors = PackedColorArray([Color(0.45, 0.36, 0.25, 0.7), Color(0.4, 0.34, 0.28, 0.0)])
+	puff.color_ramp = ramp
+	puff.mesh = _sprite(_glow_texture, false)
+	add_child(puff)
+	puff.global_position = at
+	puff.emitting = true
+	get_tree().create_timer(1.6).timeout.connect(puff.queue_free)
 
 
 # --- fighters ----------------------------------------------------------------------

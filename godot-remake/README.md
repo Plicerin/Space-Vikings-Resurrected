@@ -108,6 +108,11 @@ lists):
   stored in a byte, so it does nothing to a defender at technology 1 or
   more. It still moves the planet towards surrender.
 - Firing on a planet that has surrendered makes it hostile again.
+- Strikes on the planet count towards taking it: every laser shot, and a missile
+  fired nose-down in the atmosphere (it hits the ground, as the original's
+  `Y0 < VV` test has it), adds to the same progress the ground battle works to,
+  and a planet that has had enough surrenders. The display shows the percent
+  taken, and the globe starts from it.
 - Once raised shields have taken a hit, every later pass in range wears
   them down whether or not anything is seen to hit.
 - The missile is tested against the place the defender would be, whether

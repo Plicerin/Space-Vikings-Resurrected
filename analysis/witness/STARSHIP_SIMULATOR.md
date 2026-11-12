@@ -157,7 +157,7 @@ none
 | 206 | L | godot-remake/scripts/rules/flight_rules.gd:96 |  | `ON K - 33 GOTO 320,321` |
 | 207 | L | godot-remake/scripts/rules/flight_rules.gd:96 |  | `IF S < 0 THEN S = 0` |
 | 208 | L | godot-remake/scripts/rules/flight_rules.gd:96 |  | `IF S > 120 THEN S = 120` |
-| 209 | L | godot-remake/scripts/flight/native_flight.gd:332 |  | `IF K = 24 THEN  PRINT "RUNH/D"` |
+| 209 | L | godot-remake/scripts/flight/native_flight.gd:353 |  | `IF K = 24 THEN  PRINT "RUNH/D"` |
 | 210 | L |  |  | `POKE 38157,S:K = 0: NEXT : GOTO 15` |
 | 311 | P |  |  | `S = S - 3: RETURN` |
 | 312 | P |  |  | `S = S + 3: RETURN` |

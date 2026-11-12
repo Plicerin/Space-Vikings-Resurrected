@@ -212,6 +212,28 @@ func _drive() -> void:
 	_check("at (700, 200, 2000), heading 190 (%d, %d, %d, %d)" % [GameState.ship_x, GameState.ship_y, GameState.ship_z, GameState.ship_heading],
 			GameState.ship_x == 700 and GameState.ship_y == 200 and GameState.ship_z == 2000 and GameState.ship_heading == 190)
 
+	# firing at the ground from the atmosphere: the strike lands on the ground, and the
+	# display says how much of the planet the strikes have taken
+	await _flight(func() -> void:
+		GameState.in_atmosphere = true
+		GameState.ship_x = 0
+		GameState.ship_y = 600
+		GameState.ship_z = -3000
+		GameState.ship_pitch = 30 # the nose well down
+		GameState.ship_speed = 0
+		GameState.gf_planet_surrendered = false
+		GameState.gf_enemy_strength = 100.0
+		GameState.gf_victory_progress = 40.0)
+	var flight := get_tree().current_scene
+	var struck: Vector3 = flight._ground_ahead(12000.0)
+	_check("nose down in the atmosphere: the line of fire meets the ground (%s)" % str(struck), struck != Vector3.INF and absf(struck.y - 20.0) < 1.0)
+	flight._play({"kind": "missile", "hit": true, "steps": 8})
+	await _frames(3)
+	_check("a missile that hits says so", _node("Hud/Overlay").message == "DIRECT HIT ON THE PLANET")
+	flight._play({"kind": "laser"})
+	await _frames(3)
+	_check("the display says how much of the planet is taken", _node("Hud/Overlay")._taken() == 40)
+
 	# the way out by the keys: held back (DOWN) in the atmosphere, the nose comes up and the
 	# ship climbs past 4000 into orbit
 	await _flight(func() -> void:

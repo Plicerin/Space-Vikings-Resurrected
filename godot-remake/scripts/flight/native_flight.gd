@@ -301,9 +301,15 @@ func _play(event: Dictionary) -> void:
 	match event["kind"]:
 		"laser":
 			_effects.laser()
+			var struck := _ground_ahead(7000.0)
+			if struck != Vector3.INF:
+				get_tree().create_timer(0.12).timeout.connect(_effects.ground_spark.bind(struck))
 		"missile":
 			var ahead := -_camera.global_transform.basis.z
-			_effects.missile(ahead, event["steps"], event["hit"])
+			var ground := _ground_ahead(12000.0) if event["hit"] else Vector3.INF
+			_effects.missile(ahead, event["steps"], event["hit"], ground)
+			if event["hit"] and ground != Vector3.INF:
+				_say("DIRECT HIT ON THE PLANET")
 		"surrendered":
 			_say("THE PLANET HAS SURRENDERED")
 		"damage":
@@ -314,6 +320,21 @@ func _play(event: Dictionary) -> void:
 				AudioManager.play_hit_medium()
 		"fighter":
 			_effects.fighter(event["from"], event["step"], event["steps"], event["strafes"], event["shot_down"])
+
+
+## Where the line of fire meets the ground, in the atmosphere, within `reach`; INF if it
+## does not (pointing up, or too far, or in space).
+func _ground_ahead(reach: float) -> Vector3:
+	if not _rules.in_atmosphere:
+		return Vector3.INF
+	var direction := -_camera.global_transform.basis.z
+	if direction.y > -0.02:
+		return Vector3.INF
+	var start := _camera.global_position
+	var distance := (start.y - FlightRules.GROUND) / -direction.y
+	if distance > reach or distance < 1.0:
+		return Vector3.INF
+	return start + direction * distance
 
 
 ## A light flash of damage after `delay`, with its thump.

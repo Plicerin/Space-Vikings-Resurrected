@@ -490,12 +490,26 @@ func _display(rect: Rect2) -> void:
 		if GameState.in_atmosphere: # the way out is up: past 4000 in the ship's units, 2000 on the readout
 			lines.append("ALTITUDE %d" % (GameState.ship_y / 2))
 			lines.append("CLIMB TO 2000 TO REACH ORBIT")
+		var taken := _taken()
+		if taken >= 0:
+			lines.append("PLANET TAKEN %d%%" % taken if taken < 100 else "PLANET SECURED")
 		lines.append("")
 		lines.append(columns("N  NAV DATA", "F1 KEYS"))
 	_write(lines.slice(0, rows), inner.position, scale, pitch_px)
 	# a faint scan over the glass
 	for line in range(int(rect.position.y) + 4, int(rect.end.y) - 2, 3):
 		draw_line(Vector2(rect.position.x + 3.0, line), Vector2(rect.end.x - 3.0, line), Color(0.0, 0.0, 0.0, 0.16), 1.0)
+
+
+## How much of the planet the strikes and landings have taken, as a percent, or -1 when
+## there is nothing to take (no resistance, or not worth saying).
+func _taken() -> int:
+	if GameState.gf_planet_surrendered:
+		return 100
+	var enemy := GameState.gf_enemy_strength
+	if enemy <= 0.0:
+		return -1
+	return clampi(int(GameState.gf_victory_progress / enemy * 100.0), 0, 99)
 
 
 ## Lines of the block lettering, `scale` pixels to the dot.
