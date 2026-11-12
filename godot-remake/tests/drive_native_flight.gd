@@ -174,7 +174,7 @@ func _drive() -> void:
 	await _frames(60 * 3)
 	_check("flying on without hitting it leaves it there", get_tree().current_scene.get("_defender") != null)
 	Input.action_press("fire")
-	await _frames(60 * 2)
+	await _frames(60 * 3)
 	Input.action_release("fire")
 	await _frames(10)
 	_check("a missile on it at the end of its strength destroys it (tier %d)" % GameState.orbital_defender_tier,

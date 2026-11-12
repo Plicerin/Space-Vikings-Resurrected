@@ -49,6 +49,11 @@ const PLANET_RADIUS := 780.0
 const CLUSTER_RADIUS := 1500.0
 ## How many of the cluster are lit, by tech: nothing, a few, some, many, all.
 const CITIES := [0, 14, 40, 90, 144]
+## Seconds between passes of the fighting. The original did one a pass of its main loop,
+## about two seconds of an Apple drawing (the flight here is scaled to a second a pass, but
+## a hand lining up a missile is not): the defender and its fighters at that pace give you
+## the time the original did.
+const FIGHT_PASS := 2.0
 const DEFENDER_AT := Vector3(400.0, -100.0, -3500.0) ## STARSHIP SIMULATOR.bas line 2: X9, Y9, Z9
 const SUN := Vector3(0.6, 0.25, -0.75)
 const SKY_STARS := 700
@@ -161,7 +166,7 @@ func _process(delta: float) -> void:
 		_change_world("ORBITAL INSERTION START", _rules.enter_orbit)
 		return
 	_fight_clock += delta
-	if _fight_clock >= FlightRules.PASS:
+	if _fight_clock >= FIGHT_PASS:
 		_fight_clock = 0.0
 		_fight()
 	if _said_for > 0.0:
