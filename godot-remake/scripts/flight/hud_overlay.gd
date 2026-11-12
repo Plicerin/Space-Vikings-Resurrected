@@ -22,8 +22,10 @@ const AMBER_TEXT := Color(1.0, 0.69, 0.0) ## an 80s terminal's amber
 const GAUGE_RADIUS := 52.0
 const GAUGE_LETTERS := 7 ## the size of a damage lamp's lettering
 const ALERT := preload("res://assets/shaders/alert.gdshader")
+const LAMP_RADIUS := 13.0
+const LAMP_LETTERS := 9 ## the raised lettering round the damage lamps
 const TIGHT := 0.8 ## letters on a lamp's arc, closer than their usual spacing
-const DISPLAY_SHARE := 0.286 ## of the screen's width, the console's window: the forty columns' size, so the panel's height
+const DISPLAY_SHARE := 0.316 ## of the screen's width, the console's window: the forty columns' size, so the panel's height
 const WORST_PAGE := 15 ## rows the longest page needs (the galaxy directory, 13, and its question over two)
 
 var camera: Camera3D
@@ -213,11 +215,11 @@ func _draw_panel() -> void:
 	_damage_lamps = ComRules.lamps()
 	for i in _damage_lamps.size():
 		var lamp: Array = _damage_lamps[i]
-		_bulb(_lamp_centre(i), 11.0, RED if lamp[2] else GREEN, true)
+		_bulb(_lamp_centre(i), LAMP_RADIUS, RED if lamp[2] else GREEN, true)
 
 
 func _lamp_centre(index: int) -> Vector2:
-	return _damage_box.position + Vector2(_damage_box.size.x * (1.0 + 2.0 * (index % 6)) / 12.0, _damage_box.size.y * (0.4 + (index / 6) * 0.36))
+	return _damage_box.position + Vector2(_damage_box.size.x * (1.0 + 2.0 * (index % 6)) / 12.0, _damage_box.size.y * (0.45 + (index / 6) * 0.34))
 
 
 ## The raised amber lettering on the plastic: drawn on `_letters`, a node over it.
@@ -227,13 +229,13 @@ func _draw_letters() -> void:
 	for i in _damage_lamps.size():
 		if i < 2: # the engines: one ENG over both, each its number under its own lamp
 			var number: String = _damage_lamps[i][0].strip_edges()
-			var number_width := font.get_string_size(number, HORIZONTAL_ALIGNMENT_LEFT, -1, 7).x
-			_raised_string(_letters, font, _lamp_centre(i) + Vector2(-number_width / 2.0, 18.0), number, 7)
+			var number_width := font.get_string_size(number, HORIZONTAL_ALIGNMENT_LEFT, -1, LAMP_LETTERS).x
+			_raised_string(_letters, font, _lamp_centre(i) + Vector2(-number_width / 2.0, LAMP_RADIUS + 13.0), number, LAMP_LETTERS)
 		else:
-			_arc_text(_letters, font, _damage_lamps[i][0].strip_edges(), _lamp_centre(i), 17.0)
+			_arc_text(_letters, font, _damage_lamps[i][0].strip_edges(), _lamp_centre(i), LAMP_RADIUS + 9.0)
 	var between := (_lamp_centre(0) + _lamp_centre(1)) / 2.0
-	var eng_width := font.get_string_size("ENG", HORIZONTAL_ALIGNMENT_LEFT, -1, 7).x
-	_raised_string(_letters, font, between + Vector2(-eng_width / 2.0, -15.0), "ENG", 7)
+	var eng_width := font.get_string_size("ENG", HORIZONTAL_ALIGNMENT_LEFT, -1, LAMP_LETTERS).x
+	_raised_string(_letters, font, between + Vector2(-eng_width / 2.0, -LAMP_RADIUS - 6.0), "ENG", LAMP_LETTERS)
 
 
 ## Lettering that stands out of the surface: a shadow below and to the right, a
@@ -247,7 +249,7 @@ func _raised_string(canvas: CanvasItem, font: Font, at: Vector2, text: String, s
 ## `text` along the top of a circle: its middle straight above `centre`, each
 ## letter turned to stand on the arc, raised.
 func _arc_text(canvas: CanvasItem, font: Font, text: String, centre: Vector2, radius: float) -> void:
-	var size_px := 7
+	var size_px := LAMP_LETTERS
 	var widths := []
 	var total := 0.0
 	for character in text:
@@ -348,7 +350,7 @@ func _icon_orbit(c: Vector2, colour: Color) -> void:
 ## a row of LEDs. With the damage alert on, a bright patch with a fading tail sweeps along and back, in amber.
 func _draw_damage(canvas: CanvasItem, box: Rect2) -> void:
 	var count := 24
-	var frame_rect := Rect2(box.position + Vector2(10.0, 22.0), Vector2(box.size.x - 20.0, 28.0))
+	var frame_rect := Rect2(box.position + Vector2(10.0, 22.0), Vector2(box.size.x - 20.0, 34.0))
 	var frame := StyleBoxFlat.new()
 	frame.bg_color = Color(0.02, 0.022, 0.026, 0.9)
 	frame.set_corner_radius_all(8)
@@ -376,8 +378,8 @@ func _draw_damage(canvas: CanvasItem, box: Rect2) -> void:
 		if level > 0.25:
 			style.shadow_color = Color(1.0, 0.6, 0.05, 0.35 * level)
 			style.shadow_size = 4
-		canvas.draw_style_box(style, Rect2(frame_rect.position + Vector2(12.0 + i * pitch_px, 7.0), Vector2(pitch_px - 3.0, 14.0)))
-	_raised_string(canvas, get_theme_default_font(), box.position + Vector2(12.0, 16.0), "DAMAGE", 11)
+		canvas.draw_style_box(style, Rect2(frame_rect.position + Vector2(12.0 + i * pitch_px, 8.0), Vector2(pitch_px - 3.0, 18.0)))
+	_raised_string(canvas, get_theme_default_font(), box.position + Vector2(12.0, 16.0), "DAMAGE", 15)
 
 
 ## Where `world_at` lies as seen from the ship, on the ball: straight ahead is
