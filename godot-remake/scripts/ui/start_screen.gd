@@ -204,10 +204,14 @@ func _draw() -> void:
 	var tagline := "RESURRECTED"
 	var tag_scale := 3.2 * scale
 	BlockFont.draw(self, tagline, Vector2((size.x - BlockFont.width(tagline, tag_scale)) / 2.0, title_at.y + 9.5 * title_scale), tag_scale, Color(LED, 0.85))
+	var kind := "A RECREATION OF THE 1982 APPLE II SPACE WAR"
+	var kind_scale := 1.8 * scale
+	var kind_at := Vector2((size.x - BlockFont.width(kind, kind_scale)) / 2.0, title_at.y + 9.5 * title_scale + 11.0 * tag_scale)
+	BlockFont.draw(self, kind, kind_at, kind_scale, Color(LED, 0.7))
 	# the credit: this is a fan remake of someone else's game, and says so
 	var credit_scale := 1.3 * scale
 	var credits := [
-		"A FAN REMAKE OF SPACE VIKINGS (1982)", "BY MITCHELL ROBBINS, PUBLISHED BY SUBLOGIC",
+		"A FAN RECREATION OF SPACE VIKINGS (1982)", "BY MITCHELL ROBBINS, PUBLISHED BY SUBLOGIC",
 		"(C) 1982 MITCHELL ROBBINS", "A2-3D1 (C) 1979 SUBLOGIC COMPANY",
 	]
 	for i in credits.size():

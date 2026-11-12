@@ -1,6 +1,6 @@
 # Space Vikings Resurrected
 
-A Godot 4 fan remake of *Space Vikings* (Apple II, 1982), the game by
+A Godot 4 fan recreation of *Space Vikings* (Apple II, 1982), the game by
 Mitchell Robbins, published by SubLOGIC (original © 1982 Mitchell Robbins;
 the A2-3D1 graphics package © 1979 SubLOGIC Company, as the manual credits
 them). This is an unofficial remake, not the original and not affiliated with
@@ -10,7 +10,7 @@ non-functional `js-remake/`.
 
     godot --path godot-remake
 
-boots to `scenes/start.tscn`: SPACE VIKINGS / RESURRECTED in the game's block lettering, the original's credit along the foot, over a
+boots to `scenes/start.tscn`: SPACE VIKINGS / RESURRECTED ("a recreation of the 1982 Apple II space war") in the game's block lettering, the original's credit along the foot, over a
 slowly turning night planet with its cities lit, and a menu on glass: 1) NEW GAME,
 2) CONTINUE (when a game has been saved), 3) QUIT, by the keys, the arrows and Enter,
 or the mouse. Developed and tested on Godot 4.7.
