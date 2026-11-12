@@ -51,6 +51,7 @@ const CITIES := [0, 14, 40, 90, 144]
 const DEFENDER_AT := Vector3(400.0, -100.0, -3500.0) ## STARSHIP SIMULATOR.bas line 2: X9, Y9, Z9
 const SUN := Vector3(0.6, 0.25, -0.75)
 const SKY_STARS := 700
+const CLOUD_HEIGHT := 2200.0
 const SKY_RADIUS := 150000.0
 ## Stick positions: hard over, and a little over with SHIFT.
 const STICK_HARD := 1.0
@@ -63,6 +64,9 @@ var _radar: Control
 var _chart: Control
 var _console: Node
 var _globe: Control
+var _clouds: MeshInstance3D
+var _fog: Environment
+var _sky_material: ProceduralSkyMaterial
 var _com_waiting := false ## the console is waiting for the chart to close
 ## Seconds since the last pass of fighting, and whether the fire key was
 ## pressed since (a tap between two passes still fires).
@@ -142,6 +146,7 @@ func _process(delta: float) -> void:
 	AudioManager.engine(_rules.speed)
 	_rules.store_state() # the radar, the console and a save read the game's own copy
 	_update_camera()
+	_update_atmosphere()
 	_update_hud()
 	if _rules.is_over_planet():
 		_change_world("REENTRY SEQUENCE START", _rules.reenter)
@@ -389,12 +394,21 @@ func _environment() -> void:
 	var environment := Environment.new()
 	if _rules.in_atmosphere:
 		var sky := Sky.new()
-		sky.sky_material = ProceduralSkyMaterial.new()
+		_sky_material = ProceduralSkyMaterial.new()
+		_sky_material.sky_top_color = Color(0.16, 0.36, 0.74)
+		_sky_material.sky_horizon_color = Color(0.66, 0.80, 0.95)
+		_sky_material.ground_horizon_color = Color(0.66, 0.80, 0.95)
+		_sky_material.ground_bottom_color = Color(0.45, 0.58, 0.72)
+		_sky_material.sky_curve = 0.22
+		_sky_material.sun_angle_max = 28.0
+		_sky_material.sun_curve = 0.12
+		sky.sky_material = _sky_material
 		environment.background_mode = Environment.BG_SKY
 		environment.sky = sky
 		environment.fog_enabled = true
-		environment.fog_light_color = Color(0.55, 0.70, 0.90)
-		environment.fog_density = 0.00004
+		environment.fog_light_color = Color(0.66, 0.80, 0.95)
+		environment.fog_density = 0.000035
+		_fog = environment
 	else:
 		environment.background_mode = Environment.BG_COLOR
 		environment.background_color = Color.BLACK
@@ -453,24 +467,25 @@ func _make_ground() -> void:
 	ground.mesh = plane
 	ground.material_override = material
 	add_child(ground)
-	var map: PackedVector3Array = DisplayList.load_file("planet_%d.bin" % (planet + 1)).lines
-	if map.is_empty():
-		return
-	var points := PackedVector3Array()
-	for point in map:
-		points.append(FlightRules.place(point + Vector3(0, 4, 0)))
-	var arrays := []
-	arrays.resize(Mesh.ARRAY_MAX)
-	arrays[Mesh.ARRAY_VERTEX] = points
-	var lines := ArrayMesh.new()
-	lines.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, arrays)
-	var map_material := StandardMaterial3D.new()
-	map_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	map_material.albedo_color = Color(0.95, 0.9, 0.55)
-	var map_lines := MeshInstance3D.new()
-	map_lines.mesh = lines
-	map_lines.material_override = map_material
-	add_child(map_lines)
+	_make_clouds()
+
+
+## A layer of cloud over the ground, at 2200: the way out of the atmosphere
+## (4000) goes up through it and out into the clear above.
+func _make_clouds() -> void:
+	var plane := PlaneMesh.new()
+	plane.size = Vector2.ONE * 90000.0
+	var material := ShaderMaterial.new()
+	material.shader = load("res://assets/shaders/clouds.gdshader")
+	material.set_shader_parameter("seed", float(GameState.current_planet + 1))
+	material.set_shader_parameter("sun_direction", FlightRules.place(SUN))
+	material.set_shader_parameter("layer_height", CLOUD_HEIGHT)
+	_clouds = MeshInstance3D.new()
+	_clouds.mesh = plane
+	_clouds.material_override = material
+	_clouds.position.y = CLOUD_HEIGHT
+	_clouds.extra_cull_margin = 90000.0
+	add_child(_clouds)
 
 
 ## What is left of a defender: the game's own fifty points of wreckage.
@@ -581,6 +596,21 @@ func _star_texture() -> GradientTexture2D:
 	texture.width = 64
 	texture.height = 64
 	return texture
+
+
+## The cloud layer under the eye, and the sky going dark as the ship climbs out.
+func _update_atmosphere() -> void:
+	if _clouds == null:
+		return
+	_clouds.position.x = _rules.x
+	_clouds.position.z = -_rules.z
+	if _sky_material != null:
+		var up := clampf((_rules.y - 1500.0) / 2500.0, 0.0, 1.0) # thin air from 1500 to 4000
+		_sky_material.sky_top_color = Color(0.16, 0.36, 0.74).lerp(Color(0.0, 0.01, 0.04), up)
+		_sky_material.sky_horizon_color = Color(0.66, 0.80, 0.95).lerp(Color(0.10, 0.18, 0.34), up)
+		_sky_material.ground_horizon_color = _sky_material.sky_horizon_color
+		_fog.fog_light_color = _sky_material.sky_horizon_color
+		_fog.fog_density = lerpf(0.000035, 0.000012, up)
 
 
 func _update_camera() -> void:

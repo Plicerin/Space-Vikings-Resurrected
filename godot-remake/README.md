@@ -77,7 +77,11 @@ cluster of points round its planet are the lights of its cities, more lit
 the more advanced the planet), the rest of the game's points stars, and
 solid low-poly craft made from the original's wireframes
 (`assets/models/`, by `tools_make_models.gd`). Below the atmosphere there
-is a ground and a sky.
+is a ground and a sky: land and sea from noise on the planet's map, with relief,
+beaches, fields, woods, rock and snow and a glint on the water; a layer of
+cloud at 2200 that the way out (past 4000) goes up through; and a sky that
+darkens as the air thins. (The original's ground map lines, which were the
+planet's coasts drawn as wire, are not used.)
 
 Keys are the original's: `1` `2` `3` `4` speed, `A` autopilot, `B`
 condition, `S` shields, `W` missile or laser, `C` command console, `R`
