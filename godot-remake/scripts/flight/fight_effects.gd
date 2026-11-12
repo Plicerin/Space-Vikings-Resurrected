@@ -225,13 +225,13 @@ func fighter(from: Vector2, step: Vector2, steps: int, strafes: Array, shot_down
 	var body := MeshInstance3D.new()
 	body.mesh = Craft.fighter()
 	body.scale = Vector3.ONE * 16.0
-	var paint := Craft.material(Color(0.8, 0.42, 0.38))
-	paint.emission_enabled = true
-	paint.emission = Color(0.8, 0.42, 0.38) * 0.35
-	body.material_override = paint
+	var materials := Craft.fighter_materials()
+	for surface in materials.size():
+		body.set_surface_override_material(surface, materials[surface])
 	craft.add_child(body)
+	_navigation_lights(craft)
 	for side in [-1.0, 1.0]: # the engines
-		var engine := _exhaust(Vector3(side * 0.4, 0.0, 1.2) * 16.0, true)
+		var engine := _exhaust(Vector3(side * 0.42, -0.02, 1.35) * 16.0, true)
 		engine.amount = 20
 		engine.scale_amount_min = 4.0
 		engine.scale_amount_max = 7.0
@@ -422,6 +422,20 @@ func _radial(offsets: Array, colors: Array) -> GradientTexture2D:
 	texture.width = 128
 	texture.height = 128
 	return texture
+
+
+## Red to port, green to starboard, on the wingtips, blinking out of step.
+func _navigation_lights(craft: Node3D) -> void:
+	for side in [-1.0, 1.0]:
+		var light := _sprite_node(RED if side < 0.0 else GREEN, 5.0, true)
+		light.position = Vector3(side * 1.85, -0.04, 0.8) * 16.0
+		craft.add_child(light)
+		var blink := light.create_tween().set_loops()
+		blink.tween_property(light, "modulate:a", 0.15, 0.35)
+		blink.tween_property(light, "modulate:a", 1.0, 0.35)
+		if side > 0.0:
+			blink.pause()
+			light.modulate.a = 0.6
 
 
 ## A point of the original's 3D window on a plane ahead of the camera: nearer as
