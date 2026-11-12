@@ -16,6 +16,7 @@ signal key_pressed(keycode: int)
 signal _resolved
 
 const COLUMNS := 40
+const BlockFont = preload("res://scripts/flight/block_font.gd")
 
 ## The flight's display panel (hud_overlay.gd).
 var overlay: Control
@@ -68,9 +69,7 @@ func menu(title: String, items: Array, said: Array = []) -> int:
 			lines.append(columns(left, "%d) %s" % [row + rows + 1, items[row + rows]]))
 		else:
 			lines.append(left)
-	if not said.is_empty():
-		lines.append("")
-		lines.append_array(said)
+	lines.append_array(flow(said))
 	show(lines)
 	_count = items.size()
 	_mode = "menu"
@@ -183,6 +182,28 @@ func _show_number() -> void:
 	var lines := _fixed.duplicate()
 	lines.append("%s%s%s" % [_prompt, _typed, "_" if int(_time * 2.0) % 2 == 0 else " "])
 	show(lines)
+
+
+## Text the original broke into narrow lines, run together and broken again at the
+## forty columns; a blank line is a new paragraph. (The pages the programs get
+## from the rules were written for a narrow window.)
+static func flow(lines: Array) -> Array:
+	var out: Array = []
+	var paragraph := ""
+	for line in lines:
+		if str(line).strip_edges() == "":
+			if paragraph != "":
+				out.append_array(BlockFont.wrap(paragraph, 1.0, COLUMNS * BlockFont.ADVANCE))
+				paragraph = ""
+			if not out.is_empty() and out.back() != "":
+				out.append("")
+		else:
+			paragraph = str(line).strip_edges() if paragraph == "" else "%s %s" % [paragraph, str(line).strip_edges()]
+	if paragraph != "":
+		out.append_array(BlockFont.wrap(paragraph, 1.0, COLUMNS * BlockFont.ADVANCE))
+	if not out.is_empty() and out.back() == "":
+		out.pop_back()
+	return out
 
 
 ## Two columns on the forty: `right` starts at the twenty-first.

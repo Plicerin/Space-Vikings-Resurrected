@@ -47,8 +47,13 @@ func run(console: Node, command: int) -> void:
 		ShoreRules.CRYOGENICS: await _cryogenics()
 
 
-## Lines under the command's title.
+## The command's title and what is said under it, run on across the forty columns.
 func _page(lines: Array) -> Array:
+	return [_title] + _console.flow(lines)
+
+
+## The title over lines that are already laid out (the tables).
+func _table_page(lines: Array) -> Array:
 	return [_title] + lines
 
 
@@ -101,12 +106,12 @@ func _enlist() -> void:
 	for weapon in ShoreRules.WEAPONS.size():
 		var offer_line := "%s COST %d" % [ShoreRules.WEAPONS[weapon][0], _rules.price_weapon(weapon)]
 		while true:
-			var asked: float = await _console.ask_number(_page(_weapons() + [offer_line]), "BUY HOW MANY? ")
+			var asked: float = await _console.ask_number(_table_page(_weapons() + [offer_line]), "BUY HOW MANY? ")
 			var why := _rules.buy(weapon, asked)
 			if why.is_empty():
 				break
-			await _console.say(_page(_weapons() + why), REFUSAL)
-	await _console.say(_page(_weapons()), LEAVE)
+			await _console.say(_table_page(_weapons() + _console.flow(why)), REFUSAL)
+	await _console.say(_table_page(_weapons()), LEAVE)
 
 
 ## The credits and what is held of each weapon, in two columns.
@@ -131,7 +136,7 @@ func _repair() -> void:
 			var left: Array = mended[i]
 			var right: Array = mended[i + 1] if i + 1 < mended.size() else ["", 0]
 			rows.append(_console.columns("%s %d%%" % [left[0], left[1]], "%s %d%%" % [right[0], right[1]] if right[0] != "" else ""))
-		await _console.say(_page(rows), LEAVE)
+		await _console.say(_table_page(rows), LEAVE)
 	var bill := _rules.bill_said()
 	var pay := true
 	if not _rules.asking: # more than there is

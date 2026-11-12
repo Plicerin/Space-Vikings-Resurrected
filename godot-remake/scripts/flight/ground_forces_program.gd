@@ -101,11 +101,9 @@ func _battle_lines(said: Array, success: float = -1.0) -> Array:
 	var lines: Array = ["-GROUND FORCES-",
 			_console.columns("FIGHTERS %d" % _rules.fighters, "TRANSPORTS %d" % _rules.transports),
 			_console.columns("TROOPS %d" % _rules.troops, "TANKS %d" % _rules.tanks),
-			_console.columns("MISSILES %d" % _rules.missiles, "SUCCESS %d%%" % success if success >= 0.0 else ""),
-			""]
-	lines.append_array(said)
+			_console.columns("MISSILES %d" % _rules.missiles, "SUCCESS %d%%" % success if success >= 0.0 else "")]
+	lines.append_array(_console.flow(said))
 	if _fighting:
-		lines.append("")
 		lines.append("R  RETREAT" if not _retreat else "RETREAT ORDERED")
 	return lines
 

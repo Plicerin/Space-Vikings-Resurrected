@@ -54,14 +54,14 @@ func _drive() -> void:
 	_tap(KEY_1)
 	await _frames(3)
 	_check("1 with the troops at another star: refused",
-			_at_menu() and _menu_said() == "YOU CAN'T ATTACK!\nYOU LEFT\nYOUR TROOPS ON\nANOTHER PLANET!")
+			_at_menu() and _menu_said() == _flat("YOU CAN'T ATTACK!\nYOU LEFT\nYOUR TROOPS ON\nANOTHER PLANET!"))
 
 	await _fresh(func() -> void:
 		GameState.troop_location = 1
 		GameState.troops = 1000.0)
 	_tap(KEY_2)
 	await _frames(3)
-	_check("2: the troops are recalled", _menu_said() == "TROOPS ARE BEING\nRECALLED, SIR!" and GameState.troop_location == 0)
+	_check("2: the troops are recalled", _menu_said() == _flat("TROOPS ARE BEING\nRECALLED, SIR!") and GameState.troop_location == 0)
 
 	await _fresh(func() -> void: GameState.gf_transports = 0.0)
 	_tap(KEY_1)
@@ -74,7 +74,7 @@ func _drive() -> void:
 	await _back_at_the_menu()
 	_check("a lifeless planet: landed on and secured without a round",
 			GameState.gf_planet_surrendered and GameState.planet_secured[here] == 1
-			and _heard.back() == "PLANET IS NON HABITABLE. THERE IS NO\nENEMY TO RESIST LANDING FORCE."
+			and _heard.back() == _flat("PLANET IS NON HABITABLE. THERE IS NO\nENEMY TO RESIST LANDING FORCE.")
 			and not GameState.loot_collected_this_visit)
 
 	await _fresh(func() -> void:
@@ -92,7 +92,7 @@ func _drive() -> void:
 	_check("and the globe is all ours", _globe.capture == 1.0 or not _globe.visible)
 	_check("the troops held back are with the rest again", GameState.troops >= 2000.0 and GameState.troops <= 8000.0)
 	_check("the loot is collected", _loot() > loot_before and GameState.loot_collected_this_visit
-			and _heard.back() == "OPERATION SOL IS A\nSUCCESS, SIR!")
+			and _heard.back() == _flat("OPERATION SOL IS A\nSUCCESS, SIR!"))
 	_check("the battle screen had the game's counts", _saw_counts)
 
 	await _fresh(func() -> void:
@@ -109,7 +109,7 @@ func _drive() -> void:
 	await _back_at_the_menu()
 	_check("the troops fall back: morale down one, the planet as it was, the troops still below",
 			GameState.troop_morale == 2 and GameState.planet_secured[here] == secured
-			and GameState.troop_location == 1 and _heard.back() == "GROUND FORCES RETREATING, SIR!\nPLANET NOT SECURED!")
+			and GameState.troop_location == 1 and _heard.back() == _flat("GROUND FORCES RETREATING, SIR!\nPLANET NOT SECURED!"))
 
 	await _fresh(func() -> void:
 		GameState.planet_tech[here] = 4
@@ -120,7 +120,7 @@ func _drive() -> void:
 	await _back_at_the_menu()
 	_check("a battle lost: no troops below, none left",
 			GameState.troop_location == 0 and GameState.troops == 0.0
-			and _heard.back() == "THE BATTLE IS LOST! ALL TROOPS\nHAVE BEEN DESTROYED!!!")
+			and _heard.back() == _flat("THE BATTLE IS LOST! ALL TROOPS\nHAVE BEEN DESTROYED!!!"))
 
 	# at the game's own pace: a report stays up, and a key moves on
 	await _fresh(func() -> void: GameState.planet_tech[here] = 0, 1.0)
@@ -136,7 +136,7 @@ func _drive() -> void:
 	_tap(KEY_3)
 	await _frames(3)
 	_check("3 before the planet has surrendered: said under the menu",
-			_at_menu() and _menu_said() == "SIR! THE PLANET\nHASN'T SURRENDERED!")
+			_at_menu() and _menu_said() == _flat("SIR! THE PLANET\nHASN'T SURRENDERED!"))
 	await _shore_leave(here)
 
 	print("ground forces driven: %d wrong" % _bad)
@@ -149,7 +149,7 @@ func _shore_leave(here: int) -> void:
 	_tap(KEY_3)
 	await _until(_asked_yes_or_no)
 	_check("3: the back pay is put, and Y or N asked",
-			_said() == "TROOPS READY FOR\nSHORE LEAVE, SIR.\nBACK PAY COMES TO\n2000 CREDITS.\n\nYOU HAVE 10000\nCREDITS.\nPAY THEM?"
+			_said() == _flat("TROOPS READY FOR\nSHORE LEAVE, SIR.\nBACK PAY COMES TO\n2000 CREDITS.\n\nYOU HAVE 10000\nCREDITS.\nPAY THEM?")
 			and _title() == "-SHORE LEAVE-")
 	_tap(KEY_X)
 	await _frames(3)
@@ -174,7 +174,7 @@ func _shore_leave(here: int) -> void:
 	await _until(_asked_yes_or_no)
 	_tap(KEY_Y)
 	await _back_at_the_menu()
-	_check("Y without the credits: said, and as N", _heard.back() == "YOU DON'T HAVE\nENOUGH CREDITS, SIR!"
+	_check("Y without the credits: said, and as N", _heard.back() == _flat("YOU DON'T HAVE\nENOUGH CREDITS, SIR!")
 			and GameState.credits == 100.0 and GameState.troop_morale == 3)
 
 	# 5) SELL LOOT
@@ -182,13 +182,13 @@ func _shore_leave(here: int) -> void:
 	_tap(KEY_5)
 	await _back_at_the_menu()
 	_check("5: the loot is sold", GameState.credits == 10600.0 and GameState.loot[1] == 0.0 and _heard.back() ==
-			"YOU HAD 10000\nCREDITS.\nYOUR LOOT IS WORTH\n600 CREDITS.\n\nTHAT GIVES YOU A\nTOTAL OF 10600\nCREDITS!")
+			_flat("YOU HAD 10000\nCREDITS.\nYOUR LOOT IS WORTH\n600 CREDITS.\n\nTHAT GIVES YOU A\nTOTAL OF 10600\nCREDITS!"))
 
 	# 8) CRYOGENICS
 	await _fresh(func() -> void: pass, QUICK, true)
 	_tap(KEY_8)
 	await _back_at_the_menu()
-	_check("8: the troops are woken", GameState.troop_location == 0 and _heard == ["TROOPS ARE BEING\nREVIVED, SIR."])
+	_check("8: the troops are woken", GameState.troop_location == 0 and _heard == [_flat("TROOPS ARE BEING\nREVIVED, SIR.")])
 
 	# 7) ESTABLISH BASE
 	var to_build := func() -> void:
@@ -197,29 +197,29 @@ func _shore_leave(here: int) -> void:
 	await _fresh(to_build, QUICK, true)
 	_tap(KEY_7)
 	await _until(_asked_yes_or_no)
-	_check("7: the price is put", _said().begins_with("SIR! IT WILL COST\n") and _said().ends_with("BUILD A BASE?"))
+	_check("7: the price is put", _said().begins_with(_flat("SIR! IT WILL COST\n")) and _said().ends_with("BUILD A BASE?"))
 	_tap(KEY_N)
 	await _back_at_the_menu()
 	_check("N: no base, and the trip's one try gone",
 			not GameState.planet_has_base[here] and GameState.credits == 100000.0 and GameState.base_built_this_trip)
 	_tap(KEY_7)
 	await _back_at_the_menu()
-	_check("7 again: only one time a trip", _heard.back() == "ONLY ONE TIME PER\nTRIP, SIR.")
+	_check("7 again: only one time a trip", _heard.back() == _flat("ONLY ONE TIME PER\nTRIP, SIR."))
 
 	await _fresh(to_build, QUICK, true)
 	_tap(KEY_7)
 	await _until(_asked_yes_or_no)
-	var cost := _said().split("\n")[1].to_float()
+	var cost := _after("IT WILL COST ")
 	_tap(KEY_Y)
 	await _back_at_the_menu()
 	_check("Y: the base is built and paid for", GameState.planet_has_base[here] and cost >= 20000.0
-			and GameState.credits == 100000.0 - cost and _heard.back() == "CONSTRUCTION IS\nUNDER WAY, SIR.")
+			and GameState.credits == 100000.0 - cost and _heard.back() == _flat("CONSTRUCTION IS\nUNDER WAY, SIR."))
 
 	# 4) ENLIST TROOPS, and the weapons
 	await _fresh(func() -> void: pass, QUICK, true)
 	_tap(KEY_4)
 	await _until(_asked_a_number)
-	_check("4: the terms are put and a number asked", _said().ends_with("YOU HAVE 10000\nCREDITS, SIR.\nTROOPS= 2000")
+	_check("4: the terms are put and a number asked", _said().ends_with(_flat("YOU HAVE 10000\nCREDITS, SIR.\nTROOPS= 2000"))
 			and _title() == "-ENLIST TROOPS-")
 	_tap(KEY_A)
 	_tap(KEY_MINUS)
@@ -230,7 +230,7 @@ func _shore_leave(here: int) -> void:
 	await _type("00")
 	await _until(func() -> bool: return _title() == "-BUY WEAPONS-" and _asked_a_number())
 	_check("500 enlisted", GameState.troops == 2500.0 and GameState.credits == 9500.0 and GameState.enlisted_this_trip)
-	var price := _said().split("\n")[-1].trim_prefix("FIGHTERS COST ").to_float()
+	var price := _after("FIGHTERS COST ")
 	_check("the fighters are priced, and what there is is on show", _said().contains("FIGHTERS COST ") and price >= 40.0
 			and _lines()[1] == _console.columns("CREDITS", "9500")
 			and _lines()[2] == _console.columns("FIGHTERS 75", "TRANSPORTS 6")
@@ -254,7 +254,7 @@ func _shore_leave(here: int) -> void:
 	await _type("0")
 	await _until(func() -> bool: return _said().contains("MISSILES COST ") and _asked_a_number())
 	var before := GameState.credits
-	price = _said().split("\n")[-1].trim_prefix("MISSILES COST ").to_float()
+	price = _after("MISSILES COST ")
 	await _type("1")
 	await _back_at_the_menu()
 	_check("no transports, no tanks and a missile", GameState.gf_transports == 6.0 and GameState.gf_tanks == 0.0
@@ -271,7 +271,7 @@ func _shore_leave(here: int) -> void:
 	_check("more troops than can be had: said, and asked again",
 			"TOO MANY TROOPS." in _all_said() and GameState.troops == 2000.0 and _said().ends_with("TROOPS= 2000"))
 	await _type("99999")
-	await _until(func() -> bool: return _asked_a_number() and "YOU DON'T HAVE\n99999 CREDITS!" in _all_said())
+	await _until(func() -> bool: return _asked_a_number() and _flat("YOU DON'T HAVE\n99999 CREDITS!") in _all_said())
 	await _type("18000")
 	await _until(func() -> bool: return _title() == "-BUY WEAPONS-")
 	_check("as many as can be had", GameState.troops == 20000.0 and GameState.credits == 12000.0)
@@ -288,7 +288,7 @@ func _shore_leave(here: int) -> void:
 	await _fresh(func() -> void: GameState.ship_hull = 40.0, QUICK, true)
 	_tap(KEY_6)
 	await _back_at_the_menu()
-	_check("6 in space: land first", _heard == ["YOU MUST LAND ON\nPLANET FIRST."] and GameState.ship_hull == 40.0)
+	_check("6 in space: land first", _heard == [_flat("YOU MUST LAND ON\nPLANET FIRST.")] and GameState.ship_hull == 40.0)
 
 	await _fresh(landed, QUICK, true)
 	_tap(KEY_6)
@@ -296,9 +296,9 @@ func _shore_leave(here: int) -> void:
 	_check("6 on the ground: what is mended, and what it was at",
 			_lines()[1] == _console.columns("ENERGY 10%", "HULL DMG. 40%") and _lines()[2].strip_edges() == "MISSILES 60%")
 	await _until(_asked_yes_or_no)
-	var bill := _said().split("\n")[4].to_float()
-	_check("the bill is put", _said().begins_with("ALL REPAIRS ARE\nCOMPLETE, SIR.\nTHE TOTAL REPAIR\nBILL COMES TO\n")
-			and _said().contains("YOU HAVE 100000\nCREDITS.") and _said().ends_with("ARE YOU GOING TO PAY, SIR?"))
+	var bill := _after("BILL COMES TO ")
+	_check("the bill is put", _said().begins_with(_flat("ALL REPAIRS ARE\nCOMPLETE, SIR.\nTHE TOTAL REPAIR\nBILL COMES TO\n"))
+			and _said().contains(_flat("YOU HAVE 100000\nCREDITS.")) and _said().ends_with("ARE YOU GOING TO PAY, SIR?"))
 	_tap(KEY_Y)
 	await _back_at_the_menu()
 	_check("Y: mended and paid for", GameState.ship_hull == 100.0 and GameState.ship_energy == 63.0
@@ -307,7 +307,7 @@ func _shore_leave(here: int) -> void:
 	_tap(KEY_6)
 	await _back_at_the_menu()
 	_check("6 again: nothing to mend, nothing asked",
-			_heard == ["ALL REPAIRS ARE\nCOMPLETE, SIR.\nTHE TOTAL REPAIR\nBILL COMES TO\n0 CREDITS.\nYOU HAVE %d\nCREDITS." % GameState.credits]
+			_heard == [_flat("ALL REPAIRS ARE\nCOMPLETE, SIR.\nTHE TOTAL REPAIR\nBILL COMES TO\n0 CREDITS.\nYOU HAVE %d\nCREDITS.") % GameState.credits]
 			and GameState.credits == 100000.0 - bill and GameState.gf_planet_surrendered)
 
 	await _fresh(landed, QUICK, true)
@@ -317,10 +317,10 @@ func _shore_leave(here: int) -> void:
 	await _back_at_the_menu()
 	_check("N: mended all the same, the credits kept and the planet lost",
 			GameState.ship_hull == 100.0 and GameState.credits == 100000.0 and not GameState.gf_planet_surrendered
-			and GameState.planet_secured[here] == 0 and _heard.back() == "I'M AFRAID YOU'VE\nMADE THE LOCAL\nGOVERNMENT ANGRY!")
+			and GameState.planet_secured[here] == 0 and _heard.back() == _flat("I'M AFRAID YOU'VE\nMADE THE LOCAL\nGOVERNMENT ANGRY!"))
 	_tap(KEY_6)
 	await _frames(3)
-	_check("and nothing more to be had of it", _at_menu() and _menu_said() == "SIR! THE PLANET\nHASN'T SURRENDERED!")
+	_check("and nothing more to be had of it", _at_menu() and _menu_said() == _flat("SIR! THE PLANET\nHASN'T SURRENDERED!"))
 
 	await _fresh(func() -> void:
 		landed.call()
@@ -331,13 +331,13 @@ func _shore_leave(here: int) -> void:
 	await _back_at_the_menu()
 	_check("a bill that cannot be met: every credit and the planet",
 			GameState.credits == 0.0 and not GameState.gf_planet_surrendered and _heard.back() ==
-			"YOU DON'T HAVE\nENOUGH CREDITS!\nYOU HAVE 0 CREDITS\nLEFT!\nI'M AFRAID YOU'VE\nMADE THE LOCAL\nGOVERNMENT ANGRY!")
+			_flat("YOU DON'T HAVE\nENOUGH CREDITS!\nYOU HAVE 0 CREDITS\nLEFT!\nI'M AFRAID YOU'VE\nMADE THE LOCAL\nGOVERNMENT ANGRY!"))
 
 	# at the game's own pace: what is said stays up, and a key moves on
 	await _fresh(func() -> void: pass, 1.0, true)
 	_tap(KEY_8)
 	await _frames(30)
-	_check("at full pace the page stays up", _said() == "TROOPS ARE BEING\nREVIVED, SIR.")
+	_check("at full pace the page stays up", _said() == _flat("TROOPS ARE BEING\nREVIVED, SIR."))
 	_tap(KEY_ENTER)
 	await _frames(4)
 	_check("a key moves on to the menu", _at_menu())
@@ -402,10 +402,24 @@ func _at_menu() -> bool:
 	return _lines().size() > 1 and _lines()[1] == _console.columns("1) ATTACK PLANET", "6) REPAIR/RESTOCK")
 
 
-## What is said under the menu.
+## What is said under the menu (after its five rows), run together.
 func _menu_said() -> String:
-	var at := _lines().find("")
-	return "\n".join(_lines().slice(at + 1)) if at >= 0 else ""
+	return _flat("\n".join(_lines().slice(6)))
+
+
+## Text with its line breaks and runs of spaces made single spaces: the
+## console breaks lines at forty columns, the rules' text at sixteen.
+func _flat(text: String) -> String:
+	var out := text.replace("\n", " ")
+	while out.contains("  "):
+		out = out.replace("  ", " ")
+	return out.strip_edges()
+
+
+## The number after `prefix` in what is said.
+func _after(prefix: String) -> float:
+	var at := _flat(_said()).find(prefix)
+	return _flat(_said()).substr(at + prefix.length()).to_float() if at >= 0 else -1.0
 
 
 func _asked_yes_or_no() -> bool:
@@ -423,12 +437,12 @@ func _said() -> String:
 		lines = lines.slice(0, lines.size() - 1)
 	elif _asked_a_number():
 		lines = lines.slice(0, lines.size() - 1)
-	return "\\n".join(lines).replace("\\\\n", "\\n") if false else "\n".join(lines)
+	return _flat("\n".join(lines))
 
 
 ## All the pages said so far, joined.
 func _all_said() -> String:
-	return "\n".join(_heard)
+	return " ".join(_heard)
 
 
 func _back_at_the_menu() -> void:
@@ -461,12 +475,12 @@ func _note() -> void:
 	# the battle screen: its counts are the game's
 	if _lines()[0] == "-GROUND FORCES-" and _lines().size() > 2 and _lines()[1].begins_with("FIGHTERS "):
 		_saw_counts = _lines()[1].begins_with("FIGHTERS %d" % int(GameState.gf_fighters))
-		said = "\n".join(_lines().slice(5)).strip_edges().trim_suffix("\nR  RETREAT").trim_suffix("RETREAT ORDERED").strip_edges()
-		# a battle page's report is the lines after the counts' blank row
+		var report: Array = _lines().slice(4).filter(func(l: String) -> bool: return l != "R  RETREAT" and l != "RETREAT ORDERED")
+		said = "\n".join(report)
 	if said == "" or said == _last_page:
 		return
 	_last_page = said
-	_heard.append(said)
+	_heard.append(_flat(said))
 
 
 func _loot() -> float:
@@ -504,5 +518,7 @@ func _tap(keycode: Key) -> void:
 
 func _check(what: String, ok: bool) -> void:
 	print("%s  %s" % ["ok   " if ok else "WRONG", what])
+	if not ok and not _lines().is_empty():
+		print("   page: ", _lines(), " heard: ", _heard)
 	if not ok:
 		_bad += 1
