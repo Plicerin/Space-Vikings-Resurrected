@@ -50,13 +50,16 @@ func laser() -> void:
 ## A missile from the ship along `direction` for `steps` steps of 160 units,
 ## bursting at the end if it hit. It leaves slowly and gathers speed, rolling on
 ## its way, a flame behind it and a smoke trail left in the air.
-func missile(direction: Vector3, steps: int, hit: bool, ground := Vector3.INF) -> void:
+func missile(direction: Vector3, steps: int, hit: bool, ground := Vector3.INF, target := Vector3.INF) -> void:
 	AudioManager.play_missile()
 	var start := camera.global_position + camera.global_transform.basis * Vector3(0.0, -0.9, -3.0)
 	var end := camera.global_position + direction * 160.0 * steps
 	var seconds := steps * MISSILE_STEP
 	if hit and ground != Vector3.INF: # aimed at the ground: it goes there, and bursts on it
 		end = ground
+		seconds = maxf(start.distance_to(end) / 160.0, 1.0) * MISSILE_STEP
+	elif hit and target != Vector3.INF: # at a ship: it bursts on its hull, not at the end of its range
+		end = target
 		seconds = maxf(start.distance_to(end) / 160.0, 1.0) * MISSILE_STEP
 	var rocket := Node3D.new()
 	add_child(rocket)

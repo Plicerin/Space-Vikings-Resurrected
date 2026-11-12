@@ -97,6 +97,15 @@ Keys are the original's: `1` `2` `3` `4` speed, `A` autopilot, `B`
 condition, `S` shields, `W` missile or laser, `C` command console, `R`
 radar, `H` hyperdrive. The arrow keys are the stick (or a joystick axis
 mapped to the stick actions) and SPACE is the button. On the radar SPACE (or I) is the ship I.D., as the manual says.
+The computer's screens (the command console and what runs from it, the radar, the chart) stop the
+flight, as each was a program of its own in the original: the ship, the fighting's clock and the engine's
+hum wait, so a planet can't be entered, or an attack disturbed, from behind a screen. Every planet of
+technology 2 or more has its defender from the start, SOL's included (it is only the surrender that
+keeps it from firing); only destroying it removes it, and its wreckage (the game's fifty points) is
+left. A missile that hits it bursts on its hull and the display says how worn it is, which the original
+did not (it took 9 missiles on SIRIUS's heavy cruiser: 24 each against a threshold of 200; the laser adds
+nothing in space, as in the original's integer sums).
+
 From the atmosphere the manual's "cities and other targets" are on the ground (`scripts/flight/cities.gd`, standing on land by the ground shader's own noise, as many as the planet's technology): a missile or laser strike burns the one it reaches. A missile that misses self-destructs in a smaller burst.
 
 The panel (`scripts/flight/hud_overlay.gd`, `switch_panel.gd`): SPEED,

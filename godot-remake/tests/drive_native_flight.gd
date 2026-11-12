@@ -156,6 +156,34 @@ func _drive() -> void:
 			GameState.gf_victory_progress > before_progress)
 	_check("and the defender's fire wears the shields (%.0f)" % GameState.ship_shield, GameState.ship_shield < 100.0)
 
+	# the defender: only destroying it removes it, and then its wreckage is there
+	await _flight(func() -> void:
+		GameState.gf_planet_surrendered = false
+		GameState.gf_enemy_strength = 250.0
+		GameState.defender_damage_threshold = 150.0
+		GameState.defender_damage_points = 149.0
+		GameState.ship_x = 400
+		GameState.ship_y = -100
+		GameState.ship_z = -5800
+		GameState.orbital_defender_tier = 3
+		GameState.ship_speed = 0
+		GameState.ship_missile_system = 100.0
+		GameState.missile_mode_active = true
+		GameState.shields_up = true)
+	_check("a defender at its planet to begin with", get_tree().current_scene.get("_defender") != null)
+	await _frames(60 * 3)
+	_check("flying on without hitting it leaves it there", get_tree().current_scene.get("_defender") != null)
+	Input.action_press("fire")
+	await _frames(60 * 2)
+	Input.action_release("fire")
+	await _frames(10)
+	_check("a missile on it at the end of its strength destroys it (tier %d)" % GameState.orbital_defender_tier,
+			GameState.orbital_defender_tier == 0 and get_tree().current_scene.get("_defender") == null)
+	_check("and its wreckage is in the sky", _wreck_count() == 1)
+	await _flight(func() -> void: # back at the planet later: the wreck of it
+		GameState.orbital_defender_tier = 0)
+	_check("a planet whose defender is gone shows the wreckage, not a ship", get_tree().current_scene.get("_defender") == null and _wreck_count() == 1)
+
 	# a ship with nothing left is lost
 	await _flight(func() -> void:
 		GameState.gf_planet_surrendered = false
@@ -182,6 +210,12 @@ func _drive() -> void:
 	GameState.ship_energy = 63.0
 	var from_planet := GameState.current_planet
 	_tap(KEY_H)
+	await _frames(30)
+	var rays: Control = null
+	for child in _node("Hud").get_children():
+		if child.get_script() != null and str(child.get_script().resource_path).ends_with("hyperspace_effect.gd"):
+			rays = child
+	_check("H: the hyperspace lines are on the screen, filling it", rays != null and rays.size.x > 1000.0 and rays.size.y > 600.0)
 	await _until(func() -> bool: return GameState.current_planet == 6)
 	_check("H with a course (SIRIUS): the ship is at the other star", GameState.current_planet == 6 and from_planet == 0)
 	await _frames(5)
@@ -227,7 +261,7 @@ func _drive() -> void:
 	var flight := get_tree().current_scene
 	var struck: Vector3 = flight._ground_ahead(12000.0)
 	_check("nose down in the atmosphere: the line of fire meets the ground (%s)" % str(struck), struck != Vector3.INF and absf(struck.y - 20.0) < 1.0)
-	flight._play({"kind": "missile", "hit": true, "steps": 8})
+	flight._play({"kind": "missile", "hit": true, "steps": 8, "defender": false})
 	await _frames(3)
 	_check("a missile that hits says so", _node("Hud/Overlay").message == "DIRECT HIT ON THE PLANET")
 	flight._play({"kind": "laser"})
@@ -249,10 +283,18 @@ func _drive() -> void:
 	_check("DOWN held in the atmosphere climbs out into orbit (altitude shown to the end)", not GameState.in_atmosphere)
 
 	# on to the console, and the radar
-	await _flight(func() -> void: pass)
+	await _flight(func() -> void:
+		GameState.ship_speed = 60) # moving, and with the new game's SOL: its ship is there though the planet is ours
+	_check("SOL, surrendered from the start, still has its ship in the flight", get_tree().current_scene.get("_defender") != null)
+	var z_before := GameState.ship_z
+	await _frames(60)
+	_check("flying, the ship moves (z %d, then %d)" % [z_before, GameState.ship_z], GameState.ship_z != z_before)
 	_tap(KEY_C)
 	await _frames(4)
 	_check("C runs the command console", get_tree().current_scene.get("_console").active())
+	var z_on := GameState.ship_z
+	await _frames(60 * 2)
+	_check("and the flight stops while it is on (z %d, then %d)" % [z_on, GameState.ship_z], GameState.ship_z == z_on)
 	await _flight(func() -> void: pass)
 	_tap(KEY_R)
 	await _frames(3)
@@ -260,6 +302,15 @@ func _drive() -> void:
 
 	print("native flight driven: %d wrong" % _bad)
 	get_tree().quit(1 if _bad > 0 else 0)
+
+
+## How many fields of wreckage (a multimesh of rocks) the flight scene has.
+func _wreck_count() -> int:
+	var count := 0
+	for child in get_tree().current_scene.get_children():
+		if child is MultiMeshInstance3D and (child as MultiMeshInstance3D).multimesh.instance_count == 50:
+			count += 1
+	return count
 
 
 func _flight(with: Callable) -> void:

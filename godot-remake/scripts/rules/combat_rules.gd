@@ -183,6 +183,7 @@ func _missile(events: Array, eye: Vector3, attitude: Vector2, vv: float, factors
 	if int(GameState.ship_missile_system) != 0:
 		var at := eye
 		var hit := false
+		var struck_defender := false ## the first thing it met was the defender, not the ground
 		var steps := 0
 		for i in MISSILE_STEPS: # 1010
 			steps += 1
@@ -190,9 +191,10 @@ func _missile(events: Array, eye: Vector3, attitude: Vector2, vv: float, factors
 				hit = true
 			elif absf(at.x - DEFENDER.x) < BOX_X and at.y < DEFENDER.y + BOX_Y_ABOVE and at.y > DEFENDER.y - BOX_Y_BELOW \
 					and absf(at.z - DEFENDER.z) < BOX_Z: # 1050
+				struck_defender = not hit
 				hit = true
 			at += step # 1060
-		events.append({"kind": "missile", "hit": hit, "steps": steps})
+		events.append({"kind": "missile", "hit": hit, "steps": steps, "defender": struck_defender})
 		if hit: # 1085
 			var outcome := _score(events, 10.0, 120.0)
 			if outcome != Outcome.NONE:

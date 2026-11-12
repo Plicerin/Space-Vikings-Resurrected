@@ -69,6 +69,7 @@ var _clouds: MeshInstance3D
 var _cities := Cities.new()
 var _fog: Environment
 var _sky_material: ProceduralSkyMaterial
+var _computer_running := false ## the command console is on, whatever page it is at
 var _com_waiting := false ## the console is waiting for the chart to close
 ## Seconds since the last pass of fighting, and whether the fire key was
 ## pressed since (a tap between two passes still fires).
@@ -140,6 +141,9 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if _dead or _jumping:
 		return
+	if _flight_paused(): # as in the original, where each of these is a program that stops the flight
+		AudioManager.engine_off()
+		return
 	# AUTO does as the original did: the stick is not read, the ship keeps the
 	# position it had; MNL reads it each frame (keys, mouse or joystick alike)
 	if not GameState.autopilot_active:
@@ -164,6 +168,12 @@ func _process(delta: float) -> void:
 		_said_for -= delta
 		if _said_for <= 0.0:
 			_overlay.message = ""
+
+
+## The computer's screens (the command console and what it runs, the radar, the
+## chart) stop the flight: the ship, the clock of the fighting and the engine's hum.
+func _flight_paused() -> bool:
+	return _computer_running or _console.active() or _radar.visible or _chart.visible
 
 
 ## @witness STARSHIP SIMULATOR 200, 210, 500
@@ -245,7 +255,9 @@ func _run_command_console() -> void:
 		"chart": _com_chart,
 		"end": _com_end,
 	}
+	_computer_running = true
 	await CommandConsoleProgram.new().run(_console, host)
+	_computer_running = false
 	_rules.store_state()
 
 
@@ -317,8 +329,12 @@ func _play(event: Dictionary) -> void:
 		"missile":
 			var ahead := -_camera.global_transform.basis.z
 			var ground := _ground_ahead(12000.0) if event["hit"] else Vector3.INF
-			_effects.missile(ahead, event["steps"], event["hit"], ground)
-			if event["hit"] and ground != Vector3.INF:
+			var ship := _defender.global_position if event["defender"] and _defender != null and ground == Vector3.INF else Vector3.INF
+			_effects.missile(ahead, event["steps"], event["hit"], ground, ship)
+			if ship != Vector3.INF:
+				var worn := GameState.defender_damage_points / maxf(GameState.defender_damage_threshold, 1.0)
+				_say("DIRECT HIT ON THE DEFENDER: %d%%" % mini(int(worn * 100.0), 99))
+			elif event["hit"] and ground != Vector3.INF:
 				_say("DIRECT HIT ON THE PLANET")
 				var flight := maxf(_camera.global_position.distance_to(ground) / 160.0, 1.0) * FightEffects.MISSILE_STEP
 				get_tree().create_timer(flight).timeout.connect(_strike.bind(ground, 160.0))
@@ -558,9 +574,7 @@ func _make_defender() -> void:
 	if GameState.orbital_defender_tier == 0: # the wreck of one
 		_make_debris()
 		return
-	if GameState.gf_planet_surrendered:
-		return
-	_defender = Node3D.new()
+	_defender = Node3D.new() # a planet that has surrendered keeps its ship: it only stops fighting
 	var body := MeshInstance3D.new()
 	var model := Craft.defender(GameState.orbital_defender_tier)
 	if model != null:

@@ -15,7 +15,6 @@ var _rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_rng.seed = 1982
 	for i in LINES:
@@ -23,6 +22,8 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	position = Vector2.ZERO
+	size = get_viewport_rect().size # a canvas layer has no layout to fill
 	_time += delta
 	queue_redraw()
 	if _time >= SECONDS:
@@ -38,4 +39,6 @@ func _draw() -> void:
 	for end in _ends:
 		var to := end * size
 		var from := middle + (to - middle) * clampf(grow * 0.25 + fade * 0.7, 0.0, 1.0)
-		draw_line(from, middle + (to - middle) * grow, Color(1, 1, 1, 1.0 - fade * 0.8), 1.5)
+		var tip := middle + (to - middle) * grow
+		draw_line(from, tip, Color(0.45, 0.7, 1.0, 0.18 * (1.0 - fade)), 5.0, true) # the glow under the streak
+		draw_line(from, tip, Color(0.92, 0.97, 1.0, 1.0 - fade * 0.8), 1.5, true)
