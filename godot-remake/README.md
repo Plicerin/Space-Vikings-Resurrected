@@ -97,7 +97,7 @@ condition, `S` shields, `W` missile or laser, `C` command console, `R`
 radar, `H` hyperdrive. The arrow keys are the stick (or a joystick axis
 mapped to the stick actions) and SPACE is the button. On the radar SPACE (or I) is the ship I.D., as the manual says.
 There is one planet and one flight over it: no scene change, no fade, no teleport. The planet's radius is the
-anchor of every size (`Terrain.PLANET_RADIUS`, 45,000 of the ground's units). The sphere seen from orbit has
+anchor of every size (`Terrain.PLANET_RADIUS`, 450,000 of the ground's units: its horizon is far, the ground flat to the eye as it was). The sphere seen from orbit has
 its ground drawn on it (`ground.gdshader`, on the planet's own sphere, coming in as the eye comes down, the
 same noise as `planet.gdshader`), the cloud layer is a shell round it, and the cities stand on it
 (`scripts/world/terrain.gd` is the map and the flat frame laid on the sphere where the ship went down). The
@@ -109,7 +109,7 @@ are the ground's divided by `ORBIT_SCALE` (the planet's radius is 780 in the ori
 (9 radii out), the defender (4.5) and the ship's start (2.7) are the original's number of planet radii, and the
 speeds go with them. The atmosphere's units are the world's. The ground's frame is laid again under the ship
 when it has flown 12,000 from where it touches the sphere, so that the original's wrap at 20,000 is never met.
-The weapons are drawn bigger in the orbit by the same factor (`size_scale`), so a missile keeps its size beside
+The ground's continents are the planet's own (in its size) with the coasts, islands and ridges at the ground's own size, so an ocean has islands and a coast has detail at any height; the sea ripples, so its height can be read. The light is harsh in space (the sun alone, no fill, black shadows) and soft in the atmosphere (the sky lights it from all sides, the sun gentler), blended as the air thins (`_light_for`). The camera's far plane is tied to its near (the depth buffer holds 2^24 between them), which is why a ground at this size draws at all. The weapons are drawn bigger in the orbit by the same factor (`size_scale`), so a missile keeps its size beside
 a ship.
 
 The instrument panel is tall enough that the console's window holds the longest page (the galaxy directory and its question, 15 rows) without growing over the view, the forty columns set small enough to keep the panel to about 230 pixels, with the gauges, the switches and the damage lamps spread to fill it (`HudOverlay.panel_height`; the radar, chart and globe keep clear of it). The computer's screens (the command console and what runs from it, the radar, the chart) stop the

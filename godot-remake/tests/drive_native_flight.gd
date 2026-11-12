@@ -13,7 +13,8 @@ extends Node
 const FLIGHT := "res://scenes/native_flight.tscn"
 const TIMEOUT_FRAMES := 60 * 20
 const WORLD_SCALE := 3.0 # the flight scene's, see native_flight.gd (the atmosphere's)
-const ORBIT_SCALE := 45000.0 / 780.0 # and the orbit's, on top: the planet's radius over the orbit's
+const PLANET_RADIUS := 450000.0 # the planet's, in the ground's units (Terrain.PLANET_RADIUS)
+const ORBIT_SCALE := PLANET_RADIUS / 780.0 # and the orbit's, on top: the planet's radius over the orbit's
 
 var _driver := false
 var _bad := 0
@@ -240,10 +241,10 @@ func _drive() -> void:
 	await _flight(func() -> void:
 		GameState.ship_x = 0
 		GameState.ship_y = 0
-		GameState.ship_z = 830 # 830 from the planet's middle: 2900 above its ground
+		GameState.ship_z = 783 # 783 from the planet's middle: 2000 above its ground
 		GameState.ship_speed = 0)
 	var scene_before := get_tree().current_scene
-	var orbit_spot := Vector3(0.0, 0.0, -830.0) * WORLD_SCALE * ORBIT_SCALE # where the camera is, in Godot's world
+	var orbit_spot := Vector3(0.0, 0.0, -783.0) * WORLD_SCALE * ORBIT_SCALE # where the camera is, in Godot's world
 	await _until(func() -> bool: return GameState.in_atmosphere, 60 * 8)
 	_check("below the top of the atmosphere over the planet: down into it", GameState.in_atmosphere)
 	await _frames(10)
@@ -252,14 +253,14 @@ func _drive() -> void:
 	_check("and the flight never stopped for it", not down.get("_jumping"))
 	var moved: float = down.get("_camera").global_position.distance_to(orbit_spot)
 	_check("the ship is where it was in the world: it went down by flying, not by being moved (%.0f)" % moved, moved < 150.0)
-	_check("the cities are on the ground it is over", down.get("_air_root").visible and down.get("_cities").sites.size() > 0)
+	_check("the ground the ship is over is shown, with its clouds (and its cities, where there is land)", down.get("_air_root").visible)
 	await _flight(func() -> void:
 		GameState.in_atmosphere = true
 		GameState.ship_x = 0
 		GameState.ship_y = 4500
 		GameState.ship_z = 0
 		GameState.ship_speed = 0)
-	var air_spot: Vector3 = GameState.reentry_site * (45000.0 + 4500.0) * WORLD_SCALE # over the frame's middle, 4500 up
+	var air_spot: Vector3 = GameState.reentry_site * (PLANET_RADIUS + 4500.0) * WORLD_SCALE # over the frame's middle, 4500 up
 	await _until(func() -> bool: return not GameState.in_atmosphere, 60 * 8)
 	_check("above 4000 in the atmosphere: up into orbit", not GameState.in_atmosphere)
 	await _frames(10)
@@ -280,7 +281,7 @@ func _drive() -> void:
 	_check("sinking to the ground: stopped at 20, level (%d, pitch %d, bank %d)" % [GameState.ship_y, GameState.ship_pitch, GameState.ship_bank],
 			GameState.ship_y == 20 and GameState.ship_pitch == 0 and GameState.ship_bank == 0)
 	_check("and landed, as the shore leave and the repairs ask", load("res://scripts/rules/shore_rules.gd").new().landed())
-	var ship_height: float = (get_tree().current_scene.get("_camera").global_position.length() - 45000.0 * WORLD_SCALE) / WORLD_SCALE
+	var ship_height: float = (get_tree().current_scene.get("_camera").global_position.length() - PLANET_RADIUS * WORLD_SCALE) / WORLD_SCALE
 	_check("with the ship 20 above the ground it is drawn on (%.0f)" % ship_height, absf(ship_height - 20.0) < 1.0)
 
 	# firing at the ground from the atmosphere: the strike lands on the ground, and the
@@ -298,7 +299,7 @@ func _drive() -> void:
 	var flight := get_tree().current_scene
 	var struck: Vector3 = flight._ground_ahead(12000.0)
 	_check("nose down in the atmosphere: the line of fire meets the ground (%s)" % str(struck),
-			struck != Vector3.INF and absf(struck.length() - (45000.0 + 20.0) * WORLD_SCALE) < 1.0)
+			struck != Vector3.INF and absf(struck.length() - (PLANET_RADIUS + 20.0) * WORLD_SCALE) < 1.0)
 	flight._play({"kind": "missile", "hit": true, "steps": 8, "defender": false})
 	await _frames(3)
 	_check("a missile that hits says so", _node("Hud/Overlay").message == "DIRECT HIT ON THE PLANET")

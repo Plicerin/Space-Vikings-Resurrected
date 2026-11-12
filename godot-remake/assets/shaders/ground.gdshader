@@ -19,13 +19,13 @@ uniform float tech = 2.0;
 uniform float seed = 1.0;
 uniform float scale = 0.00018;
 uniform float sea_level = 0.5;
-uniform float relief = 5200.0;
+uniform float relief = 13000.0;
 // `world_scale` of the scene's units to one of the ground's, and the planet's radius in the ground's.
 uniform float world_scale = 3.0;
-uniform float planet_radius = 45000.0;
+uniform float planet_radius = 450000.0;
 // The eye's height above the ground (in the ground's units) over which the ground comes in.
-uniform float comes_in_from = 26000.0;
-uniform float comes_in_to = 9000.0;
+uniform float comes_in_from = 90000.0;
+uniform float comes_in_to = 30000.0;
 
 varying vec3 world;
 varying vec3 local;
@@ -48,9 +48,12 @@ float value_noise3(vec3 p) {
 // The map: the planet's continents and coasts (planet.gdshader), ridges on them. `n` is a
 // direction from the planet's centre.
 float height(vec3 n) {
-	float h = value_noise3(n * 3.0 + seed) * 0.6 + value_noise3(n * 7.0) * 0.3 + value_noise3(n * 15.0) * 0.1;
+	// the planet's own continents, in the planet's size...
+	float broad = value_noise3(n * 3.0 + seed) * 0.6 + value_noise3(n * 7.0) * 0.3 + value_noise3(n * 15.0) * 0.1;
+	// ...and the coasts, islands and ridges in the ground's own: the same at any size of planet
 	vec3 p = n * planet_radius * scale;
-	return h + (value_noise3(p * 31.0) - 0.5) * 0.10 + (value_noise3(p * 97.0) - 0.5) * 0.05;
+	float ground_map = value_noise3(p * 3.0 + seed) * 0.55 + value_noise3(p * 9.0) * 0.28 + value_noise3(p * 31.0) * 0.12 + value_noise3(p * 97.0) * 0.05;
+	return broad * 0.6 + ground_map * 0.4;
 }
 
 void vertex() {
@@ -101,12 +104,21 @@ void fragment() {
 		ground = mix(ground, vec3(0.35, 0.33, 0.28), clamp(grid, 0.0, 1.0) * 0.35 * (1.0 - smoothstep(0.05, 0.25, high)));
 	}
 	ground *= 1.0 + grain * 0.5;
+	// the sea is not flat: ripples and swell moving on it, so that its height can be read
+	vec3 drift = vec3(TIME * 0.7, TIME * 0.3, TIME * 0.5);
+	vec3 q = p.yzx * 0.19 + drift * 1.4; // a second set of ripples across the first: no lattice shows
+	float ripple = value_noise3(p * 0.07 + drift) * 0.6 + value_noise3(q) * 0.4;
+	float ripple_x = value_noise3(p * 0.07 + drift + world_t1 * 0.3) * 0.6 + value_noise3(q + world_t1 * 0.3) * 0.4 - ripple;
+	float ripple_z = value_noise3(p * 0.07 + drift + world_t2 * 0.3) * 0.6 + value_noise3(q + world_t2 * 0.3) * 0.4 - ripple;
+	float swell = value_noise3(p * 0.006 + drift * 0.2);
+	vec3 sea_slope = normalize(up - (world_t1 * ripple_x + world_t2 * ripple_z) * 1.6 * (0.3 + near));
+	sea = mix(sea, sea * 1.35, swell * 0.6);
 	ALBEDO = mix(sea, ground, land);
 	ALPHA = coming;
 	// the sea is smooth and bright with the sun on it; the land rough
 	ROUGHNESS = mix(0.06, 0.9, land);
 	SPECULAR = mix(0.9, 0.12, land);
 	METALLIC = 0.0;
-	vec3 view_normal = (VIEW_MATRIX * vec4(slope, 0.0)).xyz;
-	NORMAL = normalize(mix(NORMAL, view_normal, land));
+	vec3 view_normal = (VIEW_MATRIX * vec4(mix(sea_slope, slope, land), 0.0)).xyz;
+	NORMAL = normalize(view_normal);
 }

@@ -8,7 +8,7 @@ uniform float seed = 1.0;
 uniform float coverage = 0.52;
 uniform vec3 sun_direction = vec3(0.6, 0.25, -0.75);
 uniform float world_scale = 3.0; // the scene's units to one of the ground's
-uniform float planet_radius = 45000.0; // in the ground's units
+uniform float planet_radius = 450000.0; // in the ground's units
 
 varying vec3 world;
 

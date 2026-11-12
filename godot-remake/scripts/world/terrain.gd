@@ -11,7 +11,7 @@ extends RefCounted
 
 const SCALE := 0.00018
 const SEA := 0.5
-const PLANET_RADIUS := 45000.0
+const PLANET_RADIUS := 450000.0
 
 var map_seed := 1.0
 var site := Vector3(0.0, 0.0, 1.0)
@@ -74,12 +74,14 @@ func _row(corner: Vector3, z_step: float, f: Vector3) -> float:
 	return lerpf(_hash3(base), _hash3(base + Vector3(1, 0, 0)), f.x)
 
 
-## The map's height under the direction `n`: the planet's own continents, with local relief on them.
+## The map's height under the direction `n`: the planet's own continents (in the planet's size) and the
+## coasts, islands and ridges of the ground (in the ground's own size, the same on a planet of any size).
 ## The sea is below SEA.
 func height_at(n: Vector3) -> float:
-	var h := _noise3(n * 3.0 + Vector3.ONE * map_seed) * 0.6 + _noise3(n * 7.0) * 0.3 + _noise3(n * 15.0) * 0.1
+	var broad := _noise3(n * 3.0 + Vector3.ONE * map_seed) * 0.6 + _noise3(n * 7.0) * 0.3 + _noise3(n * 15.0) * 0.1
 	var p := n * PLANET_RADIUS * SCALE
-	return h + (_noise3(p * 31.0) - 0.5) * 0.10 + (_noise3(p * 97.0) - 0.5) * 0.05
+	var local := _noise3(p * 3.0 + Vector3.ONE * map_seed) * 0.55 + _noise3(p * 9.0) * 0.28 + _noise3(p * 31.0) * 0.12 + _noise3(p * 97.0) * 0.05
+	return broad * 0.6 + local * 0.4
 
 
 ## Low, dry land with room round it, at the place `w` of the frame: where a city can stand.

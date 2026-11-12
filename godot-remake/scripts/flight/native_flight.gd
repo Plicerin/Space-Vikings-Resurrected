@@ -77,7 +77,7 @@ const DEFENDER_AT := Vector3(400.0, -100.0, -3500.0) ## STARSHIP SIMULATOR.bas l
 const SUN := Vector3(0.6, 0.25, -0.75)
 const SKY_STARS := 700
 const CLOUD_HEIGHT := 2200.0
-const SKY_RADIUS := 150000.0
+const SKY_RADIUS := 8000.0 ## in the orbit's units (the sky is that many times the orbit's scale out: within the far plane)
 ## Stick positions: hard over, and a little over with SHIFT.
 const STICK_HARD := 1.0
 const STICK_FINE := 0.35
@@ -97,6 +97,7 @@ var _air_root: Node3D ## the ground, the clouds and the cities: what is there in
 var _world_env: WorldEnvironment
 var _space_env: Environment
 var _air_env: Environment
+var _fill: DirectionalLight3D ## the cool light from the other side, there in the atmosphere and not in the sun's glare
 var _frame: RefCounted ## the ground's frame on the planet (Terrain), laid where the ship went down
 var _ground: MeshInstance3D
 var _stars: Array[Node3D] = []
@@ -131,7 +132,6 @@ func _exit_tree() -> void:
 func _ready() -> void:
 	GameState.flight_scene = scene_file_path
 	_rules.load_state()
-	_camera.far = 6.0e7
 	_frame = Terrain.new(float(GameState.current_planet + 1), GameState.reentry_site)
 	_environment()
 	_space_root = Node3D.new()
@@ -142,11 +142,10 @@ func _ready() -> void:
 	_sun_light.look_at_from_position(Vector3.ZERO, -FlightRules.place(SUN))
 	_sun_light.light_energy = 1.6
 	# a cool fill from the other side, so that the dark side of a ship still has its shape
-	var fill := DirectionalLight3D.new()
-	fill.light_color = Color(0.55, 0.65, 0.95)
-	fill.light_energy = 0.55
-	add_child(fill)
-	fill.look_at_from_position(Vector3.ZERO, FlightRules.place(SUN) + Vector3(0.0, -0.4, 0.0) * FlightRules.place(SUN).length())
+	_fill = DirectionalLight3D.new()
+	_fill.light_color = Color(0.55, 0.65, 0.95)
+	add_child(_fill)
+	_fill.look_at_from_position(Vector3.ZERO, FlightRules.place(SUN) + Vector3(0.0, -0.4, 0.0) * FlightRules.place(SUN).length())
 	_make_planet() # one planet, with its ground drawn on it: the ship flies from orbit to the ground over it
 	_make_defender()
 	_make_stars()
@@ -551,6 +550,7 @@ func _apply_world() -> void:
 	_effects.size_scale = 1.0 if air else ORBIT_SCALE
 	_overlay.range_scale = 0.5 / _world_scale() # the readout is in the original's units
 	_air_root.visible = air
+	_light_for(0.0 if air else 1.0)
 	_world_env.environment = _air_env if air else _space_env
 	_overlay.target = null if air else _defender
 	for star: Node3D in _stars:
@@ -595,9 +595,13 @@ func _make_environment(air: bool) -> Environment:
 	else:
 		environment.background_mode = Environment.BG_COLOR
 		environment.background_color = Color.BLACK
-	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	environment.ambient_light_color = Color(0.10, 0.12, 0.18)
-	environment.ambient_light_energy = 0.9
+	if air: # the sky lights it from every side: soft
+		environment.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+		environment.ambient_light_energy = 1.0
+	else: # nothing but the sun: hard, and the dark side dark
+		environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+		environment.ambient_light_color = Color(0.04, 0.05, 0.08)
+		environment.ambient_light_energy = 0.5
 	environment.glow_enabled = true
 	environment.glow_intensity = 0.8
 	environment.glow_bloom = 0.1
@@ -606,7 +610,7 @@ func _make_environment(air: bool) -> Environment:
 
 func _make_planet() -> void:
 	var sphere := SphereMesh.new()
-	sphere.radius = PLANET_RADIUS * 0.9997 # a hair under the ground drawn on it
+	sphere.radius = PLANET_RADIUS * 0.998 # under the ground drawn on it, clear of its depth
 	sphere.height = sphere.radius * 2.0
 	sphere.radial_segments = 96
 	sphere.rings = 48
@@ -637,8 +641,8 @@ func _make_ground(planet: int) -> void:
 	var sphere := SphereMesh.new()
 	sphere.radius = PLANET_RADIUS
 	sphere.height = PLANET_RADIUS * 2.0
-	sphere.radial_segments = 256
-	sphere.rings = 128
+	sphere.radial_segments = 1024 # the horizon of a planet this big is a few of its faces: fine ones
+	sphere.rings = 512
 	var material := ShaderMaterial.new()
 	material.shader = load("res://assets/shaders/ground.gdshader")
 	material.set_shader_parameter("tech", float(GameState.planet_tech[planet]))
@@ -823,12 +827,23 @@ func _star_texture() -> GradientTexture2D:
 	return texture
 
 
+## The light: harsh in space (the sun alone, a clean bright edge and a black shadow, no fill), soft in the
+## atmosphere (the sky lighting it from all sides, the sun gentler, the cool fill from the other side), and
+## between the two as the air thins (`up`, 0 in the thick of it to 1 in space).
+func _light_for(up: float) -> void:
+	_sun_light.light_energy = lerpf(1.1, 2.8, up)
+	_sun_light.light_color = Color(1.0, 0.95, 0.88).lerp(Color(1.0, 1.0, 1.0), up)
+	_fill.light_energy = lerpf(0.5, 0.0, up)
+	_air_env.ambient_light_energy = lerpf(1.1, 0.3, up)
+
+
 ## The cloud layer under the eye, and the sky going dark as the ship climbs out.
 func _update_atmosphere() -> void:
 	if not _rules.in_atmosphere:
 		return
 	if _sky_material != null:
 		var up := clampf((_rules.y - 1000.0) / 2500.0, 0.0, 1.0) # thin air from 1000 to 3500, black where orbit begins
+		_light_for(up)
 		_sky_material.sky_top_color = Color(0.16, 0.36, 0.74).lerp(Color(0.0, 0.01, 0.04), up)
 		_sky_material.sky_horizon_color = Color(0.66, 0.80, 0.95).lerp(Color(0.10, 0.18, 0.34), up)
 		_sky_material.ground_horizon_color = _sky_material.sky_horizon_color
@@ -849,6 +864,7 @@ func _update_camera() -> void:
 	_camera.transform = pose
 	var height := (pose.origin.length() - WORLD_RADIUS) / WORLD_SCALE # the camera's near plane keeps up with its height
 	_camera.near = clampf(height * WORLD_SCALE * 0.002, 2.0, 120.0)
+	_camera.far = _camera.near * 1.5e7 # the depth buffer holds 2^24 between the near plane and the far one
 	if _sky != null:
 		_sky.position = pose.origin / (WORLD_SCALE * ORBIT_SCALE) # the sky goes with the ship, in the orbit's units
 
