@@ -79,6 +79,9 @@ const BYTE_MAX := 255.0
 
 ## RND(1). The tests load the dice.
 var rnd: Callable = func() -> float: return randf()
+## The defender's hit box in times the original's: 1 is the original's, which the recordings hold it
+## to; the game draws the defender bigger and lets the box follow.
+var hit_scale := 1.0
 
 ## DMG, DP, L and TE of the flight program.
 var dmg := false
@@ -189,8 +192,8 @@ func _missile(events: Array, eye: Vector3, attitude: Vector2, vv: float, factors
 			steps += 1
 			if GameState.in_atmosphere and at.y < vv:
 				hit = true
-			elif absf(at.x - DEFENDER.x) < BOX_X and at.y < DEFENDER.y + BOX_Y_ABOVE and at.y > DEFENDER.y - BOX_Y_BELOW \
-					and absf(at.z - DEFENDER.z) < BOX_Z: # 1050
+			elif absf(at.x - DEFENDER.x) < BOX_X * hit_scale and at.y < DEFENDER.y + BOX_Y_ABOVE * hit_scale \
+					and at.y > DEFENDER.y - BOX_Y_BELOW * hit_scale and absf(at.z - DEFENDER.z) < BOX_Z * hit_scale: # 1050
 				struck_defender = not hit
 				hit = true
 			at += step # 1060

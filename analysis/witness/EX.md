@@ -29,9 +29,9 @@ none
 | 21 | W |  |  | `IF Y2 > 65 THEN Y2 = 65` |
 | 22 | W |  |  | `IF Y2 <  - 60 THEN Y2 =  - 60` |
 | 25 | W |  |  | `HPLOT 140,60 TO 140 + X2,60 + Y2: NEXT` |
-| 30 | L | godot-remake/scripts/rules/combat_rules.gd:101 |  | `NEXT : POKE 38205,0: POKE EN,127` |
-| 40 | P | godot-remake/scripts/rules/combat_rules.gd:101 |  | `PRINT "BLOADDEBRIS,A30841"` |
-| 56 | L | godot-remake/scripts/rules/combat_rules.gd:101 |  | `F =  PEEK (38207) / 2: POKE 38207,F` |
+| 30 | L | godot-remake/scripts/rules/combat_rules.gd:104 |  | `NEXT : POKE 38205,0: POKE EN,127` |
+| 40 | P | godot-remake/scripts/rules/combat_rules.gd:104 |  | `PRINT "BLOADDEBRIS,A30841"` |
+| 56 | L | godot-remake/scripts/rules/combat_rules.gd:104 |  | `F =  PEEK (38207) / 2: POKE 38207,F` |
 | 57 | P |  |  | `PRINT "BLOAD SOUND GEN,A$9276"` |
 | 60 | P |  |  | `PRINT "RUN STARSHIP SIMULATOR"` |
 | 63999 | P |  |  | `PRINT : PRINT "INT"` |

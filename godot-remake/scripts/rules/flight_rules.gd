@@ -31,6 +31,10 @@ extends RefCounted
 ## continuous model they have nothing to be), and the drawing time that
 ## made a pass.
 
+## The planet's size in times the original's (1 is the original's, which the recordings hold it to); the
+## game draws it bigger, and the box that sends the ship down to it follows.
+var planet_scale := 1.0
+
 const PASS := 1.0 ## seconds a pass of the original is here
 const WORLD_EDGE := 20000.0
 const ANGLE := TAU / 256.0 ## radians to a unit of angle
@@ -110,7 +114,8 @@ static func pitch_marker(pitch_units: float) -> float:
 ## Within 900 of the planet on every axis and not in the atmosphere: the
 ## ship goes down (RE).
 func is_over_planet() -> bool:
-	return not in_atmosphere and absf(x) < 900.0 and absf(y) < 900.0 and absf(z) < 900.0
+	var reach := 900.0 * planet_scale
+	return not in_atmosphere and absf(x) < reach and absf(y) < reach and absf(z) < reach
 
 
 ## @witness STARSHIP SIMULATOR 158

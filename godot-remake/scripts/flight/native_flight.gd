@@ -45,6 +45,9 @@ const EndProgram = preload("res://scripts/flight/end_program.gd")
 const RadarRules = preload("res://scripts/rules/radar_rules.gd")
 
 const PLANET_RADIUS := 780.0
+## How much bigger the planet is drawn than the original's, with the box that takes the ship down
+## to it: from orbit it fills more of the sky, and the defender is smaller beside it.
+const PLANET_SCALE := 1.5
 ## The game's own points nearer than this to the planet are its cluster; the
 ## rest are stars.
 const CLUSTER_RADIUS := 1500.0
@@ -56,8 +59,8 @@ const CITIES := [0, 14, 40, 90, 144]
 ## the time the original did.
 const FIGHT_PASS := 2.0
 ## How much bigger the defender is drawn than the original's wireframe (460 long, about 5500 from the
-## ship at the start, which is a speck): the hit box and the range stay the original's, so a missile
-## that passes through its outer hull may still miss.
+## ship at the start, which is a speck), with its hit box: the distances, the speeds and the missile's
+## range stay the original's, so the time to reach it is what it was.
 const DEFENDER_SCALE := 1.8
 const DEFENDER_AT := Vector3(400.0, -100.0, -3500.0) ## STARSHIP SIMULATOR.bas line 2: X9, Y9, Z9
 const SUN := Vector3(0.6, 0.25, -0.75)
@@ -114,6 +117,8 @@ func _exit_tree() -> void:
 func _ready() -> void:
 	GameState.flight_scene = scene_file_path
 	_rules.load_state()
+	_rules.planet_scale = PLANET_SCALE
+	_combat.hit_scale = DEFENDER_SCALE
 	_environment()
 	_space_root = Node3D.new()
 	add_child(_space_root)
@@ -536,8 +541,8 @@ func _make_environment(air: bool) -> Environment:
 
 func _make_planet() -> void:
 	var sphere := SphereMesh.new()
-	sphere.radius = PLANET_RADIUS
-	sphere.height = PLANET_RADIUS * 2.0
+	sphere.radius = PLANET_RADIUS * PLANET_SCALE
+	sphere.height = PLANET_RADIUS * PLANET_SCALE * 2.0
 	sphere.radial_segments = 96
 	sphere.rings = 48
 	var material := ShaderMaterial.new()
