@@ -352,6 +352,9 @@ a hyperspace burst, a ground plane and sky below the atmosphere.
 
 ## The look
 
+The frame is 4:3 (1280 by 960), the Apple's television, and the window keeps it when resized. The 3D
+view holds its horizontal angle, so going from 16:9 added to the top and bottom and trimmed nothing.
+
 The native screens share one theme (`theme/space_vikings.tres`) and one
 font, `assets/fonts/space_vikings.res` (from `font_source/space_vikings.ttf`, made by `tools/make_font.py`; the `.res` holds the data so a fresh clone needs no import) from
 the game's own character table (the 7x8 glyphs `HI-RES CHARACTER

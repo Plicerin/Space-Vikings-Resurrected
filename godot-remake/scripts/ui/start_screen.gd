@@ -121,7 +121,7 @@ func _build_scene() -> void:
 	_viewport.transparent_bg = true
 	_viewport.own_world_3d = true
 	_viewport.msaa_3d = Viewport.MSAA_4X
-	_viewport.size = Vector2i(1280, 720)
+	_viewport.size = Vector2i(1280, 960)
 	var container := SubViewportContainer.new()
 	container.stretch = true
 	container.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -130,7 +130,8 @@ func _build_scene() -> void:
 	container.add_child(_viewport)
 	move_child(container, 0)
 	var camera := Camera3D.new()
-	camera.fov = 38.0
+	camera.keep_aspect = Camera3D.KEEP_WIDTH # the frame is 4:3, as the Apple's television: the extra is above
+	camera.fov = 62.9
 	camera.position = Vector3(0.0, 0.0, 6.0)
 	_viewport.add_child(camera)
 	var sun := DirectionalLight3D.new()
@@ -194,7 +195,7 @@ func _draw() -> void:
 		var twinkle := 0.65 + 0.35 * sin(_time * (1.5 + star[1]) + star[3])
 		draw_circle(Vector2(x, y), star[2] * star[1], Color(0.8, 0.88, 1.0, twinkle * star[1]))
 	# the title, big, in the game's own lettering, with a glow and a CRT's scan
-	var scale := minf(size.x / 1280.0, size.y / 720.0)
+	var scale := minf(size.x / 1280.0, size.y / 960.0)
 	var title := "SPACE VIKINGS"
 	var title_scale := 7.0 * scale
 	var title_at := Vector2((size.x - BlockFont.width(title, title_scale)) / 2.0, size.y * 0.12)
