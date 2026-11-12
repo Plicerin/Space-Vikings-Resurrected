@@ -207,7 +207,7 @@ func _draw_panel() -> void:
 
 
 func _lamp_centre(index: int) -> Vector2:
-	return _damage_box.position + Vector2(_damage_box.size.x * (1.0 + 2.0 * (index % 6)) / 12.0, 84.0 + (index / 6) * 36.0)
+	return _damage_box.position + Vector2(_damage_box.size.x * (1.0 + 2.0 * (index % 6)) / 12.0, 72.0 + (index / 6) * 48.0)
 
 
 ## The raised amber lettering on the plastic: drawn on `_letters`, a node over it.
@@ -215,7 +215,15 @@ func _draw_letters() -> void:
 	var font := get_theme_default_font()
 	_draw_damage(_letters, _damage_box)
 	for i in _damage_lamps.size():
-		_arc_text(_letters, font, _lamp_name(i, _damage_lamps[i]), _lamp_centre(i), 17.0)
+		if i < 2: # the engines: one ENG over both, each its number under its own lamp
+			var number: String = _damage_lamps[i][0].strip_edges()
+			var number_width := font.get_string_size(number, HORIZONTAL_ALIGNMENT_LEFT, -1, 7).x
+			_raised_string(_letters, font, _lamp_centre(i) + Vector2(-number_width / 2.0, 18.0), number, 7)
+		else:
+			_arc_text(_letters, font, _damage_lamps[i][0].strip_edges(), _lamp_centre(i), 17.0)
+	var between := (_lamp_centre(0) + _lamp_centre(1)) / 2.0
+	var eng_width := font.get_string_size("ENG", HORIZONTAL_ALIGNMENT_LEFT, -1, 7).x
+	_raised_string(_letters, font, between + Vector2(-eng_width / 2.0, -15.0), "ENG", 7)
 
 
 ## Lettering that stands out of the surface: a shadow below and to the right, a
@@ -224,13 +232,6 @@ func _raised_string(canvas: CanvasItem, font: Font, at: Vector2, text: String, s
 	canvas.draw_string(font, at + Vector2(0.9, 1.1), text, HORIZONTAL_ALIGNMENT_LEFT, -1, size_px, Color(0.0, 0.0, 0.0, 0.75))
 	canvas.draw_string(font, at + Vector2(-0.5, -0.6), text, HORIZONTAL_ALIGNMENT_LEFT, -1, size_px, AMBER_TEXT.lightened(0.55))
 	canvas.draw_string(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, size_px, AMBER_TEXT)
-
-
-## What a lamp is called: COM's top line (the engines' number after ENG);
-## the colour says the rest (NO/GO, DMG, LOW).
-func _lamp_name(index: int, lamp: Array) -> String:
-	var first: String = lamp[0].strip_edges()
-	return "ENG %s" % first if index < 2 else first
 
 
 ## `text` along the top of a circle: its middle straight above `centre`, each
