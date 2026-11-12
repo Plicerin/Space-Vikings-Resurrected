@@ -34,6 +34,8 @@ var energy := 0.0
 var nav: Array = [0, 0, 0, 0, 0, 0] ## X, Y, Z, heading, pitch, bank, as the panel shows them
 var message := "" ## what the display says, for a while, over its page
 var page: Array = [] ## lines another part of the flight (the radar) has put on the display
+var program: Array = [] ## what a program (ground forces, shore leave, the console) has written
+var program_open := false ## a program has the display: it grows to a screenful
 var hide_target := false ## the target bracket is not drawn (the radar is up)
 enum Mode { IDLE, NAV, HELP }
 var mode := Mode.IDLE
@@ -434,6 +436,7 @@ func _stacked(font: Font, text: String, at: Vector2, pitch_px: float) -> void:
 # --- the display: a green panel that can be written to ---
 
 const COLUMNS := 40 ## the Apple's text screen
+const PROGRAM_EXTRA := 150.0 ## how much taller the display is while a program has it
 const HELP := [
 	"ARROWS  STICK          1 2 3 4  SPEED",
 	"SPACE   FIRE           A  AUTO",
@@ -452,6 +455,8 @@ func show_mode(wanted: Mode) -> void:
 
 
 func _display(rect: Rect2) -> void:
+	if program_open: # a program has it: up over the window, a screenful tall
+		rect = Rect2(rect.position.x, rect.position.y - PROGRAM_EXTRA, rect.size.x, rect.size.y + PROGRAM_EXTRA)
 	var window := StyleBoxFlat.new()
 	window.bg_color = Color(0.01, 0.03, 0.015)
 	window.set_corner_radius_all(10)
@@ -468,8 +473,10 @@ func _display(rect: Rect2) -> void:
 	var pitch_px := (BlockFont.HEIGHT + 1.0) * scale # a blank dot row between lines
 	var rows := int(inner.size.y / pitch_px)
 	var lines: Array
-	if message != "":
+	if message != "" and not program_open:
 		lines = BlockFont.wrap(message, scale, inner.size.x)
+	elif program_open:
+		lines = program
 	elif not page.is_empty():
 		lines = page
 	elif mode == Mode.NAV:
@@ -487,7 +494,7 @@ func _display(rect: Rect2) -> void:
 
 ## Lines of the block lettering, `scale` pixels to the dot.
 func _write(lines: Array, at: Vector2, scale: float, pitch_px: float) -> void:
-	for i in 8:
+	for i in 20:
 		_crt("line%d" % i, lines[i] if i < lines.size() else "", at + Vector2(0.0, i * pitch_px), scale, 1.0)
 
 

@@ -36,6 +36,7 @@ const FightEffects = preload("res://scripts/flight/fight_effects.gd")
 const COM := "res://scenes/com.tscn"
 const VectorRadar = preload("res://scripts/flight/vector_radar.gd")
 const VectorChart = preload("res://scripts/flight/vector_chart.gd")
+const CrtConsole = preload("res://scripts/flight/crt_console.gd")
 
 const PLANET_RADIUS := 780.0
 ## The game's own points nearer than this to the planet are its cluster; the
@@ -56,6 +57,7 @@ var _combat := CombatRules.new()
 var _effects: Node3D
 var _radar: Control
 var _chart: Control
+var _console: Node
 ## Seconds since the last pass of fighting, and whether the fire key was
 ## pressed since (a tap between two passes still fires).
 var _fight_clock := 0.0
@@ -108,6 +110,9 @@ func _ready() -> void:
 	if GameState.show_radar_on_arrival: # the console's RADAR
 		GameState.show_radar_on_arrival = false
 		_radar.open()
+	_console = CrtConsole.new()
+	_console.overlay = $Hud/Overlay
+	add_child(_console)
 	_chart = VectorChart.new()
 	_chart.console = $Hud/Overlay
 	$Hud.add_child(_chart)
@@ -158,7 +163,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		GameState.reboot() # a key after the ship is lost, and the machine starts again
 		return
 	var viewport := get_viewport() # the radar's X may leave for the console
-	if _radar.handle_key(key) or _chart.handle_key(key):
+	if _console.handle_key(key) or _radar.handle_key(key) or _chart.handle_key(key):
 		viewport.set_input_as_handled()
 		return
 	if event.is_action("fire"):
