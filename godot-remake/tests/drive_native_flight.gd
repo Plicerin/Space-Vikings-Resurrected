@@ -12,7 +12,8 @@ extends Node
 
 const FLIGHT := "res://scenes/native_flight.tscn"
 const TIMEOUT_FRAMES := 60 * 20
-const WORLD_SCALE := 3.0 # the flight scene's, see native_flight.gd
+const WORLD_SCALE := 3.0 # the flight scene's, see native_flight.gd (the atmosphere's)
+const ORBIT_SCALE := 2.0 # and the orbit's, on top
 
 var _driver := false
 var _bad := 0
@@ -33,7 +34,7 @@ func _drive() -> void:
 	await _flight(func() -> void:
 		GameState.ship_y = 3000
 		GameState.ship_speed = 0)
-	var at := Vector3(GameState.ship_x, GameState.ship_y, -GameState.ship_z) * WORLD_SCALE # Godot's z is the original's reversed
+	var at := Vector3(GameState.ship_x, GameState.ship_y, -GameState.ship_z) * WORLD_SCALE * ORBIT_SCALE # Godot's z is the original's reversed
 	_check("a new flight: the camera is at the ship (%s, the game has %s)" % [_camera().global_position, at],
 			_camera().global_position.is_equal_approx(at))
 	_check("the panel: no speed, full shields", _speed() == 0.0 and GameState.ship_shield == 100.0)

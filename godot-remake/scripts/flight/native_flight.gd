@@ -48,11 +48,12 @@ const RadarRules = preload("res://scripts/rules/radar_rules.gd")
 ## game's world, its speeds with them, so the time to reach anything is what it was; the weapons'
 ## own sizes (a missile, a burst, a fighter) are not, so they are small in it.
 const WORLD_SCALE := 3.0
+## The orbit is this much bigger again, round the planet (its radius the anchor): the ship's orbit,
+## the defender's, the hyperdrive's arrival and the missile's range are all the same number of
+## planet radii as the original's, and the planet is this many times its size in the atmosphere's
+## units. The atmosphere keeps the world's scale; the re-entry teleport is the joint.
+const ORBIT_SCALE := 2.0
 const PLANET_RADIUS := 780.0
-## How much bigger the planet is drawn than the original's, with the box that takes the ship down
-## to it: with 2, the ship comes up 0.4 of a radius above it and the defender sits 1.2 radii above it,
-## a low orbit; much more and the box takes the ship down at the start of the orbit.
-const PLANET_SCALE := 2.0
 ## The game's own points nearer than this to the planet are its cluster; the
 ## rest are stars.
 const CLUSTER_RADIUS := 1500.0
@@ -122,13 +123,11 @@ func _exit_tree() -> void:
 func _ready() -> void:
 	GameState.flight_scene = scene_file_path
 	_rules.load_state()
-	_rules.planet_scale = PLANET_SCALE
-	_camera.far = 400000.0 * WORLD_SCALE
-	_overlay.range_scale = 0.5 / WORLD_SCALE # the readout is in the original's units
+	_camera.far = 400000.0 * WORLD_SCALE * ORBIT_SCALE
 	_combat.hit_scale = DEFENDER_SCALE
 	_environment()
 	_space_root = Node3D.new()
-	_space_root.scale = Vector3.ONE * WORLD_SCALE
+	_space_root.scale = Vector3.ONE * WORLD_SCALE * ORBIT_SCALE
 	add_child(_space_root)
 	_air_root = Node3D.new()
 	_air_root.scale = Vector3.ONE * WORLD_SCALE
@@ -147,7 +146,7 @@ func _ready() -> void:
 	_make_ground()
 	_combat.start(true)
 	_effects = FightEffects.new()
-	_effects.world_scale = WORLD_SCALE
+	_effects.world_scale = _world_scale()
 	_effects.camera = _camera
 	_effects.flashed.connect(_flash_screen)
 	_effects.shaken.connect(func(amount: float) -> void: _shake = maxf(_shake, amount))
@@ -338,7 +337,7 @@ func _fight() -> void:
 		CombatRules.Outcome.DEFENDER_DESTROYED:
 			_say("THE DEFENDER IS DESTROYED.")
 			if _defender != null:
-				_effects.explosion(_defender.global_position, 300.0 * WORLD_SCALE)
+				_effects.explosion(_defender.global_position, 300.0 * _world_scale())
 				_defender.queue_free()
 				_defender = null
 				_overlay.target = null
@@ -376,7 +375,7 @@ func _play(event: Dictionary) -> void:
 				_say("DIRECT HIT ON THE DEFENDER: %d%%" % mini(int(worn * 100.0), 99))
 			elif event["hit"] and ground != Vector3.INF:
 				_say("DIRECT HIT ON THE PLANET")
-				var flight := maxf(_camera.global_position.distance_to(ground) / (160.0 * WORLD_SCALE), 1.0) * FightEffects.MISSILE_STEP
+				var flight := maxf(_camera.global_position.distance_to(ground) / (160.0 * _world_scale()), 1.0) * FightEffects.MISSILE_STEP
 				get_tree().create_timer(flight).timeout.connect(_strike.bind(ground, 160.0))
 		"surrendered":
 			_say("THE PLANET HAS SURRENDERED")
@@ -399,8 +398,8 @@ func _ground_ahead(reach: float) -> Vector3:
 	if direction.y > -0.02:
 		return Vector3.INF
 	var start := _camera.global_position
-	var distance := (start.y - FlightRules.GROUND * WORLD_SCALE) / -direction.y
-	if distance > reach * WORLD_SCALE or distance < 1.0:
+	var distance := (start.y - FlightRules.GROUND * _world_scale()) / -direction.y
+	if distance > reach * _world_scale() or distance < 1.0:
 		return Vector3.INF
 	return start + direction * distance
 
@@ -493,9 +492,17 @@ func _fade_to(alpha: float, seconds: float) -> void:
 	await tween.finished
 
 
+## How much bigger the world the ship is in is than the original's units: the atmosphere's, or
+## the orbit's (the planet's radius is the anchor, and the orbit is the same number of radii).
+func _world_scale() -> float:
+	return WORLD_SCALE if _rules.in_atmosphere else WORLD_SCALE * ORBIT_SCALE
+
+
 ## Shows the world the ship is in: what is in orbit, or what is in the atmosphere.
 func _apply_world() -> void:
 	var air := _rules.in_atmosphere
+	_effects.world_scale = _world_scale()
+	_overlay.range_scale = 0.5 / _world_scale() # the readout is in the original's units
 	_space_root.visible = not air
 	_air_root.visible = air
 	_world_env.environment = _air_env if air else _space_env
@@ -551,8 +558,8 @@ func _make_environment(air: bool) -> Environment:
 
 func _make_planet() -> void:
 	var sphere := SphereMesh.new()
-	sphere.radius = PLANET_RADIUS * PLANET_SCALE
-	sphere.height = PLANET_RADIUS * PLANET_SCALE * 2.0
+	sphere.radius = PLANET_RADIUS
+	sphere.height = PLANET_RADIUS * 2.0
 	sphere.radial_segments = 96
 	sphere.rings = 48
 	var material := ShaderMaterial.new()
@@ -771,7 +778,7 @@ func _update_camera() -> void:
 		var jolt := Vector3(randf() - 0.5, randf() - 0.5, 0.0) * _shake * 0.06
 		basis = basis * Basis.from_euler(jolt)
 		_shake = move_toward(_shake, 0.0, get_process_delta_time() * 1.6)
-	_camera.transform = Transform3D(basis, eye * WORLD_SCALE)
+	_camera.transform = Transform3D(basis, eye * _world_scale())
 	if _sky != null:
 		_sky.position = eye # in the scaled world's own units
 
