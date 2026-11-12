@@ -13,6 +13,8 @@ extends Control
 ## cities (the same as the planet in the flight), so that no part of it is
 ## bare: what has not been taken is red wherever it is.
 
+const HudOverlay = preload("res://scripts/flight/hud_overlay.gd")
+
 const CITIES := [0, 14, 40, 90, 144] ## as the planet in the flight has
 const GOLDEN_ANGLE := 2.399963
 const PHOSPHOR := Color(0.7, 1.0, 0.82)
@@ -66,8 +68,8 @@ func _draw() -> void:
 	_count = CITIES[clampi(tech, 0, 4)]
 	if _lit_for != Vector2i(GameState.current_planet, _count):
 		_scatter(_count, GameState.current_planet)
-	var centre := Vector2(size.x * 0.5, (size.y - 150.0) * 0.5)
-	var radius := minf(size.x, size.y - 150.0) * radius_fraction
+	var centre := Vector2(size.x * 0.5, (size.y - HudOverlay.panel_height(size.x)) * 0.5)
+	var radius := minf(size.x, size.y - HudOverlay.panel_height(size.x)) * radius_fraction
 	draw_rect(Rect2(centre - Vector2(radius, radius) * 1.25, Vector2(radius, radius) * 2.5), Color(0.0, 0.03, 0.02, 0.7)) # the glass
 	var flicker := 1.0 - 0.04 * absf(sin(_turn * 31.0) * sin(_turn * 9.7))
 	var spin := _turn * 0.22

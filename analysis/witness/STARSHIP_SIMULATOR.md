@@ -55,12 +55,12 @@ none
 | 155 | P |  | 1 | `VTAB 24: HTAB 1: PRINT  INT (X / 2);" ";: HTAB 7: PRINT  INT (Y / 2);" ";: HTAB 13: PRINT ` |
 | 156 | L | godot-remake/scripts/rules/flight_rules.gd:109 | 1 | `POKE 973,1: VTAB 8: HTAB 18: PRINT "-"; CHR$ (91);"  "; CHR$ (93);"-": POKE 973,0: IF  ABS` |
 | 158 | L | godot-remake/scripts/rules/flight_rules.gd:109<br>godot-remake/scripts/rules/flight_rules.gd:116 | 1 | `IF  PEEK (38210) = 1 AND Y > 4000 THEN  PRINT "RUNORBIT"` |
-| 159 | L | godot-remake/scripts/flight/hud_overlay.gd:256 | 1 | `HCOLOR= 0: DRAW 25 AT TT,133: DRAW 26 AT 136,VV: DRAW 25 AT EE,133: DRAW 25 AT SS,133:TX =` |
+| 159 | L | godot-remake/scripts/flight/hud_overlay.gd:266 | 1 | `HCOLOR= 0: DRAW 25 AT TT,133: DRAW 26 AT 136,VV: DRAW 25 AT EE,133: DRAW 25 AT SS,133:TX =` |
 | 170 | L | godot-remake/scripts/rules/flight_rules.gd:101 | 1 | `VY =  INT (167 - ((HL - P) / 4)): IF P < 127 THEN VY =  INT (167 + (P / 4))` |
 | 173 | P |  | 1 | `SX = 13 + (S / 2):EX = 199 + E` |
 | 175 | L | godot-remake/scripts/rules/flight_rules.gd:146 | 1 | `HCOLOR= 3: IF  PEEK (P1) > 59 AND  PEEK (P1) < 127 THEN  POKE P1,59` |
 | 177 | L | godot-remake/scripts/rules/flight_rules.gd:146 | 1 | `IF  PEEK (P1) < 195 AND  PEEK (P1) > 127 THEN  POKE P1,195` |
-| 180 | L | godot-remake/scripts/flight/hud_overlay.gd:256 | 1 | `DRAW 13 AT TX,133: DRAW 14 AT 136,VY: DRAW 13 AT SX,133: DRAW 13 AT EX,133: IF OO = 1 THEN` |
+| 180 | L | godot-remake/scripts/flight/hud_overlay.gd:266 | 1 | `DRAW 13 AT TX,133: DRAW 14 AT 136,VY: DRAW 13 AT SX,133: DRAW 13 AT EX,133: IF OO = 1 THEN` |
 | 182 | L | godot-remake/scripts/rules/combat_rules.gd:90 | 1 | `IF  PEEK (38149) = 7 THEN  POKE 38149,0: GOTO 200` |
 | 185 | L | godot-remake/scripts/flight/native_flight.gd:247<br>godot-remake/scripts/rules/combat_rules.gd:110 | 1 | `IF  PEEK ( - 16287) > 127 THEN  GOSUB 1500` |
 | 189 | L | godot-remake/scripts/flight/native_flight.gd:247<br>godot-remake/scripts/rules/combat_rules.gd:110 | 1 | `IF  PEEK (38282 +  PEEK (38209)) < 2 THEN 200` |

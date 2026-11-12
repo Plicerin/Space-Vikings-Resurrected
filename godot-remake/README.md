@@ -97,7 +97,7 @@ Keys are the original's: `1` `2` `3` `4` speed, `A` autopilot, `B`
 condition, `S` shields, `W` missile or laser, `C` command console, `R`
 radar, `H` hyperdrive. The arrow keys are the stick (or a joystick axis
 mapped to the stick actions) and SPACE is the button. On the radar SPACE (or I) is the ship I.D., as the manual says.
-The computer's screens (the command console and what runs from it, the radar, the chart) stop the
+The instrument panel is tall enough that the console's window holds the longest page (the galaxy directory and its question, 15 rows) without growing over the view, with the gauges, the switches and the damage lamps spread to fill it (`HudOverlay.panel_height`; the radar, chart and globe keep clear of it). The computer's screens (the command console and what runs from it, the radar, the chart) stop the
 flight, as each was a program of its own in the original: the ship, the fighting's clock and the engine's
 hum wait, so a planet can't be entered, or an attack disturbed, from behind a screen. Every planet of
 technology 2 or more has its defender from the start, SOL's included (it is only the surrender that

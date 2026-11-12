@@ -15,6 +15,7 @@ extends Control
 ## any key did; N and Escape answer no, where any key but Y did.
 
 const ChartRules = preload("res://scripts/rules/chart_rules.gd")
+const HudOverlay = preload("res://scripts/flight/hud_overlay.gd")
 
 signal closed(to_console: bool)
 
@@ -206,7 +207,7 @@ func _write_console() -> void:
 
 ## @witness GALAXY MAP 3000-3100
 func _draw() -> void:
-	var area := Rect2(size.x * 0.5 - 470.0, 28.0, 940.0, size.y - 150.0 - 48.0)
+	var area := Rect2(size.x * 0.5 - 470.0, 28.0, 940.0, size.y - HudOverlay.panel_height(size.x) - 48.0)
 	_scale = minf((area.size.x - 40.0) / 280.0, (area.size.y - 40.0) / 160.0)
 	_map = Rect2(area.get_center() - Vector2(280.0, 160.0) * _scale / 2.0, Vector2(280.0, 160.0) * _scale)
 	draw_rect(area, Color(0.0, 0.03, 0.02, 0.78))

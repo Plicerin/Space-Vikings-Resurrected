@@ -90,7 +90,7 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	var width := 960.0 if identify else 600.0
-	var area := Rect2(size.x * 0.5 - width / 2.0, 28.0, width, size.y - PANEL_HEIGHT_CLEAR - 48.0)
+	var area := Rect2(size.x * 0.5 - width / 2.0, 28.0, width, size.y - HudOverlay.panel_height(size.x) - 48.0)
 	draw_rect(area, Color(0.0, 0.03, 0.02, 0.78)) # the window's glass, a little darker
 	_brackets(area)
 	var flicker := 1.0 - 0.04 * absf(sin(_turn * 31.0) * sin(_turn * 9.7))
@@ -141,7 +141,7 @@ func _release_console() -> void:
 		console.hide_target = false
 
 
-const PANEL_HEIGHT_CLEAR := 150.0
+const HudOverlay = preload("res://scripts/flight/hud_overlay.gd")
 
 
 func _tint(colour: Color, flicker: float) -> Color:

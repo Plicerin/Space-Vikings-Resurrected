@@ -23,7 +23,8 @@ const GAUGE_RADIUS := 52.0
 const GAUGE_LETTERS := 7 ## the size of a damage lamp's lettering
 const ALERT := preload("res://assets/shaders/alert.gdshader")
 const TIGHT := 0.8 ## letters on a lamp's arc, closer than their usual spacing
-const PANEL_HEIGHT := 150.0
+const DISPLAY_SHARE := 0.385 ## of the screen's width, the console's window
+const WORST_PAGE := 15 ## rows the longest page needs (the galaxy directory, 13, and its question over two)
 
 var camera: Camera3D
 var target: Node3D ## null when there is none
@@ -179,23 +180,31 @@ func _draw_gauge() -> void:
 		_ball_marker(centre, target.global_position, TARGET) # the defender
 
 
+## How tall the panel is on a screen `width` across: tall enough that the console's window
+## holds the longest page without growing over the view, and the rest of the panel with it.
+static func panel_height(width: float) -> float:
+	var scale := (width * DISPLAY_SHARE - 28.0) / (COLUMNS * BlockFont.ADVANCE)
+	return ceilf(WORST_PAGE * (BlockFont.HEIGHT + 1.0) * scale) + 48.0
+
+
 func _draw_panel() -> void:
 	var font := get_theme_default_font()
-	var top := size.y - PANEL_HEIGHT
-	draw_rect(Rect2(0.0, top, size.x, PANEL_HEIGHT), Color(0.02, 0.03, 0.05, 0.92))
-	draw_rect(Rect2(0.0, top, size.x, PANEL_HEIGHT), Color(0.9, 0.9, 0.9), false, 2.0)
+	var height := panel_height(size.x)
+	var top := size.y - height
+	draw_rect(Rect2(0.0, top, size.x, height), Color(0.02, 0.03, 0.05, 0.92))
+	draw_rect(Rect2(0.0, top, size.x, height), Color(0.9, 0.9, 0.9), false, 2.0)
 	var w := size.x
-	_display(Rect2(w * 0.012, top + 10.0, w * 0.385, PANEL_HEIGHT - 20.0))
-	# TURN with SPEED and ENERGY tucked under it, VERT standing tall beside
+	_display(Rect2(w * 0.012, top + 10.0, w * DISPLAY_SHARE, height - 20.0))
+	# TURN with SPEED and ENERGY spread down the column, VERT standing tall beside
 	var column := w * 0.412
-	_dial(font, "TURN", Rect2(column, top + 24.0, w * 0.088, 26.0), (bank + 48.0) / 95.0, false)
-	_bar(font, "SPEED", Rect2(column, top + 74.0, w * 0.088, 8.0), speed / 120.0, false)
-	_bar(font, "ENERGY", Rect2(column, top + 108.0, w * 0.088, 8.0), energy / 63.0, false)
+	_dial(font, "TURN", Rect2(column, top + height * 0.12, w * 0.088, 26.0), (bank + 48.0) / 95.0, false)
+	_bar(font, "SPEED", Rect2(column, top + height * 0.44, w * 0.088, 8.0), speed / 120.0, false)
+	_bar(font, "ENERGY", Rect2(column, top + height * 0.72, w * 0.088, 8.0), energy / 63.0, false)
 	# VERT: the nose up is the top
-	_dial(font, "VERT", Rect2(w * 0.513, top + 12.0, 26.0, PANEL_HEIGHT - 28.0), (-pitch + 61.0) / 120.0, true)
-	_switches.position = Vector2(w * 0.562, top + 8.0)
+	_dial(font, "VERT", Rect2(w * 0.513, top + 12.0, 26.0, height - 28.0), (-pitch + 61.0) / 120.0, true)
+	_switches.position = Vector2(w * 0.562, top + (height - _switches.size.y) / 2.0)
 	# damage control
-	var box := Rect2(w * 0.672, top + 8.0, w * 0.318, PANEL_HEIGHT - 16.0)
+	var box := Rect2(w * 0.672, top + 8.0, w * 0.318, height - 16.0)
 	_damage_box = box
 	_plastic.position = box.position
 	_plastic.size = box.size
@@ -203,11 +212,11 @@ func _draw_panel() -> void:
 	_damage_lamps = ComRules.lamps()
 	for i in _damage_lamps.size():
 		var lamp: Array = _damage_lamps[i]
-		_bulb(_lamp_centre(i), 9.0, RED if lamp[2] else GREEN, true)
+		_bulb(_lamp_centre(i), 11.0, RED if lamp[2] else GREEN, true)
 
 
 func _lamp_centre(index: int) -> Vector2:
-	return _damage_box.position + Vector2(_damage_box.size.x * (1.0 + 2.0 * (index % 6)) / 12.0, 72.0 + (index / 6) * 48.0)
+	return _damage_box.position + Vector2(_damage_box.size.x * (1.0 + 2.0 * (index % 6)) / 12.0, _damage_box.size.y * (0.4 + (index / 6) * 0.36))
 
 
 ## The raised amber lettering on the plastic: drawn on `_letters`, a node over it.
