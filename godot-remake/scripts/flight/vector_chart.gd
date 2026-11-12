@@ -141,9 +141,11 @@ func select() -> void:
 		return
 	var star := _pointed()
 	if star == ChartRules.NO_STAR:
+		AudioManager.play_refuse()
 		_said_no_star = true
 		_said_until = _turn + SAID
 		return
+	AudioManager.play_select()
 	_asking = star
 
 

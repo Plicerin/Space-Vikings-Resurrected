@@ -36,6 +36,7 @@ func _ready() -> void:
 ## Two bolts from the bottom corners to a point ahead: a bright core in a wider
 ## halo, a flare where each leaves, a flicker of light.
 func laser() -> void:
+	AudioManager.play_laser()
 	for side in [-1.0, 1.0]:
 		var from := _ahead(Vector3(side * 1.9, -1.1, -1.5))
 		_bolt(from, _ahead(Vector3(0.0, 0.0, -420.0)), GREEN, 0.3, 0.12)
@@ -50,6 +51,7 @@ func laser() -> void:
 ## bursting at the end if it hit. It leaves slowly and gathers speed, rolling on
 ## its way, a flame behind it and a smoke trail left in the air.
 func missile(direction: Vector3, steps: int, hit: bool) -> void:
+	AudioManager.play_missile()
 	var start := camera.global_position + camera.global_transform.basis * Vector3(0.0, -0.9, -3.0)
 	var end := camera.global_position + direction * 160.0 * steps
 	var rocket := Node3D.new()
@@ -125,6 +127,10 @@ func _exhaust(at: Vector3, flame: bool) -> CPUParticles3D:
 ## A fireball with a white flash, a shockwave ring, sparks and a pulse of light;
 ## `size` is about the radius it reaches.
 func explosion(at: Vector3, size: float) -> void:
+	if size >= 150.0:
+		AudioManager.play_explosion()
+	else:
+		AudioManager.play_small_explosion()
 	var flash := _sprite_node(Color(1.0, 0.95, 0.8, 1.0), size * 1.6, true)
 	add_child(flash)
 	flash.global_position = at
@@ -283,6 +289,7 @@ func _strafe(craft: Node3D, strafe: Dictionary) -> void:
 	if not is_instance_valid(craft):
 		return
 	var target := _ahead(Vector3(0.0, -2.0, -6.0))
+	AudioManager.play_enemy_fire()
 	for side in [-1.0, 1.0]:
 		var muzzle := craft.to_global(Vector3(side * 1.6, 0.0, -0.3) * 16.0)
 		_flare(muzzle, RED, 7.0)
@@ -290,6 +297,7 @@ func _strafe(craft: Node3D, strafe: Dictionary) -> void:
 	get_tree().create_timer(0.17).timeout.connect(_hit_ship.bind(target))
 	var turret: float = strafe.get("turret", 0.0)
 	if turret > 0.0:
+		AudioManager.play_laser()
 		for offset in [-20.0, 20.0]:
 			var from := _ahead(_place(Vector2(turret + offset, 123.0), 0.0) * 0.012 + Vector3(0.0, -0.4, 0.0))
 			_bolt(from, craft.global_position, GREEN, 0.2, 0.08, 0.16)
@@ -297,6 +305,7 @@ func _strafe(craft: Node3D, strafe: Dictionary) -> void:
 
 
 func _hit_ship(at: Vector3) -> void:
+	AudioManager.play_hit_light()
 	_flare(at, RED, 2.6)
 	flashed.emit(0.25)
 	shaken.emit(0.25)

@@ -73,6 +73,8 @@ func menu(title: String, items: Array, said: Array = [], header: Array = []) -> 
 		else:
 			lines.append(left)
 	lines.append_array(flow(said))
+	if not said.is_empty():
+		AudioManager.play_refuse()
 	show(lines)
 	_count = items.size()
 	_mode = "menu"
@@ -117,11 +119,14 @@ func wait(seconds: float, skippable := true) -> void:
 	_skippable = skippable
 	_token += 1
 	var mine := _token
-	get_tree().create_timer(maxf(seconds * pace, 0.001)).timeout.connect(func() -> void:
-		if _mode == "wait" and _token == mine:
-			_finish(null))
+	get_tree().create_timer(maxf(seconds * pace, 0.001)).timeout.connect(_wait_over.bind(mine))
 	await _resolved
 	_mode = ""
+
+
+func _wait_over(token: int) -> void:
+	if _mode == "wait" and _token == token:
+		_finish(null)
 
 
 ## Waits for any key; returns its keycode.
@@ -139,10 +144,12 @@ func handle_key(key: InputEventKey) -> bool:
 	key_pressed.emit(key.keycode)
 	if key.echo:
 		return true
+	AudioManager.play_key()
 	match _mode:
 		"menu":
 			var number := _digit(key)
 			if number >= 1 and number <= _count:
+				AudioManager.play_select()
 				_finish(number)
 		"yesno":
 			if key.keycode == KEY_Y:

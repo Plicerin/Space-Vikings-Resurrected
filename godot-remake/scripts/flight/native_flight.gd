@@ -83,6 +83,10 @@ var _said_for := 0.0
 @onready var _overlay: Control = $Hud/Overlay
 
 
+func _exit_tree() -> void:
+	AudioManager.engine_off() # the scene is going: its hum with it
+
+
 func _ready() -> void:
 	GameState.flight_scene = scene_file_path
 	_rules.load_state()
@@ -135,6 +139,7 @@ func _process(delta: float) -> void:
 	if not GameState.autopilot_active:
 		_stick = Vector2(_axis("stick_forward", "stick_back"), _axis("stick_left", "stick_right"))
 	_rules.fly(delta, _stick.x, _stick.y)
+	AudioManager.engine(_rules.speed)
 	_rules.store_state() # the radar, the console and a save read the game's own copy
 	_update_camera()
 	_update_hud()
@@ -175,10 +180,18 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		KEY_4: _rules.change_speed(15.0)
 		KEY_N: _overlay.show_mode(_overlay.Mode.NAV)
 		KEY_F1, KEY_SLASH: _overlay.show_mode(_overlay.Mode.HELP)
-		KEY_A: GameState.autopilot_active = not GameState.autopilot_active
-		KEY_B: GameState.condition = {2: 3, 3: 1}.get(GameState.condition, 2)
-		KEY_S: GameState.shields_up = not GameState.shields_up
-		KEY_W: GameState.missile_mode_active = not GameState.missile_mode_active
+		KEY_A:
+			GameState.autopilot_active = not GameState.autopilot_active
+			AudioManager.play_switch()
+		KEY_B:
+			GameState.condition = {2: 3, 3: 1}.get(GameState.condition, 2)
+			AudioManager.play_alarm() if GameState.condition == 3 else AudioManager.play_select()
+		KEY_S:
+			GameState.shields_up = not GameState.shields_up
+			AudioManager.play_switch()
+		KEY_W:
+			GameState.missile_mode_active = not GameState.missile_mode_active
+			AudioManager.play_switch()
 		KEY_C:
 			_run_command_console.call_deferred()
 		KEY_R:
@@ -267,9 +280,12 @@ func _fight() -> void:
 			_combat.start(true)
 			_make_debris()
 		CombatRules.Outcome.DAMAGED:
+			AudioManager.play_alarm()
 			_say("DAMAGE TO THE SHIP.")
 			_combat.start(true)
 		CombatRules.Outcome.SHIP_DESTROYED:
+			AudioManager.play_destruction()
+			AudioManager.engine_off()
 			_flash_screen(1.0)
 			_overlay.message = "YOUR SHIP HAS BEEN DESTROYED!!"
 			_said_for = 1e9
@@ -287,11 +303,20 @@ func _play(event: Dictionary) -> void:
 			_say("THE PLANET HAS SURRENDERED")
 		"damage":
 			for i in event["light"]:
-				get_tree().create_timer(0.12 * i).timeout.connect(_flash_screen.bind(0.35))
+				_flash_later(0.12 * i, 0.35)
 			if event["medium"]:
 				_flash_screen(0.7)
+				AudioManager.play_hit_medium()
 		"fighter":
 			_effects.fighter(event["from"], event["step"], event["steps"], event["strafes"], event["shot_down"])
+
+
+## A light flash of damage after `delay`, with its thump.
+func _flash_later(delay: float, strength: float) -> void:
+	await get_tree().create_timer(delay).timeout
+	if is_inside_tree():
+		_flash_screen(strength)
+		AudioManager.play_hit_light()
 
 
 func _flash_screen(strength: float) -> void:
@@ -323,12 +348,15 @@ func _hyperdrive() -> void:
 		await get_tree().create_timer(1.6).timeout
 		_say("ORBIT DECAYING")
 		await get_tree().create_timer(1.6).timeout
+		AudioManager.play_destruction()
+		AudioManager.engine_off()
 		_flash_screen(1.0)
 		_overlay.message = "YOUR SHIP HAS BEEN DESTROYED!!"
 		_said_for = 1e9
 		_dead = true
 		return
 	_jumping = true
+	AudioManager.play_jump()
 	var rays := HyperspaceEffect.new()
 	$Hud.add_child(rays)
 	await rays.done

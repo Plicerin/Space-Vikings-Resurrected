@@ -47,6 +47,7 @@ func open(with_id := false) -> void:
 		return
 	identify = with_id
 	visible = true
+	AudioManager.play_ping()
 
 
 func close() -> void:

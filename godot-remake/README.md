@@ -214,12 +214,26 @@ that is the port's own, where the Apple would have had a DOS error.
 
 ## Sound
 
-Every sound in the game is one of two machine-code routines: LASER
-(`$92D1`, fourteen falling chirps) and SOUND GEN (`$9276`, shift-register
-noise with a duration set by two POKEs). `autoload/audio_manager.gd`
-synthesises both from their disassembly; it is the shape of the sound,
-not a cycle-exact speaker. They are played where the original calls
-them.
+Every sound is made by `autoload/audio_manager.gd` from nothing (no sample
+files): filtered noise, sweeps and tones under envelopes, built once at start
+and played from ten voices, each a touch different in pitch so that no two
+are alike. The original had two sounds, a falling chirp (`LASER`, `$92D1`) and
+a burst of shift-register noise (`SOUND GEN`, `$9276`) for every hit and
+explosion, read from the disassembly; the events are the same, the sounds
+modern.
+
+- **Fighting:** the laser a bright zap, an enemy's shot a lower one, a missile a
+  thump and a rush that climbs, hits a thump and a crackle (light, medium,
+  heavy), explosions a crack with a low rumble after it (the defender's the
+  biggest, a fighter's smaller), the ship's own end longest of all.
+- **The ship:** an engine hum whose pitch and loudness follow the speed, a
+  rising rush for the hyperdrive, a klaxon at the first damage and when the
+  condition goes to red, a clunk for each switch and key.
+- **The screens:** a click for a console key, a rising beep for a choice, a low
+  one for a refusal, the radar's ping, a chime when a planet is taken.
+
+`check_audio` checks each is a real sound (length, level, not clipped); what they
+sound like is for the ear.
 
 ## Tests
 
@@ -231,6 +245,7 @@ a difference.
     godot --headless --path . res://tests/check_com_rules.tscn       # COM: 5 recorded routes through the rules, 201 screens rebuilt from the characters it drew
     godot --headless --path . res://tests/check_radar_rules.tscn     # RADAR and the I.D. texts against the recordings
     godot --headless --path . res://tests/check_combat_rules.tscn    # fighting (missile, lasers, damage, fighters, EX/DMG/S-X) against analysis/live/combat
+    godot --headless --path . res://tests/check_audio.tscn            # the synthesized sounds: each lasts as it should and is heard
     godot --headless --path . res://tests/check_hyperdrive_rules.tscn # hyperdrive cost, refusals, re-entry and orbit against the verified legacy code
     godot --headless --path . res://tests/check_save.tscn            # save and load, the planet record's byte
     godot --headless --path . res://tests/check_ground_rules.tscn    # GROUND FORCES, RECALL, COLLECT: 14 recorded routes through the rules, state and text

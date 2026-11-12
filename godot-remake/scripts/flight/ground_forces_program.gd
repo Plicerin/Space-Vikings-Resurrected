@@ -146,6 +146,7 @@ func _fight() -> void:
 		_fighting = false
 		match outcome:
 			GroundRules.Outcome.SURRENDERED:
+				AudioManager.play_capture()
 				await _tell(GroundRules.SAID_SURRENDERED, SURRENDER, success)
 				await _tell(GroundRules.SAID_COLLECTING, REPORT, success)
 				for report: Array in _rules.collect():

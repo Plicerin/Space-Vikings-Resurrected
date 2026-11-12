@@ -76,6 +76,7 @@ func _hotspot(rect: Rect2, action: Callable) -> void:
 	spot.gui_input.connect(func(event: InputEvent) -> void:
 		var click := event as InputEventMouseButton
 		if click != null and click.pressed and click.button_index == MOUSE_BUTTON_LEFT:
+			AudioManager.play_switch()
 			action.call())
 	add_child(spot)
 
