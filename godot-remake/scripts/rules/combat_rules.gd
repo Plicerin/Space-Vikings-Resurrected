@@ -79,9 +79,9 @@ const BYTE_MAX := 255.0
 
 ## RND(1). The tests load the dice.
 var rnd: Callable = func() -> float: return randf()
-## The defender's hit box in times the original's: 1 is the original's, which the recordings hold it
-## to; the game draws the defender bigger and lets the box follow.
-var hit_scale := 1.0
+## The box a missile hits the defender in (line 1050's, by default, which the recordings hold it
+## to); the game sets it to the ship it draws.
+var hit_box := AABB(DEFENDER + Vector3(-BOX_X, -BOX_Y_BELOW, -BOX_Z), Vector3(2.0 * BOX_X, BOX_Y_BELOW + BOX_Y_ABOVE, 2.0 * BOX_Z))
 
 ## DMG, DP, L and TE of the flight program.
 var dmg := false
@@ -143,6 +143,13 @@ func fight(button: bool, eye: Vector3, attitude: Vector2, vv: float, factors: Ar
 	return {"outcome": Outcome.NONE, "events": events}
 
 
+## Inside the defender's box (the edges are not in it, as line 1050's `<` and `>` have it).
+func _in_hit_box(at: Vector3) -> bool:
+	var end := hit_box.end
+	return at.x > hit_box.position.x and at.x < end.x and at.y > hit_box.position.y and at.y < end.y \
+			and at.z > hit_box.position.z and at.z < end.z
+
+
 func _in_firing_box(eye: Vector3) -> bool:
 	return eye.x > FIRING_X.x and eye.x < FIRING_X.y and eye.y > FIRING_Y.x and eye.y < FIRING_Y.y \
 			and eye.z > FIRING_Z.x and eye.z < FIRING_Z.y
@@ -192,8 +199,7 @@ func _missile(events: Array, eye: Vector3, attitude: Vector2, vv: float, factors
 			steps += 1
 			if GameState.in_atmosphere and at.y < vv:
 				hit = true
-			elif absf(at.x - DEFENDER.x) < BOX_X * hit_scale and at.y < DEFENDER.y + BOX_Y_ABOVE * hit_scale \
-					and at.y > DEFENDER.y - BOX_Y_BELOW * hit_scale and absf(at.z - DEFENDER.z) < BOX_Z * hit_scale: # 1050
+			elif _in_hit_box(at): # 1050
 				struck_defender = not hit
 				hit = true
 			at += step # 1060

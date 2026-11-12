@@ -1,8 +1,11 @@
 shader_type spatial;
-// The ground of a planet from the air: sea and land from noise on the map, with
-// relief (the light falling on hills that are not there to collide with), beaches,
-// fields and woods, rock on the heights, a glint on the water, fine detail that
-// comes up as the ground comes near, and a haze towards the edge.
+render_mode blend_mix, cull_back;
+// The ground of a planet from the air, drawn on the planet's own sphere (the planet shader's
+// sphere, at the same radius): sea and land from the planet's own noise, with relief (the light
+// falling on hills that are not there to collide with), beaches, fields and woods, rock on the
+// heights, a glint on the water, fine detail that comes up as the ground comes near, and a haze
+// towards the edge. It is clear from far off (the planet shader's look shows through) and comes
+// in as the eye comes down, so that the descent from orbit is one flight over one planet.
 
 uniform vec3 deep_color : source_color = vec3(0.03, 0.12, 0.30);
 uniform vec3 shallow_color : source_color = vec3(0.10, 0.38, 0.52);
@@ -17,21 +20,15 @@ uniform float seed = 1.0;
 uniform float scale = 0.00018;
 uniform float sea_level = 0.5;
 uniform float relief = 5200.0;
-// How much bigger the scene's world is than the units the map is drawn in.
-uniform float world_scale = 1.0;
-// Where on the planet's sphere the ground's middle is (a direction from its centre), and how
-// much ground a radian of the sphere is (the planet's radius): the continents are the planet's own,
-// as seen from orbit.
-uniform vec3 site = vec3(0.0, 0.0, 1.0);
+// `world_scale` of the scene's units to one of the ground's, and the planet's radius in the ground's.
+uniform float world_scale = 3.0;
 uniform float planet_radius = 45000.0;
+// The eye's height above the ground (in the ground's units) over which the ground comes in.
+uniform float comes_in_from = 26000.0;
+uniform float comes_in_to = 9000.0;
 
 varying vec3 world;
-
-float hash(vec2 p) {
-	p = fract(p * vec2(0.3183099, 0.3678794) + seed * 0.137);
-	p *= 17.0;
-	return fract(p.x * p.y * (p.x + p.y));
-}
+varying vec3 local;
 
 float hash3(vec3 p) {
 	p = fract(p * 0.3183099 + vec3(0.1, 0.2, 0.3) + seed * 0.137);
@@ -48,65 +45,64 @@ float value_noise3(vec3 p) {
 	return mix(a, b, f.z);
 }
 
-float value_noise(vec2 p) {
-	vec2 i = floor(p);
-	vec2 f = fract(p);
-	f = f * f * (3.0 - 2.0 * f);
-	return mix(mix(hash(i), hash(i + vec2(1, 0)), f.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x), f.y);
-}
-
-// The map: the planet's continents and coasts, ridges on them.
-float height(vec2 w) {
-	vec3 east = cross(vec3(0.0, 1.0, 0.0), site);
-	east = length(east) > 0.001 ? normalize(east) : vec3(1.0, 0.0, 0.0);
-	vec3 north = cross(site, east);
-	vec3 n = normalize(site + (east * w.x + north * w.y) / planet_radius);
-	// the planet's own map (planet.gdshader), with local relief on it
+// The map: the planet's continents and coasts (planet.gdshader), ridges on them. `n` is a
+// direction from the planet's centre.
+float height(vec3 n) {
 	float h = value_noise3(n * 3.0 + seed) * 0.6 + value_noise3(n * 7.0) * 0.3 + value_noise3(n * 15.0) * 0.1;
-	vec2 p = w * scale;
-	return h + (value_noise(p * 31.0) - 0.5) * 0.10 + (value_noise(p * 97.0) - 0.5) * 0.05;
+	vec3 p = n * planet_radius * scale;
+	return h + (value_noise3(p * 31.0) - 0.5) * 0.10 + (value_noise3(p * 97.0) - 0.5) * 0.05;
 }
 
 void vertex() {
-	world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz / world_scale;
+	local = VERTEX;
+	world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 }
 
 void fragment() {
-	vec3 cam = INV_VIEW_MATRIX[3].xyz / world_scale;
-	float dist = distance(world, cam);
-	vec2 w = world.xz;
-	float h = height(w);
-	// relief: the slope of the map, a few hundred units to a side
-	float e = 60.0;
-	float dx = height(w + vec2(e, 0.0)) - height(w - vec2(e, 0.0));
-	float dz = height(w + vec2(0.0, e)) - height(w - vec2(0.0, e));
+	vec3 cam = INV_VIEW_MATRIX[3].xyz;
+	vec3 n = normalize(local);
+	vec3 up = normalize(world);
+	vec3 p = n * planet_radius; // where on the ground, in the ground's units
+	float dist = distance(world, cam) / world_scale;
+	float eye_height = (length(cam) - length(world)) / world_scale;
+	float coming = 1.0 - smoothstep(comes_in_to, comes_in_from, eye_height);
+	float h = height(n);
+	// relief: the slope of the map, a few hundred units to a side, along the ground's two directions
+	float e = 60.0 / planet_radius;
+	vec3 t1 = normalize(cross(n, abs(n.y) < 0.95 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0)));
+	vec3 t2 = cross(n, t1);
+	float dx = height(normalize(n + t1 * e)) - height(normalize(n - t1 * e));
+	float dz = height(normalize(n + t2 * e)) - height(normalize(n - t2 * e));
 	float land = smoothstep(sea_level - 0.006, sea_level + 0.006, h);
 	float high = clamp((h - sea_level) / 0.28, 0.0, 1.0); // 0 at the shore, 1 on the heights
-	vec3 slope = normalize(vec3(-dx * relief * land, 1.0, -dz * relief * land));
+	vec3 world_t1 = normalize(cross(up, abs(up.y) < 0.95 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0)));
+	vec3 world_t2 = cross(up, world_t1);
+	vec3 slope = normalize(up - (world_t1 * dx + world_t2 * dz) * relief * land);
 	// fine detail, near the eye
 	float near = 1.0 - smoothstep(600.0, 9000.0, dist);
-	float fine = value_noise(w * 0.02) * 0.5 + value_noise(w * 0.09) * 0.3 + value_noise(w * 0.4) * 0.2;
+	float fine = value_noise3(p * 0.02) * 0.5 + value_noise3(p * 0.09) * 0.3 + value_noise3(p * 0.4) * 0.2;
 	float grain = (fine - 0.5) * near;
 	// the sea
 	float depth = clamp((sea_level - h) / 0.12, 0.0, 1.0);
 	vec3 sea = mix(shallow_color, deep_color, sqrt(depth));
 	// the land
-	float wet = value_noise(w * scale * 6.0 + 7.0);
-	vec3 low = mix(grass_color, dry_color, smoothstep(0.45, 0.75, value_noise(w * scale * 5.0 + 4.0)));
+	float wet = value_noise3(p * scale * 6.0 + 7.0);
+	vec3 low = mix(grass_color, dry_color, smoothstep(0.45, 0.75, value_noise3(p * scale * 5.0 + 4.0)));
 	float woods = smoothstep(0.55, 0.7, wet) * (1.0 - high);
-	low = mix(low, wood_color, woods * (0.6 + 0.4 * value_noise(w * 0.05)));
+	low = mix(low, wood_color, woods * (0.6 + 0.4 * value_noise3(p * 0.05)));
 	vec3 ground = mix(sand_color, low, smoothstep(0.0, 0.07, high));
 	ground = mix(ground, rock_color, smoothstep(0.45, 0.7, high));
-	ground = mix(ground, snow_color, smoothstep(0.82, 0.95, high + (value_noise(w * 0.004) - 0.5) * 0.1));
+	ground = mix(ground, snow_color, smoothstep(0.82, 0.95, high + (value_noise3(p * 0.004) - 0.5) * 0.1));
 	// fields and streets where there are people, on the low land
 	if (tech >= 2.0) {
-		float grid = step(0.93, fract(world.x * 0.0009)) + step(0.93, fract(world.z * 0.0009));
-		float plots = floor(w.x * 0.0009) * 0.37 + floor(w.y * 0.0009) * 0.61;
+		float grid = step(0.93, fract(p.x * 0.0009)) + step(0.93, fract(p.z * 0.0009));
+		float plots = floor(p.x * 0.0009) * 0.37 + floor(p.z * 0.0009) * 0.61;
 		ground = mix(ground, ground * (0.85 + 0.3 * fract(plots * 7.3)), 0.5 * (1.0 - smoothstep(0.1, 0.3, high)) * near);
 		ground = mix(ground, vec3(0.35, 0.33, 0.28), clamp(grid, 0.0, 1.0) * 0.35 * (1.0 - smoothstep(0.05, 0.25, high)));
 	}
 	ground *= 1.0 + grain * 0.5;
 	ALBEDO = mix(sea, ground, land);
+	ALPHA = coming;
 	// the sea is smooth and bright with the sun on it; the land rough
 	ROUGHNESS = mix(0.06, 0.9, land);
 	SPECULAR = mix(0.9, 0.12, land);

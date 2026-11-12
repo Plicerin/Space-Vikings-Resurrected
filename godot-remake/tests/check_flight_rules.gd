@@ -24,6 +24,7 @@ var _golden: Dictionary
 func _ready() -> void:
 	_golden = JSON.parse_string(FileAccess.get_file_as_string(GOLDEN))
 	_matrix()
+	_attitude()
 	_motion()
 	_dynamics()
 	_stops()
@@ -54,6 +55,20 @@ func _matrix() -> void:
 		_checked += 1
 		_check("the camera sees it at %s, the view has %s" % [local, mine],
 				(local - Vector3(mine.x, mine.y, -mine.z)).length() < 0.01)
+
+
+## The attitude a camera basis has is the one it was made from (the inverse the one-planet flight
+## uses to carry the ship's attitude from a frame to another).
+func _attitude() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 5
+	for i in 200:
+		var pitch := rng.randf_range(-60.0, 60.0) # short of straight up and down (64), where heading is undone
+		var bank := rng.randf_range(-120.0, 120.0)
+		var heading := rng.randf_range(0.0, 256.0)
+		var back := FlightRules.attitude_of(FlightRules.camera_basis(pitch, bank, heading))
+		_check("attitude of a camera basis (%.1f, %.1f, %.1f) is its own (%s)" % [pitch, bank, heading, back],
+				absf(back.x - pitch) < 0.01 and _angle_gap(back.y, bank) < 0.01 and _angle_gap(back.z, heading) < 0.01)
 
 
 func _v(a: Array) -> Vector3:

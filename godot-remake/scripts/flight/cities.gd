@@ -13,7 +13,7 @@ const SPREAD := 17000.0
 const SPACING := 2300.0
 const CITY_RADIUS := 230.0
 
-var sites: Array[Vector3] = []
+var sites: Array[Vector2] = [] ## each city's place in the ground's frame
 var burning: Array[bool] = []
 var _nodes: Array[Node3D] = []
 var _bodies: Array[MultiMeshInstance3D] = []
@@ -31,8 +31,9 @@ func clear() -> void:
 	_pads.clear()
 
 
-## Puts the cities of the planet with map `terrain` and technology `tech` under `parent`.
-func build(parent: Node3D, terrain: RefCounted, tech: int) -> void:
+## Puts the cities of the planet with map `terrain` and technology `tech` under `parent`, each on
+## the sphere (its up the planet's up there) in a world `world_scale` times the ground's units.
+func build(parent: Node3D, terrain: RefCounted, tech: int, world_scale: float) -> void:
 	var want: int = COUNTS[clampi(tech, 0, COUNTS.size() - 1)]
 	if want == 0:
 		return
@@ -55,12 +56,13 @@ func build(parent: Node3D, terrain: RefCounted, tech: int) -> void:
 		candidates[i] = candidates[j]
 		candidates[j] = kept
 	for at in candidates.slice(0, want):
-		_city(parent, at, rng)
+		_city(parent, at, terrain, world_scale, rng)
 
 
-func _city(parent: Node3D, at: Vector2, rng: RandomNumberGenerator) -> void:
+func _city(parent: Node3D, at: Vector2, terrain: RefCounted, world_scale: float, rng: RandomNumberGenerator) -> void:
 	var root := Node3D.new()
-	root.position = Vector3(at.x, 0.0, at.y)
+	var up: Vector3 = terrain.ground_point(at)
+	root.transform = Transform3D((terrain.frame_at(up) as Basis).scaled(Vector3.ONE * world_scale), up * terrain.PLANET_RADIUS * world_scale)
 	parent.add_child(root)
 	# the paved ground
 	var pad := MeshInstance3D.new()
@@ -100,7 +102,7 @@ func _city(parent: Node3D, at: Vector2, rng: RandomNumberGenerator) -> void:
 	material.roughness = 0.8
 	body.material_override = material
 	root.add_child(body)
-	sites.append(root.position)
+	sites.append(at)
 	burning.append(false)
 	_nodes.append(root)
 	_bodies.append(body)
@@ -109,11 +111,11 @@ func _city(parent: Node3D, at: Vector2, rng: RandomNumberGenerator) -> void:
 
 ## A strike at `at` with a blast `radius` wide: the nearest city it reaches is
 ## burned, its buildings black rubble. Returns that city's number, or -1.
-func hit(at: Vector3, radius: float) -> int:
+func hit(at: Vector2, radius: float) -> int:
 	var best := -1
 	var near := INF
 	for i in sites.size():
-		var gap := Vector2(sites[i].x - at.x, sites[i].z - at.z).length()
+		var gap := sites[i].distance_to(at)
 		if gap < CITY_RADIUS + radius and gap < near and not burning[i]:
 			near = gap
 			best = i

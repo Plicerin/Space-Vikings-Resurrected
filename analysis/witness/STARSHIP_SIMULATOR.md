@@ -48,10 +48,10 @@ none
 | 136 | L | godot-remake/scripts/rules/flight_rules.gd:82 | 1 | `IF Y > W1 THEN Y = W2` |
 | 137 | L | godot-remake/scripts/rules/flight_rules.gd:82 | 1 | `IF Z < W2 THEN Z = W1` |
 | 138 | L | godot-remake/scripts/rules/flight_rules.gd:82 | 1 | `IF Z > W1 THEN Z = W2` |
-| 140 | P | godot-remake/scripts/rules/flight_rules.gd:254 | 1 | `BV% = X: GOSUB 6000: POKE XI,LO%: POKE XI + 1,HI%:BV% = Y: GOSUB 6000: POKE YI,LO%: POKE Y` |
-| 147 | L | godot-remake/scripts/rules/flight_rules.gd:254 | 1 | `POKE 29461,84 + OO:OP =  ABS (OO - 1): POKE 29463,OP: POKE 29465,OP: IF  PEEK (38210) = 1 ` |
-| 150 | L | godot-remake/scripts/rules/flight_rules.gd:254 | 1 | `CALL CA: IF OO = 1 THEN  POKE 974,32: CALL 37936` |
-| 153 | L | godot-remake/scripts/flight/native_flight.gd:770 | 1 | `IF OO = 0 THEN  POKE 974,64: CALL 37888` |
+| 140 | P | godot-remake/scripts/rules/flight_rules.gd:264 | 1 | `BV% = X: GOSUB 6000: POKE XI,LO%: POKE XI + 1,HI%:BV% = Y: GOSUB 6000: POKE YI,LO%: POKE Y` |
+| 147 | L | godot-remake/scripts/rules/flight_rules.gd:264 | 1 | `POKE 29461,84 + OO:OP =  ABS (OO - 1): POKE 29463,OP: POKE 29465,OP: IF  PEEK (38210) = 1 ` |
+| 150 | L | godot-remake/scripts/rules/flight_rules.gd:264 | 1 | `CALL CA: IF OO = 1 THEN  POKE 974,32: CALL 37936` |
+| 153 | L | godot-remake/scripts/flight/native_flight.gd:823 | 1 | `IF OO = 0 THEN  POKE 974,64: CALL 37888` |
 | 155 | P |  | 1 | `VTAB 24: HTAB 1: PRINT  INT (X / 2);" ";: HTAB 7: PRINT  INT (Y / 2);" ";: HTAB 13: PRINT ` |
 | 156 | L | godot-remake/scripts/rules/flight_rules.gd:109 | 1 | `POKE 973,1: VTAB 8: HTAB 18: PRINT "-"; CHR$ (91);"  "; CHR$ (93);"-": POKE 973,0: IF  ABS` |
 | 158 | L | godot-remake/scripts/rules/flight_rules.gd:109<br>godot-remake/scripts/rules/flight_rules.gd:116 | 1 | `IF  PEEK (38210) = 1 AND Y > 4000 THEN  PRINT "RUNORBIT"` |
@@ -75,7 +75,7 @@ none
 | 206 | L | godot-remake/scripts/rules/flight_rules.gd:95 |  | `ON K - 33 GOTO 320,321` |
 | 207 | L | godot-remake/scripts/rules/flight_rules.gd:95 |  | `IF S < 0 THEN S = 0` |
 | 208 | L | godot-remake/scripts/rules/flight_rules.gd:95 |  | `IF S > 120 THEN S = 120` |
-| 209 | L | godot-remake/scripts/flight/native_flight.gd:428 |  | `IF K = 24 THEN  PRINT "RUNH/D"` |
+| 209 | L | godot-remake/scripts/flight/native_flight.gd:432 |  | `IF K = 24 THEN  PRINT "RUNH/D"` |
 | 210 | L | godot-remake/scripts/flight/native_flight.gd:218 |  | `POKE 38157,S:K = 0: NEXT : GOTO 15` |
 | 311 | P |  |  | `S = S - 3: RETURN` |
 | 312 | P |  |  | `S = S + 3: RETURN` |
@@ -87,62 +87,62 @@ none
 | 320 | P |  |  | `PRINT "RUNRADAR"` |
 | 321 | P |  |  | `POKE LT,1` |
 | 500 | L | godot-remake/scripts/flight/native_flight.gd:218 |  | `CALL 38402: GOTO 1` |
-| 1000 | L | godot-remake/scripts/rules/combat_rules.gd:173 | 1 | `M8 = M1:M9 = M2:M3 = 3:M1 = 140:M2 = 40:X0 = X:Y0 = Y:Z0 = Z:S2 = 160:X2 = S2 * (ZP * XH):` |
-| 1010 | L | godot-remake/scripts/rules/combat_rules.gd:173 | 1 | `CALL SG: FOR M = 124 TO 62 STEP  - 4: XDRAW M3 AT M1 + M2,M: XDRAW M3 AT M1 - M2,M: IF  PE` |
-| 1050 | L | godot-remake/scripts/rules/combat_rules.gd:173 | 1 | `IF X0 < X9 + 150 AND X0 > X9 - 150 AND Y0 < Y9 + 60 AND Y0 > Y9 - 20 AND Z0 < Z9 + 100 AND` |
-| 1060 | L | godot-remake/scripts/rules/combat_rules.gd:173 | 1 | `XDRAW M3 AT M1 + M2,M: XDRAW M3 AT M1 - M2,M:M3 = M3 + .32:M2 = M2 - 2:X0 = X0 + X2:Z0 = Z` |
-| 1085 | L | godot-remake/scripts/rules/combat_rules.gd:173 | 1 | `IF HIT = 1 THEN  GOSUB 1200:J1 = 10:J2 = 120: GOSUB 1535: GOTO 1090` |
+| 1000 | L | godot-remake/scripts/rules/combat_rules.gd:180 | 1 | `M8 = M1:M9 = M2:M3 = 3:M1 = 140:M2 = 40:X0 = X:Y0 = Y:Z0 = Z:S2 = 160:X2 = S2 * (ZP * XH):` |
+| 1010 | L | godot-remake/scripts/rules/combat_rules.gd:180 | 1 | `CALL SG: FOR M = 124 TO 62 STEP  - 4: XDRAW M3 AT M1 + M2,M: XDRAW M3 AT M1 - M2,M: IF  PE` |
+| 1050 | L | godot-remake/scripts/rules/combat_rules.gd:180 | 1 | `IF X0 < X9 + 150 AND X0 > X9 - 150 AND Y0 < Y9 + 60 AND Y0 > Y9 - 20 AND Z0 < Z9 + 100 AND` |
+| 1060 | L | godot-remake/scripts/rules/combat_rules.gd:180 | 1 | `XDRAW M3 AT M1 + M2,M: XDRAW M3 AT M1 - M2,M:M3 = M3 + .32:M2 = M2 - 2:X0 = X0 + X2:Z0 = Z` |
+| 1085 | L | godot-remake/scripts/rules/combat_rules.gd:180 | 1 | `IF HIT = 1 THEN  GOSUB 1200:J1 = 10:J2 = 120: GOSUB 1535: GOTO 1090` |
 | 1088 | P |  | 1 | `GOSUB 1100` |
-| 1090 | L | godot-remake/scripts/rules/combat_rules.gd:209 | 1 | `HIT = 0:M1 = M8:M2 = M9:J =  PEEK (38187) - 2: GOSUB 3380: POKE 38187,J: RETURN` |
-| 1100 | L | godot-remake/scripts/rules/combat_rules.gd:173 | 1 | `GOSUB 4100: POKE  - 16298,0: POKE  - 16297,0: HCOLOR= 3: FOR X0 = 1 TO 2: FOR LY = 0 TO 1:` |
+| 1090 | L | godot-remake/scripts/rules/combat_rules.gd:215 | 1 | `HIT = 0:M1 = M8:M2 = M9:J =  PEEK (38187) - 2: GOSUB 3380: POKE 38187,J: RETURN` |
+| 1100 | L | godot-remake/scripts/rules/combat_rules.gd:180 | 1 | `GOSUB 4100: POKE  - 16298,0: POKE  - 16297,0: HCOLOR= 3: FOR X0 = 1 TO 2: FOR LY = 0 TO 1:` |
 | 1200 | P |  | 1 | `FOR X0 = 1 TO 2: FOR LY = 1 TO 2: SCALE= LY: XDRAW 2 AT M1 - M2,M: NEXT : SCALE= 1: POKE  ` |
 | 1205 | L | godot-remake/autoload/audio_manager.gd:66 | 1 | `CALL SG` |
 | 1220 | P |  | 1 | `FOR LY = 1 TO 2: SCALE= LY: XDRAW 2 AT M1 + M2,M: NEXT` |
 | 1222 | P |  | 1 | `SCALE= 1: POKE  - 16298,0: XDRAW 15 AT M1 + M2,M: XDRAW 16 AT M1 + M2,M: XDRAW 17 AT M1 + ` |
-| 1500 | L | godot-remake/scripts/rules/combat_rules.gd:154 | 1 | `IF  PEEK (38208) = 1 THEN  POKE 38208,0: POKE 38150,100` |
-| 1501 | L | godot-remake/scripts/rules/combat_rules.gd:154 | 1 | `POKE  - 16300,0: IF  PEEK (38202) = 1 THEN 1000` |
-| 1502 | L | godot-remake/scripts/rules/combat_rules.gd:154 | 1 | `IF  PEEK (38186) = 0 THEN  RETURN` |
-| 1505 | L | godot-remake/scripts/rules/combat_rules.gd:154 | 1 | `J1 = 10:J2 = 1:X1 = 90:X2 = 190:Y1 = 123:Y2 = 60:X3 = 136:X4 = 144: FOR LX = 1 TO 3: HCOLO` |
+| 1500 | L | godot-remake/scripts/rules/combat_rules.gd:161 | 1 | `IF  PEEK (38208) = 1 THEN  POKE 38208,0: POKE 38150,100` |
+| 1501 | L | godot-remake/scripts/rules/combat_rules.gd:161 | 1 | `POKE  - 16300,0: IF  PEEK (38202) = 1 THEN 1000` |
+| 1502 | L | godot-remake/scripts/rules/combat_rules.gd:161 | 1 | `IF  PEEK (38186) = 0 THEN  RETURN` |
+| 1505 | L | godot-remake/scripts/rules/combat_rules.gd:161 | 1 | `J1 = 10:J2 = 1:X1 = 90:X2 = 190:Y1 = 123:Y2 = 60:X3 = 136:X4 = 144: FOR LX = 1 TO 3: HCOLO` |
 | 1530 | P |  | 1 | `HCOLOR= 0: HPLOT X1,Y1 TO X3,Y2 TO X1 + 4,Y1: HPLOT X2,Y1 TO X4,Y2 TO X2 - 4,Y1: FOR J = 1` |
-| 1535 | L | godot-remake/scripts/rules/combat_rules.gd:218 | 1 | `VP =  PEEK (38160) + (J1 / (TE + 1)): IF VP < HL THEN  POKE 38160,VP` |
-| 1540 | L | godot-remake/scripts/rules/combat_rules.gd:218 | 1 | `IF  PEEK (38210) = 0 THEN DP =  PEEK (38152) + (J2 / (TE + 1)): IF DP < HL THEN  POKE 3815` |
-| 1550 | L | godot-remake/scripts/rules/combat_rules.gd:218 | 1 | `IF VP =  >  PEEK (38150) THEN  POKE 974,32: POKE  - 16300,0: SPEED= 127: VTAB 13: HTAB 8: ` |
-| 1560 | L | godot-remake/scripts/rules/combat_rules.gd:218 | 1 | `IF DP >  PEEK (38204) AND  PEEK (38205) <  > 0 THEN  PRINT "RUNEX"` |
+| 1535 | L | godot-remake/scripts/rules/combat_rules.gd:224 | 1 | `VP =  PEEK (38160) + (J1 / (TE + 1)): IF VP < HL THEN  POKE 38160,VP` |
+| 1540 | L | godot-remake/scripts/rules/combat_rules.gd:224 | 1 | `IF  PEEK (38210) = 0 THEN DP =  PEEK (38152) + (J2 / (TE + 1)): IF DP < HL THEN  POKE 3815` |
+| 1550 | L | godot-remake/scripts/rules/combat_rules.gd:224 | 1 | `IF VP =  >  PEEK (38150) THEN  POKE 974,32: POKE  - 16300,0: SPEED= 127: VTAB 13: HTAB 8: ` |
+| 1560 | L | godot-remake/scripts/rules/combat_rules.gd:224 | 1 | `IF DP >  PEEK (38204) AND  PEEK (38205) <  > 0 THEN  PRINT "RUNEX"` |
 | 1570 | P |  | 1 | `RETURN` |
-| 3000 | L | godot-remake/scripts/rules/combat_rules.gd:241 | 1 | `IF  PEEK (38205) = 0 AND  PEEK (38210) = 0 THEN  RETURN` |
-| 3001 | L | godot-remake/scripts/rules/combat_rules.gd:241 | 1 | `POKE  - 16300,0: IF  RND (1) > .4 THEN 3030` |
-| 3010 | L | godot-remake/scripts/rules/combat_rules.gd:241 | 1 | `IF  RND (1) > .4 THEN 3030` |
-| 3019 | L | godot-remake/scripts/rules/combat_rules.gd:241 | 1 | `GOSUB 4110:HC =  RND (1) * 5: FOR LY = 1 TO HC: POKE  - 16298,0: FOR J = 1 TO 10: NEXT : P` |
-| 3030 | L | godot-remake/scripts/rules/combat_rules.gd:241 | 1 | `IF  RND (1) > .3 THEN 3200` |
-| 3032 | L | godot-remake/scripts/rules/combat_rules.gd:241 | 1 | `GOSUB 4120: POKE  - 16298,0: CALL SG: POKE  - 16297,0:DMG = 1: CALL SG` |
-| 3200 | L | godot-remake/scripts/rules/combat_rules.gd:241 | 1 | `IF DMG = 0 THEN  RETURN` |
-| 3205 | L | godot-remake/scripts/rules/combat_rules.gd:263 | 1 | `J =  PEEK (38200) - ( RND (1) * 1.1): GOSUB 3380: POKE 38200,J: IF  PEEK (38200) > 10 AND ` |
-| 3207 | L | godot-remake/scripts/rules/combat_rules.gd:263 | 1 | `IF L = 7 THEN  RETURN` |
-| 3230 | L | godot-remake/scripts/rules/combat_rules.gd:263 | 1 | `J =  PEEK (38195) - ( RND (1) * 5): GOSUB 3380: POKE 38195,J` |
-| 3260 | L | godot-remake/scripts/rules/combat_rules.gd:263 | 1 | `J =  PEEK (38198) - ( RND (1) * 5): GOSUB 3380` |
-| 3270 | L | godot-remake/scripts/rules/combat_rules.gd:263 | 1 | `POKE 38198,J:J =  PEEK (38197) - ( RND (1) * 5): GOSUB 3380: POKE 38197,J:J =  PEEK (38196` |
-| 3350 | L | godot-remake/scripts/rules/combat_rules.gd:263 | 1 | `POKE 38193,J:DMG = 0: IF J = 0 THEN  PRINT "RUNS/X"` |
-| 3360 | L | godot-remake/scripts/rules/combat_rules.gd:263 | 1 | `IF  PEEK (38393) = 0 THEN  POKE 38393,1: PRINT "RUNDMG"` |
-| 3380 | L | godot-remake/scripts/rules/combat_rules.gd:209<br>godot-remake/scripts/rules/combat_rules.gd:263 | 1 | `IF J < 0 THEN J = 0` |
+| 3000 | L | godot-remake/scripts/rules/combat_rules.gd:247 | 1 | `IF  PEEK (38205) = 0 AND  PEEK (38210) = 0 THEN  RETURN` |
+| 3001 | L | godot-remake/scripts/rules/combat_rules.gd:247 | 1 | `POKE  - 16300,0: IF  RND (1) > .4 THEN 3030` |
+| 3010 | L | godot-remake/scripts/rules/combat_rules.gd:247 | 1 | `IF  RND (1) > .4 THEN 3030` |
+| 3019 | L | godot-remake/scripts/rules/combat_rules.gd:247 | 1 | `GOSUB 4110:HC =  RND (1) * 5: FOR LY = 1 TO HC: POKE  - 16298,0: FOR J = 1 TO 10: NEXT : P` |
+| 3030 | L | godot-remake/scripts/rules/combat_rules.gd:247 | 1 | `IF  RND (1) > .3 THEN 3200` |
+| 3032 | L | godot-remake/scripts/rules/combat_rules.gd:247 | 1 | `GOSUB 4120: POKE  - 16298,0: CALL SG: POKE  - 16297,0:DMG = 1: CALL SG` |
+| 3200 | L | godot-remake/scripts/rules/combat_rules.gd:247 | 1 | `IF DMG = 0 THEN  RETURN` |
+| 3205 | L | godot-remake/scripts/rules/combat_rules.gd:269 | 1 | `J =  PEEK (38200) - ( RND (1) * 1.1): GOSUB 3380: POKE 38200,J: IF  PEEK (38200) > 10 AND ` |
+| 3207 | L | godot-remake/scripts/rules/combat_rules.gd:269 | 1 | `IF L = 7 THEN  RETURN` |
+| 3230 | L | godot-remake/scripts/rules/combat_rules.gd:269 | 1 | `J =  PEEK (38195) - ( RND (1) * 5): GOSUB 3380: POKE 38195,J` |
+| 3260 | L | godot-remake/scripts/rules/combat_rules.gd:269 | 1 | `J =  PEEK (38198) - ( RND (1) * 5): GOSUB 3380` |
+| 3270 | L | godot-remake/scripts/rules/combat_rules.gd:269 | 1 | `POKE 38198,J:J =  PEEK (38197) - ( RND (1) * 5): GOSUB 3380: POKE 38197,J:J =  PEEK (38196` |
+| 3350 | L | godot-remake/scripts/rules/combat_rules.gd:269 | 1 | `POKE 38193,J:DMG = 0: IF J = 0 THEN  PRINT "RUNS/X"` |
+| 3360 | L | godot-remake/scripts/rules/combat_rules.gd:269 | 1 | `IF  PEEK (38393) = 0 THEN  POKE 38393,1: PRINT "RUNDMG"` |
+| 3380 | L | godot-remake/scripts/rules/combat_rules.gd:215<br>godot-remake/scripts/rules/combat_rules.gd:269 | 1 | `IF J < 0 THEN J = 0` |
 | 3381 | P |  | 1 | `RETURN` |
 | 4100 | L | godot-remake/autoload/audio_manager.gd:63 | 1 | `POKE 37491,10: POKE 37490,10: POKE 37492,0: POKE 37493,129: RETURN` |
 | 4110 | L | godot-remake/autoload/audio_manager.gd:56 | 1 | `POKE 37491,5: POKE 37490,5: POKE 37492,0: POKE 37493,0: RETURN` |
 | 4120 | L | godot-remake/autoload/audio_manager.gd:60 | 1 | `POKE 37491,7: POKE 37490,7: POKE 37492,0: POKE 37493,129: RETURN` |
-| 5000 | L | godot-remake/scripts/rules/combat_rules.gd:301 | 1 | `POKE  - 16300,0:X1 = ( RND (5) * 260) + 10:Y1 =  RND (1): IF Y1 >  = .4 THEN Y1 = 10:Y2 = ` |
-| 5045 | L | godot-remake/scripts/rules/combat_rules.gd:301 | 1 | `IF Y1 < .4 THEN Y1 = 120:Y2 =  RND (5) * 7:Y2 = Y2 - (Y2 * 2)` |
-| 5050 | L | godot-remake/scripts/rules/combat_rules.gd:301 | 1 | `IF X1 > 190 THEN X2 =  - 7:M = 9: GOTO 5090` |
-| 5060 | L | godot-remake/scripts/rules/combat_rules.gd:301 | 1 | `IF X1 < 91 THEN X2 = 7:M = 10: GOTO 5090` |
-| 5080 | L | godot-remake/scripts/rules/combat_rules.gd:301 | 1 | `X2 =  - 2:M = 8: IF  ABS (Y2) < 4 THEN Y2 = Y2 * 2` |
-| 5090 | L | godot-remake/scripts/rules/combat_rules.gd:301 | 1 | `XDRAW M AT X1,Y1: IF  RND (1) < .3 THEN  GOSUB 5098: GOSUB 5200` |
-| 5095 | L | godot-remake/scripts/rules/combat_rules.gd:301 | 1 | `XDRAW M AT X1,Y1:X1 = X1 + X2:Y1 = Y1 + Y2: IF Y1 < 10 OR Y1 > 120 OR X1 < 10 OR X1 > 270 ` |
+| 5000 | L | godot-remake/scripts/rules/combat_rules.gd:307 | 1 | `POKE  - 16300,0:X1 = ( RND (5) * 260) + 10:Y1 =  RND (1): IF Y1 >  = .4 THEN Y1 = 10:Y2 = ` |
+| 5045 | L | godot-remake/scripts/rules/combat_rules.gd:307 | 1 | `IF Y1 < .4 THEN Y1 = 120:Y2 =  RND (5) * 7:Y2 = Y2 - (Y2 * 2)` |
+| 5050 | L | godot-remake/scripts/rules/combat_rules.gd:307 | 1 | `IF X1 > 190 THEN X2 =  - 7:M = 9: GOTO 5090` |
+| 5060 | L | godot-remake/scripts/rules/combat_rules.gd:307 | 1 | `IF X1 < 91 THEN X2 = 7:M = 10: GOTO 5090` |
+| 5080 | L | godot-remake/scripts/rules/combat_rules.gd:307 | 1 | `X2 =  - 2:M = 8: IF  ABS (Y2) < 4 THEN Y2 = Y2 * 2` |
+| 5090 | L | godot-remake/scripts/rules/combat_rules.gd:307 | 1 | `XDRAW M AT X1,Y1: IF  RND (1) < .3 THEN  GOSUB 5098: GOSUB 5200` |
+| 5095 | L | godot-remake/scripts/rules/combat_rules.gd:307 | 1 | `XDRAW M AT X1,Y1:X1 = X1 + X2:Y1 = Y1 + Y2: IF Y1 < 10 OR Y1 > 120 OR X1 < 10 OR X1 > 270 ` |
 | 5096 | P |  | 1 | `GOTO 5090` |
-| 5098 | L | godot-remake/scripts/rules/combat_rules.gd:301 | 1 | `GOSUB 4110: POKE  - 16298,0: CALL SG: POKE  - 16297,0:L = 7: GOSUB 3205:L = 0: RETURN` |
-| 5200 | L | godot-remake/scripts/rules/combat_rules.gd:301 | 1 | `IF  PEEK (38165) <  > 3 THEN  RETURN` |
-| 5210 | L | godot-remake/scripts/rules/combat_rules.gd:301 | 1 | `LX = 240:J =  RND (1): IF J < .6 THEN LX = 40` |
-| 5230 | L | godot-remake/scripts/rules/combat_rules.gd:301 | 1 | `FOR J = 1 TO 0 STEP  - 1: HCOLOR= J * 5: POKE  - 16298,0: FOR J1 = 1 TO 5: NEXT : POKE  - ` |
-| 5240 | L | godot-remake/scripts/rules/combat_rules.gd:301 | 1 | `IF  RND (5) < .3 THEN  GOSUB 5250: POP` |
+| 5098 | L | godot-remake/scripts/rules/combat_rules.gd:307 | 1 | `GOSUB 4110: POKE  - 16298,0: CALL SG: POKE  - 16297,0:L = 7: GOSUB 3205:L = 0: RETURN` |
+| 5200 | L | godot-remake/scripts/rules/combat_rules.gd:307 | 1 | `IF  PEEK (38165) <  > 3 THEN  RETURN` |
+| 5210 | L | godot-remake/scripts/rules/combat_rules.gd:307 | 1 | `LX = 240:J =  RND (1): IF J < .6 THEN LX = 40` |
+| 5230 | L | godot-remake/scripts/rules/combat_rules.gd:307 | 1 | `FOR J = 1 TO 0 STEP  - 1: HCOLOR= J * 5: POKE  - 16298,0: FOR J1 = 1 TO 5: NEXT : POKE  - ` |
+| 5240 | L | godot-remake/scripts/rules/combat_rules.gd:307 | 1 | `IF  RND (5) < .3 THEN  GOSUB 5250: POP` |
 | 5245 | P |  | 1 | `RETURN` |
-| 5250 | L | godot-remake/scripts/rules/combat_rules.gd:301 | 1 | `XDRAW M AT X1,Y1:M8 = M1:M9 = M2:M1 = X1:M2 = 4:M = Y1: GOSUB 1100:J =  PEEK (38207) - 1: ` |
+| 5250 | L | godot-remake/scripts/rules/combat_rules.gd:307 | 1 | `XDRAW M AT X1,Y1:M8 = M1:M9 = M2:M1 = X1:M2 = 4:M = Y1: GOSUB 1100:J =  PEEK (38207) - 1: ` |
 | 5251 | P |  | 1 | `GOTO 1090` |
 | 6000 | W |  | 1 | `HI% = BV% / HH: IF BV% < 0 THEN HI% = HI% + 1` |
 | 6010 | W |  | 1 | `LO% = BV% - HI% * HH: IF BV% >  - 1 THEN  RETURN` |

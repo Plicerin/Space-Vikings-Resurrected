@@ -10,16 +10,16 @@ func _init() -> void:
 	get_root().add_child(root)
 	var wrong := 0
 	var cities := Cities.new()
-	cities.build(root, Terrain.new(3.0, Vector3(0.3, 0.5, 0.8)), 4)
+	cities.build(root, Terrain.new(3.0, Vector3(0.3, 0.5, 0.8)), 4, 3.0)
 	if cities.sites.size() < 20:
 		print("few cities: ", cities.sites.size())
 		wrong += 1
 	var none := Cities.new()
-	none.build(root, Terrain.new(3.0, Vector3(0.3, 0.5, 0.8)), 0)
+	none.build(root, Terrain.new(3.0, Vector3(0.3, 0.5, 0.8)), 0, 3.0)
 	if not none.sites.is_empty():
 		wrong += 1
-	var at: Vector3 = cities.sites[0]
-	if cities.hit(at + Vector3(5000, 0, 0), 40.0) != -1:
+	var at: Vector2 = cities.sites[0]
+	if cities.hit(at + Vector2(5000, 0), 40.0) != -1:
 		wrong += 1
 	if cities.hit(at, 40.0) != 0 or cities.hit(at, 40.0) != -1:
 		wrong += 1

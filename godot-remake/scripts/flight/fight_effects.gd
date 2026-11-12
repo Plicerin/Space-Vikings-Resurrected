@@ -24,6 +24,9 @@ var camera: Camera3D
 ## How much bigger the world is than the original's units: a missile covers that much more space
 ## in the same time. The weapons' own sizes are not scaled.
 var world_scale := 1.0
+## How many times bigger than in the atmosphere the weapons are drawn: in the orbit, where the world is,
+## a missile and a burst would be specks; the ratio of a missile to a ship is kept.
+var size_scale := 1.0
 
 var _glow_texture: GradientTexture2D
 var _ring_texture: GradientTexture2D
@@ -58,7 +61,7 @@ func laser() -> void:
 func missile(direction: Vector3, steps: int, hit: bool, ground := Vector3.INF, target := Vector3.INF) -> void:
 	AudioManager.play_missile()
 	var basis := camera.global_transform.basis
-	var start := camera.global_position + basis * Vector3(0.0, -0.9, -3.0)
+	var start := camera.global_position + basis * Vector3(0.0, -0.9, -3.0) * size_scale
 	var end := camera.global_position + direction * 160.0 * world_scale * steps
 	var seconds := steps * MISSILE_STEP
 	if hit and ground != Vector3.INF: # aimed at the ground: it goes there, and bursts on it
@@ -67,7 +70,7 @@ func missile(direction: Vector3, steps: int, hit: bool, ground := Vector3.INF, t
 	elif hit and target != Vector3.INF: # at a ship: it bursts on its hull, not at the end of its range
 		end = target
 		seconds = maxf(start.distance_to(end) / (160.0 * world_scale), 1.0) * MISSILE_STEP
-	var sideways := basis.x * 2.2
+	var sideways := basis.x * 2.2 * size_scale
 	for side in [-1.0, 1.0]: # the left, then the right
 		var pair_start: Vector3 = start + sideways * side
 		var pair_end: Vector3 = end + sideways * side * 0.12 # they draw in as they go
@@ -88,7 +91,7 @@ func _launch(start: Vector3, end: Vector3, direction: Vector3, seconds: float, b
 	rocket.global_transform = Transform3D(Basis.looking_at(direction, Vector3.UP), start)
 	var body := MeshInstance3D.new()
 	body.mesh = Craft.missile()
-	body.scale = Vector3.ONE * 3.0
+	body.scale = Vector3.ONE * 3.0 * size_scale
 	body.material_override = Craft.material(Color(0.82, 0.84, 0.88))
 	rocket.add_child(body)
 	var light := OmniLight3D.new()
@@ -154,7 +157,8 @@ func _exhaust(at: Vector3, flame: bool) -> CPUParticles3D:
 
 ## A fireball with a white flash, a shockwave ring, sparks and a pulse of light;
 ## `size` is about the radius it reaches.
-func explosion(at: Vector3, size: float, grounded := false) -> void:
+func explosion(at: Vector3, blast: float, grounded := false) -> void:
+	var size := blast * size_scale
 	if size >= 150.0:
 		AudioManager.play_explosion()
 	else:
@@ -407,7 +411,7 @@ func fighter(from: Vector2, step: Vector2, steps: int, strafes: Array) -> void:
 	camera.add_child(craft)
 	var body := MeshInstance3D.new()
 	body.mesh = Craft.fighter()
-	body.scale = Vector3.ONE * 16.0
+	body.scale = Vector3.ONE * 16.0 * size_scale
 	var materials := Craft.fighter_materials()
 	for surface in materials.size():
 		body.set_surface_override_material(surface, materials[surface])
@@ -520,7 +524,7 @@ func _bolt(from: Vector3, to: Vector3, color: Color, seconds: float, width: floa
 	for layer in 2:
 		var mesh := MeshInstance3D.new()
 		var box := BoxMesh.new()
-		box.size = Vector3(width * (1.0 if layer == 0 else 3.2), width * (1.0 if layer == 0 else 3.2), streak)
+		box.size = Vector3(width * (1.0 if layer == 0 else 3.2), width * (1.0 if layer == 0 else 3.2), streak) * Vector3(size_scale, size_scale, 1.0)
 		mesh.mesh = box
 		mesh.material_override = _emissive(Color(1, 1, 1, 0.95) if layer == 0 else Color(color, 0.35))
 		mesh.position = Vector3(0, 0, -streak / 2.0)
@@ -536,7 +540,7 @@ func _bolt(from: Vector3, to: Vector3, color: Color, seconds: float, width: floa
 
 ## A soft round flash of light, at once and gone.
 func _flare(at: Vector3, color: Color, size: float) -> void:
-	var node := _sprite_node(Color(color, 0.9).lightened(0.3), size, true)
+	var node := _sprite_node(Color(color, 0.9).lightened(0.3), size * size_scale, true)
 	add_child(node)
 	node.global_position = at
 	var tween := create_tween()
@@ -550,7 +554,7 @@ func _light(at: Vector3, color: Color, energy: float, light_range: float, second
 	var light := OmniLight3D.new()
 	light.light_color = color
 	light.light_energy = energy
-	light.omni_range = light_range
+	light.omni_range = light_range * size_scale
 	add_child(light)
 	light.global_position = at
 	var tween := create_tween()
@@ -628,11 +632,11 @@ func _navigation_lights(craft: Node3D) -> void:
 ## `progress` (0 to 1) goes on, as a fighter swoops across.
 func _place(point: Vector2, progress: float) -> Vector3:
 	var depth := lerpf(620.0, 440.0, sin(progress * PI * 0.5))
-	return Vector3((point.x - 140.0) / 130.0 * depth * 0.62, (65.0 - point.y) / 55.0 * depth * 0.30, -depth)
+	return Vector3((point.x - 140.0) / 130.0 * depth * 0.62, (65.0 - point.y) / 55.0 * depth * 0.30, -depth) * size_scale
 
 
 func _ahead(local: Vector3) -> Vector3:
-	return camera.global_position + camera.global_transform.basis * local
+	return camera.global_position + camera.global_transform.basis * (local * size_scale)
 
 
 func _emissive(color: Color) -> StandardMaterial3D:

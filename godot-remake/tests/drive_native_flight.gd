@@ -13,7 +13,7 @@ extends Node
 const FLIGHT := "res://scenes/native_flight.tscn"
 const TIMEOUT_FRAMES := 60 * 20
 const WORLD_SCALE := 3.0 # the flight scene's, see native_flight.gd (the atmosphere's)
-const ORBIT_SCALE := 2.0 # and the orbit's, on top
+const ORBIT_SCALE := 45000.0 / 780.0 # and the orbit's, on top: the planet's radius over the orbit's
 
 var _driver := false
 var _bad := 0
@@ -174,6 +174,11 @@ func _drive() -> void:
 		GameState.missile_mode_active = true
 		GameState.shields_up = true)
 	_check("a defender at its planet to begin with", get_tree().current_scene.get("_defender") != null)
+	var box: AABB = get_tree().current_scene.get("_combat").hit_box
+	var ship: Node3D = get_tree().current_scene.get("_defender")
+	var aabb: AABB = (ship.get_child(0) as MeshInstance3D).mesh.get_aabb()
+	_check("the missile's hit box is the ship as drawn: as long as it is (%.0f, drawn %.0f)" % [box.size.x, aabb.size.x * 1.8],
+			absf(box.size.x - aabb.size.x * 1.8) < 1.0)
 	await _frames(60 * 3)
 	_check("flying on without hitting it leaves it there", get_tree().current_scene.get("_defender") != null)
 	Input.action_press("fire")
@@ -225,35 +230,36 @@ func _drive() -> void:
 	_check("with the energy paid (%.0f)" % GameState.ship_energy, GameState.ship_energy < 63.0)
 	_check("and the scene begun again there", _path() == FLIGHT)
 
-	# down to the planet and up again
+	# down to the planet and up again: one flight over one planet, the ship never moved by it
 	await _flight(func() -> void:
-		GameState.ship_x = 300
-		GameState.ship_y = 200
-		GameState.ship_z = 100
+		GameState.ship_x = 0
+		GameState.ship_y = 0
+		GameState.ship_z = 830 # 830 from the planet's middle: 2900 above its ground
 		GameState.ship_speed = 0)
 	var scene_before := get_tree().current_scene
+	var orbit_spot := Vector3(0.0, 0.0, -830.0) * WORLD_SCALE * ORBIT_SCALE # where the camera is, in Godot's world
 	await _until(func() -> bool: return GameState.in_atmosphere, 60 * 8)
-	_check("within 900 of the planet: down into the atmosphere", GameState.in_atmosphere)
-	await _frames(60 * 2)
+	_check("below the top of the atmosphere over the planet: down into it", GameState.in_atmosphere)
+	await _frames(10)
 	var down := get_tree().current_scene
-	_check("it is the same scene: the world changed, nothing reloaded", down == scene_before)
-	_check("the ground and clouds are shown, the planet and stars not", down.get("_air_root").visible and not down.get("_space_root").visible)
-	_check("and the flight is on again after the fade", not down.get("_jumping") and down.get("_fade").color.a == 0.0)
-	_check("x with its low byte put to 188 (from 300: 444), 1024 up and 7000 short of the planet along z, heading 20 (%d, %d, %d, %d)" % [
-			GameState.ship_x, GameState.ship_y, GameState.ship_z, GameState.ship_heading],
-			GameState.ship_x == 444 and GameState.ship_z == -7000 and GameState.ship_heading == 20 and GameState.ship_y < 1100)
+	_check("it is the same scene: nothing reloaded", down == scene_before)
+	_check("and the flight never stopped for it", not down.get("_jumping"))
+	var moved: float = down.get("_camera").global_position.distance_to(orbit_spot)
+	_check("the ship is where it was in the world: it went down by flying, not by being moved (%.0f)" % moved, moved < 150.0)
+	_check("the cities are on the ground it is over", down.get("_air_root").visible and down.get("_cities").sites.size() > 0)
 	await _flight(func() -> void:
 		GameState.in_atmosphere = true
 		GameState.ship_x = 0
 		GameState.ship_y = 4500
-		GameState.ship_z = 5000
+		GameState.ship_z = 0
 		GameState.ship_speed = 0)
+	var air_spot: Vector3 = GameState.reentry_site * (45000.0 + 4500.0) * WORLD_SCALE # over the frame's middle, 4500 up
 	await _until(func() -> bool: return not GameState.in_atmosphere, 60 * 8)
 	_check("above 4000 in the atmosphere: up into orbit", not GameState.in_atmosphere)
-	await _frames(60 * 2)
-	_check("and the planet is shown again", get_tree().current_scene.get("_space_root").visible and not get_tree().current_scene.get("_air_root").visible)
-	_check("at (700, 200, 2000), heading 190 (%d, %d, %d, %d)" % [GameState.ship_x, GameState.ship_y, GameState.ship_z, GameState.ship_heading],
-			GameState.ship_x == 700 and GameState.ship_y == 200 and GameState.ship_z == 2000 and GameState.ship_heading == 190)
+	await _frames(10)
+	var up_moved: float = get_tree().current_scene.get("_camera").global_position.distance_to(air_spot)
+	_check("and the ship is where it was in the world (%.0f)" % up_moved, up_moved < 150.0)
+	_check("the orbit shows no clouds or cities", not get_tree().current_scene.get("_air_root").visible)
 
 	# firing at the ground from the atmosphere: the strike lands on the ground, and the
 	# display says how much of the planet the strikes have taken
@@ -270,7 +276,7 @@ func _drive() -> void:
 	var flight := get_tree().current_scene
 	var struck: Vector3 = flight._ground_ahead(12000.0)
 	_check("nose down in the atmosphere: the line of fire meets the ground (%s)" % str(struck),
-			struck != Vector3.INF and absf(struck.y - 20.0 * WORLD_SCALE) < 1.0)
+			struck != Vector3.INF and absf(struck.length() - (45000.0 + 20.0) * WORLD_SCALE) < 1.0)
 	flight._play({"kind": "missile", "hit": true, "steps": 8, "defender": false})
 	await _frames(3)
 	_check("a missile that hits says so", _node("Hud/Overlay").message == "DIRECT HIT ON THE PLANET")

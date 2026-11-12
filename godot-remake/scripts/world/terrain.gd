@@ -1,17 +1,13 @@
 extends RefCounted
-## The planet's map as the planet and the ground shaders read it
-## (assets/shaders/planet.gdshader, ground.gdshader): the same noise, so that the
-## continents seen from orbit are the land flown over, and what is built on the land
-## (the cities) stands on land and not in the sea. `w` is a place on the ground, x and
-## z in the scene's world; the ground's middle is the point `site` of the sphere (a
-## direction from the planet's centre), and a radian of the sphere is PLANET_RADIUS of ground.
+## The planet's map and the flat frame laid on it where the ship goes down. The map is the same
+## noise the planet's and the ground's shaders read (assets/shaders/planet.gdshader,
+## ground.gdshader), so the continents seen from orbit are the land flown over, and what is built
+## on the land (the cities) stands on land and not in the sea.
 ##
-## The planet's radius is the anchor of the sizes: the atmosphere (4000 up in the original's
-## units) is under a tenth of it, the ground the flight covers (the world wraps at 20000 each
-## way) under half a radian each way, and the sphere seen from orbit is the same planet at
-## the orbit's own scale (the orbit's units are PLANET_RADIUS over the sphere's drawn radius
-## times the atmosphere's: the original's two worlds were never the one scale, and its
-## teleport between them is the joint).
+## The planet is one sphere: its radius PLANET_RADIUS (in the ground's units) is the anchor of the
+## sizes. The ground the ship flies over is a flat frame touching it at `site` (a direction from
+## the planet's centre): `w`, a place on it (east and south of the site), is a place on the sphere,
+## and the frame's up is the sphere's up where the ship is.
 
 const SCALE := 0.00018
 const SEA := 0.5
@@ -19,16 +15,39 @@ const PLANET_RADIUS := 45000.0
 
 var map_seed := 1.0
 var site := Vector3(0.0, 0.0, 1.0)
-var _east := Vector3.RIGHT
-var _north := Vector3.UP
+var east := Vector3.RIGHT
+var south := Vector3.BACK
 
 
 func _init(for_seed: float, at_site: Vector3) -> void:
 	map_seed = for_seed
 	site = at_site.normalized()
-	_east = Vector3.UP.cross(site)
-	_east = _east.normalized() if _east.length() > 0.001 else Vector3.RIGHT
-	_north = site.cross(_east)
+	east = Vector3.UP.cross(site)
+	east = east.normalized() if east.length() > 0.001 else Vector3.RIGHT
+	south = east.cross(site) # east, up (the site) and south are right-handed
+
+
+# --- the frame on the sphere ---------------------------------------------------
+
+
+## The direction from the planet's centre to the place `w` of the frame.
+func ground_point(w: Vector2) -> Vector3:
+	return (site + (east * w.x + south * w.y) / PLANET_RADIUS).normalized()
+
+
+## The place of the frame under the direction `n` from the planet's centre.
+func ground_coords(n: Vector3) -> Vector2:
+	var d := n / n.dot(site) - site
+	return Vector2(d.dot(east), d.dot(south)) * PLANET_RADIUS
+
+
+## The axes of the frame at the direction `n`: east, up and south, carried round the sphere from
+## the site (the shortest way).
+func frame_at(n: Vector3) -> Basis:
+	return Basis(Quaternion(site, n)) * Basis(east, site, south)
+
+
+# --- the map ----------------------------------------------------------------------
 
 
 static func _fract3(v: Vector3) -> Vector3:
@@ -55,31 +74,15 @@ func _row(corner: Vector3, z_step: float, f: Vector3) -> float:
 	return lerpf(_hash3(base), _hash3(base + Vector3(1, 0, 0)), f.x)
 
 
-func _hash2(p: Vector2) -> float:
-	var q := Vector2(p.x * 0.3183099 + map_seed * 0.137, p.y * 0.3678794 + map_seed * 0.137)
-	q = Vector2(q.x - floorf(q.x), q.y - floorf(q.y)) * 17.0
-	return fposmod(q.x * q.y * (q.x + q.y), 1.0)
-
-
-func _noise2(p: Vector2) -> float:
-	var i := Vector2(floorf(p.x), floorf(p.y))
-	var f := p - i
-	f = Vector2(f.x * f.x * (3.0 - 2.0 * f.x), f.y * f.y * (3.0 - 2.0 * f.y))
-	var a := lerpf(_hash2(i), _hash2(i + Vector2(1, 0)), f.x)
-	var b := lerpf(_hash2(i + Vector2(0, 1)), _hash2(i + Vector2(1, 1)), f.x)
-	return lerpf(a, b, f.y)
-
-
-## The map's height at `w`: the planet's own continents, with local relief on them. The sea is
-## below SEA.
-func height(w: Vector2) -> float:
-	var n := (site + (_east * w.x + _north * w.y) / PLANET_RADIUS).normalized()
+## The map's height under the direction `n`: the planet's own continents, with local relief on them.
+## The sea is below SEA.
+func height_at(n: Vector3) -> float:
 	var h := _noise3(n * 3.0 + Vector3.ONE * map_seed) * 0.6 + _noise3(n * 7.0) * 0.3 + _noise3(n * 15.0) * 0.1
-	var p := w * SCALE
-	return h + (_noise2(p * 31.0) - 0.5) * 0.10 + (_noise2(p * 97.0) - 0.5) * 0.05
+	var p := n * PLANET_RADIUS * SCALE
+	return h + (_noise3(p * 31.0) - 0.5) * 0.10 + (_noise3(p * 97.0) - 0.5) * 0.05
 
 
-## Low, dry land with room round it: where a city can stand.
+## Low, dry land with room round it, at the place `w` of the frame: where a city can stand.
 func is_building_land(w: Vector2) -> bool:
-	var h := height(w)
+	var h := height_at(ground_point(w))
 	return h > SEA + 0.035 and h < SEA + 0.17

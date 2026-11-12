@@ -240,6 +240,16 @@ static func view_matrix(pitch_units: float, bank_units: float, heading_units: fl
 	]
 
 
+## The attitude (pitch, bank, heading, in the original's units) a camera basis in Godot's world
+## has: the inverse of camera_basis().
+static func attitude_of(basis: Basis) -> Vector3:
+	var right := place(basis.x)
+	var up := place(basis.y)
+	var ahead := -place(basis.z)
+	var level := sqrt(ahead.x * ahead.x + ahead.z * ahead.z)
+	return Vector3(atan2(-ahead.y, level) / ANGLE, atan2(right.y, up.y) / ANGLE, fposmod(atan2(ahead.x, ahead.z) / ANGLE, 256.0))
+
+
 ## Where a point is in the view, from an eye and an attitude, in the
 ## original's world: x right, y up, z ahead.
 static func to_view(point: Vector3, eye: Vector3, attitude: Vector3) -> Vector3:
