@@ -118,7 +118,7 @@ func _build() -> void:
 	_auto_labels.append(_label(_auto_pivot, "AUTO", Vector3(0.0, 0.3, 0.25)))
 	_auto_labels.append(_label(_auto_pivot, "MNL", Vector3(0.0, -0.3, 0.25)))
 	_weapon_pivot = _rocker(Vector3(0.5, -0.55, 0.1))
-	_missile_parts = _missile(_weapon_pivot, Vector3(0.0, 0.3, 0.25))
+	_missile_parts = _missile(_weapon_pivot, Vector3(0.0, 0.25, 0.25))
 	_laser_parts = _laser(_weapon_pivot, Vector3(0.0, -0.3, 0.25))
 
 
@@ -150,7 +150,7 @@ func _missile(parent: Node3D, at: Vector3) -> Array[MeshInstance3D]:
 	var parts: Array[MeshInstance3D] = []
 	var holder := Node3D.new()
 	holder.position = at
-	holder.scale = Vector3.ONE * 0.85
+	holder.scale = Vector3.ONE * 0.78
 	parent.add_child(holder)
 	var material := _flat(DIM)
 	var black := _flat(Color(0.05, 0.05, 0.05))
