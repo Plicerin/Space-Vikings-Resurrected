@@ -144,9 +144,8 @@ func _label(parent: Node3D, text: String, at: Vector3) -> Label3D:
 	return label
 
 
-## A missile standing on end, stencilled like a round on a munitions rack: a pointed ogive, a warhead
-## collar, a body in two with black hazard bands across it, a motor collar and nozzle, two swept fins,
-## and the flame of its motor. The bands stay black; the rest is what lights.
+## A missile standing on end, like a round on a munitions rack: a pointed ogive, a warhead collar, a body
+## in two, a motor collar and nozzle, two long swept fins, and the flame of its motor.
 func _missile(parent: Node3D, at: Vector3) -> Array[MeshInstance3D]:
 	var parts: Array[MeshInstance3D] = []
 	var holder := Node3D.new()
@@ -168,9 +167,6 @@ func _missile(parent: Node3D, at: Vector3) -> Array[MeshInstance3D]:
 		parts.append(_mesh(holder, fin, Vector3(side * 0.105, -0.045, 0.0), material))
 	parts.append(_mesh(holder, _cylinder(0.0, 0.05, 0.16), Vector3(0.0, -0.25, 0.0), material)) # the flame
 	_mesh(holder, _cylinder(0.0, 0.024, 0.09), Vector3(0.0, -0.225, 0.02), black) # its dark core
-	for y in [0.115, 0.055, -0.005, -0.065]: # the hazard bands
-		_mesh(holder, _cylinder(0.0575, 0.0575, 0.014), Vector3(0.0, y, 0.0), black)
-	_mesh(holder, _cylinder(0.0, 0.03, 0.04), Vector3(0.0, 0.215, 0.0), black) # the ogive's painted tip
 	return parts
 
 
