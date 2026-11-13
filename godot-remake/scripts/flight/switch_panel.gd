@@ -151,6 +151,7 @@ func _missile(parent: Node3D, at: Vector3) -> Array[MeshInstance3D]:
 	var holder := Node3D.new()
 	holder.position = at
 	holder.scale = Vector3.ONE * 0.78
+	holder.rotation.z = -0.65 # flying up and to the right: not another burst of light like the laser's
 	parent.add_child(holder)
 	var material := _flat(DIM)
 	var black := _flat(Color(0.05, 0.05, 0.05))
