@@ -146,12 +146,12 @@ func _label(parent: Node3D, text: String, at: Vector3) -> Label3D:
 
 ## A missile standing on end, stencilled like a round on a munitions rack: a pointed ogive, a warhead
 ## collar, a body in two with black hazard bands across it, a motor collar and nozzle, two swept fins,
-## and a cradle under it. The bands stay black; the rest is what lights.
+## and the flame of its motor. The bands stay black; the rest is what lights.
 func _missile(parent: Node3D, at: Vector3) -> Array[MeshInstance3D]:
 	var parts: Array[MeshInstance3D] = []
 	var holder := Node3D.new()
 	holder.position = at
-	holder.scale = Vector3.ONE * 1.3
+	holder.scale = Vector3.ONE * 0.85
 	parent.add_child(holder)
 	var material := _flat(DIM)
 	var black := _flat(Color(0.05, 0.05, 0.05))
@@ -166,7 +166,8 @@ func _missile(parent: Node3D, at: Vector3) -> Array[MeshInstance3D]:
 		fin.size = Vector3(0.1, 0.15, 0.016)
 		fin.left_to_right = 1.0 if side < 0.0 else 0.0 # the straight edge on the body
 		parts.append(_mesh(holder, fin, Vector3(side * 0.105, -0.045, 0.0), material))
-	parts.append(_mesh(holder, _box(Vector3(0.24, 0.022, 0.02)), Vector3(0.0, -0.2, 0.0), material)) # the cradle
+	parts.append(_mesh(holder, _cylinder(0.0, 0.05, 0.16), Vector3(0.0, -0.25, 0.0), material)) # the flame
+	_mesh(holder, _cylinder(0.0, 0.024, 0.09), Vector3(0.0, -0.225, 0.02), black) # its dark core
 	for y in [0.115, 0.055, -0.005, -0.065]: # the hazard bands
 		_mesh(holder, _cylinder(0.0575, 0.0575, 0.014), Vector3(0.0, y, 0.0), black)
 	_mesh(holder, _cylinder(0.0, 0.03, 0.04), Vector3(0.0, 0.215, 0.0), black) # the ogive's painted tip
