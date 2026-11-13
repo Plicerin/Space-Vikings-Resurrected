@@ -19,6 +19,7 @@ extends RefCounted
 ## - the directory's list of stars is on every one of its pages, two columns.
 
 const ComRules = preload("res://scripts/rules/com_rules.gd")
+const ChartRules = preload("res://scripts/rules/chart_rules.gd")
 const ReportsProgram = preload("res://scripts/flight/reports_program.gd")
 
 # Seconds.
@@ -68,14 +69,17 @@ func _central() -> void:
 	if ComRules.computer_out():
 		await _console.say(["-CENTRAL COMPUTER-"] + _console.flow(ComRules.SAID_COMPUTER_OUT), SAID)
 		return
-	var choice: int = await _console.menu("CENTRAL COMPUTER", ComRules.CENTRAL, [], [], ComRules.CENTRAL.size())
+	# the galaxy map is not a choice of its own: the directory has it (the stars on a map to click on, and
+	# each star's page, which says where it is and how far)
+	var items := ComRules.CENTRAL.duplicate()
+	items.erase("GALAXY MAP")
+	var shown: int = await _console.menu("CENTRAL COMPUTER", items, [], [], items.size())
+	var choice := shown + (1 if shown >= ComRules.Central.GALAXY_MAP + 1 else 0) # the rules count the map third
 	match ComRules.central(choice):
 		ComRules.Central.NAVIGATION:
 			await _navigation()
 		ComRules.Central.DIRECTORY:
 			await _directory()
-		ComRules.Central.GALAXY_MAP:
-			await _chart_pages(0)
 		ComRules.Central.STATUS:
 			await ReportsProgram.new().status(_console)
 		ComRules.Central.SUPPLY:
@@ -139,21 +143,14 @@ func _star_rows() -> Array:
 func _directory() -> void:
 	var rows := _star_rows()
 	while true:
-		var choice: int = await _console.menu("GALAXY DIRECTORY", ComRules.DIRECTORY, [], rows, ComRules.DIRECTORY.size())
-		if choice == 2:
+		_host.pick.call(true) # the galaxy map is up over the view: a click names a star
+		var c := int(await _console.ask_number(["-GALAXY DIRECTORY-"] + rows, "WHICH SYSTEM? (0 TO RETURN) ", true, _star_name))
+		_host.pick.call(false)
+		if c <= 0:
 			return
-		while true:
-			_host.pick.call(true)
-			var c := int(await _console.ask_number(["-GALAXY DIRECTORY-"] + rows, "WHICH SYSTEM? (0 TO RETURN) ", true, _star_name))
-			_host.pick.call(false)
-			if c <= 0:
-				break
-			if ComRules.is_star(c):
-				var from_chart := await _page(c)
-				if from_chart:
-					await _chart_pages(0)
-					return
-				break
+		if ComRules.is_star(c):
+			await _page(c)
+		else:
 			await _console.say(["-GALAXY DIRECTORY-"] + rows + ["TRY AGAIN PLEASE."], SAID)
 
 
@@ -162,6 +159,7 @@ func _directory() -> void:
 ## map comes up again).
 func _page(c: int) -> bool:
 	var lines: Array = ["-%s STAR SYSTEM-" % ComRules.NAMES[c - 1]]
+	lines.append(ChartRules.said(c)[1]) # where it is and how far, as the galaxy map says
 	var body := ComRules.star_page(c)
 	lines.append_array(body.slice(0, body.size()))
 	await _console.any_key(_trim(lines) + ["ANY KEY  RETURN"])
