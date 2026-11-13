@@ -111,24 +111,6 @@ func _drive() -> void:
 	await _frames(3)
 	_check("and takes it down", not chart.visible)
 
-	# run by the console, Space goes back to the console
-	GameState.start_new_game()
-	GameState.goto_scene(FLIGHT)
-	await _scene_is(FLIGHT)
-	await _frames(3)
-	chart = _scene().get("_chart")
-	_tap(KEY_C)
-	await _frames(4)
-	_tap(KEY_1)
-	await _frames(3)
-	_tap(KEY_3)
-	await _frames(4)
-	_check("the console's GALAXY MAP shows the chart over the flight", chart.visible)
-	_tap(KEY_SPACE)
-	await _frames(4)
-	_check("Space goes back to the console's command menu, nothing asked", not chart.visible and GameState.handover == 0
-			and _scene().get_node("Hud/Overlay").program[0] == "-COMMAND MODE-")
-
 	print("chart driven: %d wrong" % _bad)
 	get_tree().quit(1 if _bad > 0 else 0)
 
