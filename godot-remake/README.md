@@ -5,8 +5,7 @@ Mitchell Robbins, published by SubLOGIC (original © 1982 Mitchell Robbins;
 the A2-3D1 graphics package © 1979 SubLOGIC Company, as the manual credits
 them). This is an unofficial remake, not the original and not affiliated with
 its authors; the title screen says so. See [`APPRECIATION.md`](../APPRECIATION.md) for why we cared. It is built from the
-disassembly and analysis in the parent repository. It replaces the
-non-functional `js-remake/`.
+disassembly and analysis in the parent repository.
 
     godot --path godot-remake
 

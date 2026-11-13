@@ -1,5 +1,8 @@
 # REA-generated disassembly
 
+> Note (2026-11-12): `README_COMPLETE.md`, `JAVASCRIPT_REMAKE_PLAN.md`, `README-original-handover.md` and the `js-remake/` and `modern/web/src/` code were removed from the tree as superseded; they remain in the git history (before the cleanup commit). Where this file names them it is the record of a correction made at the time.
+
+
 This directory holds decompiled output from [REA (Reverse Engineer Anything)](https://github.com/morluto/rea),
 run against Ghidra 12.1.2 with a full JDK 27, for every real 6502 code binary
 extracted from the Space Vikings disk. It supplements the hand-written

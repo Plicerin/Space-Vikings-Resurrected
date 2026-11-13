@@ -66,9 +66,9 @@ down, each claim citing the code it came from:
     rea-disassembly/  decompiled machine code
     disk_image/, original_uploads/, extracted/
                       the cracked disk and what was taken from it, kept for the research
-    js-remake/, modern/
-                      earlier attempts in JavaScript (not the game; see below)
-    HANDOVER.md       the notes this work started from
+    modern/           the decoded shapes and the live traces the analyses cite
+                      (shapes_json/, a2_3d1_json/, ship_id_json/, web/tools/, web/public/data/debug/)
+    HANDOVER.md       the notes this work started from (historical)
 
 ## Tests
 
@@ -84,7 +84,8 @@ The whole list, and what each holds the port to, is in
 
 This started as a fork of [`Plicerin/Space-Vikings-Resurrected`](https://github.com/Plicerin/Space-Vikings-Resurrected),
 which did the first extraction and disassembly of the disk and made a first attempt at a remake in
-JavaScript (`js-remake/`, `modern/`, the early documents, `HANDOVER.md`). Everything since is here: the
+JavaScript. That code, and the early documents that went with it, were superseded and removed from the tree
+(they are in the git history); what it decoded is kept in `modern/`. Everything since is here: the
 decompiled engine and its analysis, the live recordings, the witness ledgers, and the Godot game.
 
 ## Credits
