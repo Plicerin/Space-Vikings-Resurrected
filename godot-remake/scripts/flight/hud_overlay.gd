@@ -379,7 +379,9 @@ func _draw_damage(canvas: CanvasItem, box: Rect2) -> void:
 			style.shadow_color = Color(1.0, 0.6, 0.05, 0.35 * level)
 			style.shadow_size = 4
 		canvas.draw_style_box(style, Rect2(frame_rect.position + Vector2(12.0 + i * pitch_px, 8.0), Vector2(pitch_px - 3.0, 18.0)))
-	_raised_string(canvas, get_theme_default_font(), box.position + Vector2(12.0, 16.0), "DAMAGE", 15)
+	var title_font := get_theme_default_font()
+	var title_width := title_font.get_string_size("DAMAGE ALERT", HORIZONTAL_ALIGNMENT_LEFT, -1, LAMP_LETTERS).x
+	_raised_string(canvas, title_font, Vector2(frame_rect.get_center().x - title_width / 2.0, box.position.y + 17.0), "DAMAGE ALERT", LAMP_LETTERS)
 
 
 ## Where `world_at` lies as seen from the ship, on the ball: straight ahead is
