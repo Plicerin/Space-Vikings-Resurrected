@@ -1,5 +1,7 @@
 # Space Vikings Reverse-Engineering — Handover
 
+> Historical: the notes this work started from. Several files named below (the JavaScript remakes, `README_COMPLETE.md`, the loose scripts and mock-ups at the root) were removed from the tree as superseded; they remain in the git history. The current state is in `README.md`.
+
 **Project:** Reverse-engineer SubLOGIC's *Space Vikings* (1982, Apple II)
 toward a modern remake.
 **Status as of handover:** Disk cataloged, file system fully extracted,

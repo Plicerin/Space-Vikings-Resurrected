@@ -1,0 +1,262 @@
+{
+  "_about": "Which recordings witness which program's lines (see tools/witness.py). A program is in scope once a @witness tag in godot-remake/scripts cites it.",
+  "recordings": {
+    "GROUND FORCES": {
+      "logs": [
+        "analysis/live/ground/*.log",
+        "analysis/live/shore/*.log"
+      ],
+      "ran": "GROUND_FORCES"
+    },
+    "RECALL": {
+      "logs": [
+        "analysis/live/ground/*.log"
+      ],
+      "ran": "RECALL"
+    },
+    "COLLECT": {
+      "logs": [
+        "analysis/live/ground/*.log"
+      ],
+      "ran": "COLLECT"
+    },
+    "SHORE LEAVE": {
+      "logs": [
+        "analysis/live/shore/*.log"
+      ],
+      "ran": "SHORE_LEAVE"
+    },
+    "STATUS": {
+      "logs": [
+        "analysis/live/reports/reports_status*.log"
+      ],
+      "after_get": "computer",
+      "until_get": "console_again"
+    },
+    "SUPPLY": {
+      "logs": [
+        "analysis/live/reports/reports_supply*.log"
+      ],
+      "after_get": "computer",
+      "until_get": "console_again"
+    },
+    "COM": {
+      "logs": [
+        "analysis/live/com/com_menus.log",
+        "analysis/live/com/com_damaged.log",
+        "analysis/live/com/com_lamps.log",
+        "analysis/live/com/com_stars.log",
+        "analysis/live/com/com_edges.log"
+      ],
+      "from_key": "C"
+    },
+    "GALAXY MAP": {
+      "logs": [
+        "analysis/live/chart/lines_live.log"
+      ],
+      "windows": [
+        [
+          "3",
+          "Y"
+        ],
+        [
+          "X",
+          "end"
+        ]
+      ]
+    },
+    "END": {
+      "logs": [
+        "analysis/live/end/end_menu.log",
+        "analysis/live/end/end_atmosphere.log",
+        "analysis/live/end/end_quit.log"
+      ],
+      "windows": [
+        [
+          "4",
+          "end"
+        ]
+      ]
+    },
+    "RADAR": {
+      "logs": [
+        "analysis/live/radar/radar_radar.log",
+        "analysis/live/radar/radar_radar_ids.log",
+        "analysis/live/radar/radar_radar_dead.log",
+        "analysis/live/radar/radar_radar_com.log"
+      ],
+      "from_key": "R"
+    },
+    "SHIP no 0 I.D.": {
+      "logs": [
+        "analysis/live/radar/radar_radar_ids.log",
+        "analysis/live/radar/radar_radar_ship_0.log",
+        "analysis/live/radar/radar_radar_ship_1.log",
+        "analysis/live/radar/radar_radar_ship_4.log"
+      ],
+      "from_key": "R"
+    },
+    "SHIP no 1 I.D.": {
+      "logs": [
+        "analysis/live/radar/radar_radar_ids.log",
+        "analysis/live/radar/radar_radar_ship_0.log",
+        "analysis/live/radar/radar_radar_ship_1.log",
+        "analysis/live/radar/radar_radar_ship_4.log"
+      ],
+      "from_key": "R"
+    },
+    "SHIP no 3 I.D.": {
+      "logs": [
+        "analysis/live/radar/radar_radar_ids.log",
+        "analysis/live/radar/radar_radar_ship_0.log",
+        "analysis/live/radar/radar_radar_ship_1.log",
+        "analysis/live/radar/radar_radar_ship_4.log"
+      ],
+      "from_key": "R"
+    },
+    "SHIP no 4 I.D.": {
+      "logs": [
+        "analysis/live/radar/radar_radar_ids.log",
+        "analysis/live/radar/radar_radar_ship_0.log",
+        "analysis/live/radar/radar_radar_ship_1.log",
+        "analysis/live/radar/radar_radar_ship_4.log"
+      ],
+      "from_key": "R"
+    },
+    "STARSHIP SIMULATOR": {
+      "logs": [
+        "analysis/live/combat/combat.log"
+      ],
+      "ran": "STARSHIP_SIMULATOR"
+    }
+  },
+  "waive": {
+    "_all": {
+      "0": "ONERR GOTO the SYSTEM ERROR screen: the original's DOS error trap, not a rule"
+    },
+    "SHORE LEAVE": {
+      "11": "OPEN/READ MISC FILE: the stardate, troops and credits come from GameState, not a file",
+      "2620": "WRITE MISC FILE: GameState keeps them"
+    },
+    "GROUND FORCES": {
+      "800": "WRITE MISC FILE: GameState keeps the stardate, troops and credits"
+    },
+    "RECALL": {
+      "11": "OPEN/READ MISC FILE: GameState keeps the stardate, troops and credits"
+    },
+    "STATUS": {
+      "5000": "OPEN/READ MISC FILE: GameState keeps the stardate, troops and credits",
+      "5010": "INPUT from MISC FILE: GameState keeps the stardate, troops and credits"
+    },
+    "SUPPLY": {
+      "5000": "OPEN/READ MISC FILE: GameState keeps the stardate, troops and credits"
+    },
+    "COLLECT": {
+      "170": "clears four rows of the text window, and R4 says whether to come back: presentation"
+    },
+    "COM": {
+      "5": "CR$ for the entry's RETURN: the entry is a field now",
+      "8": "clears the lamp rows with DRAW, painting",
+      "10": "DIM of the arrays",
+      "20": "paints the view and clears the window",
+      "21": "text window set",
+      "25": "text window set",
+      "29": "clears the window",
+      "35": "R=1 return: the screens are one panel",
+      "390": "RETURN of GOSUB 21",
+      "15100": "S$() names (the rules' NAMES)",
+      "10000": "the lamp's inverse test (see lamps())",
+      "15000": "DATA, read by the lamps' loop and not run: the lamps' words are in COM_RULES",
+      "15010": "DATA, read by the lamps' loop and not run: the lamps' words are in COM_RULES",
+      "15020": "DATA, read by the lamps' loop and not run: the lamps' words are in COM_RULES",
+      "15030": "DATA, read by the lamps' loop and not run: the lamps' words are in COM_RULES",
+      "897": "never reached: nothing goes to it (the original's own dead line)"
+    },
+    "GALAXY MAP": {
+      "5": "DIM, the hi-res switch and the names",
+      "3000": "text window of the page",
+      "3002": "text window",
+      "3096": "SCALE=1 for the shapes",
+      "3100": "the caption: the title and 'press space'",
+      "3245": "never reached (the original's dead line)",
+      "15100": "S$() names (the rules' NAMES)",
+      "15110": "S$() names",
+      "15120": "S$() names",
+      "15130": "S$() names",
+      "15140": "RETURN of the names",
+      "10000": "never called by this program (a leftover of COM's lamp test)",
+      "10010": "never called by this program",
+      "5000": "repaints the flight panel's lamps: the flight scene's HUD does it",
+      "5010": "flight panel lamps",
+      "5020": "flight panel lamps",
+      "5030": "flight panel lamps",
+      "5040": "flight panel lamps",
+      "5050": "flight panel lamps",
+      "5060": "flight panel lamps",
+      "5065": "flight panel lamps",
+      "5070": "flight panel lamps",
+      "5080": "flight panel lamps",
+      "5090": "flight panel lamps",
+      "5100": "flight panel lamps",
+      "5110": "flight panel lamps",
+      "5120": "flight panel lamps",
+      "5130": "flight panel lamps",
+      "5140": "flight panel lamps",
+      "5150": "flight panel lamps",
+      "5160": "flight panel lamps",
+      "5500": "flight panel lamps: draws a lamp block",
+      "2": "the 77 trampoline into flight (END's CONTINUE, START's old game): CONTINUE now just loads the flight scene"
+    },
+    "END": {
+      "120": "POKE the saved-game mark and run GALAXY MAP: CONTINUE just returns to the flight; the mark is gone (the save stays until saved over)"
+    },
+    "STARSHIP SIMULATOR": {
+      "6000": "stores or reads a number as two bytes (HI%, LO%, H): the game's own whole numbers, which GameState keeps as numbers",
+      "6010": "stores or reads a number as two bytes (HI%, LO%, H): the game's own whole numbers, which GameState keeps as numbers",
+      "6030": "stores or reads a number as two bytes (HI%, LO%, H): the game's own whole numbers, which GameState keeps as numbers",
+      "6600": "stores or reads a number as two bytes (HI%, LO%, H): the game's own whole numbers, which GameState keeps as numbers"
+    },
+    "H_D": {
+      "6000": "stores a number as two bytes (HI%, LO%): the game's own whole numbers",
+      "6005": "the same helper",
+      "6010": "the same helper",
+      "6020": "the same helper",
+      "6030": "the same helper",
+      "6040": "the same helper",
+      "6050": "the same helper",
+      "6060": "the same helper",
+      "6070": "the same helper",
+      "6080": "the same helper"
+    },
+    "RADAR": {
+      "6000": "stores a number as two bytes (HI%, LO%): the game's own whole numbers",
+      "6005": "the same helper",
+      "6010": "the same helper",
+      "6020": "the same helper",
+      "6030": "the same helper",
+      "6040": "the same helper",
+      "6050": "the same helper",
+      "6060": "the same helper",
+      "6070": "the same helper",
+      "6080": "the same helper"
+    },
+    "EX": {
+      "6": "the explosion's burst: drawing",
+      "7": "the explosion's rays: drawing and its random lengths",
+      "20": "a ray of the explosion: drawing",
+      "21": "a ray of the explosion: drawing",
+      "22": "a ray of the explosion: drawing",
+      "25": "a ray of the explosion: drawing"
+    },
+    "S_X": {
+      "6": "the explosion's burst: drawing",
+      "7": "the explosion's rays: drawing and its random lengths",
+      "20": "a ray of the explosion: drawing",
+      "21": "a ray of the explosion: drawing",
+      "22": "a ray of the explosion: drawing",
+      "25": "a ray of the explosion: drawing",
+      "30": "the end of the rays (EX: also the defender's 38205, which the rules take: line 30 is cited there)"
+    }
+  },
+  "in_progress": []
+}

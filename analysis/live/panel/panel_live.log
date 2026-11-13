@@ -1,0 +1,23 @@
+[5678] == settle
+[7178] == watch
+[7304] pass 1 shown=85 E6=32 S=120 E=63 P=0 B=0 H=0 X=700 Y=200 Z=-5801 cg=64
+[7479] pass 2 shown=84 E6=32 S=120 E=63 P=0 B=0 H=0 X=700 Y=200 Z=-5681 cg=32
+key 4
+[7657] pass 3 shown=85 E6=32 S=120 E=63 P=0 B=0 H=0 X=700 Y=200 Z=-5561 cg=64
+key 4
+[7836] pass 4 shown=84 E6=32 S=120 E=63 P=0 B=0 H=0 X=700 Y=200 Z=-5441 cg=32
+[8011] pass 5 shown=85 E6=32 S=120 E=63 P=0 B=0 H=0 X=700 Y=200 Z=-5321 cg=64
+key 3
+[8191] pass 6 shown=84 E6=32 S=105 E=63 P=0 B=0 H=0 X=700 Y=200 Z=-5216 cg=32
+[8365] pass 7 shown=85 E6=32 S=105 E=63 P=0 B=0 H=0 X=700 Y=200 Z=-5111 cg=64
+[8541] pass 8 shown=84 E6=32 S=105 E=63 P=0 B=0 H=0 X=700 Y=200 Z=-5006 cg=32
+key 2
+[8719] pass 9 shown=85 E6=32 S=108 E=63 P=0 B=0 H=0 X=700 Y=200 Z=-4898 cg=64
+key 4
+[8899] pass 10 shown=84 E6=32 S=120 E=63 P=0 B=0 H=0 X=700 Y=200 Z=-4778 cg=32
+[9074] pass 11 shown=85 E6=32 S=120 E=63 P=0 B=0 H=0 X=700 Y=200 Z=-4658 cg=64
+[9250] pass 12 shown=84 E6=32 S=120 E=63 P=0 B=0 H=0 X=700 Y=200 Z=-4538 cg=32
+[9426] pass 13 shown=85 E6=32 S=120 E=63 P=0 B=0 H=0 X=700 Y=200 Z=-4418 cg=64
+[9598] pass 14 shown=84 E6=32 S=120 E=63 P=0 B=0 H=0 X=700 Y=200 Z=-4298 cg=32
+[9598] == done
+done

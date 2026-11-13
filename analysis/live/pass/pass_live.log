@@ -1,0 +1,182 @@
+[0] show 1 (+0)
+[896] show 2 (+896)
+[896] show 1 (+896)
+[896] t974 32 (+896)
+[896] show 2 (+896)
+[913] show 1 (+913)
+[2109] planet file loaded over byte 29461 (+2109)
+[3918] t974 64 (+3918)
+[4747] t974 64 (+4747)
+[5154] t974 32 (+5154)
+[5717] ev 1 (+5717) it=84 X=700 Y=200 Z=-6881 P=0 B=0 H=0 S=120 E=63 pdl=128/128 auto=0 cond=3 shields=0 weapon=1 atmos=0 dmg=0 flip=0 b149=7 planet=1 target=0 defender=3 c974=32 shown=1
+[5718] == flight
+[5834] t974 64 (+117)
+[5893] ev 2 (+176) it=85 X=700 Y=200 Z=-6761 P=0 B=0 H=0 S=120 E=63 pdl=128/128 auto=0 cond=3 shields=0 weapon=1 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=64 shown=1
+[5895] show 2 (+2)
+[6009] t974 32 (+116)
+[6070] ev 3 (+177) it=84 X=700 Y=200 Z=-6641 P=0 B=0 H=0 S=120 E=63 pdl=128/128 auto=0 cond=3 shields=0 weapon=1 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=32 shown=2
+[6072] show 1 (+2)
+[6186] t974 64 (+116)
+[6245] ev 4 (+175) it=85 X=700 Y=200 Z=-6521 P=0 B=0 H=0 S=120 E=63 pdl=128/128 auto=0 cond=3 shields=0 weapon=1 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=64 shown=1
+[6247] show 2 (+2)
+[6362] t974 32 (+117)
+[6423] ev 5 (+178) it=84 X=700 Y=200 Z=-6401 P=0 B=0 H=0 S=120 E=63 pdl=128/128 auto=0 cond=3 shields=0 weapon=1 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=32 shown=2
+[6425] show 1 (+2)
+[6539] t974 64 (+116)
+[6599] ev 6 (+176) it=85 X=700 Y=200 Z=-6281 P=0 B=0 H=0 S=120 E=63 pdl=128/128 auto=0 cond=3 shields=0 weapon=1 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=64 shown=1
+act auto 1
+act pdl 128 0
+[6601] show 2 (+2)
+[6715] t974 32 (+116)
+[6774] ev 7 (+175) it=84 X=700 Y=200 Z=-6161 P=0 B=4 H=0 S=120 E=63 pdl=128/0 auto=1 cond=3 shields=0 weapon=1 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=32 shown=2
+[6777] show 1 (+3)
+[6891] t974 64 (+117)
+[6951] ev 8 (+177) it=85 X=697 Y=200 Z=-6041 P=0 B=8 H=255 S=120 E=63 pdl=128/0 auto=1 cond=3 shields=0 weapon=1 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=64 shown=1
+[6953] show 2 (+2)
+[7068] t974 32 (+117)
+[7130] ev 9 (+179) it=84 X=693 Y=200 Z=-5921 P=0 B=12 H=254 S=120 E=63 pdl=128/0 auto=1 cond=3 shields=0 weapon=1 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=32 shown=2
+[7132] show 1 (+2)
+[7247] t974 64 (+117)
+[7307] ev 10 (+177) it=85 X=685 Y=200 Z=-5801 P=0 B=16 H=253 S=120 E=63 pdl=128/0 auto=1 cond=3 shields=0 weapon=1 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=64 shown=1
+act pdl 0 128
+[7310] show 2 (+3)
+[7423] t974 32 (+116)
+[7485] ev 11 (+178) it=84 X=674 Y=188 Z=-5682 P=4 B=16 H=252 S=120 E=63 pdl=0/128 auto=1 cond=3 shields=0 weapon=1 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=32 shown=2
+[7487] show 1 (+2)
+[7597] t974 64 (+112)
+[7658] ev 12 (+173) it=85 X=660 Y=164 Z=-5565 P=8 B=16 H=251 S=120 E=63 pdl=0/128 auto=1 cond=3 shields=0 weapon=1 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=64 shown=1
+[7660] show 2 (+2)
+[7766] t974 32 (+108)
+[7829] ev 13 (+171) it=84 X=644 Y=129 Z=-5452 P=12 B=16 H=250 S=120 E=63 pdl=0/128 auto=1 cond=3 shields=0 weapon=1 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=32 shown=2
+act pdl 128 128
+act key 1
+[7831] show 1 (+2)
+[7937] t974 64 (+108)
+[8003] ev 14 (+174) it=85 X=626 Y=96 Z=-5342 P=12 B=16 H=249 S=117 E=63 pdl=128/128 auto=1 cond=3 shields=0 weapon=1 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=64 shown=1
+act key 3
+[8005] show 2 (+2)
+[8110] t974 32 (+107)
+[8177] ev 15 (+174) it=84 X=608 Y=66 Z=-5246 P=12 B=16 H=248 S=102 E=63 pdl=128/128 auto=1 cond=3 shields=0 weapon=1 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=32 shown=2
+act key W
+[8179] show 1 (+2)
+[8285] t974 64 (+108)
+[8370] ev 16 (+193) it=84 X=587 Y=36 Z=-5151 P=12 B=16 H=247 S=102 E=63 pdl=128/128 auto=1 cond=3 shields=0 weapon=0 atmos=0 dmg=0 flip=0 b149=7 planet=1 target=0 defender=3 c974=64 shown=1
+[8478] t974 64 (+108)
+[8535] ev 17 (+165) it=85 X=564 Y=6 Z=-5057 P=12 B=16 H=246 S=102 E=63 pdl=128/128 auto=1 cond=3 shields=0 weapon=0 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=64 shown=1
+[8537] show 2 (+2)
+[8643] t974 32 (+108)
+[8707] ev 18 (+172) it=84 X=538 Y=-23 Z=-4963 P=12 B=16 H=245 S=102 E=63 pdl=128/128 auto=1 cond=3 shields=0 weapon=0 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=32 shown=2
+act key B
+[8710] show 1 (+3)
+[8816] t974 64 (+109)
+[8902] ev 19 (+195) it=84 X=510 Y=-53 Z=-4870 P=12 B=16 H=244 S=102 E=63 pdl=128/128 auto=1 cond=1 shields=0 weapon=0 atmos=0 dmg=0 flip=0 b149=7 planet=1 target=0 defender=3 c974=64 shown=1
+[9011] t974 64 (+109)
+[9069] ev 20 (+167) it=85 X=480 Y=-83 Z=-4777 P=12 B=16 H=243 S=102 E=63 pdl=128/128 auto=1 cond=1 shields=0 weapon=0 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=64 shown=1
+act key S
+[9071] show 2 (+2)
+[9178] t974 32 (+109)
+[9265] ev 21 (+196) it=84 X=447 Y=-113 Z=-4686 P=12 B=16 H=242 S=102 E=63 pdl=128/128 auto=1 cond=1 shields=1 weapon=0 atmos=0 dmg=0 flip=0 b149=7 planet=1 target=0 defender=3 c974=32 shown=2
+[9267] show 1 (+2)
+[9361] t974 64 (+96)
+[9419] ev 22 (+154) it=85 X=413 Y=-143 Z=-4595 P=12 B=16 H=241 S=102 E=63 pdl=128/128 auto=1 cond=1 shields=1 weapon=0 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=64 shown=1
+[9421] show 2 (+2)
+[9513] t974 32 (+94)
+[9577] ev 23 (+158) it=84 X=377 Y=-172 Z=-4504 P=12 B=16 H=240 S=102 E=63 pdl=128/128 auto=1 cond=1 shields=1 weapon=0 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=32 shown=2
+act key A
+[9580] show 1 (+3)
+[9671] t974 64 (+94)
+[9758] ev 24 (+181) it=84 X=338 Y=-202 Z=-4415 P=12 B=16 H=239 S=102 E=63 pdl=128/128 auto=0 cond=1 shields=1 weapon=0 atmos=0 dmg=0 flip=0 b149=7 planet=1 target=0 defender=3 c974=64 shown=1
+[9851] t974 64 (+93)
+[9911] ev 25 (+153) it=85 X=297 Y=-232 Z=-4327 P=12 B=16 H=238 S=102 E=63 pdl=128/128 auto=0 cond=1 shields=1 weapon=0 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=64 shown=1
+[9913] show 2 (+2)
+[10000] t974 32 (+89)
+[10066] ev 26 (+155) it=84 X=254 Y=-261 Z=-4240 P=12 B=16 H=237 S=102 E=63 pdl=128/128 auto=0 cond=1 shields=1 weapon=0 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=32 shown=2
+act key A
+[10068] show 1 (+2)
+[10154] t974 64 (+88)
+[10240] ev 27 (+174) it=84 X=208 Y=-291 Z=-4154 P=12 B=16 H=236 S=102 E=63 pdl=128/128 auto=1 cond=1 shields=1 weapon=0 atmos=0 dmg=0 flip=0 b149=7 planet=1 target=0 defender=3 c974=64 shown=1
+[10326] t974 64 (+86)
+[10385] ev 28 (+145) it=85 X=161 Y=-321 Z=-4070 P=12 B=16 H=235 S=102 E=63 pdl=128/128 auto=1 cond=1 shields=1 weapon=0 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=64 shown=1
+act key H
+[10387] show 2 (+2)
+[10470] t974 32 (+85)
+[10730] show 1 (+345)
+[11152] ev 29 (+767) it=84 X=112 Y=-351 Z=-3987 P=12 B=16 H=234 S=102 E=63 pdl=128/128 auto=1 cond=1 shields=1 weapon=0 atmos=0 dmg=0 flip=0 b149=7 planet=1 target=0 defender=3 c974=32 shown=1
+[11237] t974 64 (+85)
+[11295] ev 30 (+143) it=85 X=60 Y=-381 Z=-3904 P=12 B=16 H=233 S=102 E=63 pdl=128/128 auto=1 cond=1 shields=1 weapon=0 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=64 shown=1
+[11297] show 2 (+2)
+[11379] t974 32 (+84)
+[11443] ev 31 (+148) it=84 X=6 Y=-410 Z=-3823 P=12 B=16 H=232 S=102 E=63 pdl=128/128 auto=1 cond=1 shields=1 weapon=0 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=32 shown=2
+act pos 300 200 -500
+act att 0 0 0
+act speed 40
+act pdl 128 128
+act key S
+[11445] show 1 (+2)
+[11525] t974 64 (+82)
+[11609] ev 32 (+166) it=84 X=300 Y=200 Z=-461 P=0 B=0 H=0 S=40 E=63 pdl=128/128 auto=1 cond=1 shields=0 weapon=0 atmos=0 dmg=0 flip=0 b149=7 planet=1 target=0 defender=3 c974=64 shown=1
+[11691] t974 64 (+82)
+[11838] t974 32 (+229)
+[11868] t974 32 (+259)
+[12120] t974 64 (+511)
+[12277] planet file loaded over byte 29461 (+668)
+[12734] ev 33 (+1125) it=84 X=462 Y=1024 Z=-6965 P=0 B=0 H=20 S=40 E=63 pdl=128/128 auto=1 cond=1 shields=0 weapon=0 atmos=1 dmg=0 flip=0 b149=7 planet=1 target=0 defender=3 c974=64 shown=1
+[12780] t974 64 (+46)
+[12835] ev 34 (+101) it=85 X=481 Y=1022 Z=-6930 P=0 B=0 H=20 S=40 E=63 pdl=128/128 auto=1 cond=1 shields=0 weapon=0 atmos=1 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=64 shown=1
+[12838] show 2 (+3)
+[12882] t974 32 (+47)
+[12942] ev 35 (+107) it=84 X=500 Y=1020 Z=-6895 P=0 B=0 H=20 S=40 E=63 pdl=128/128 auto=1 cond=1 shields=0 weapon=0 atmos=1 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=32 shown=2
+[12945] show 1 (+3)
+[12989] t974 64 (+47)
+[13049] ev 36 (+107) it=85 X=519 Y=1018 Z=-6859 P=0 B=0 H=20 S=40 E=63 pdl=128/128 auto=1 cond=1 shields=0 weapon=0 atmos=1 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=64 shown=1
+[13052] show 2 (+3)
+[13096] t974 32 (+47)
+[13156] ev 37 (+107) it=84 X=538 Y=1016 Z=-6824 P=0 B=0 H=20 S=40 E=63 pdl=128/128 auto=1 cond=1 shields=0 weapon=0 atmos=1 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=32 shown=2
+act pdl 255 128
+[13159] show 1 (+3)
+[13202] t974 64 (+46)
+[13263] ev 38 (+107) it=85 X=557 Y=1017 Z=-6789 P=252 B=0 H=20 S=40 E=63 pdl=255/128 auto=1 cond=1 shields=0 weapon=0 atmos=1 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=64 shown=1
+[13266] show 2 (+3)
+[13302] t974 32 (+39)
+[13364] ev 39 (+101) it=84 X=575 Y=1022 Z=-6754 P=248 B=0 H=20 S=40 E=63 pdl=255/128 auto=1 cond=1 shields=0 weapon=0 atmos=1 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=32 shown=2
+[13367] show 1 (+3)
+[13397] t974 64 (+33)
+[13458] ev 40 (+94) it=85 X=593 Y=1032 Z=-6721 P=244 B=0 H=20 S=40 E=63 pdl=255/128 auto=1 cond=1 shields=0 weapon=0 atmos=1 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=64 shown=1
+act pdl 128 128
+act key 4
+[13461] show 2 (+3)
+[13490] t974 32 (+32)
+[13556] ev 41 (+98) it=84 X=618 Y=1045 Z=-6674 P=244 B=0 H=20 S=55 E=63 pdl=128/128 auto=1 cond=1 shields=0 weapon=0 atmos=1 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=32 shown=2
+[13559] show 1 (+3)
+[13588] t974 64 (+32)
+[13649] ev 42 (+93) it=85 X=643 Y=1060 Z=-6628 P=244 B=0 H=20 S=55 E=63 pdl=128/128 auto=1 cond=1 shields=0 weapon=0 atmos=1 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=64 shown=1
+[13652] show 2 (+3)
+[13681] t974 32 (+32)
+[13743] ev 43 (+94) it=84 X=667 Y=1075 Z=-6581 P=244 B=0 H=20 S=55 E=63 pdl=128/128 auto=1 cond=1 shields=0 weapon=0 atmos=1 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=32 shown=2
+[13746] show 1 (+3)
+[13775] t974 64 (+32)
+[13836] ev 44 (+93) it=85 X=692 Y=1091 Z=-6535 P=244 B=0 H=20 S=55 E=63 pdl=128/128 auto=1 cond=1 shields=0 weapon=0 atmos=1 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=64 shown=1
+act pos 300 4100 -500
+act key S
+[13839] show 2 (+3)
+[13868] t974 32 (+32)
+[13953] ev 45 (+117) it=84 X=324 Y=4115 Z=-454 P=244 B=0 H=20 S=55 E=63 pdl=128/128 auto=1 cond=1 shields=1 weapon=0 atmos=1 dmg=0 flip=0 b149=7 planet=1 target=0 defender=3 c974=32 shown=2
+[13956] show 1 (+3)
+[13985] t974 64 (+32)
+[14157] t974 32 (+204)
+[14186] t974 32 (+233)
+[14438] t974 64 (+485)
+[14594] planet file loaded over byte 29461 (+641)
+[15242] ev 46 (+1289) it=84 X=648 Y=215 Z=2000 P=244 B=0 H=190 S=55 E=63 pdl=128/128 auto=1 cond=1 shields=1 weapon=0 atmos=0 dmg=0 flip=0 b149=7 planet=1 target=0 defender=3 c974=64 shown=1
+[15324] t974 64 (+82)
+[15378] ev 47 (+136) it=85 X=596 Y=231 Z=2000 P=244 B=0 H=190 S=55 E=63 pdl=128/128 auto=1 cond=1 shields=1 weapon=0 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=64 shown=1
+[15380] show 2 (+2)
+[15460] t974 32 (+82)
+[15520] ev 48 (+142) it=84 X=544 Y=246 Z=2000 P=244 B=0 H=190 S=55 E=63 pdl=128/128 auto=1 cond=1 shields=1 weapon=0 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=32 shown=2
+[15522] show 1 (+2)
+[15603] t974 64 (+83)
+[15661] ev 49 (+141) it=85 X=492 Y=262 Z=2000 P=244 B=0 H=190 S=55 E=63 pdl=128/128 auto=1 cond=1 shields=1 weapon=0 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=64 shown=1
+[15663] show 2 (+2)
+[15744] t974 32 (+83)
+[15804] ev 50 (+143) it=84 X=440 Y=277 Z=2000 P=244 B=0 H=190 S=55 E=63 pdl=128/128 auto=1 cond=1 shields=1 weapon=0 atmos=0 dmg=0 flip=0 b149=0 planet=1 target=0 defender=3 c974=32 shown=2
+done

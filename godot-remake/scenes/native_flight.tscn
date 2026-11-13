@@ -1,0 +1,39 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/flight/native_flight.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/flight/hud_overlay.gd" id="hud_overlay"]
+
+[node name="NativeFlight" type="Node3D"]
+script = ExtResource("1")
+
+[node name="Camera" type="Camera3D" parent="."]
+keep_aspect = 0
+fov = 93.8
+near = 5.0
+far = 400000.0
+current = true
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+light_energy = 1.6
+
+[node name="Hud" type="CanvasLayer" parent="."]
+
+
+[node name="Overlay" type="Control" parent="Hud"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("hud_overlay")
+
+[node name="Flash" type="ColorRect" parent="Hud"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 0)

@@ -1,0 +1,1983 @@
+[5678] == flight
+planet=1 tech=3 defender=3 fighters=30 surrendered=1 X=700 Y=200 Z=-6521
+[8078] == watch
+[8079] byte shield_38200 nil -> 91
+[8079] byte radar_38195 nil -> 100
+[8079] byte eng1_38198 nil -> 100
+[8079] byte eng2_38197 nil -> 100
+[8079] byte computer_38196 nil -> 100
+[8079] byte laser_38186 nil -> 100
+[8079] byte hull_38193 nil -> 100
+[8079] byte missiles_38187 nil -> 56
+[8079] byte fighters_38207 nil -> 7
+[8079] byte surrendered_38208 nil -> 0
+[8079] byte defender_38205 nil -> 3
+[8079] byte vp_38160 nil -> 1
+[8079] byte dp_38152 nil -> 0
+[8079] byte shields_38201 nil -> 1
+[8079] byte condition_38165 nil -> 3
+[8079] byte weapon_38202 nil -> 1
+[8079] byte dmgflag_38393 nil -> 0
+[8079] byte speed_38157 nil -> 120
+[8079] byte hpag_E6 nil -> 32
+[8079] byte pitch_7321 nil -> 0
+[8079] byte bank_7322 nil -> 0
+[8079] byte head_7323 nil -> 0
+[8079] iter 84 (+8079 frames) X=700 Y=200 Z=-4661 atmos=0 marker=7F/7F
+[8085] byte shield_38200 91 -> 90
+[8093] page 10 bytes rows 115-122 cols 33-34
+[8093] snap_0 small page change
+[8094] page 7 bytes rows 120-126 cols 32-33
+[8095] page 14 bytes rows 115-126 cols 32-34
+[8099] page 14 bytes rows 112-123 cols 31-33
+[8099] snap_1 small page change
+[8111] byte shield_38200 90 -> 89
+[8116] page 1 bytes rows 123-123 cols 2-2
+[8116] snap_2 small page change
+[8117] page 23 bytes rows 121-123 cols 3-23
+[8117] snap_3 small page change
+[8118] page 10 bytes rows 120-121 cols 24-32
+[8118] snap_4 small page change
+[8119] page 8 bytes rows 122-123 cols 12-24
+[8119] snap_5 small page change
+[8120] page 3 bytes rows 120-121 cols 32-33
+[8120] snap_6 small page change
+[8123] page 1 bytes rows 123-123 cols 2-2
+[8123] snap_7 small page change
+[8124] page 31 bytes rows 121-123 cols 3-31
+[8124] snap_8 small page change
+[8125] page 3 bytes rows 120-121 cols 31-32
+[8125] snap_9 small page change
+[8126] page 11 bytes rows 120-123 cols 12-33
+[8126] snap_10 small page change
+[8129] page 14 bytes rows 112-123 cols 31-33
+[8129] snap_11 small page change
+[8132] page 8 bytes rows 110-117 cols 31-32
+[8132] snap_12 small page change
+[8133] page 9 bytes rows 112-121 cols 30-31
+[8133] snap_13 small page change
+[8134] page 14 bytes rows 110-121 cols 30-32
+[8134] snap_14 small page change
+[8135] page 2 bytes rows 116-117 cols 31-31
+[8135] snap_15 small page change
+[8138] page 14 bytes rows 108-119 cols 29-31
+[8138] snap_16 small page change
+[8139] page 8 bytes rows 108-115 cols 30-31
+[8139] snap_17 small page change
+[8140] page 9 bytes rows 110-119 cols 29-30
+[8140] snap_18 small page change
+[8143] page 14 bytes rows 106-117 cols 28-30
+[8143] snap_19 small page change
+[8144] page 1 bytes rows 112-112 cols 29-29
+[8144] snap_20 small page change
+[8145] page 14 bytes rows 106-117 cols 28-30
+[8145] snap_21 small page change
+[8148] page 9 bytes rows 104-111 cols 28-29
+[8148] snap_22 small page change
+[8149] page 8 bytes rows 106-115 cols 27-28
+[8149] snap_23 small page change
+[8150] page 14 bytes rows 104-115 cols 27-29
+[8150] snap_24 small page change
+[8154] page 14 bytes rows 102-113 cols 26-28
+[8154] snap_25 small page change
+[8166] byte shield_38200 89 -> 88
+[8171] page 1 bytes rows 123-123 cols 31-31
+[8171] snap_26 small page change
+[8172] page 19 bytes rows 110-123 cols 27-37
+[8172] snap_27 small page change
+[8173] page 22 bytes rows 110-123 cols 28-37
+[8173] snap_28 small page change
+[8176] page 1 bytes rows 123-123 cols 31-31
+[8176] snap_29 small page change
+[8177] page 18 bytes rows 110-123 cols 27-31
+[8177] snap_30 small page change
+[8178] page 17 bytes rows 114-123 cols 30-37
+[8178] snap_31 small page change
+[8179] page 5 bytes rows 110-113 cols 28-30
+[8179] snap_32 small page change
+[8181] page 14 bytes rows 102-113 cols 26-28
+[8181] snap_33 small page change
+[8184] page 3 bytes rows 105-107 cols 26-26
+[8184] snap_34 small page change
+[8185] page 14 bytes rows 100-111 cols 25-27
+[8185] snap_35 small page change
+[8197] byte shield_38200 88 -> 87
+[8202] page 4 bytes rows 121-123 cols 30-31
+[8202] snap_36 small page change
+[8203] page 19 bytes rows 108-123 cols 26-37
+[8203] snap_37 small page change
+[8204] page 26 bytes rows 108-123 cols 27-37
+[8204] snap_38 small page change
+[8207] page 1 bytes rows 123-123 cols 31-31
+[8207] snap_39 small page change
+[8208] page 21 bytes rows 108-123 cols 26-31
+[8208] snap_40 small page change
+[8209] page 15 bytes rows 115-123 cols 31-37
+[8209] snap_41 small page change
+[8210] page 12 bytes rows 108-115 cols 27-31
+[8210] snap_42 small page change
+[8212] page 14 bytes rows 100-111 cols 25-27
+[8212] snap_43 small page change
+[8216] page 14 bytes rows 98-109 cols 24-26
+[8216] snap_44 small page change
+[8217] page 10 bytes rows 98-105 cols 25-26
+[8217] snap_45 small page change
+[8218] page 7 bytes rows 103-109 cols 24-25
+[8218] snap_46 small page change
+[8221] page 14 bytes rows 95-106 cols 23-25
+[8221] snap_47 small page change
+[8222] page 2 bytes rows 100-101 cols 24-24
+[8222] snap_48 small page change
+[8223] page 14 bytes rows 95-106 cols 23-25
+[8223] snap_49 small page change
+[8226] page 11 bytes rows 93-101 cols 23-24
+[8226] snap_50 small page change
+[8227] page 6 bytes rows 98-104 cols 22-23
+[8227] snap_51 small page change
+[8228] page 14 bytes rows 93-104 cols 22-24
+[8228] snap_52 small page change
+[8231] page 3 bytes rows 96-98 cols 22-22
+[8231] snap_53 small page change
+[8232] page 14 bytes rows 91-102 cols 21-23
+[8232] snap_54 small page change
+[8233] page 14 bytes rows 91-102 cols 21-23
+[8233] snap_55 small page change
+[8234] page 3 bytes rows 96-98 cols 22-22
+[8234] snap_56 small page change
+[8237] page 14 bytes rows 89-100 cols 20-22
+[8237] snap_57 small page change
+[8238] page 8 bytes rows 89-96 cols 21-22
+[8238] snap_58 small page change
+[8239] page 9 bytes rows 91-100 cols 20-21
+[8239] snap_59 small page change
+[8242] page 14 bytes rows 87-98 cols 19-21
+[8242] snap_60 small page change
+[8243] page 3 bytes rows 92-94 cols 20-20
+[8243] snap_61 small page change
+[8254] byte shield_38200 87 -> 86
+[8260] page 16 bytes rows 114-123 cols 2-8
+[8260] snap_62 small page change
+[8261] page 30 bytes rows 95-114 cols 9-20
+[8261] snap_63 small page change
+[8262] page 32 bytes rows 101-123 cols 8-18
+[8262] snap_64 small page change
+[8263] page 8 bytes rows 95-100 cols 18-21
+[8263] snap_65 small page change
+[8266] page 6 bytes rows 120-123 cols 2-4
+[8266] snap_66 small page change
+[8267] page 41 bytes rows 95-120 cols 5-20
+[8267] snap_67 small page change
+[8268] page 22 bytes rows 109-123 cols 8-15
+[8268] snap_68 small page change
+[8269] page 20 bytes rows 95-108 cols 15-21
+[8269] snap_69 small page change
+[8271] page 14 bytes rows 87-98 cols 19-21
+[8271] snap_70 small page change
+[8272] page 1 bytes rows 93-93 cols 20-20
+[8272] snap_71 small page change
+[8275] page 14 bytes rows 85-96 cols 18-20
+[8275] snap_72 small page change
+[8276] page 10 bytes rows 85-92 cols 19-20
+[8276] snap_73 small page change
+[8277] page 7 bytes rows 90-96 cols 18-19
+[8277] snap_74 small page change
+[8280] page 14 bytes rows 83-94 cols 17-19
+[8280] snap_75 small page change
+[8292] byte shield_38200 86 -> 85
+[8297] page 1 bytes rows 123-123 cols 31-31
+[8297] snap_76 small page change
+[8298] page 46 bytes rows 91-123 cols 18-31
+[8298] snap_77 small page change
+[8299] page 1 bytes rows 123-123 cols 37-37
+[8299] snap_78 small page change
+[8300] page 50 bytes rows 91-123 cols 19-37
+[8300] snap_79 small page change
+[8304] page 31 bytes rows 102-123 cols 22-31
+[8305] page 17 bytes rows 91-123 cols 18-37
+[8306] page 48 bytes rows 93-123 cols 19-37
+[8307] page 2 bytes rows 91-92 cols 19-19
+[8309] page 14 bytes rows 83-94 cols 17-19
+[8312] page 5 bytes rows 84-88 cols 17-18
+[8313] page 12 bytes rows 81-92 cols 16-18
+[8314] page 14 bytes rows 81-92 cols 16-18
+[8315] page 3 bytes rows 86-88 cols 17-17
+[8318] page 14 bytes rows 79-90 cols 15-17
+[8330] byte shield_38200 85 -> 83
+[8335] page 1 bytes rows 123-123 cols 31-31
+[8336] page 52 bytes rows 87-123 cols 16-31
+[8337] page 6 bytes rows 120-123 cols 35-37
+[8338] page 51 bytes rows 87-120 cols 17-35
+[8342] page 30 bytes rows 103-123 cols 22-31
+[8343] page 24 bytes rows 87-123 cols 16-37
+[8344] page 43 bytes rows 96-123 cols 22-37
+[8345] page 13 bytes rows 87-96 cols 17-21
+[8347] page 14 bytes rows 79-90 cols 15-17
+[8351] page 14 bytes rows 76-87 cols 14-16
+[8363] byte shield_38200 83 -> 82
+[8368] page 1 bytes rows 123-123 cols 31-31
+[8369] page 56 bytes rows 84-123 cols 15-31
+[8370] page 12 bytes rows 116-123 cols 33-37
+[8371] page 50 bytes rows 84-116 cols 16-33
+[8375] page 33 bytes rows 100-123 cols 22-31
+[8376] page 24 bytes rows 84-123 cols 15-37
+[8377] page 43 bytes rows 96-123 cols 22-37
+[8378] page 19 bytes rows 84-96 cols 16-22
+[8380] page 14 bytes rows 76-87 cols 14-16
+[8381] page 1 bytes rows 82-82 cols 15-15
+[8384] page 14 bytes rows 74-85 cols 13-15
+[8385] page 9 bytes rows 74-81 cols 14-15
+[8386] page 8 bytes rows 76-85 cols 13-14
+[8389] page 14 bytes rows 72-83 cols 12-14
+[8390] page 1 bytes rows 78-78 cols 13-13
+[8401] byte shield_38200 82 -> 81
+[8407] page 34 bytes rows 97-123 cols 2-9
+[8408] page 23 bytes rows 80-123 cols 8-13
+[8409] page 49 bytes rows 80-122 cols 8-14
+[8412] page 1 bytes rows 123-123 cols 2-2
+[8413] page 49 bytes rows 84-123 cols 3-12
+[8414] page 7 bytes rows 80-123 cols 8-13
+[8415] page 49 bytes rows 80-122 cols 8-14
+[8418] page 14 bytes rows 72-83 cols 12-14
+[8424] page 10 bytes rows 75-84 cols 13-14
+[8425] page 23 bytes rows 71-84 cols 12-14
+[8426] page 11 bytes rows 71-83 cols 12-13
+[8438] page 12 bytes rows 75-84 cols 13-15
+[8439] page 19 bytes rows 71-84 cols 13-15
+[8440] page 6 bytes rows 71-75 cols 13-14
+[8442] page 20 bytes rows 72-83 cols 11-13
+[8443] page 30 bytes rows 69-84 cols 12-14
+[8444] page 18 bytes rows 66-89 cols 11-13
+[8445] page 6 bytes rows 77-79 cols 13-15
+[8446] page 7 bytes rows 74-80 cols 14-14
+[8447] page 25 bytes rows 69-83 cols 12-15
+[8448] page 25 bytes rows 72-89 cols 12-15
+[8449] page 15 bytes rows 66-85 cols 13-16
+[8452] page 14 bytes rows 75-84 cols 12-14
+[8453] page 20 bytes rows 71-84 cols 12-14
+[8454] page 7 bytes rows 71-75 cols 12-13
+[8455] page 6 bytes rows 75-80 cols 14-14
+[8456] page 20 bytes rows 71-84 cols 13-15
+[8457] page 18 bytes rows 71-84 cols 13-15
+[8459] page 5 bytes rows 76-80 cols 13-13
+[8460] page 27 bytes rows 69-83 cols 11-14
+[8461] page 26 bytes rows 72-89 cols 11-14
+[8462] page 17 bytes rows 66-85 cols 12-15
+[8464] page 18 bytes rows 74-83 cols 12-14
+[8465] page 29 bytes rows 69-84 cols 13-15
+[8466] page 19 bytes rows 66-89 cols 12-14
+[8467] page 8 bytes rows 77-85 cols 14-16
+[8470] byte fighters_38207 7 -> 6
+[8472] byte missiles_38187 56 -> 54
+[8501] iter 85 (+422 frames) X=700 Y=200 Z=-4541 atmos=0 marker=7F/7F
+[8503] page 403 bytes rows 23-190 cols 1-37
+[8504] page 548 bytes rows 20-190 cols 0-39
+[8505] page 469 bytes rows 24-190 cols 0-39
+[8506] page 2 bytes rows 22-45 cols 13-19
+[8507] page 3 bytes rows 68-112 cols 10-19
+[8508] page 3 bytes rows 24-112 cols 10-16
+[8509] page 6 bytes rows 25-92 cols 12-19
+[8510] page 4 bytes rows 27-92 cols 10-21
+[8511] page 3 bytes rows 70-114 cols 10-22
+[8512] page 4 bytes rows 21-106 cols 10-17
+[8513] page 4 bytes rows 30-98 cols 12-21
+[8514] page 5 bytes rows 28-85 cols 10-17
+[8515] page 3 bytes rows 72-114 cols 12-17
+[8516] page 4 bytes rows 20-103 cols 15-17
+[8517] page 3 bytes rows 31-103 cols 13-17
+[8518] page 3 bytes rows 25-83 cols 9-18
+[8519] page 6 bytes rows 69-113 cols 8-23
+[8520] page 3 bytes rows 22-108 cols 14-22
+[8521] page 3 bytes rows 29-95 cols 10-19
+[8522] page 4 bytes rows 22-87 cols 15-22
+[8523] page 3 bytes rows 24-112 cols 15-16
+[8524] page 3 bytes rows 48-113 cols 15-16
+[8525] page 3 bytes rows 25-93 cols 15-16
+[8526] page 2 bytes rows 43-80 cols 8-21
+[8527] page 3 bytes rows 23-113 cols 16-22
+[8528] page 3 bytes rows 51-108 cols 8-21
+[8529] page 5 bytes rows 28-88 cols 8-21
+[8530] page 3 bytes rows 28-77 cols 14-17
+[8531] page 3 bytes rows 20-114 cols 16-17
+[8532] page 4 bytes rows 53-103 cols 14-17
+[8533] page 4 bytes rows 31-83 cols 14-17
+[8534] page 3 bytes rows 27-77 cols 9-21
+[8535] page 3 bytes rows 21-114 cols 8-15
+[8536] page 4 bytes rows 52-105 cols 10-21
+[8537] page 3 bytes rows 31-85 cols 10-21
+[8538] page 4 bytes rows 22-83 cols 12-20
+[8539] page 3 bytes rows 23-112 cols 12-15
+[8540] page 3 bytes rows 49-111 cols 13-20
+[8541] page 3 bytes rows 26-92 cols 13-20
+[8542] page 3 bytes rows 23-82 cols 9-20
+[8543] page 4 bytes rows 23-68 cols 9-20
+[8544] page 4 bytes rows 39-111 cols 12-19
+[8545] page 4 bytes rows 26-91 cols 9-21
+[8546] page 4 bytes rows 27-114 cols 10-16
+[8547] page 4 bytes rows 21-71 cols 11-22
+[8548] page 3 bytes rows 33-105 cols 13-20
+[8549] page 4 bytes rows 31-84 cols 11-13
+[8550] page 3 bytes rows 28-77 cols 17-19
+[8551] page 6 bytes rows 20-71 cols 10-19
+[8552] page 3 bytes rows 31-104 cols 12-17
+[8553] page 3 bytes rows 32-83 cols 17-19
+[8565] page 24 bytes rows 115-123 cols 2-17
+[8566] page 12 bytes rows 116-123 cols 16-17
+[8568] page 13 bytes rows 116-123 cols 16-17
+[8569] page 10 bytes rows 121-123 cols 3-11
+[8570] page 11 bytes rows 116-123 cols 12-16
+[8571] page 14 bytes rows 115-122 cols 12-15
+[8572] page 11 bytes rows 112-123 cols 14-15
+[8573] page 3 bytes rows 118-119 cols 14-15
+[8574] page 9 bytes rows 112-123 cols 15-17
+[8575] page 1 bytes rows 115-115 cols 16-16
+[8576] page 2 bytes rows 118-118 cols 15-16
+[8577] page 2 bytes rows 112-115 cols 14-16
+[8578] page 11 bytes rows 104-114 cols 14-16
+[8579] page 8 bytes rows 105-114 cols 15-16
+[8580] page 1 bytes rows 104-104 cols 16-16
+[8581] page 4 bytes rows 103-107 cols 16-17
+[8582] page 6 bytes rows 99-103 cols 15-16
+[8583] page 4 bytes rows 102-105 cols 15-16
+[8584] page 8 bytes rows 99-102 cols 16-17
+[8585] page 1 bytes rows 99-99 cols 16-16
+[8586] page 4 bytes rows 95-98 cols 16-16
+[8587] page 5 bytes rows 97-101 cols 15-15
+[8588] page 3 bytes rows 97-99 cols 16-16
+[8590] page 6 bytes rows 108-111 cols 15-16
+[8591] page 3 bytes rows 109-111 cols 16-16
+[8592] page 1 bytes rows 104-104 cols 16-16
+[8594] page 1 bytes rows 115-115 cols 15-15
+[8595] page 1 bytes rows 115-115 cols 15-15
+[8600] page 1 bytes rows 113-113 cols 15-15
+[8605] page 1 bytes rows 103-103 cols 16-16
+[8614] page 5 bytes rows 123-123 cols 7-11
+[8616] page 10 bytes rows 117-121 cols 7-16
+[8617] page 12 bytes rows 189-189 cols 0-20
+[8618] page 252 bytes rows 170-189 cols 0-39
+[8619] page 511 bytes rows 150-169 cols 0-38
+[8620] page 277 bytes rows 130-149 cols 0-39
+[8621] page 69 bytes rows 128-130 cols 0-39
+[8622] page 3 bytes rows 190-190 cols 0-2
+[8623] page 3 bytes rows 190-190 cols 6-8
+[8624] page 5 bytes rows 187-190 cols 13-14
+[8625] page 8 bytes rows 184-190 cols 15-25
+[8626] page 1 bytes rows 190-190 cols 34-34
+[8627] page 16 bytes rows 56-62 cols 17-22
+[8631] page 5 bytes rows 132-134 cols 19-20
+[8632] page 5 bytes rows 165-169 cols 19-19
+[8633] page 4 bytes rows 132-134 cols 10-37
+[8634] page 3 bytes rows 132-134 cols 10-10
+[8640] page 2 bytes rows 132-133 cols 20-20
+[8641] page 9 bytes rows 133-169 cols 19-20
+[8642] page 6 bytes rows 132-134 cols 10-37
+[8655] byte shield_38200 81 -> 80
+[8662] page 11 bytes rows 5-12 cols 12-13
+[8663] page 7 bytes rows 10-16 cols 12-13
+[8664] page 16 bytes rows 5-16 cols 12-13
+[8667] page 7 bytes rows 11-16 cols 13-14
+[8668] page 12 bytes rows 9-20 cols 13-14
+[8679] byte shield_38200 80 -> 79
+[8685] page 1 bytes rows 123-123 cols 2-2
+[8686] page 116 bytes rows 17-122 cols 2-13
+[8687] page 1 bytes rows 123-123 cols 8-8
+[8688] page 112 bytes rows 17-122 cols 8-14
+[8692] page 59 bytes rows 71-123 cols 2-8
+[8693] page 60 bytes rows 17-123 cols 8-13
+[8694] page 76 bytes rows 51-122 cols 8-12
+[8695] page 36 bytes rows 17-50 cols 12-14
+[8697] page 16 bytes rows 9-20 cols 13-14
+[8701] page 16 bytes rows 13-24 cols 14-15
+[8702] page 15 bytes rows 13-24 cols 14-15
+[8703] page 2 bytes rows 19-20 cols 14-14
+[8706] page 16 bytes rows 18-29 cols 15-16
+[8707] page 9 bytes rows 18-25 cols 15-16
+[8708] page 10 bytes rows 20-29 cols 15-16
+[8711] page 16 bytes rows 22-33 cols 16-17
+[8712] page 3 bytes rows 27-29 cols 16-17
+[8713] page 16 bytes rows 22-33 cols 16-17
+[8716] page 15 bytes rows 26-37 cols 17-18
+[8717] page 2 bytes rows 32-33 cols 17-17
+[8718] page 16 bytes rows 26-37 cols 17-18
+[8721] page 10 bytes rows 31-38 cols 18-19
+[8722] page 8 bytes rows 36-42 cols 18-19
+[8723] page 16 bytes rows 31-42 cols 18-19
+[8726] page 6 bytes rows 38-42 cols 19-20
+[8727] page 13 bytes rows 35-46 cols 19-20
+[8728] page 16 bytes rows 35-46 cols 19-20
+[8732] page 16 bytes rows 39-50 cols 20-21
+[8733] page 14 bytes rows 39-49 cols 20-21
+[8734] page 3 bytes rows 45-50 cols 20-21
+[8737] page 16 bytes rows 44-55 cols 21-22
+[8738] page 9 bytes rows 44-51 cols 21-22
+[8739] page 10 bytes rows 46-55 cols 21-22
+[8742] page 16 bytes rows 48-59 cols 22-23
+[8743] page 3 bytes rows 53-55 cols 22-23
+[8744] page 15 bytes rows 48-59 cols 22-23
+[8747] page 15 bytes rows 52-63 cols 23-24
+[8748] page 2 bytes rows 58-59 cols 23-23
+[8749] page 16 bytes rows 52-63 cols 23-24
+[8752] page 11 bytes rows 57-64 cols 24-25
+[8753] page 8 bytes rows 62-68 cols 24-25
+[8754] page 16 bytes rows 57-68 cols 24-25
+[8757] page 6 bytes rows 64-68 cols 25-26
+[8758] page 13 bytes rows 61-72 cols 25-26
+[8759] page 16 bytes rows 61-72 cols 25-26
+[8763] page 16 bytes rows 65-76 cols 26-27
+[8764] page 13 bytes rows 65-74 cols 26-27
+[8765] page 4 bytes rows 71-76 cols 26-27
+[8768] page 16 bytes rows 70-81 cols 27-28
+[8780] byte shield_38200 79 -> 78
+[8785] page 1 bytes rows 123-123 cols 2-2
+[8786] page 38 bytes rows 99-123 cols 3-16
+[8787] page 33 bytes rows 78-99 cols 16-27
+[8788] page 33 bytes rows 101-123 cols 8-18
+[8789] page 32 bytes rows 78-100 cols 18-28
+[8792] page 1 bytes rows 123-123 cols 2-2
+[8793] page 47 bytes rows 93-123 cols 3-19
+[8794] page 24 bytes rows 78-123 cols 8-27
+[8795] page 44 bytes rows 93-123 cols 8-21
+[8796] page 21 bytes rows 78-93 cols 22-28
+[8798] page 16 bytes rows 70-81 cols 27-28
+[8799] page 1 bytes rows 76-76 cols 27-27
+[8802] page 16 bytes rows 74-85 cols 28-29
+[8814] byte shield_38200 78 -> 77
+[8819] page 1 bytes rows 123-123 cols 31-31
+[8820] page 45 bytes rows 82-123 cols 28-37
+[8821] page 50 bytes rows 82-123 cols 29-37
+[8825] page 45 bytes rows 82-123 cols 28-31
+[8826] page 1 bytes rows 123-123 cols 37-37
+[8827] page 50 bytes rows 82-123 cols 29-37
+[8829] page 11 bytes rows 74-81 cols 28-29
+[8830] page 7 bytes rows 79-85 cols 28-29
+[8833] page 16 bytes rows 78-89 cols 29-30
+[8845] byte shield_38200 77 -> 76
+[8850] page 1 bytes rows 123-123 cols 31-31
+[8851] page 39 bytes rows 86-122 cols 29-31
+[8852] page 45 bytes rows 86-123 cols 30-37
+[8856] page 40 bytes rows 86-123 cols 29-31
+[8857] page 1 bytes rows 123-123 cols 37-37
+[8858] page 45 bytes rows 86-123 cols 30-37
+[8861] page 16 bytes rows 78-89 cols 29-30
+[8867] page 11 bytes rows 81-90 cols 29-30
+[8868] page 20 bytes rows 77-90 cols 28-30
+[8869] page 8 bytes rows 77-87 cols 28-29
+[8881] page 17 bytes rows 80-90 cols 29-31
+[8882] page 21 bytes rows 77-90 cols 29-31
+[8883] page 6 bytes rows 77-81 cols 29-30
+[8885] page 21 bytes rows 76-89 cols 27-29
+[8886] page 27 bytes rows 75-91 cols 28-30
+[8887] page 18 bytes rows 72-95 cols 27-30
+[8888] page 5 bytes rows 83-84 cols 29-31
+[8889] page 7 bytes rows 80-86 cols 30-30
+[8890] page 26 bytes rows 75-89 cols 29-31
+[8891] page 27 bytes rows 78-95 cols 28-32
+[8892] page 14 bytes rows 72-91 cols 30-32
+[8895] page 14 bytes rows 80-90 cols 28-30
+[8896] page 18 bytes rows 77-90 cols 28-30
+[8897] page 5 bytes rows 77-81 cols 28-29
+[8898] page 6 bytes rows 81-86 cols 30-30
+[8899] page 24 bytes rows 77-90 cols 29-31
+[8900] page 19 bytes rows 77-90 cols 29-31
+[8902] page 5 bytes rows 82-86 cols 29-29
+[8903] page 25 bytes rows 75-89 cols 27-30
+[8904] page 24 bytes rows 78-95 cols 27-30
+[8905] page 16 bytes rows 72-91 cols 28-31
+[8907] page 16 bytes rows 80-89 cols 29-30
+[8908] page 29 bytes rows 75-90 cols 29-32
+[8909] page 20 bytes rows 72-95 cols 28-30
+[8910] page 8 bytes rows 83-91 cols 30-32
+[8913] byte fighters_38207 6 -> 5
+[8915] byte missiles_38187 54 -> 52
+[8944] iter 84 (+443 frames) X=700 Y=200 Z=-4421 atmos=0 marker=00/7F
+[9070] page 5 bytes rows 132-134 cols 19-20
+[9071] page 5 bytes rows 165-169 cols 19-19
+[9072] page 3 bytes rows 132-134 cols 37-37
+[9073] page 3 bytes rows 132-134 cols 10-10
+[9080] page 10 bytes rows 132-169 cols 19-20
+[9081] page 3 bytes rows 132-134 cols 10-10
+[9082] page 3 bytes rows 132-134 cols 37-37
+[9094] byte shield_38200 76 -> 75
+[9102] page 13 bytes rows 115-126 cols 28-30
+[9114] byte shield_38200 75 -> 74
+[9119] page 2 bytes rows 123-123 cols 30-31
+[9120] page 3 bytes rows 123-123 cols 29-37
+[9121] page 7 bytes rows 123-123 cols 31-37
+[9124] page 1 bytes rows 123-123 cols 31-31
+[9125] page 4 bytes rows 123-123 cols 29-37
+[9126] page 7 bytes rows 123-123 cols 31-37
+[9128] page 9 bytes rows 115-122 cols 29-30
+[9129] page 7 bytes rows 120-126 cols 28-29
+[9132] page 13 bytes rows 109-120 cols 27-29
+[9144] byte shield_38200 74 -> 73
+[9149] page 1 bytes rows 123-123 cols 31-31
+[9150] page 11 bytes rows 117-123 cols 28-37
+[9151] page 15 bytes rows 117-123 cols 29-37
+[9155] page 10 bytes rows 117-123 cols 28-31
+[9156] page 11 bytes rows 119-123 cols 31-37
+[9157] page 5 bytes rows 117-119 cols 29-31
+[9159] page 9 bytes rows 109-116 cols 28-29
+[9160] page 7 bytes rows 114-120 cols 27-28
+[9166] page 17 bytes rows 111-121 cols 27-28
+[9167] page 16 bytes rows 108-121 cols 27-29
+[9168] page 4 bytes rows 109-112 cols 27-27
+[9179] page 6 bytes rows 112-117 cols 29-29
+[9180] page 22 bytes rows 108-121 cols 28-30
+[9181] page 18 bytes rows 108-121 cols 28-30
+[9183] page 6 bytes rows 111-117 cols 27-28
+[9184] page 24 bytes rows 106-120 cols 26-28
+[9185] page 27 bytes rows 109-126 cols 26-29
+[9186] page 17 bytes rows 103-122 cols 26-29
+[9188] page 18 bytes rows 111-120 cols 27-29
+[9189] page 27 bytes rows 106-118 cols 27-30
+[9190] page 23 bytes rows 103-126 cols 27-30
+[9191] page 8 bytes rows 114-122 cols 29-31
+[9193] page 7 bytes rows 112-117 cols 27-28
+[9194] page 23 bytes rows 108-121 cols 27-28
+[9195] page 18 bytes rows 108-121 cols 27-29
+[9197] page 10 bytes rows 112-121 cols 29-30
+[9198] page 23 bytes rows 108-121 cols 28-30
+[9199] page 11 bytes rows 108-120 cols 28-29
+[9201] page 14 bytes rows 111-120 cols 27-28
+[9202] page 23 bytes rows 106-116 cols 26-29
+[9203] page 26 bytes rows 103-126 cols 26-29
+[9204] page 10 bytes rows 106-122 cols 28-29
+[9206] page 22 bytes rows 107-120 cols 27-29
+[9207] page 29 bytes rows 106-126 cols 29-30
+[9208] page 22 bytes rows 103-124 cols 27-31
+[9209] page 1 bytes rows 115-115 cols 29-29
+[9211] byte fighters_38207 5 -> 4
+[9214] byte missiles_38187 52 -> 50
+[9242] iter 85 (+298 frames) X=700 Y=200 Z=-4301 atmos=0 marker=00/00
+[9244] page 7 bytes rows 20-49 cols 9-15
+[9245] page 511 bytes rows 17-190 cols 1-38
+[9246] page 614 bytes rows 20-190 cols 0-39
+[9247] page 293 bytes rows 28-190 cols 0-39
+[9248] page 3 bytes rows 20-84 cols 9-19
+[9249] page 3 bytes rows 22-115 cols 16-19
+[9250] page 5 bytes rows 48-115 cols 9-19
+[9251] page 4 bytes rows 23-94 cols 10-19
+[9252] page 4 bytes rows 25-78 cols 9-21
+[9253] page 5 bytes rows 19-116 cols 16-23
+[9254] page 3 bytes rows 51-108 cols 9-21
+[9255] page 3 bytes rows 29-86 cols 10-20
+[9256] page 3 bytes rows 26-77 cols 12-17
+[9257] page 4 bytes rows 18-117 cols 11-15
+[9258] page 5 bytes rows 52-105 cols 12-17
+[9259] page 5 bytes rows 30-84 cols 12-17
+[9260] page 4 bytes rows 23-80 cols 9-23
+[9261] page 4 bytes rows 20-116 cols 8-15
+[9262] page 3 bytes rows 50-110 cols 9-22
+[9263] page 3 bytes rows 27-89 cols 10-22
+[9264] page 4 bytes rows 19-85 cols 14-16
+[9265] page 3 bytes rows 22-115 cols 15-16
+[9266] page 4 bytes rows 47-116 cols 14-15
+[9267] page 4 bytes rows 22-95 cols 14-15
+[9268] page 3 bytes rows 22-81 cols 7-21
+[9269] page 4 bytes rows 20-70 cols 8-23
+[9270] page 4 bytes rows 35-111 cols 11-21
+[9271] page 3 bytes rows 27-90 cols 8-17
+[9272] page 4 bytes rows 26-117 cols 14-15
+[9273] page 3 bytes rows 18-72 cols 14-17
+[9274] page 4 bytes rows 30-106 cols 14-17
+[9275] page 4 bytes rows 31-84 cols 8-14
+[9276] page 4 bytes rows 25-117 cols 14-21
+[9277] page 3 bytes rows 19-71 cols 7-21
+[9278] page 4 bytes rows 32-108 cols 9-19
+[9279] page 3 bytes rows 30-86 cols 12-21
+[9280] page 2 bytes rows 84-115 cols 15-20
+[9281] page 4 bytes rows 21-69 cols 12-20
+[9282] page 5 bytes rows 38-115 cols 12-17
+[9283] page 3 bytes rows 23-93 cols 18-20
+[9284] page 5 bytes rows 20-115 cols 8-16
+[9285] page 4 bytes rows 21-69 cols 8-20
+[9286] page 3 bytes rows 37-114 cols 12-19
+[9287] page 4 bytes rows 24-93 cols 9-21
+[9288] page 3 bytes rows 25-117 cols 10-16
+[9289] page 3 bytes rows 52-71 cols 10-22
+[9290] page 4 bytes rows 32-107 cols 12-20
+[9291] page 5 bytes rows 26-85 cols 10-17
+[9292] page 3 bytes rows 72-77 cols 10-19
+[9293] page 4 bytes rows 18-106 cols 14-19
+[9294] page 3 bytes rows 30-105 cols 11-17
+[9295] page 1 bytes rows 84-84 cols 18-18
+[9314] page 8 bytes rows 118-123 cols 14-15
+[9315] page 1 bytes rows 119-119 cols 14-14
+[9316] page 6 bytes rows 118-123 cols 15-15
+[9318] page 7 bytes rows 115-121 cols 14-15
+[9319] page 12 bytes rows 110-118 cols 14-15
+[9320] page 4 bytes rows 115-117 cols 14-15
+[9321] page 5 bytes rows 110-114 cols 15-15
+[9322] page 5 bytes rows 105-109 cols 15-15
+[9323] page 1 bytes rows 113-113 cols 14-14
+[9324] page 6 bytes rows 108-112 cols 14-15
+[9325] page 7 bytes rows 108-111 cols 14-15
+[9326] page 4 bytes rows 122-123 cols 14-15
+[9327] page 1 bytes rows 121-121 cols 14-14
+[9328] page 1 bytes rows 123-123 cols 15-15
+[9329] page 2 bytes rows 112-118 cols 15-15
+[9337] page 2 bytes rows 114-114 cols 14-15
+[9338] page 1 bytes rows 115-115 cols 14-14
+[9346] page 18 bytes rows 188-189 cols 0-34
+[9347] page 251 bytes rows 169-188 cols 0-39
+[9348] page 506 bytes rows 150-168 cols 0-38
+[9349] page 292 bytes rows 130-149 cols 0-39
+[9350] page 54 bytes rows 128-130 cols 0-39
+[9351] page 3 bytes rows 190-190 cols 0-2
+[9352] page 3 bytes rows 190-190 cols 6-8
+[9353] page 15 bytes rows 184-190 cols 13-15
+[9354] page 2 bytes rows 190-190 cols 16-25
+[9355] page 1 bytes rows 190-190 cols 34-34
+[9356] page 16 bytes rows 56-62 cols 17-22
+[9360] page 6 bytes rows 132-167 cols 19-20
+[9361] page 5 bytes rows 165-169 cols 19-19
+[9362] page 5 bytes rows 132-134 cols 10-37
+[9363] page 2 bytes rows 133-134 cols 10-10
+[9369] page 3 bytes rows 132-134 cols 20-20
+[9370] page 8 bytes rows 133-169 cols 19-20
+[9371] page 6 bytes rows 132-134 cols 10-37
+[9383] byte shield_38200 73 -> 71
+[9391] page 6 bytes rows 117-122 cols 37-37
+[9392] page 13 bytes rows 115-126 cols 36-38
+[9393] page 14 bytes rows 115-126 cols 36-38
+[9394] page 3 bytes rows 120-122 cols 37-37
+[9397] page 14 bytes rows 112-123 cols 35-37
+[9398] page 8 bytes rows 112-119 cols 36-37
+[9399] page 11 bytes rows 114-123 cols 35-36
+[9402] page 14 bytes rows 110-121 cols 34-36
+[9403] page 2 bytes rows 116-117 cols 35-35
+[9404] page 14 bytes rows 110-121 cols 34-36
+[9407] page 8 bytes rows 108-115 cols 34-35
+[9408] page 11 bytes rows 110-119 cols 33-34
+[9409] page 14 bytes rows 108-119 cols 33-35
+[9413] page 14 bytes rows 106-117 cols 32-34
+[9414] page 8 bytes rows 106-113 cols 33-34
+[9415] page 9 bytes rows 111-117 cols 32-33
+[9418] page 14 bytes rows 104-115 cols 31-33
+[9420] page 14 bytes rows 104-115 cols 31-33
+[9423] page 10 bytes rows 102-109 cols 30-32
+[9424] page 7 bytes rows 107-113 cols 30-31
+[9425] page 14 bytes rows 102-113 cols 30-32
+[9428] page 3 bytes rows 104-106 cols 30-30
+[9429] page 14 bytes rows 99-110 cols 29-31
+[9440] byte shield_38200 71 -> 70
+[9446] page 13 bytes rows 112-123 cols 30-31
+[9447] page 7 bytes rows 107-123 cols 29-37
+[9448] page 24 bytes rows 107-123 cols 30-37
+[9451] page 1 bytes rows 123-123 cols 31-31
+[9452] page 19 bytes rows 107-123 cols 29-37
+[9453] page 24 bytes rows 107-123 cols 30-37
+[9456] page 14 bytes rows 99-110 cols 29-31
+[9462] page 11 bytes rows 102-108 cols 29-30
+[9463] page 22 bytes rows 98-111 cols 28-30
+[9464] page 14 bytes rows 98-111 cols 28-30
+[9476] page 17 bytes rows 102-111 cols 30-31
+[9477] page 19 bytes rows 98-111 cols 29-31
+[9478] page 7 bytes rows 98-107 cols 30-31
+[9480] page 16 bytes rows 101-110 cols 28-30
+[9481] page 26 bytes rows 96-108 cols 28-31
+[9482] page 23 bytes rows 93-116 cols 27-30
+[9483] page 7 bytes rows 104-112 cols 30-31
+[9485] page 24 bytes rows 97-110 cols 29-31
+[9486] page 23 bytes rows 96-116 cols 30-32
+[9487] page 23 bytes rows 93-114 cols 28-32
+[9488] page 1 bytes rows 105-105 cols 31-31
+[9490] page 16 bytes rows 102-111 cols 29-30
+[9491] page 20 bytes rows 98-111 cols 28-30
+[9492] page 10 bytes rows 98-110 cols 28-30
+[9494] page 19 bytes rows 101-111 cols 29-31
+[9495] page 16 bytes rows 98-111 cols 30-31
+[9496] page 2 bytes rows 101-102 cols 30-30
+[9498] page 20 bytes rows 97-110 cols 28-30
+[9499] page 25 bytes rows 96-116 cols 29-31
+[9500] page 22 bytes rows 93-114 cols 27-31
+[9501] page 2 bytes rows 104-105 cols 30-30
+[9502] page 14 bytes rows 101-110 cols 30-31
+[9503] page 25 bytes rows 96-110 cols 29-32
+[9504] page 25 bytes rows 93-116 cols 28-32
+[9505] page 13 bytes rows 96-112 cols 30-32
+[9508] byte fighters_38207 4 -> 3
+[9510] byte missiles_38187 50 -> 48
+[9539] iter 84 (+297 frames) X=700 Y=200 Z=-4181 atmos=0 marker=00/00
+[9654] page 5 bytes rows 132-134 cols 19-20
+[9655] page 5 bytes rows 165-169 cols 19-19
+[9656] page 3 bytes rows 132-134 cols 37-37
+[9657] page 3 bytes rows 132-134 cols 10-10
+[9664] page 10 bytes rows 132-169 cols 19-20
+[9665] page 3 bytes rows 132-134 cols 10-10
+[9666] page 3 bytes rows 132-134 cols 37-37
+[9677] byte shield_38200 70 -> 69
+[9685] page 13 bytes rows 7-12 cols 14-16
+[9686] page 7 bytes rows 7-11 cols 15-16
+[9687] page 8 bytes rows 7-12 cols 14-16
+[9690] page 8 bytes rows 7-12 cols 14-16
+[9691] page 4 bytes rows 8-11 cols 15-15
+[9692] page 7 bytes rows 7-12 cols 14-16
+[9695] page 8 bytes rows 7-12 cols 14-16
+[9696] page 2 bytes rows 10-11 cols 15-15
+[9697] page 7 bytes rows 7-12 cols 14-16
+[9700] page 13 bytes rows 8-13 cols 14-16
+[9701] page 4 bytes rows 11-12 cols 14-15
+[9702] page 12 bytes rows 8-13 cols 14-16
+[9705] page 12 bytes rows 8-13 cols 13-15
+[9706] page 1 bytes rows 11-11 cols 14-14
+[9707] page 12 bytes rows 8-13 cols 13-15
+[9710] page 8 bytes rows 9-14 cols 13-15
+[9722] byte shield_38200 69 -> 68
+[9728] page 56 bytes rows 74-123 cols 2-8
+[9729] page 65 bytes rows 15-73 cols 8-14
+[9730] page 68 bytes rows 60-123 cols 8-12
+[9731] page 46 bytes rows 16-59 cols 12-14
+[9734] page 1 bytes rows 123-123 cols 2-2
+[9735] page 111 bytes rows 23-122 cols 2-13
+[9736] page 10 bytes rows 15-123 cols 8-14
+[9737] page 113 bytes rows 16-122 cols 8-14
+[9740] page 8 bytes rows 9-14 cols 13-15
+[9743] page 12 bytes rows 9-14 cols 13-15
+[9744] page 1 bytes rows 12-12 cols 13-13
+[9745] page 12 bytes rows 9-14 cols 13-15
+[9748] page 12 bytes rows 10-15 cols 13-14
+[9749] page 1 bytes rows 13-13 cols 12-12
+[9750] page 13 bytes rows 10-15 cols 12-14
+[9753] page 8 bytes rows 10-15 cols 12-14
+[9755] page 8 bytes rows 10-15 cols 12-14
+[9758] page 8 bytes rows 11-16 cols 12-14
+[9760] page 8 bytes rows 11-16 cols 12-14
+[9763] page 13 bytes rows 11-16 cols 12-14
+[9764] page 1 bytes rows 14-14 cols 12-12
+[9775] byte shield_38200 68 -> 67
+[9781] page 48 bytes rows 80-123 cols 2-6
+[9782] page 68 bytes rows 17-79 cols 6-12
+[9783] page 70 bytes rows 57-123 cols 8-11
+[9784] page 42 bytes rows 17-56 cols 11-13
+[9787] page 1 bytes rows 123-123 cols 2-2
+[9788] page 116 bytes rows 17-122 cols 2-12
+[9789] page 4 bytes rows 120-123 cols 8-8
+[9790] page 108 bytes rows 17-119 cols 8-13
+[9793] page 13 bytes rows 11-16 cols 12-14
+[9799] page 12 bytes rows 12-19 cols 12-13
+[9800] page 24 bytes rows 8-21 cols 11-13
+[9801] page 14 bytes rows 8-20 cols 11-12
+[9813] page 17 bytes rows 12-21 cols 12-14
+[9814] page 21 bytes rows 8-21 cols 12-14
+[9815] page 7 bytes rows 8-12 cols 12-14
+[9817] page 16 bytes rows 11-20 cols 11-12
+[9818] page 30 bytes rows 6-21 cols 11-14
+[9819] page 20 bytes rows 3-26 cols 10-12
+[9820] page 8 bytes rows 14-22 cols 12-14
+[9821] page 3 bytes rows 14-16 cols 13-13
+[9822] page 26 bytes rows 6-20 cols 12-14
+[9823] page 22 bytes rows 9-26 cols 12-15
+[9824] page 18 bytes rows 3-22 cols 11-15
+[9827] page 14 bytes rows 12-21 cols 12-13
+[9828] page 22 bytes rows 8-21 cols 11-13
+[9829] page 9 bytes rows 8-17 cols 11-12
+[9830] page 2 bytes rows 13-14 cols 13-13
+[9831] page 23 bytes rows 9-21 cols 12-14
+[9832] page 20 bytes rows 8-21 cols 12-14
+[9835] page 22 bytes rows 7-20 cols 11-12
+[9836] page 26 bytes rows 6-26 cols 11-14
+[9837] page 20 bytes rows 3-22 cols 10-14
+[9839] page 14 bytes rows 11-20 cols 12-13
+[9840] page 22 bytes rows 6-15 cols 12-15
+[9841] page 25 bytes rows 3-26 cols 11-14
+[9842] page 11 bytes rows 6-22 cols 13-15
+[9845] byte fighters_38207 3 -> 2
+[9847] byte missiles_38187 48 -> 46
+[9876] iter 85 (+337 frames) X=700 Y=200 Z=-4061 atmos=0 marker=00/00
+[9878] page 237 bytes rows 18-183 cols 1-37
+[9879] page 514 bytes rows 18-190 cols 0-39
+[9880] page 581 bytes rows 19-190 cols 0-39
+[9881] page 1 bytes rows 43-43 cols 19-19
+[9882] page 5 bytes rows 17-118 cols 8-15
+[9883] page 3 bytes rows 19-69 cols 9-19
+[9884] page 4 bytes rows 37-119 cols 12-19
+[9885] page 3 bytes rows 21-96 cols 9-21
+[9886] page 3 bytes rows 22-120 cols 9-16
+[9887] page 5 bytes rows 17-71 cols 9-23
+[9888] page 5 bytes rows 27-110 cols 11-21
+[9889] page 3 bytes rows 24-88 cols 9-16
+[9890] page 4 bytes rows 73-121 cols 11-17
+[9891] page 3 bytes rows 15-108 cols 14-17
+[9892] page 4 bytes rows 27-108 cols 12-17
+[9893] page 4 bytes rows 20-85 cols 8-18
+[9894] page 3 bytes rows 70-119 cols 7-23
+[9895] page 4 bytes rows 18-113 cols 13-23
+[9896] page 3 bytes rows 25-99 cols 9-19
+[9897] page 4 bytes rows 16-91 cols 14-22
+[9898] page 3 bytes rows 69-118 cols 14-15
+[9899] page 4 bytes rows 20-120 cols 14-15
+[9900] page 4 bytes rows 20-94 cols 14-15
+[9901] page 3 bytes rows 20-97 cols 12-22
+[9902] page 4 bytes rows 70-119 cols 7-23
+[9903] page 4 bytes rows 18-114 cols 7-17
+[9904] page 4 bytes rows 24-98 cols 10-21
+[9905] page 3 bytes rows 24-91 cols 7-17
+[9906] page 3 bytes rows 73-121 cols 13-17
+[9907] page 3 bytes rows 15-108 cols 13-15
+[9908] page 4 bytes rows 27-108 cols 14-17
+[9909] page 3 bytes rows 23-85 cols 8-18
+[9910] page 4 bytes rows 72-120 cols 6-22
+[9911] page 4 bytes rows 16-110 cols 13-21
+[9912] page 4 bytes rows 28-104 cols 8-19
+[9913] page 3 bytes rows 17-87 cols 12-21
+[9914] page 5 bytes rows 19-118 cols 11-20
+[9915] page 3 bytes rows 47-118 cols 12-20
+[9916] page 3 bytes rows 21-95 cols 12-20
+[9917] page 3 bytes rows 18-85 cols 8-20
+[9918] page 3 bytes rows 19-118 cols 16-20
+[9919] page 3 bytes rows 47-118 cols 8-19
+[9920] page 3 bytes rows 21-95 cols 8-19
+[9921] page 5 bytes rows 23-79 cols 10-21
+[9922] page 3 bytes rows 16-120 cols 15-22
+[9923] page 3 bytes rows 51-109 cols 10-20
+[9924] page 3 bytes rows 28-87 cols 10-20
+[9925] page 6 bytes rows 24-78 cols 10-19
+[9926] page 2 bytes rows 15-73 cols 9-14
+[9927] page 3 bytes rows 52-108 cols 11-19
+[9928] page 3 bytes rows 28-85 cols 11-18
+[9952] page 1 bytes rows 123-123 cols 13-13
+[9973] page 129 bytes rows 181-189 cols 0-37
+[9974] page 341 bytes rows 161-180 cols 0-39
+[9975] page 400 bytes rows 141-161 cols 0-39
+[9976] page 251 bytes rows 128-141 cols 0-39
+[9978] page 3 bytes rows 190-190 cols 0-2
+[9979] page 3 bytes rows 190-190 cols 6-8
+[9980] page 7 bytes rows 186-190 cols 13-16
+[9981] page 2 bytes rows 190-190 cols 25-34
+[9982] page 8 bytes rows 56-62 cols 17-18
+[9983] page 8 bytes rows 56-62 cols 21-22
+[9986] page 3 bytes rows 132-134 cols 20-20
+[9987] page 8 bytes rows 133-169 cols 19-20
+[9988] page 3 bytes rows 132-134 cols 37-37
+[9989] page 5 bytes rows 132-134 cols 10-37
+[9996] page 5 bytes rows 132-134 cols 19-20
+[9997] page 8 bytes rows 132-169 cols 10-19
+[9998] page 3 bytes rows 132-134 cols 37-37
+[10022] byte shield_38200 67 -> 66
+[10031] page 16 bytes rows 115-126 cols 9-10
+[10032] page 14 bytes rows 115-125 cols 9-10
+[10033] page 3 bytes rows 121-126 cols 9-10
+[10036] page 16 bytes rows 113-124 cols 10-11
+[10037] page 9 bytes rows 113-120 cols 10-11
+[10038] page 10 bytes rows 115-124 cols 10-11
+[10041] page 16 bytes rows 111-122 cols 11-12
+[10042] page 3 bytes rows 116-118 cols 12-12
+[10043] page 16 bytes rows 111-122 cols 11-12
+[10046] page 15 bytes rows 110-121 cols 12-13
+[10047] page 2 bytes rows 116-117 cols 12-13
+[10048] page 16 bytes rows 110-121 cols 12-13
+[10051] page 11 bytes rows 108-115 cols 13-14
+[10052] page 8 bytes rows 113-119 cols 13-14
+[10053] page 16 bytes rows 108-119 cols 13-14
+[10056] page 6 bytes rows 110-114 cols 14-15
+[10057] page 13 bytes rows 107-118 cols 14-15
+[10058] page 16 bytes rows 107-118 cols 14-15
+[10062] page 16 bytes rows 105-116 cols 15-16
+[10063] page 14 bytes rows 105-115 cols 15-16
+[10064] page 3 bytes rows 111-116 cols 15-16
+[10067] page 16 bytes rows 103-114 cols 16-17
+[10068] page 9 bytes rows 103-110 cols 16-17
+[10069] page 10 bytes rows 105-114 cols 16-17
+[10072] page 16 bytes rows 102-113 cols 17-18
+[10073] page 3 bytes rows 107-109 cols 18-18
+[10074] page 16 bytes rows 102-113 cols 17-18
+[10077] page 15 bytes rows 100-111 cols 18-19
+[10078] page 2 bytes rows 106-107 cols 18-19
+[10079] page 16 bytes rows 100-111 cols 18-19
+[10082] page 11 bytes rows 99-106 cols 19-20
+[10083] page 8 bytes rows 104-110 cols 19-20
+[10084] page 16 bytes rows 99-110 cols 19-20
+[10087] page 5 bytes rows 101-104 cols 20-21
+[10088] page 14 bytes rows 97-108 cols 20-21
+[10089] page 16 bytes rows 97-108 cols 20-21
+[10093] page 16 bytes rows 95-106 cols 21-22
+[10094] page 15 bytes rows 95-106 cols 21-22
+[10095] page 2 bytes rows 101-102 cols 21-22
+[10098] page 16 bytes rows 94-105 cols 22-23
+[10110] byte shield_38200 66 -> 65
+[10115] page 1 bytes rows 123-123 cols 31-31
+[10116] page 31 bytes rows 102-123 cols 22-31
+[10117] page 26 bytes rows 108-123 cols 27-37
+[10118] page 11 bytes rows 102-108 cols 23-27
+[10121] page 4 bytes rows 121-123 cols 30-31
+[10122] page 28 bytes rows 102-123 cols 22-37
+[10123] page 36 bytes rows 102-123 cols 23-37
+[10126] page 15 bytes rows 94-105 cols 22-23
+[10127] page 2 bytes rows 100-101 cols 22-23
+[10132] page 6 bytes rows 97-102 cols 22-22
+[10133] page 23 bytes rows 93-106 cols 21-23
+[10134] page 20 bytes rows 93-106 cols 21-23
+[10146] page 12 bytes rows 97-104 cols 23-24
+[10147] page 22 bytes rows 93-106 cols 22-24
+[10148] page 15 bytes rows 93-106 cols 22-24
+[10150] page 9 bytes rows 96-104 cols 22-22
+[10151] page 24 bytes rows 91-105 cols 21-23
+[10152] page 26 bytes rows 91-111 cols 20-24
+[10153] page 14 bytes rows 88-107 cols 22-24
+[10155] page 19 bytes rows 94-105 cols 22-23
+[10156] page 26 bytes rows 91-106 cols 22-25
+[10157] page 18 bytes rows 88-111 cols 21-23
+[10158] page 6 bytes rows 99-101 cols 23-25
+[10160] page 10 bytes rows 97-103 cols 22-23
+[10161] page 24 bytes rows 93-106 cols 21-23
+[10162] page 16 bytes rows 93-106 cols 21-23
+[10164] page 17 bytes rows 97-106 cols 22-24
+[10165] page 20 bytes rows 93-106 cols 22-24
+[10166] page 8 bytes rows 93-102 cols 22-24
+[10168] page 16 bytes rows 96-105 cols 21-22
+[10169] page 29 bytes rows 91-106 cols 21-24
+[10170] page 19 bytes rows 88-111 cols 20-22
+[10171] page 7 bytes rows 99-106 cols 22-24
+[10172] page 4 bytes rows 99-102 cols 23-23
+[10173] page 26 bytes rows 91-105 cols 22-24
+[10174] page 24 bytes rows 94-111 cols 21-25
+[10175] page 16 bytes rows 88-107 cols 22-25
+[10178] byte fighters_38207 2 -> 1
+[10180] byte missiles_38187 46 -> 44
+[10209] iter 84 (+333 frames) X=700 Y=200 Z=-3941 atmos=0 marker=00/00
+[10320] page 5 bytes rows 132-134 cols 19-20
+[10321] page 5 bytes rows 165-169 cols 19-19
+[10322] page 3 bytes rows 132-134 cols 37-37
+[10323] page 3 bytes rows 132-134 cols 10-10
+[10330] page 10 bytes rows 132-169 cols 19-20
+[10331] page 5 bytes rows 132-134 cols 10-37
+[10332] page 2 bytes rows 133-134 cols 37-37
+[10343] byte shield_38200 65 -> 64
+[10351] page 8 bytes rows 115-122 cols 1-2
+[10352] page 9 bytes rows 120-126 cols 2-3
+[10363] byte shield_38200 64 -> 63
+[10369] page 10 bytes rows 123-123 cols 22-31
+[10370] page 20 bytes rows 123-123 cols 2-21
+[10371] page 7 bytes rows 123-123 cols 31-37
+[10376] page 10 bytes rows 123-123 cols 22-31
+[10377] page 21 bytes rows 123-123 cols 2-22
+[10378] page 7 bytes rows 123-123 cols 31-37
+[10382] page 14 bytes rows 115-126 cols 1-3
+[10385] page 10 bytes rows 109-116 cols 2-4
+[10386] page 6 bytes rows 115-120 cols 3-4
+[10397] byte shield_38200 63 -> 62
+[10403] page 8 bytes rows 117-123 cols 2-3
+[10404] page 6 bytes rows 120-123 cols 6-8
+[10405] page 6 bytes rows 117-120 cols 4-6
+[10408] page 8 bytes rows 117-123 cols 2-3
+[10409] page 4 bytes rows 121-123 cols 7-8
+[10410] page 8 bytes rows 117-121 cols 4-7
+[10412] page 8 bytes rows 109-116 cols 2-3
+[10413] page 9 bytes rows 114-120 cols 3-4
+[10419] page 17 bytes rows 111-121 cols 2-3
+[10420] page 16 bytes rows 108-121 cols 2-4
+[10421] page 4 bytes rows 109-112 cols 2-2
+[10432] page 6 bytes rows 112-117 cols 4-4
+[10433] page 21 bytes rows 108-121 cols 3-5
+[10434] page 18 bytes rows 108-121 cols 3-5
+[10436] page 7 bytes rows 111-117 cols 2-3
+[10437] page 24 bytes rows 106-120 cols 1-3
+[10438] page 27 bytes rows 109-126 cols 1-4
+[10439] page 17 bytes rows 103-122 cols 1-4
+[10441] page 18 bytes rows 111-120 cols 2-4
+[10442] page 27 bytes rows 106-118 cols 3-5
+[10443] page 23 bytes rows 103-126 cols 2-5
+[10444] page 8 bytes rows 114-122 cols 4-6
+[10446] page 7 bytes rows 112-117 cols 2-3
+[10447] page 23 bytes rows 108-121 cols 2-3
+[10448] page 17 bytes rows 108-121 cols 2-4
+[10450] page 10 bytes rows 112-121 cols 4-5
+[10451] page 23 bytes rows 108-121 cols 3-5
+[10452] page 9 bytes rows 108-118 cols 3-4
+[10454] page 16 bytes rows 111-120 cols 1-3
+[10455] page 25 bytes rows 106-118 cols 1-4
+[10456] page 24 bytes rows 103-126 cols 1-3
+[10457] page 7 bytes rows 114-122 cols 3-4
+[10459] page 22 bytes rows 107-120 cols 2-4
+[10460] page 29 bytes rows 106-126 cols 3-5
+[10461] page 20 bytes rows 103-122 cols 2-6
+[10464] byte fighters_38207 1 -> 0
+[10467] byte missiles_38187 44 -> 42
+[10495] iter 85 (+286 frames) X=700 Y=200 Z=-3821 atmos=0 marker=00/00
+[10497] page 21 bytes rows 16-52 cols 9-21
+[10498] page 450 bytes rows 16-190 cols 0-38
+[10499] page 613 bytes rows 15-190 cols 0-39
+[10500] page 229 bytes rows 15-190 cols 0-39
+[10501] page 3 bytes rows 15-88 cols 8-19
+[10502] page 3 bytes rows 17-121 cols 15-19
+[10503] page 4 bytes rows 46-123 cols 8-19
+[10504] page 3 bytes rows 18-99 cols 8-18
+[10505] page 3 bytes rows 20-80 cols 8-21
+[10506] page 3 bytes rows 14-123 cols 15-23
+[10507] page 4 bytes rows 50-113 cols 8-21
+[10508] page 5 bytes rows 25-89 cols 8-21
+[10509] page 3 bytes rows 22-78 cols 11-17
+[10510] page 3 bytes rows 13-74 cols 10-17
+[10511] page 3 bytes rows 24-112 cols 11-16
+[10512] page 3 bytes rows 28-86 cols 8-17
+[10513] page 3 bytes rows 18-123 cols 14-23
+[10514] page 5 bytes rows 15-71 cols 6-23
+[10515] page 4 bytes rows 32-117 cols 8-19
+[10516] page 4 bytes rows 22-92 cols 15-23
+[10517] page 3 bytes rows 14-121 cols 14-15
+[10518] page 3 bytes rows 17-69 cols 14-15
+[10519] page 3 bytes rows 36-123 cols 14-15
+[10520] page 3 bytes rows 16-100 cols 14-22
+[10521] page 3 bytes rows 17-122 cols 6-15
+[10522] page 4 bytes rows 15-71 cols 6-23
+[10523] page 3 bytes rows 32-117 cols 10-21
+[10524] page 5 bytes rows 22-93 cols 6-17
+[10525] page 2 bytes rows 22-78 cols 13-14
+[10526] page 3 bytes rows 13-74 cols 13-17
+[10527] page 4 bytes rows 25-111 cols 14-17
+[10528] page 4 bytes rows 20-86 cols 7-18
+[10529] page 2 bytes rows 72-80 cols 5-22
+[10530] page 4 bytes rows 14-113 cols 13-21
+[10531] page 3 bytes rows 26-107 cols 8-19
+[10532] page 2 bytes rows 42-89 cols 11-21
+[10533] page 3 bytes rows 69-122 cols 11-20
+[10534] page 3 bytes rows 17-122 cols 14-20
+[10535] page 3 bytes rows 18-96 cols 12-17
+[10536] page 3 bytes rows 15-98 cols 12-20
+[10537] page 2 bytes rows 69-87 cols 7-20
+[10538] page 3 bytes rows 16-122 cols 7-16
+[10539] page 4 bytes rows 18-97 cols 10-19
+[10540] page 3 bytes rows 21-97 cols 7-21
+[10541] page 2 bytes rows 73-80 cols 9-22
+[10542] page 3 bytes rows 14-112 cols 9-16
+[10543] page 3 bytes rows 26-107 cols 11-20
+[10544] page 4 bytes rows 22-88 cols 9-17
+[10545] page 5 bytes rows 13-78 cols 8-19
+[10546] page 3 bytes rows 51-111 cols 10-18
+[10547] page 4 bytes rows 25-86 cols 10-18
+[10592] page 240 bytes rows 176-189 cols 0-39
+[10593] page 384 bytes rows 156-175 cols 0-38
+[10594] page 368 bytes rows 136-156 cols 0-39
+[10595] page 129 bytes rows 128-136 cols 0-39
+[10596] page 3 bytes rows 190-190 cols 0-2
+[10597] page 2 bytes rows 190-190 cols 6-7
+[10598] page 1 bytes rows 190-190 cols 8-8
+[10599] page 10 bytes rows 184-190 cols 13-25
+[10600] page 1 bytes rows 190-190 cols 34-34
+[10601] page 9 bytes rows 56-62 cols 17-21
+[10602] page 7 bytes rows 57-62 cols 21-22
+[10605] page 5 bytes rows 132-134 cols 19-20
+[10606] page 5 bytes rows 165-169 cols 19-19
+[10607] page 3 bytes rows 132-134 cols 37-37
+[10608] page 3 bytes rows 132-134 cols 10-10
+[10615] page 10 bytes rows 132-169 cols 19-20
+[10616] page 3 bytes rows 132-134 cols 10-10
+[10617] page 3 bytes rows 132-134 cols 37-37
+[10660] byte shield_38200 62 -> 61
+[10691] iter 84 (+196 frames) X=700 Y=200 Z=-3701 atmos=0 marker=00/00
+[10799] page 2 bytes rows 132-133 cols 20-20
+[10800] page 5 bytes rows 133-167 cols 19-20
+[10801] page 7 bytes rows 132-169 cols 19-37
+[10802] page 5 bytes rows 132-134 cols 10-37
+[10803] page 2 bytes rows 133-134 cols 10-10
+[10809] page 5 bytes rows 132-134 cols 19-20
+[10810] page 5 bytes rows 165-169 cols 19-19
+[10811] page 6 bytes rows 132-134 cols 10-37
+[10835] byte shield_38200 61 -> 60
+[10866] iter 85 (+175 frames) X=700 Y=200 Z=-3581 atmos=0 marker=00/00
+[10868] page 241 bytes rows 14-183 cols 1-37
+[10869] page 607 bytes rows 13-190 cols 0-39
+[10870] page 448 bytes rows 13-190 cols 0-39
+[10871] page 3 bytes rows 11-41 cols 12-19
+[10872] page 2 bytes rows 70-90 cols 7-19
+[10873] page 2 bytes rows 14-45 cols 7-15
+[10874] page 5 bytes rows 15-98 cols 10-19
+[10875] page 3 bytes rows 17-102 cols 7-22
+[10876] page 3 bytes rows 11-82 cols 7-23
+[10877] page 3 bytes rows 50-117 cols 8-21
+[10878] page 4 bytes rows 23-91 cols 8-21
+[10879] page 3 bytes rows 20-79 cols 10-17
+[10880] page 2 bytes rows 9-75 cols 9-13
+[10881] page 3 bytes rows 51-116 cols 11-17
+[10882] page 3 bytes rows 21-87 cols 11-17
+[10883] page 3 bytes rows 15-84 cols 7-23
+[10884] page 4 bytes rows 12-71 cols 6-23
+[10885] page 3 bytes rows 30-120 cols 7-19
+[10886] page 4 bytes rows 20-94 cols 15-23
+[10887] page 2 bytes rows 10-92 cols 13-14
+[10888] page 4 bytes rows 15-69 cols 13-15
+[10889] page 3 bytes rows 13-97 cols 14-15
+[10890] page 2 bytes rows 38-104 cols 13-22
+[10891] page 2 bytes rows 71-85 cols 5-23
+[10892] page 3 bytes rows 12-121 cols 5-16
+[10893] page 3 bytes rows 19-103 cols 9-21
+[10894] page 4 bytes rows 20-95 cols 6-17
+[10895] page 3 bytes rows 9-79 cols 13-17
+[10896] page 3 bytes rows 51-116 cols 13-16
+[10897] page 3 bytes rows 22-88 cols 13-16
+[10898] page 3 bytes rows 18-81 cols 6-22
+[10899] page 4 bytes rows 10-73 cols 4-13
+[10900] page 3 bytes rows 50-116 cols 7-22
+[10901] page 3 bytes rows 23-90 cols 7-21
+[10902] page 4 bytes rows 11-90 cols 11-20
+[10903] page 4 bytes rows 14-70 cols 10-20
+[10904] page 2 bytes rows 33-99 cols 11-11
+[10905] page 3 bytes rows 15-101 cols 17-20
+[10906] page 3 bytes rows 12-89 cols 6-20
+[10907] page 2 bytes rows 14-46 cols 6-16
+[10908] page 3 bytes rows 15-99 cols 10-19
+[10909] page 4 bytes rows 18-100 cols 6-21
+[10910] page 3 bytes rows 73-81 cols 8-22
+[10911] page 3 bytes rows 10-115 cols 9-16
+[10912] page 4 bytes rows 24-110 cols 9-20
+[10913] page 3 bytes rows 20-79 cols 9-18
+[10914] page 2 bytes rows 9-75 cols 7-13
+[10915] page 4 bytes rows 51-115 cols 9-18
+[10916] page 3 bytes rows 22-88 cols 10-18
+[10960] page 23 bytes rows 188-189 cols 0-34
+[10961] page 246 bytes rows 169-188 cols 0-39
+[10962] page 507 bytes rows 149-168 cols 0-38
+[10963] page 301 bytes rows 130-149 cols 0-39
+[10964] page 44 bytes rows 128-129 cols 0-39
+[10965] page 3 bytes rows 190-190 cols 0-2
+[10966] page 3 bytes rows 190-190 cols 6-8
+[10967] page 13 bytes rows 184-190 cols 13-15
+[10968] page 2 bytes rows 190-190 cols 16-25
+[10969] page 1 bytes rows 190-190 cols 34-34
+[10970] page 16 bytes rows 56-62 cols 17-22
+[10974] page 6 bytes rows 132-167 cols 19-20
+[10975] page 5 bytes rows 165-169 cols 19-19
+[10976] page 5 bytes rows 132-134 cols 10-37
+[10977] page 2 bytes rows 133-134 cols 10-10
+[10983] page 3 bytes rows 132-134 cols 20-20
+[10984] page 7 bytes rows 133-169 cols 19-19
+[10985] page 6 bytes rows 132-134 cols 10-37
+[11010] byte shield_38200 60 -> 59
+[11041] iter 84 (+175 frames) X=700 Y=200 Z=-3461 atmos=0 marker=00/00
+[11149] page 5 bytes rows 132-134 cols 19-20
+[11150] page 5 bytes rows 165-169 cols 19-19
+[11151] page 3 bytes rows 132-134 cols 37-37
+[11152] page 3 bytes rows 132-134 cols 10-10
+[11159] page 10 bytes rows 132-169 cols 19-20
+[11160] page 6 bytes rows 132-134 cols 10-37
+[11161] page 1 bytes rows 133-133 cols 37-37
+[11185] byte shield_38200 59 -> 58
+[11215] iter 85 (+174 frames) X=700 Y=200 Z=-3341 atmos=0 marker=00/00
+[11218] page 427 bytes rows 9-190 cols 1-38
+[11219] page 430 bytes rows 9-190 cols 0-39
+[11220] page 429 bytes rows 10-190 cols 0-39
+[11221] page 3 bytes rows 7-40 cols 11-19
+[11222] page 3 bytes rows 11-92 cols 6-19
+[11223] page 2 bytes rows 43-100 cols 6-18
+[11224] page 3 bytes rows 11-106 cols 6-18
+[11225] page 3 bytes rows 15-83 cols 7-22
+[11226] page 3 bytes rows 7-74 cols 7-23
+[11227] page 4 bytes rows 24-120 cols 10-21
+[11228] page 3 bytes rows 20-92 cols 7-10
+[11229] page 2 bytes rows 17-80 cols 15-17
+[11230] page 4 bytes rows 5-77 cols 8-17
+[11231] page 3 bytes rows 18-121 cols 10-16
+[11232] page 3 bytes rows 24-89 cols 6-17
+[11233] page 3 bytes rows 12-86 cols 5-23
+[11234] page 2 bytes rows 9-47 cols 12-23
+[11235] page 3 bytes rows 17-107 cols 7-19
+[11236] page 3 bytes rows 6-97 cols 13-23
+[11237] page 4 bytes rows 11-94 cols 12-15
+[11238] page 3 bytes rows 42-99 cols 12-15
+[11239] page 4 bytes rows 9-108 cols 12-15
+[11240] page 3 bytes rows 11-87 cols 4-22
+[11241] page 2 bytes rows 9-72 cols 16-23
+[11242] page 3 bytes rows 29-106 cols 4-21
+[11243] page 4 bytes rows 16-97 cols 4-16
+[11244] page 3 bytes rows 17-80 cols 12-13
+[11245] page 6 bytes rows 5-76 cols 12-17
+[11246] page 3 bytes rows 18-121 cols 13-16
+[11247] page 4 bytes rows 23-89 cols 5-13
+[11248] page 3 bytes rows 15-82 cols 3-22
+[11249] page 3 bytes rows 7-120 cols 12-22
+[11250] page 4 bytes rows 21-114 cols 6-19
+[11251] page 4 bytes rows 7-92 cols 10-21
+[11252] page 2 bytes rows 70-92 cols 10-20
+[11253] page 3 bytes rows 11-101 cols 11-20
+[11254] page 3 bytes rows 11-105 cols 11-20
+[11255] page 5 bytes rows 8-92 cols 4-20
+[11256] page 3 bytes rows 11-70 cols 15-21
+[11257] page 2 bytes rows 44-101 cols 5-19
+[11258] page 4 bytes rows 12-104 cols 5-21
+[11259] page 2 bytes rows 15-82 cols 8-11
+[11260] page 4 bytes rows 6-74 cols 8-23
+[11261] page 4 bytes rows 22-119 cols 11-21
+[11262] page 3 bytes rows 21-91 cols 8-10
+[11263] page 2 bytes rows 17-80 cols 16-18
+[11264] page 4 bytes rows 5-76 cols 6-18
+[11265] page 5 bytes rows 18-120 cols 8-17
+[11266] page 2 bytes rows 23-89 cols 17-18
+[11310] page 25 bytes rows 188-189 cols 0-34
+[11311] page 244 bytes rows 169-188 cols 0-39
+[11312] page 507 bytes rows 149-168 cols 0-38
+[11313] page 301 bytes rows 130-149 cols 0-39
+[11314] page 44 bytes rows 128-129 cols 0-39
+[11315] page 3 bytes rows 190-190 cols 0-2
+[11316] page 3 bytes rows 190-190 cols 6-8
+[11317] page 14 bytes rows 184-190 cols 13-15
+[11318] page 2 bytes rows 190-190 cols 16-25
+[11319] page 1 bytes rows 190-190 cols 34-34
+[11320] page 16 bytes rows 56-62 cols 17-22
+[11324] page 6 bytes rows 132-167 cols 19-20
+[11325] page 5 bytes rows 165-169 cols 19-19
+[11326] page 5 bytes rows 132-134 cols 10-37
+[11327] page 2 bytes rows 133-134 cols 10-10
+[11333] page 4 bytes rows 132-134 cols 19-20
+[11334] page 6 bytes rows 133-169 cols 19-19
+[11335] page 6 bytes rows 132-134 cols 10-37
+[11347] byte shield_38200 58 -> 57
+[11379] iter 84 (+164 frames) X=700 Y=200 Z=-3221 atmos=0 marker=00/00
+[11487] page 5 bytes rows 132-134 cols 19-20
+[11488] page 5 bytes rows 165-169 cols 19-19
+[11489] page 3 bytes rows 132-134 cols 37-37
+[11490] page 3 bytes rows 132-134 cols 10-10
+[11497] page 10 bytes rows 132-169 cols 19-20
+[11498] page 5 bytes rows 132-134 cols 10-37
+[11499] page 2 bytes rows 133-134 cols 37-37
+[11510] byte shield_38200 57 -> 56
+[11541] iter 85 (+162 frames) X=700 Y=200 Z=-3101 atmos=0 marker=00/00
+[11543] page 236 bytes rows 5-183 cols 1-37
+[11544] page 604 bytes rows 5-190 cols 0-39
+[11545] page 450 bytes rows 5-190 cols 0-39
+[11546] page 3 bytes rows 2-39 cols 10-19
+[11547] page 2 bytes rows 71-96 cols 4-19
+[11548] page 3 bytes rows 7-41 cols 4-15
+[11549] page 3 bytes rows 6-103 cols 9-18
+[11550] page 3 bytes rows 11-110 cols 5-22
+[11551] page 3 bytes rows 3-84 cols 6-24
+[11552] page 2 bytes rows 48-117 cols 6-21
+[11553] page 4 bytes rows 17-94 cols 6-21
+[11554] page 4 bytes rows 15-81 cols 8-17
+[11555] page 4 bytes rows 0-78 cols 7-17
+[11556] page 2 bytes rows 14-120 cols 9-15
+[11557] page 3 bytes rows 21-91 cols 5-17
+[11558] page 2 bytes rows 8-88 cols 18-24
+[11559] page 3 bytes rows 5-73 cols 4-23
+[11560] page 3 bytes rows 14-110 cols 6-19
+[11561] page 4 bytes rows 1-99 cols 13-23
+[11562] page 3 bytes rows 70-98 cols 12-15
+[11563] page 4 bytes rows 8-102 cols 12-15
+[11564] page 4 bytes rows 4-113 cols 12-15
+[11565] page 4 bytes rows 7-89 cols 2-22
+[11566] page 2 bytes rows 5-72 cols 16-24
+[11567] page 3 bytes rows 26-109 cols 3-22
+[11568] page 3 bytes rows 13-100 cols 3-16
+[11569] page 2 bytes rows 14-81 cols 12-13
+[11570] page 4 bytes rows 0-77 cols 12-17
+[11571] page 2 bytes rows 14-120 cols 13-15
+[11572] page 5 bytes rows 12-91 cols 4-17
+[11573] page 2 bytes rows 75-84 cols 2-22
+[11574] page 3 bytes rows 2-123 cols 11-22
+[11575] page 4 bytes rows 18-118 cols 4-19
+[11576] page 3 bytes rows 3-94 cols 10-22
+[11577] page 2 bytes rows 71-95 cols 9-20
+[11578] page 4 bytes rows 7-103 cols 10-20
+[11579] page 4 bytes rows 7-108 cols 10-20
+[11580] page 3 bytes rows 3-94 cols 3-20
+[11581] page 3 bytes rows 7-71 cols 15-21
+[11582] page 3 bytes rows 30-104 cols 3-19
+[11583] page 3 bytes rows 7-108 cols 4-21
+[11584] page 2 bytes rows 12-83 cols 7-11
+[11585] page 3 bytes rows 2-76 cols 7-23
+[11586] page 4 bytes rows 19-123 cols 10-21
+[11587] page 3 bytes rows 18-93 cols 7-10
+[11588] page 3 bytes rows 14-81 cols 5-18
+[11589] page 3 bytes rows 1-120 cols 12-18
+[11590] page 3 bytes rows 15-21 cols 8-17
+[11591] page 1 bytes rows 91-91 cols 18-18
+[11636] page 252 bytes rows 173-189 cols 0-39
+[11637] page 458 bytes rows 153-172 cols 0-38
+[11638] page 307 bytes rows 134-153 cols 0-39
+[11639] page 104 bytes rows 128-134 cols 0-39
+[11640] page 3 bytes rows 190-190 cols 0-2
+[11641] page 3 bytes rows 190-190 cols 6-8
+[11643] page 17 bytes rows 184-190 cols 13-25
+[11644] page 1 bytes rows 190-190 cols 34-34
+[11645] page 16 bytes rows 56-62 cols 17-22
+[11649] page 5 bytes rows 132-134 cols 19-20
+[11650] page 5 bytes rows 165-169 cols 19-19
+[11651] page 3 bytes rows 132-134 cols 37-37
+[11652] page 3 bytes rows 132-134 cols 10-10
+[11659] page 10 bytes rows 132-169 cols 19-20
+[11660] page 3 bytes rows 132-134 cols 10-10
+[11661] page 3 bytes rows 132-134 cols 37-37
+[11673] byte shield_38200 56 -> 55
+[11704] iter 84 (+163 frames) X=700 Y=200 Z=-2981 atmos=0 marker=00/00
+[11811] page 5 bytes rows 132-134 cols 19-20
+[11812] page 5 bytes rows 165-169 cols 19-19
+[11813] page 3 bytes rows 132-134 cols 37-37
+[11814] page 3 bytes rows 132-134 cols 10-10
+[11821] page 8 bytes rows 132-167 cols 19-20
+[11822] page 6 bytes rows 132-169 cols 10-19
+[11823] page 3 bytes rows 132-134 cols 37-37
+[11846] byte shield_38200 55 -> 54
+[11877] iter 85 (+173 frames) X=700 Y=200 Z=-2861 atmos=0 marker=00/00
+[11879] page 22 bytes rows 0-119 cols 5-23
+[11880] page 592 bytes rows 0-190 cols 0-39
+[11881] page 461 bytes rows 0-190 cols 1-39
+[11882] page 212 bytes rows 73-190 cols 0-39
+[11883] page 4 bytes rows 37-100 cols 2-19
+[11884] page 4 bytes rows 3-71 cols 3-19
+[11885] page 2 bytes rows 28-106 cols 18-18
+[11886] page 4 bytes rows 0-115 cols 3-22
+[11887] page 2 bytes rows 76-86 cols 5-24
+[11888] page 2 bytes rows 47-122 cols 5-21
+[11889] page 3 bytes rows 14-97 cols 5-21
+[11890] page 3 bytes rows 11-82 cols 7-17
+[11891] page 1 bytes rows 80-80 cols 6-6
+[11892] page 3 bytes rows 8-123 cols 8-17
+[11893] page 4 bytes rows 18-92 cols 4-17
+[11894] page 2 bytes rows 3-90 cols 18-24
+[11895] page 4 bytes rows 0-74 cols 2-24
+[11896] page 3 bytes rows 9-114 cols 5-19
+[11897] page 2 bytes rows 38-103 cols 14-23
+[11898] page 2 bytes rows 71-103 cols 11-14
+[11899] page 3 bytes rows 3-104 cols 11-14
+[11900] page 2 bytes rows 30-119 cols 11-14
+[11901] page 3 bytes rows 2-91 cols 1-22
+[11902] page 3 bytes rows 0-73 cols 1-24
+[11903] page 2 bytes rows 23-112 cols 21-22
+[11904] page 4 bytes rows 8-104 cols 2-15
+[11905] page 3 bytes rows 11-83 cols 12-13
+[11906] page 2 bytes rows 49-79 cols 12-16
+[11907] page 3 bytes rows 9-92 cols 12-15
+[11908] page 4 bytes rows 8-85 cols 2-22
+[11909] page 1 bytes rows 77-77 cols 0-0
+[11910] page 3 bytes rows 15-123 cols 3-22
+[11911] page 3 bytes rows 15-96 cols 9-22
+[11912] page 2 bytes rows 71-99 cols 9-20
+[11913] page 2 bytes rows 3-40 cols 12-20
+[11914] page 4 bytes rows 1-106 cols 10-17
+[11915] page 2 bytes rows 37-114 cols 20-20
+[11916] page 4 bytes rows 2-98 cols 1-21
+[11917] page 2 bytes rows 40-107 cols 2-19
+[11918] page 3 bytes rows 2-113 cols 2-19
+[11919] page 4 bytes rows 8-85 cols 6-21
+[11920] page 3 bytes rows 47-77 cols 6-23
+[11921] page 2 bytes rows 15-15 cols 9-20
+[11922] page 3 bytes rows 11-95 cols 5-15
+[11923] page 2 bytes rows 79-83 cols 3-18
+[11924] page 1 bytes rows 49-49 cols 18-18
+[11925] page 3 bytes rows 9-92 cols 7-18
+[11970] page 65 bytes rows 185-189 cols 0-34
+[11971] page 241 bytes rows 166-185 cols 0-39
+[11972] page 475 bytes rows 147-165 cols 0-38
+[11973] page 340 bytes rows 128-146 cols 0-39
+[11975] page 3 bytes rows 190-190 cols 0-2
+[11976] page 3 bytes rows 190-190 cols 6-8
+[11977] page 7 bytes rows 186-190 cols 13-16
+[11978] page 1 bytes rows 190-190 cols 25-25
+[11979] page 2 bytes rows 59-190 cols 17-34
+[11980] page 15 bytes rows 56-62 cols 18-22
+[11983] page 2 bytes rows 132-133 cols 20-20
+[11984] page 9 bytes rows 133-169 cols 19-20
+[11985] page 5 bytes rows 132-168 cols 19-37
+[11986] page 5 bytes rows 132-134 cols 10-37
+[11987] page 2 bytes rows 133-134 cols 10-10
+[11993] page 5 bytes rows 132-134 cols 19-20
+[11994] page 5 bytes rows 165-169 cols 19-19
+[11995] page 6 bytes rows 132-134 cols 10-37
+[12007] byte shield_38200 54 -> 53
+[12038] iter 84 (+161 frames) X=700 Y=200 Z=-2741 atmos=0 marker=00/00
+[12078] == laser
+[12978] byte shield_38200 53 -> 49
+[12978] byte weapon_38202 1 -> 0
+[12978] page 214 bytes rows 0-190 cols 0-26
+[12978] snap_80 laser, button held
+[12980] snap_81 laser, button held
+[12982] snap_82 laser, button held
+[12984] snap_83 laser, button held
+[12986] snap_84 laser, button held
+[12988] page 2 bytes rows 132-133 cols 20-20
+[12988] snap_85 laser, button held
+[12989] page 5 bytes rows 133-167 cols 19-20
+[12990] page 7 bytes rows 132-169 cols 19-37
+[12990] snap_86 laser, button held
+[12991] page 4 bytes rows 132-134 cols 10-37
+[12992] page 2 bytes rows 133-134 cols 10-10
+[12992] snap_87 laser, button held
+[12994] snap_88 laser, button held
+[12996] snap_89 laser, button held
+[12998] page 5 bytes rows 132-134 cols 19-20
+[12998] snap_90 laser, button held
+[12999] page 5 bytes rows 165-169 cols 19-19
+[13000] page 6 bytes rows 132-134 cols 10-37
+[13000] snap_91 laser, button held
+[13002] snap_92 laser, button held
+[13004] snap_93 laser, button held
+[13006] snap_94 laser, button held
+[13007] page 1 bytes rows 123-123 cols 12-12
+[13008] page 70 bytes rows 60-122 cols 12-19
+[13008] snap_95 laser, button held
+[13009] page 44 bytes rows 68-123 cols 13-27
+[13010] page 70 bytes rows 60-122 cols 20-27
+[13010] snap_96 laser, button held
+[13011] page 42 bytes rows 64-123 cols 20-26
+[13012] snap_97 laser, button held
+[13014] snap_98 laser, button held
+[13016] snap_99 laser, button held
+[13018] snap_100 laser, button held
+[13020] snap_101 laser, button held
+[13022] snap_102 laser, button held
+[13024] snap_103 laser, button held
+[13026] snap_104 laser, button held
+[13028] snap_105 laser, button held
+[13030] snap_106 laser, button held
+[13032] snap_107 laser, button held
+[13034] snap_108 laser, button held
+[13036] snap_109 laser, button held
+[13038] snap_110 laser, button held
+[13040] snap_111 laser, button held
+[13042] snap_112 laser, button held
+[13044] snap_113 laser, button held
+[13046] snap_114 laser, button held
+[13048] snap_115 laser, button held
+[13050] snap_116 laser, button held
+[13052] snap_117 laser, button held
+[13054] snap_118 laser, button held
+[13055] page 1 bytes rows 123-123 cols 12-12
+[13056] page 70 bytes rows 60-122 cols 12-19
+[13056] snap_119 laser, button held
+[13057] page 43 bytes rows 68-123 cols 13-18
+[13058] page 69 bytes rows 62-123 cols 20-27
+[13058] snap_120 laser, button held
+[13059] page 44 bytes rows 60-123 cols 20-26
+[13060] snap_121 laser, button held
+[13062] snap_122 laser, button held
+[13063] page 27 bytes rows 100-123 cols 12-15
+[13064] page 48 bytes rows 60-99 cols 15-19
+[13064] snap_123 laser, button held
+[13065] page 30 bytes rows 91-123 cols 13-27
+[13066] page 70 bytes rows 60-122 cols 20-27
+[13066] snap_124 laser, button held
+[13067] page 42 bytes rows 64-123 cols 20-26
+[13068] snap_125 laser, button held
+[13070] snap_126 laser, button held
+[13072] snap_127 laser, button held
+[13074] snap_128 laser, button held
+[13076] snap_129 laser, button held
+[13078] snap_130 laser, button held
+[13080] snap_131 laser, button held
+[13082] snap_132 laser, button held
+[13084] snap_133 laser, button held
+[13086] snap_134 laser, button held
+[13088] snap_135 laser, button held
+[13090] snap_136 laser, button held
+[13092] snap_137 laser, button held
+[13094] snap_138 laser, button held
+[13096] snap_139 laser, button held
+[13098] snap_140 laser, button held
+[13100] snap_141 laser, button held
+[13102] snap_142 laser, button held
+[13104] snap_143 laser, button held
+[13106] snap_144 laser, button held
+[13108] snap_145 laser, button held
+[13110] snap_146 laser, button held
+[13111] page 5 bytes rows 120-123 cols 12-13
+[13112] page 66 bytes rows 60-119 cols 13-19
+[13112] snap_147 laser, button held
+[13113] page 43 bytes rows 71-123 cols 13-27
+[13114] page 70 bytes rows 60-122 cols 20-27
+[13114] snap_148 laser, button held
+[13115] page 42 bytes rows 64-123 cols 20-26
+[13116] snap_149 laser, button held
+[13118] snap_150 laser, button held
+[13119] page 61 bytes rows 69-123 cols 12-18
+[13120] page 51 bytes rows 60-122 cols 13-19
+[13120] snap_151 laser, button held
+[13121] page 36 bytes rows 92-123 cols 13-27
+[13122] page 44 bytes rows 60-95 cols 20-23
+[13122] snap_152 laser, button held
+[13123] page 22 bytes rows 97-123 cols 24-26
+[13124] snap_153 laser, button held
+[13126] snap_154 laser, button held
+[13128] snap_155 laser, button held
+[13130] snap_156 laser, button held
+[13132] snap_157 laser, button held
+[13134] snap_158 laser, button held
+[13136] snap_159 laser, button held
+[13138] snap_160 laser, button held
+[13140] snap_161 laser, button held
+[13142] snap_162 laser, button held
+[13144] snap_163 laser, button held
+[13146] snap_164 laser, button held
+[13148] snap_165 laser, button held
+[13150] snap_166 laser, button held
+[13152] snap_167 laser, button held
+[13154] snap_168 laser, button held
+[13156] snap_169 laser, button held
+[13158] snap_170 laser, button held
+[13160] snap_171 laser, button held
+[13162] snap_172 laser, button held
+[13164] snap_173 laser, button held
+[13166] snap_174 laser, button held
+[13167] page 40 bytes rows 88-123 cols 12-16
+[13168] page 47 bytes rows 60-101 cols 15-19
+[13168] snap_175 laser, button held
+[13169] page 32 bytes rows 103-123 cols 13-27
+[13170] page 60 bytes rows 60-111 cols 20-26
+[13170] snap_176 laser, button held
+[13171] page 38 bytes rows 77-123 cols 22-26
+[13172] snap_177 laser, button held
+[13174] snap_178 laser, button held
+[13175] byte vp_38160 1 -> 3
+[13176] snap_179 laser, button held
+[13178] snap_180 laser, button held
+[13180] page 7 bytes rows 96-102 cols 7-7
+[13180] snap_181 laser, button held
+[13182] page 7 bytes rows 96-102 cols 8-8
+[13182] snap_182 laser, button held
+[13184] snap_183 laser, button held
+[13185] page 7 bytes rows 96-102 cols 9-9
+[13186] snap_184 laser, button held
+[13187] page 1 bytes rows 98-98 cols 10-10
+[13188] snap_185 laser, button held
+[13190] page 7 bytes rows 96-102 cols 11-11
+[13190] snap_186 laser, button held
+[13192] snap_187 laser, button held
+[13193] page 7 bytes rows 96-102 cols 12-12
+[13194] snap_188 laser, button held
+[13195] page 7 bytes rows 96-102 cols 13-13
+[13196] snap_189 laser, button held
+[13198] page 7 bytes rows 96-102 cols 14-14
+[13198] snap_190 laser, button held
+[13200] page 7 bytes rows 96-102 cols 15-15
+[13200] snap_191 laser, button held
+[13202] snap_192 laser, button held
+[13203] page 7 bytes rows 96-102 cols 16-16
+[13204] snap_193 laser, button held
+[13206] snap_194 laser, button held
+[13208] page 7 bytes rows 96-102 cols 18-18
+[13208] snap_195 laser, button held
+[13210] snap_196 laser, button held
+[13211] page 7 bytes rows 96-102 cols 19-19
+[13212] snap_197 laser, button held
+[13213] page 7 bytes rows 96-102 cols 20-20
+[13214] snap_198 laser, button held
+[13216] snap_199 laser, button held
+[13218] snap_200 laser, button held
+[13219] page 8 bytes rows 96-103 cols 22-22
+[13220] snap_201 laser, button held
+[13221] page 7 bytes rows 96-102 cols 23-23
+[13222] snap_202 laser, button held
+[13224] page 7 bytes rows 96-102 cols 24-24
+[13224] snap_203 laser, button held
+[13226] page 3 bytes rows 96-98 cols 25-25
+[13226] snap_204 laser, button held
+[13227] page 4 bytes rows 99-102 cols 25-25
+[13228] snap_205 laser, button held
+[13229] page 7 bytes rows 96-102 cols 26-26
+[13230] snap_206 laser, button held
+[13232] page 7 bytes rows 96-102 cols 27-27
+[13232] snap_207 laser, button held
+[13234] page 7 bytes rows 96-102 cols 28-28
+[13234] snap_208 laser, button held
+[13236] snap_209 laser, button held
+[13237] page 7 bytes rows 96-102 cols 29-29
+[13238] snap_210 laser, button held
+[13240] page 7 bytes rows 96-102 cols 30-30
+[13240] snap_211 laser, button held
+[13242] page 7 bytes rows 96-102 cols 31-31
+[13242] snap_212 laser, button held
+[13244] snap_213 laser, button held
+[13245] page 7 bytes rows 96-102 cols 32-32
+[13246] snap_214 laser, button held
+[13248] snap_215 laser, button held
+[13250] snap_216 laser, button held
+[13251] byte surrendered_38208 0 -> 1
+[13252] snap_217 laser, button held
+[13254] snap_218 laser, button held
+[13256] snap_219 laser, button held
+[13258] snap_220 laser, button held
+[13260] snap_221 laser, button held
+[13262] snap_222 laser, button held
+[13264] snap_223 laser, button held
+[13266] snap_224 laser, button held
+[13268] snap_225 laser, button held
+[13270] snap_226 laser, button held
+[13272] snap_227 laser, button held
+[13274] snap_228 laser, button held
+[13276] snap_229 laser, button held
+[13278] snap_230 laser, button held
+[13280] snap_231 laser, button held
+[13282] snap_232 laser, button held
+[13284] snap_233 laser, button held
+[13286] iter 85 (+1248 frames) X=700 Y=200 Z=-2022 atmos=0 marker=00/00
+[13286] snap_234 laser, button held
+[13288] page 261 bytes rows 3-183 cols 0-37
+[13288] snap_235 laser, button held
+[13289] page 461 bytes rows 0-190 cols 0-39
+[13290] page 597 bytes rows 4-190 cols 0-38
+[13290] snap_236 laser, button held
+[13291] page 58 bytes rows 30-158 cols 18-39
+[13292] page 1 bytes rows 74-74 cols 19-19
+[13292] snap_237 laser, button held
+[13293] page 1 bytes rows 119-119 cols 18-18
+[13294] page 2 bytes rows 11-18 cols 17-23
+[13294] snap_238 laser, button held
+[13295] page 2 bytes rows 83-94 cols 0-26
+[13296] page 2 bytes rows 42-42 cols 0-1
+[13296] snap_239 laser, button held
+[13297] page 1 bytes rows 109-109 cols 1-1
+[13298] page 1 bytes rows 88-88 cols 16-16
+[13298] snap_240 laser, button held
+[13299] page 1 bytes rows 46-46 cols 16-16
+[13300] page 2 bytes rows 4-101 cols 14-16
+[13300] snap_241 laser, button held
+[13301] page 1 bytes rows 102-102 cols 26-26
+[13302] page 1 bytes rows 37-37 cols 26-26
+[13302] snap_242 laser, button held
+[13303] page 3 bytes rows 31-120 cols 12-25
+[13304] page 1 bytes rows 73-73 cols 13-13
+[13304] snap_243 laser, button held
+[13305] page 1 bytes rows 20-20 cols 5-5
+[13306] page 4 bytes rows 20-116 cols 12-13
+[13306] snap_244 laser, button held
+[13307] page 1 bytes rows 22-22 cols 23-23
+[13308] page 1 bytes rows 77-77 cols 25-25
+[13308] snap_245 laser, button held
+[13309] page 1 bytes rows 9-9 cols 22-22
+[13310] page 2 bytes rows 89-92 cols 9-13
+[13310] snap_246 laser, button held
+[13311] page 1 bytes rows 46-46 cols 9-9
+[13312] page 2 bytes rows 4-101 cols 9-10
+[13312] snap_247 laser, button held
+[13313] page 1 bytes rows 93-93 cols 23-23
+[13314] page 1 bytes rows 43-43 cols 23-23
+[13314] snap_248 laser, button held
+[13315] page 2 bytes rows 108-108 cols 22-23
+[13316] page 3 bytes rows 30-122 cols 6-20
+[13316] snap_249 laser, button held
+[13317] page 2 bytes rows 26-74 cols 6-20
+[13318] page 3 bytes rows 17-120 cols 6-7
+[13318] snap_250 laser, button held
+[13319] page 1 bytes rows 29-29 cols 20-20
+[13320] page 1 bytes rows 75-75 cols 21-21
+[13320] snap_251 laser, button held
+[13321] page 2 bytes rows 16-121 cols 19-19
+[13322] page 2 bytes rows 7-92 cols 2-22
+[13322] snap_252 laser, button held
+[13323] page 3 bytes rows 43-85 cols 2-25
+[13324] snap_253 laser, button held
+[13325] page 2 bytes rows 89-106 cols 3-18
+[13326] page 1 bytes rows 45-45 cols 18-18
+[13326] snap_254 laser, button held
+[13327] page 1 bytes rows 4-4 cols 15-15
+[13328] page 1 bytes rows 101-101 cols 17-17
+[13328] snap_255 laser, button held
+[13330] snap_256 laser, button held
+[13332] snap_257 laser, button held
+[13334] snap_258 laser, button held
+[13336] snap_259 laser, button held
+[13338] snap_260 laser, button held
+[13340] snap_261 laser, button held
+[13342] snap_262 laser, button held
+[13344] snap_263 laser, button held
+[13346] snap_264 laser, button held
+[13348] snap_265 laser, button held
+[13350] snap_266 laser, button held
+[13352] snap_267 laser, button held
+[13354] snap_268 laser, button held
+[13356] snap_269 laser, button held
+[13358] snap_270 laser, button held
+[13360] snap_271 laser, button held
+[13362] snap_272 laser, button held
+[13364] snap_273 laser, button held
+[13366] snap_274 laser, button held
+[13368] snap_275 laser, button held
+[13370] snap_276 laser, button held
+[13372] snap_277 laser, button held
+[13373] page 52 bytes rows 186-189 cols 0-34
+[13374] page 227 bytes rows 167-186 cols 0-39
+[13374] snap_278 laser, button held
+[13375] page 501 bytes rows 147-166 cols 0-38
+[13376] page 341 bytes rows 128-147 cols 0-39
+[13376] snap_279 laser, button held
+[13378] page 3 bytes rows 190-190 cols 0-2
+[13378] snap_280 laser, button held
+[13379] page 3 bytes rows 190-190 cols 6-8
+[13380] page 9 bytes rows 184-190 cols 13-16
+[13380] snap_281 laser, button held
+[13381] page 1 bytes rows 190-190 cols 25-25
+[13382] page 2 bytes rows 59-190 cols 17-34
+[13382] snap_282 laser, button held
+[13383] page 15 bytes rows 56-62 cols 18-22
+[13384] snap_283 laser, button held
+[13386] page 2 bytes rows 132-133 cols 20-20
+[13386] snap_284 laser, button held
+[13387] page 5 bytes rows 133-167 cols 19-20
+[13388] page 7 bytes rows 132-169 cols 19-37
+[13388] snap_285 laser, button held
+[13389] page 5 bytes rows 132-134 cols 10-37
+[13390] page 2 bytes rows 133-134 cols 10-10
+[13390] snap_286 laser, button held
+[13392] snap_287 laser, button held
+[13394] snap_288 laser, button held
+[13396] page 5 bytes rows 132-134 cols 19-20
+[13396] snap_289 laser, button held
+[13397] page 5 bytes rows 165-169 cols 19-19
+[13398] page 6 bytes rows 132-134 cols 10-37
+[13398] snap_290 laser, button held
+[13400] snap_291 laser, button held
+[13401] byte surrendered_38208 1 -> 0
+[13402] snap_292 laser, button held
+[13404] snap_293 laser, button held
+[13406] snap_294 laser, button held
+[13407] page 55 bytes rows 74-123 cols 12-17
+[13408] page 49 bytes rows 60-116 cols 14-19
+[13408] snap_295 laser, button held
+[13409] page 36 bytes rows 98-123 cols 13-27
+[13410] page 47 bytes rows 60-97 cols 20-24
+[13410] snap_296 laser, button held
+[13411] page 28 bytes rows 89-123 cols 23-26
+[13412] snap_297 laser, button held
+[13414] snap_298 laser, button held
+[13416] snap_299 laser, button held
+[13418] snap_300 laser, button held
+[13420] snap_301 laser, button held
+[13422] snap_302 laser, button held
+[13424] snap_303 laser, button held
+[13426] snap_304 laser, button held
+[13428] snap_305 laser, button held
+[13430] snap_306 laser, button held
+[13432] snap_307 laser, button held
+[13434] snap_308 laser, button held
+[13436] snap_309 laser, button held
+[13438] snap_310 laser, button held
+[13440] snap_311 laser, button held
+[13442] snap_312 laser, button held
+[13444] snap_313 laser, button held
+[13446] snap_314 laser, button held
+[13448] snap_315 laser, button held
+[13450] snap_316 laser, button held
+[13452] snap_317 laser, button held
+[13454] snap_318 laser, button held
+[13455] page 32 bytes rows 95-123 cols 12-15
+[13456] page 45 bytes rows 60-95 cols 15-19
+[13456] snap_319 laser, button held
+[13457] page 32 bytes rows 96-123 cols 13-27
+[13458] page 65 bytes rows 60-117 cols 20-26
+[13458] snap_320 laser, button held
+[13459] page 40 bytes rows 71-123 cols 21-26
+[13460] snap_321 laser, button held
+[13462] page 1 bytes rows 123-123 cols 12-12
+[13462] snap_322 laser, button held
+[13463] page 70 bytes rows 60-122 cols 12-19
+[13464] page 43 bytes rows 68-123 cols 13-18
+[13464] snap_323 laser, button held
+[13465] page 64 bytes rows 66-123 cols 21-27
+[13466] page 47 bytes rows 60-121 cols 20-26
+[13466] snap_324 laser, button held
+[13467] page 2 bytes rows 122-123 cols 26-26
+[13468] snap_325 laser, button held
+[13470] snap_326 laser, button held
+[13472] snap_327 laser, button held
+[13474] snap_328 laser, button held
+[13476] snap_329 laser, button held
+[13478] snap_330 laser, button held
+[13480] snap_331 laser, button held
+[13482] snap_332 laser, button held
+[13484] snap_333 laser, button held
+[13486] snap_334 laser, button held
+[13488] snap_335 laser, button held
+[13490] snap_336 laser, button held
+[13492] snap_337 laser, button held
+[13494] snap_338 laser, button held
+[13496] snap_339 laser, button held
+[13498] snap_340 laser, button held
+[13500] snap_341 laser, button held
+[13502] snap_342 laser, button held
+[13504] snap_343 laser, button held
+[13506] snap_344 laser, button held
+[13508] snap_345 laser, button held
+[13510] snap_346 laser, button held
+[13511] page 68 bytes rows 63-123 cols 12-19
+[13512] page 46 bytes rows 60-123 cols 13-19
+[13512] snap_347 laser, button held
+[13513] page 42 bytes rows 86-123 cols 23-27
+[13514] page 46 bytes rows 60-101 cols 20-24
+[13514] snap_348 laser, button held
+[13515] page 18 bytes rows 103-123 cols 24-26
+[13516] snap_349 laser, button held
+[13518] page 1 bytes rows 123-123 cols 12-12
+[13518] snap_350 laser, button held
+[13519] page 70 bytes rows 60-122 cols 12-19
+[13520] page 44 bytes rows 68-123 cols 13-27
+[13520] snap_351 laser, button held
+[13521] page 70 bytes rows 60-122 cols 20-27
+[13522] page 42 bytes rows 64-123 cols 20-26
+[13522] snap_352 laser, button held
+[13524] snap_353 laser, button held
+[13526] snap_354 laser, button held
+[13528] snap_355 laser, button held
+[13530] snap_356 laser, button held
+[13532] snap_357 laser, button held
+[13534] snap_358 laser, button held
+[13536] snap_359 laser, button held
+[13538] snap_360 laser, button held
+[13540] snap_361 laser, button held
+[13542] snap_362 laser, button held
+[13544] snap_363 laser, button held
+[13546] snap_364 laser, button held
+[13548] snap_365 laser, button held
+[13550] snap_366 laser, button held
+[13552] snap_367 laser, button held
+[13554] snap_368 laser, button held
+[13556] snap_369 laser, button held
+[13558] snap_370 laser, button held
+[13560] snap_371 laser, button held
+[13562] snap_372 laser, button held
+[13564] snap_373 laser, button held
+[13566] page 1 bytes rows 123-123 cols 12-12
+[13566] snap_374 laser, button held
+[13567] page 70 bytes rows 60-122 cols 12-19
+[13568] page 43 bytes rows 68-123 cols 13-18
+[13568] snap_375 laser, button held
+[13569] page 71 bytes rows 60-123 cols 20-27
+[13570] page 42 bytes rows 64-123 cols 20-26
+[13570] snap_376 laser, button held
+[13572] snap_377 laser, button held
+[13574] snap_378 laser, button held
+[13575] byte vp_38160 3 -> 5
+[13576] snap_379 laser, button held
+[13578] snap_380 laser, button held
+[13601] byte shield_38200 49 -> 48
+[13632] iter 84 (+346 frames) X=700 Y=200 Z=-1902 atmos=0 marker=06/00
+[13732] page 5 bytes rows 132-134 cols 19-20
+[13733] page 5 bytes rows 165-169 cols 19-19
+[13734] page 3 bytes rows 132-134 cols 37-37
+[13735] page 3 bytes rows 132-134 cols 10-10
+[13742] page 5 bytes rows 132-134 cols 19-20
+[13743] page 8 bytes rows 132-169 cols 10-19
+[13744] page 3 bytes rows 132-134 cols 37-37
+[13751] page 50 bytes rows 79-123 cols 12-17
+[13752] page 48 bytes rows 60-110 cols 14-19
+[13753] page 35 bytes rows 103-123 cols 13-27
+[13754] page 52 bytes rows 60-102 cols 20-25
+[13755] page 32 bytes rows 85-123 cols 22-26
+[13799] page 28 bytes rows 99-123 cols 12-15
+[13800] page 47 bytes rows 60-98 cols 15-19
+[13801] page 31 bytes rows 91-123 cols 13-27
+[13802] page 71 bytes rows 60-122 cols 20-27
+[13803] page 41 bytes rows 68-123 cols 21-26
+[13806] page 1 bytes rows 123-123 cols 12-12
+[13807] page 70 bytes rows 60-122 cols 12-19
+[13808] page 43 bytes rows 68-123 cols 13-18
+[13809] page 60 bytes rows 70-123 cols 21-27
+[13810] page 48 bytes rows 60-116 cols 20-25
+[13811] page 5 bytes rows 118-123 cols 26-26
+[13855] page 63 bytes rows 67-123 cols 12-18
+[13856] page 51 bytes rows 60-123 cols 13-19
+[13857] page 38 bytes rows 90-123 cols 23-27
+[13858] page 43 bytes rows 60-95 cols 20-23
+[13859] page 22 bytes rows 97-123 cols 24-26
+[13862] page 1 bytes rows 123-123 cols 12-12
+[13863] page 70 bytes rows 60-122 cols 12-19
+[13864] page 44 bytes rows 68-123 cols 13-27
+[13865] page 70 bytes rows 60-122 cols 20-27
+[13866] page 42 bytes rows 64-123 cols 20-26
+[13910] page 1 bytes rows 123-123 cols 12-12
+[13911] page 70 bytes rows 60-122 cols 12-19
+[13912] page 43 bytes rows 68-123 cols 13-18
+[13913] page 71 bytes rows 60-123 cols 20-27
+[13914] page 42 bytes rows 64-123 cols 20-26
+[13919] byte vp_38160 5 -> 7
+[13945] byte shield_38200 48 -> 47
+[13976] iter 85 (+344 frames) X=700 Y=200 Z=-1782 atmos=0 marker=06/00
+[13978] page 89 bytes rows 4-183 cols 1-26
+[13979] page 499 bytes rows 4-190 cols 0-39
+[13980] page 418 bytes rows 4-190 cols 1-38
+[13981] page 203 bytes rows 27-190 cols 0-39
+[13982] page 1 bytes rows 75-75 cols 19-19
+[13984] page 2 bytes rows 3-14 cols 17-24
+[13985] page 1 bytes rows 86-86 cols 28-28
+[13988] page 1 bytes rows 91-91 cols 16-16
+[13989] page 1 bytes rows 44-44 cols 16-16
+[13990] page 1 bytes rows 104-104 cols 15-15
+[13991] page 1 bytes rows 108-108 cols 27-27
+[13992] page 2 bytes rows 34-34 cols 26-27
+[13993] page 1 bytes rows 29-29 cols 12-12
+[13994] page 3 bytes rows 9-74 cols 1-13
+[13995] page 2 bytes rows 16-121 cols 12-12
+[13996] page 1 bytes rows 18-18 cols 24-24
+[13997] page 1 bytes rows 79-79 cols 26-26
+[13998] page 1 bytes rows 2-2 cols 22-22
+[13999] page 2 bytes rows 91-91 cols 8-9
+[14000] page 3 bytes rows 44-100 cols 8-12
+[14002] page 3 bytes rows 96-105 cols 8-23
+[14003] page 1 bytes rows 41-41 cols 23-23
+[14005] page 2 bytes rows 26-112 cols 5-23
+[14006] page 3 bytes rows 18-75 cols 4-20
+[14007] page 1 bytes rows 13-13 cols 5-5
+[14008] page 1 bytes rows 26-26 cols 20-20
+[14009] page 1 bytes rows 76-76 cols 21-21
+[14010] page 2 bytes rows 12-12 cols 18-19
+[14011] page 2 bytes rows 95-95 cols 0-1
+[14012] page 2 bytes rows 41-89 cols 1-26
+[14013] page 1 bytes rows 111-111 cols 1-1
+[14014] page 1 bytes rows 91-91 cols 18-18
+[14015] page 1 bytes rows 44-44 cols 17-17
+[14016] page 1 bytes rows 105-105 cols 17-17
+[14062] page 170 bytes rows 178-189 cols 0-37
+[14063] page 356 bytes rows 158-178 cols 0-39
+[14064] page 398 bytes rows 139-158 cols 0-39
+[14065] page 191 bytes rows 128-139 cols 0-39
+[14066] page 1 bytes rows 190-190 cols 0-0
+[14067] page 2 bytes rows 190-190 cols 1-2
+[14068] page 3 bytes rows 190-190 cols 6-8
+[14069] page 11 bytes rows 184-190 cols 13-15
+[14070] page 2 bytes rows 190-190 cols 25-34
+[14071] page 8 bytes rows 56-62 cols 17-18
+[14072] page 8 bytes rows 56-62 cols 21-22
+[14075] page 5 bytes rows 132-134 cols 19-20
+[14076] page 5 bytes rows 165-169 cols 19-19
+[14077] page 3 bytes rows 132-134 cols 37-37
+[14078] page 3 bytes rows 132-134 cols 10-10
+[14085] page 5 bytes rows 132-134 cols 19-20
+[14086] page 8 bytes rows 132-169 cols 10-19
+[14087] page 3 bytes rows 132-134 cols 37-37
+[14094] page 1 bytes rows 123-123 cols 12-12
+[14095] page 70 bytes rows 60-122 cols 12-19
+[14096] page 42 bytes rows 68-123 cols 13-18
+[14097] page 70 bytes rows 61-123 cols 20-27
+[14098] page 43 bytes rows 60-123 cols 20-26
+[14143] page 71 bytes rows 60-123 cols 12-19
+[14144] page 43 bytes rows 68-123 cols 13-18
+[14145] page 49 bytes rows 80-123 cols 22-27
+[14146] page 48 bytes rows 60-107 cols 20-25
+[14147] page 12 bytes rows 109-123 cols 25-26
+[14150] page 7 bytes rows 118-123 cols 12-13
+[14151] page 64 bytes rows 60-117 cols 13-19
+[14152] page 43 bytes rows 71-123 cols 13-27
+[14153] page 70 bytes rows 60-122 cols 20-27
+[14154] page 42 bytes rows 64-123 cols 20-26
+[14198] page 1 bytes rows 123-123 cols 12-12
+[14199] page 70 bytes rows 60-122 cols 12-19
+[14200] page 44 bytes rows 68-123 cols 13-27
+[14201] page 70 bytes rows 60-122 cols 20-27
+[14202] page 42 bytes rows 64-123 cols 20-26
+[14206] page 41 bytes rows 87-123 cols 12-16
+[14207] page 47 bytes rows 60-103 cols 15-19
+[14208] page 34 bytes rows 104-123 cols 13-27
+[14209] page 57 bytes rows 60-109 cols 20-25
+[14210] page 38 bytes rows 77-123 cols 22-26
+[14254] page 19 bytes rows 107-123 cols 12-14
+[14255] page 54 bytes rows 60-106 cols 14-19
+[14256] page 35 bytes rows 83-123 cols 13-27
+[14257] page 70 bytes rows 60-122 cols 20-27
+[14258] page 42 bytes rows 64-123 cols 20-26
+[14263] byte vp_38160 7 -> 9
+[14289] byte shield_38200 47 -> 46
+[14320] iter 84 (+344 frames) X=700 Y=200 Z=-1662 atmos=0 marker=00/00
+[14418] page 3 bytes rows 132-134 cols 20-20
+[14419] page 8 bytes rows 133-169 cols 19-20
+[14420] page 5 bytes rows 132-168 cols 19-37
+[14421] page 5 bytes rows 132-134 cols 10-37
+[14422] page 2 bytes rows 133-134 cols 10-10
+[14428] page 5 bytes rows 132-134 cols 19-20
+[14429] page 7 bytes rows 132-169 cols 10-19
+[14430] page 5 bytes rows 132-134 cols 10-37
+[14437] page 18 bytes rows 108-123 cols 12-14
+[14438] page 55 bytes rows 60-107 cols 14-19
+[14439] page 36 bytes rows 82-123 cols 13-27
+[14440] page 70 bytes rows 60-122 cols 20-27
+[14441] page 42 bytes rows 64-123 cols 20-26
+[15078] == lores
+[15082] snap_381 lo-res flash (forced $C056)
+[15088] == done
+done

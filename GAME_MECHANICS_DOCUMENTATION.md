@@ -45,11 +45,10 @@ Space Vikings is a 1982 Apple II space trading and combat game with multiple sub
 - Morale impact on combat effectiveness
 
 ### 4. Crew Management
-**Morale & Training:**
-- **$03CE (974)**: Crew morale/status (62 references)
-- **$03CD (973)**: Training level/experience (31 references)
-- Morale affects mission success rates
-- Training improves combat and navigation skills
+**Morale & Training (label disputed — see correction below):**
+- **$03CE (974)**: previously labeled "crew morale" (62 references); REA's Ghidra decompilation of `HI-RES CHARACTER GENERATOR` shows this address read/written as an inverse/flash-mode text flag, and multiple BASIC overlays (`END.bas`, `S_X.bas`, `H_D.bas`) POKE it to 32/64/255 at screen-transition moments unrelated to crew state. `analysis/comprehensive_memory_layout.md` independently guessed "Likely screen/display control" for this same address — that guess is the one supported by the evidence, not "crew morale."
+- **$03CD (973)**: previously labeled "training level/experience" (31 references); same caveat applies — REA's decompile shows this byte used alongside $03CE as a display-mode flag, not a crew stat. Not yet independently re-verified against every reference site.
+- Treat both as **unconfirmed / likely mislabeled** until someone traces all 62+31 references by hand.
 
 ### 5. Mission System
 **Mission Types Identified:**
@@ -97,10 +96,10 @@ $9526 (38182): Food inventory            [RND(1)*5 adjustments]
 $9527 (38183): Wine/Liquor inventory     [RND(1)*5 adjustments]
 ```
 
-### Crew System ($03C0-$03FF)
+### Crew System ($03C0-$03FF) — labels disputed, see Crew Management note above
 ```
-$03CD (973):  Training level            [31 refs]
-$03CE (974):  Crew morale               [62 refs] - MOST REFERENCED
+$03CD (973):  previously "training level" [31 refs] — likely display-mode flag instead
+$03CE (974):  previously "crew morale"    [62 refs] - MOST REFERENCED — likely display-mode flag instead
 ```
 
 ## File Formats & Data Storage
@@ -135,19 +134,28 @@ $03CE (974):  Crew morale               [62 refs] - MOST REFERENCED
 
 ### Shape Tables ($8000 loading address)
 **26 Files Converted:** 21 planets + 3 ships + 2 special graphics
-**Format Decoded:**
+**Format Decoded** (corrected 2026-11-07 — verified against the real
+ship/planet art in the archive.org manual scan, page 7; see
+`tools/shape_table_decoder.py`'s docstring for the full derivation):
 - First byte: Number of shapes minus 1
-- Offsets table to each shape
-- Vector drawing with 8 directions
-- Pen up/down control via bit 0
+- Offsets table to each shape, one byte per shape
+- Each byte packs **three** vectors, not one — bits 0-2, bits 3-5, bits
+  6-7, each vector's low bit a plot flag and its remaining bits a
+  2-bit direction. No step count exists in the real format (the table
+  below with "steps 1-15" was an invented guess that produced scrambled
+  shapes).
+- Pen up/down: controlled by each vector's own plot flag (not a
+  separate control byte)
 
-**Direction Encoding:**
+**Direction Encoding** (diagonal, not the 8-compass-point guess
+previously here):
 ```
-0: Right          4: Left
-1: Up-Right       5: Down-Left  
-2: Up             6: Down
-3: Up-Left        7: Down-Right
+0: NE (up-right)      2: SW (down-left)
+1: SE (down-right)    3: NW (up-left)
 ```
+The third vector per byte (bits 6-7) only has these 2 direction bits and
+no plot bit at all — it can move but never draw, and a value of 0 there
+is a true no-op rather than "NE."
 
 ## Sound System
 
@@ -156,8 +164,8 @@ $03CE (974):  Crew morale               [62 refs] - MOST REFERENCED
 **Parameters:** $9270-$9275 memory locations
 **Algorithm:** XOR, ROR, ASL operations for tone generation
 
-### EXPL ($9100)
-**Explosion Effects:** Calls SOUND GEN with specific parameters
+### EXPL (catalog load address $9270, not $9100 — corrected)
+**Not executable code.** REA's Ghidra decode fails immediately with "bad instruction data" at both the previously-assumed $9100 and the catalog-documented $9270. `H_D.bas` only ever uses this file with Applesoft's `DRAW` shape-table command, never `CALL` — EXPL is shape-table graphics data for the explosion animation, not a sound routine, and it does not call SOUND GEN. (The explosion *sound* is a separate, direct `CALL` to SOUND GEN from the BASIC overlays; EXPL only supplies the visual.)
 **Non-critical path:** Can be emulated or replaced in modern port
 
 ## Protection System Analysis

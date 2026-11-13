@@ -1,0 +1,469 @@
+# Space Vikings Resurrected
+
+A Godot 4 fan recreation of *Space Vikings* (Apple II, 1982), the game by
+Mitchell Robbins, published by SubLOGIC (original © 1982 Mitchell Robbins;
+the A2-3D1 graphics package © 1979 SubLOGIC Company, as the manual credits
+them). This is an unofficial remake, not the original and not affiliated with
+its authors; the title screen says so. See [`APPRECIATION.md`](../APPRECIATION.md) for why we cared. It is built from the
+disassembly and analysis in the parent repository.
+
+    godot --path godot-remake
+
+boots to `scenes/start.tscn`: SPACE VIKINGS / RESURRECTED ("a recreation of the 1982 Apple II space war") in the game's block lettering, the original's credit along the foot, over a
+slowly turning night planet with its cities lit, and a menu on glass: 1) NEW GAME,
+2) CONTINUE (when a game has been saved), 3) QUIT, by the keys, the arrows and Enter,
+or the mouse. Developed and tested on Godot 4.7.
+
+The aim is a small, simple Godot game with the original's rules and
+experience, none of the Apple's hardware to fight with. Anyone after the
+Apple's own picture, speed and disk habits has the real disk and an
+emulator. The test of whether one of the original's bugs, quirks or
+mechanics is kept is whether keeping it leaves the Godot game simpler
+(see "Liberties").
+
+This file says what the port is. How each fact was found is in the
+parent repository's analysis documents (`CALL_SITES.md` first), the
+witness ledgers and the git history.
+
+## How it is put together
+
+Every program of the original is a **rules class** with no screen in it
+(`scripts/rules/`) and a **Godot scene** that shows it (controls, the
+theme `theme/space_vikings.tres`, numbers that count, waits a key can cut
+short). The rules were played through recordings of the real game, made
+in MAME (`tools/mame/*_live.lua`, results in `analysis/live/`): its keys,
+the numbers its `RND` gave, compared with its memory, variables and
+printed text at every stop. Where the recording could not reach, the
+rules were compared with the verified code of the earlier port, kept as
+data in `tests/golden/`.
+
+| Original program | Rules | Scene | Held to the real game by |
+|---|---|---|---|
+| `GROUND FORCES`, `RECALL`, `COLLECT` | `scripts/rules/ground_rules.gd` | `scripts/flight/ground_forces_program.gd` (on the console, with `vector_globe.gd` over the window) | `check_ground_rules` (the rules), `drive_ground_forces` (the scene) |
+| `SHORE LEAVE` (shore leave, enlisting and weapons, loot, repairs, a base, cryogenics) | `scripts/rules/shore_rules.gd` | `scripts/flight/shore_leave_program.gd`, on the console | `check_shore_rules`, `drive_ground_forces` |
+| `GALAXY MAP` (star chart) | `scripts/rules/chart_rules.gd` | `scripts/flight/vector_chart.gd` (a vector overlay on the flight) | `check_chart_rules`, `drive_chart` |
+| `END` (save, continue, end game) | `scripts/rules/end_rules.gd` | `scripts/flight/end_program.gd`, on the console | `check_end_rules`, `drive_com` |
+| `COM` (command console, central and navigation computers, galaxy directory; the damage-control lamps are on the flight panel) | `scripts/rules/com_rules.gd` | `scripts/flight/command_console_program.gd`, on the console | `check_com_rules`, `drive_com` |
+| `STATUS`, `SUPPLY` (the central computer's two reports) | `scripts/rules/report_rules.gd` | `scripts/flight/reports_program.gd`, two pages each on the console | `check_report_rules`, `drive_com` |
+| `STARSHIP SIMULATOR` (flight, fighting, keys) | `scripts/rules/flight_rules.gd`, `combat_rules.gd` | `scripts/flight/native_flight.gd` (3D), `fight_effects.gd` | `check_flight_rules`, `check_combat_rules`, `drive_native_flight` |
+| `H_D` (hyperdrive), `RE`, `ORBIT` (into and out of the atmosphere) | `hyperdrive_rules.gd`, `flight_rules.gd` | `native_flight.gd`, `hyperspace_effect.gd` | `check_hyperdrive_rules`, `check_flight_rules` |
+| `EX`, `DMG`, `S/X` (the ends of a fight) | `combat_rules.gd` | `native_flight.gd` | `check_combat_rules` |
+| `RADAR`, `SHIP # 0 I.D.`, `# 1`, `# 3`, `# 4` | `radar_rules.gd` | `scripts/flight/vector_radar.gd` (a vector overlay on the flight) | `check_radar_rules`, `drive_radar` |
+| `START` (title), save and load, planet records, new-game data | `autoload/game_state.gd` | `scripts/ui/start_screen.gd` | `check_save`, `drive_save` |
+
+## The code witness
+
+The rules are held to the real game twice: by what it does (the
+recordings, replayed through them) and by what its code says. A rule
+cites the BASIC lines it follows with a comment, `## @witness SHORE LEAVE
+2087-2098`, and `tools/witness.py` sets that against the listing, line
+by line, in `analysis/witness/<PROGRAM>.md`: every line is logic,
+presentation or waived (with a reason), and the tool fails for a line
+that changes or decides something and that no rule cites, for a cited
+line that is not there, and for a `CALL` into machine code that no
+`@witness-asm <address>` tag accounts for. It also says which cited
+lines no recording ever ran, the ones the rules rest on the listing
+alone for. `python3 tools/witness.py --check` is part of the suite.
+
+It covers every program the rules came from (the ledgers are in
+`analysis/witness/`), the flight program included: every line of it that does
+something to the game is cited by a rule, or waived with a reason (the
+two-byte number helpers), and each of its machine-code calls is accounted for.
+The lines no recording runs are COLLECT's 820 (a planet with no technology) and
+1090 (the superior one's loot), and the flight's 74 (a stick-read variant) and
+its speed and switch keys, 201 to 210 and 500, whose rules rest on the listing
+alone.
+
+## Flight
+
+`scenes/native_flight.tscn` is the flight in Godot's own 3D. The ship
+flies by `scripts/rules/flight_rules.gd`, the original's rules as a
+continuous model (the same turn rates, stops, climb, world edge and sink,
+a pass of the original being one second), held to the original's own
+arithmetic by `check_flight_rules`. The view is a camera with the
+original's attitude convention, the planet a shaded sphere (the game's
+cluster of points round its planet are the lights of its cities, more lit
+the more advanced the planet), the rest of the game's points stars, and
+clean low-poly craft built from boxes and wedges in the style of the original's wireframes (`scripts/world/ships.gd`: the same parts in the same places, with their sides closed). Below the atmosphere there
+is a ground and a sky: land and sea from noise on the planet's map, with relief,
+beaches, fields, woods, rock and snow and a glint on the water; a layer of
+cloud at 2200 that the way out (past 4000) goes up through; and a sky that
+darkens as the air thins. (The original's ground map lines, which were the
+planet's coasts drawn as wire, are not used.)
+
+Keys are the original's: `1` `2` `3` `4` speed, `A` autopilot, `B`
+condition, `S` shields, `W` missile or laser, `C` command console, `R`
+radar, `H` hyperdrive. The arrow keys are the stick (or a joystick axis
+mapped to the stick actions) and SPACE is the button. On the radar SPACE (or I) is the ship I.D., as the manual says.
+There is one planet and one flight over it: no scene change, no fade, no teleport. The planet's radius is the
+anchor of every size (`Terrain.PLANET_RADIUS`, 450,000 of the ground's units: its horizon is far, the ground flat to the eye as it was). The sphere seen from orbit has
+its ground drawn on it (`ground.gdshader`, on the planet's own sphere, coming in as the eye comes down, the
+same noise as `planet.gdshader`), the cloud layer is a shell round it, and the cities stand on it
+(`scripts/world/terrain.gd` is the map and the flat frame laid on the sphere where the ship went down). The
+ship goes down into the atmosphere when it is under 3500 above the ground and up out of it above 4000 (the
+original's ceiling), and the rules' coordinates change meaning there while the ship stays exactly where it is
+in the world and looks the way it did (`_enter_atmosphere`, `_leave_atmosphere`; the original's teleport, RE and
+ORBIT, is still in `flight_rules.gd`, held to the real game, but the game does not use it). The orbit's units
+are the ground's divided by `ORBIT_SCALE` (the planet's radius is 780 in the original's orbit): the arrival
+(9 radii out), the defender (4.5) and the ship's start (2.7) are the original's number of planet radii, and the
+speeds go with them. The atmosphere's units are the world's. The ground's frame is laid again under the ship
+when it has flown 12,000 from where it touches the sphere, so that the original's wrap at 20,000 is never met.
+The ground's continents are the planet's own (in its size) with the coasts, islands and ridges at the ground's own size, so an ocean has islands and a coast has detail at any height; the sea ripples, so its height can be read. The light is harsh in space (the sun alone, no fill, black shadows) and soft in the atmosphere (the sky lights it from all sides, the sun gentler), blended as the air thins (`_light_for`). The camera's far plane is tied to its near (the depth buffer holds 2^24 between them), which is why a ground at this size draws at all. The weapons are drawn bigger in the orbit by the same factor (`size_scale`), so a missile keeps its size beside
+a ship.
+
+The galaxy directory and the galaxy map are one: the directory asks WHICH SYSTEM? with the map up over the view (click a star, or type its number; its name is under the prompt), and each star's page says where it is and how far, as the map did, so the central computer has no GALAXY MAP choice of its own (`G` in the flight still opens the map). Escape goes back a screen in every menu of the console (the command menu, the computer, navigation, the directory, GROUND FORCES: it takes RETURN; END: it takes CONTINUE PRESENT GAME), and in the numbers asked it gives the question up. When a destination or a system is asked for, the galaxy map comes up over the view: a click on a star types its number into the prompt, rings it on the map, and its name is on the line at the foot of the display (typing the number does the same, the name following it); Enter sets it. The instrument panel is tall enough that the console's window holds the longest page (the galaxy directory and its question, 15 rows) without growing over the view, the forty columns set small enough to keep the panel to about 230 pixels, with the gauges, the switches and the damage lamps spread to fill it (`HudOverlay.panel_height`; the radar, chart and globe keep clear of it). The computer's screens (the command console and what runs from it, the radar, the chart) stop the
+flight, as each was a program of its own in the original: the ship, the fighting's clock and the engine's
+hum wait, so a planet can't be entered, or an attack disturbed, from behind a screen. Every planet of
+technology 2 or more has its defender from the start, SOL's included (it is only the surrender that
+keeps it from firing); only destroying it removes it, and its wreckage (the game's fifty points) is
+left. A missile that hits it bursts on its hull and the display says how worn it is, which the original
+did not (it took 9 missiles on SIRIUS's heavy cruiser: 24 each against a threshold of 200; the laser adds
+nothing in space, as in the original's integer sums).
+
+From the atmosphere the manual's "cities and other targets" are on the ground (`scripts/flight/cities.gd`, standing on land by the ground shader's own noise, as many as the planet's technology): a missile or laser strike burns the one it reaches. A missile that misses self-destructs in a smaller burst. The fighting runs a pass every two seconds, as the original's main loop did (the flight itself is scaled to a second a pass, but a hand lining up a missile is not), so the defender and its fighters give you the time the original did; per pass, with every missile on target, SIRIUS's heavy cruiser falls in 9 passes and costs about 18 to 25 of the missile system (a simulation of the rules, no screen). The world is 3 times the original's in every length (`WORLD_SCALE` in `native_flight.gd`): the planet, the defender and its hit box, the stars, the ground, the clouds, the cities, the ship's own coordinates as drawn, the missile's range and the speeds with them, so the time to reach anything is what it was and the picture of the world is the same. The weapons' own sizes (a missile, a burst, a fighter) are not scaled, so they are small in it; the rules and the readouts stay in the original's units. The defender is drawn 1.8 times the wireframe (`DEFENDER_SCALE`), and its hit box is the ship as drawn (never smaller than the original's box). Missiles go in pairs, one from each side, as in the original (line 1010 draws both, 1200 bursts the left and then the right).
+
+The panel (`scripts/flight/hud_overlay.gd`, `switch_panel.gd`): SPEED,
+a green CRT display on the Apple's text screen (40 columns across, six rows, two-column printing) that is written to (`N` puts up the position and headings in seven-segment digits, `F1` or `?` the keys, the same key takes them down; messages such as "THE DEFENDER IS DESTROYED" appear on it); SPEED and ENERGY bars, TURN and VERT dials; three switches in a small
+3D scene of their own, which can be clicked as well as keyed: a push
+button for the shields, a rocker AUTO / MNL and a rocker missile / laser;
+the damage-control panel (dark plastic, raised amber lettering, twelve
+LED bulbs, a scanner of LEDs that sweeps while the damage alert is on);
+the attitude ball (a shaded sphere, with the orbit ring and pointers to
+the enemy and the planet); a target bracket on the defender; and a
+blue or red line round the screen for condition 2 or 3 (the manual's alert standby and battle stations; green, normal, has none). **AUTO** is as
+the original had it: the stick is not read, so the ship keeps the stick
+position it had when AUTO went on; a new game starts in manual.
+
+What the original does that is kept (the rules files have the full
+lists):
+
+- The world wraps at ±20000. Bank does not return to level.
+- The laser adds `1/(tech+1)` to the defender's damage and the result is
+  stored in a byte, so it does nothing to a defender at technology 1 or
+  more. It still moves the planet towards surrender.
+- Firing on a planet that has surrendered makes it hostile again.
+- Strikes on the planet count towards taking it: every laser shot, and a missile
+  fired nose-down in the atmosphere (it hits the ground, as the original's
+  `Y0 < VV` test has it), adds to the same progress the ground battle works to,
+  and a planet that has had enough surrenders. The display shows the percent
+  taken, and the globe starts from it. The globe's lights are spread evenly over the sphere, as many
+as the planet has cities, so that what is not yet taken is red wherever it is.
+- Once raised shields have taken a hit, every later pass in range wears
+  them down whether or not anything is seen to hit.
+- The missile is tested against the place the defender would be, whether
+  or not one is there.
+- The hyperdrive goes to whatever star the navigation computer was last
+  set to. The energy it costs is meant to be the distance, but `H_D`
+  reads the X table three times over, so the two stars' Y and Z do not
+  count and it is not the distance the chart gives.
+
+Not kept: the 3D engine's sine table slips (entry 25 is wrong, and
+negative results are a little too negative), the factor that stays unset
+at two angles, the cosines read as nothing at 64, 128 and 191, the turn
+the heading takes when the stick holds the nose past its stop, the
+alternating hi-res pages and their stale gauge markers, and the white
+flashes (the screen flashes in Godot's way).
+
+## Star chart
+
+The central computer's "GALAXY MAP", a vector display over the front
+window, like the radar (`scripts/flight/vector_chart.gd` over
+`scripts/rules/chart_rules.gd`, held to a recording that put the paddles to
+fifty places: `check_chart_rules`). `G` puts it up in the flight; the
+console's GALAXY MAP shows it too, and Space then goes back to the console.
+What it says is written on the console's display, not on the glass. Twenty stars by X and Y, a
+different mark for near, middle and far Z, violet for a secured one, a
+box round the star the ship is at. Point at a star and click (or the
+arrow keys and Enter) and it says what the star is called, where it is
+and how far from here; "Y" to the question runs the console with that
+star's page. It does not set a course: that is the navigation
+computer's job.
+
+Kept from the original (and what the recording confirms):
+
+- A star's cell is three columns of ten dots and two rows of five, and
+  the first star in the list whose cell the cursor is in wins: aiming at
+  VARCAR finds BARNARD'S STAR, which is a row below it and earlier, and
+  aiming at CYGNI finds PROCYON.
+- The cursor is held between 10 and 270 across and 10 and 145 down.
+- "Y" at the question gives the once-a-trip base flag back (the original
+  writes an 8 into the byte `SHORE LEAVE` keeps it in).
+- Star 16 is "GROOMBRIDGE 168" here and in `COM`, "GROOMBRIDGE 1618" in
+  `STATUS` (and the port's reports) and `COLLECT`.
+- Applesoft's `INT(H * 1.19)` puts paddle readings 100 and 200 one dot
+  left of where exact arithmetic would.
+
+Not kept: the flickering cross and the black `DRAW` that took the star
+under it off, the search taking longer the further down the list a star
+is, any key at all leaving (Space and Escape do), any key but Y meaning
+no (N and Escape do), and the eight flight-panel lamps the original
+paints on the way out (the flight scene does its own).
+
+## The planet record and SOL's flag
+
+`CALL 38825` swaps a planet's 16-byte record (defender, fighters,
+strength, …) between the table and the working bytes on every arrival,
+departure and save. It copies seventeen bytes. The seventeenth working
+byte is SOL's "secured" flag, so that flag always holds the first byte
+of the record *after* the current planet's: 100 at SOL in a new game.
+
+The chart tests the flag for `= 1` and draws SOL white (not secured);
+`COM`'s directory tests it for `<> 0` and says SOL HAS BEEN SECURED.
+Storing a record writes the byte back, into the next planet's defender
+threshold.
+
+Ported as it is: `GameState.planet_secured` holds bytes, not flags, and
+`store_planet_record()` / `load_planet_record()` carry the seventeenth.
+The real game's log shows the 100 (`analysis/live/jump/`), and
+`check_save` and the jump recordings show it.
+
+## Save and load
+
+`END.bas` and `START.bas`: saving is refused in an atmosphere ("YOU MUST
+BE IN ORBIT TO SAVE GAME") and the ship's place is saved with the game.
+The file is JSON in `user://`, not the original's three binary files. The
+title's CONTINUE is there when a game is saved and loads it; the file
+stays until it is saved over.
+
+Not kept: the original's saved game could be taken up once, at the next
+boot, and no other (the boot cleared the mark before it asked "(N)EW
+GAME OR (O)LD GAME?"; `analysis/live/save/` has the recordings), the old
+game skipping the panel's lamp routine, and the reboot after a lost
+ship, which is the way back to the title.
+
+`check_save` saves, loads and compares every field and the planet
+record's seventeenth byte; `drive_save` goes through the title, flight,
+the console and END's menu.
+
+## END
+
+The console's "4) END" is a program on the console (`scripts/flight/end_program.gd` over
+`scripts/rules/end_rules.gd`, held to the recordings by `check_end_rules`):
+1) SAVE GAME, 2) CONTINUE PRESENT GAME, 3) END GAME. A save is refused in
+an atmosphere (the original's refusal and wording); "2" goes on with the
+game by way of the flight scene. Not kept, as they were the machine and not the game:
+
+- **A key that was not a number lost the game in hand.** The original's
+  choice was read with `GET C`, a numeric variable: a letter, RETURN or
+  ESC was a ?SYNTAX ERROR, which went to the one error screen of the
+  disk's DOS ("SYSTEM ERROR!" and "PRESS ANY KEY TO REBOOT", then a
+  boot, which used a saved game up). Here only the three choices (the
+  keys 1 to 3 or the buttons) do anything. The recordings of those keys
+  are in `analysis/live/end/end_key_*.log`.
+- **"3) END GAME" hung the machine,** poking zeros up through memory
+  until the screen went black. The application closes.
+
+A save that cannot be written says so (THE GAME COULD NOT BE SAVED.);
+that is the port's own, where the Apple would have had a DOS error.
+
+## Sound
+
+Every sound is made by `autoload/audio_manager.gd` from nothing (no sample
+files): filtered noise, sweeps and tones under envelopes, built once at start
+and played from ten voices, each a touch different in pitch so that no two
+are alike. The original had two sounds, a falling chirp (`LASER`, `$92D1`) and
+a burst of shift-register noise (`SOUND GEN`, `$9276`) for every hit and
+explosion, read from the disassembly; the events are the same, the sounds
+modern.
+
+- **Fighting:** the laser a bright zap, an enemy's shot a lower one, a missile a
+  thump and a rush that climbs, hits a thump and a crackle (light, medium,
+  heavy), explosions a crack with a low rumble after it (the defender's the
+  biggest, a fighter's smaller), the ship's own end longest of all.
+- **The ship:** an engine hum whose pitch and loudness follow the speed, a
+  rising rush for the hyperdrive, a klaxon at the first damage and when the
+  condition goes to red, a clunk for each switch and key.
+- **The screens:** a click for a console key, a rising beep for a choice, a low
+  one for a refusal, the radar's ping, a chime when a planet is taken.
+
+`check_audio` checks each is a real sound (length, level, not clipped); what they
+sound like is for the ear.
+
+## Tests
+
+From `godot-remake/`. Each prints one summary line and exits non-zero on
+a difference.
+
+    godot --headless --path . res://tests/check_chart_rules.tscn     # GALAXY MAP: 50 recorded paddle positions through the rules, and the 18 stars' marks on the recorded page
+    godot --headless --path . res://tests/check_end_rules.tscn       # END: the menu, the refusal and "GAME SAVED." as the real game printed them
+    godot --headless --path . res://tests/check_com_rules.tscn       # COM: 5 recorded routes through the rules, 201 screens rebuilt from the characters it drew
+    godot --headless --path . res://tests/check_radar_rules.tscn     # RADAR and the I.D. texts against the recordings
+    godot --headless --path . res://tests/check_combat_rules.tscn    # fighting (missile, lasers, damage, fighters, EX/DMG/S-X) against analysis/live/combat
+    godot --headless --path . -s tests/check_cities.gd                  # cities stand on land by technology; a strike burns the one it reaches
+    godot --headless --path . res://tests/check_audio.tscn            # the synthesized sounds: each lasts as it should and is heard
+    godot --headless --path . res://tests/check_hyperdrive_rules.tscn # hyperdrive cost, refusals, re-entry and orbit against the verified legacy code
+    godot --headless --path . res://tests/check_save.tscn            # save and load, the planet record's byte
+    godot --headless --path . res://tests/check_ground_rules.tscn    # GROUND FORCES, RECALL, COLLECT: 14 recorded routes through the rules, state and text
+    godot --headless --path . res://tests/check_flight_rules.tscn    # the continuous flight model against the original's arithmetic, the engine's matrix and the camera
+    godot --headless --path . res://tests/check_report_rules.tscn    # STATUS and SUPPLY: 6 recorded routes, 20 pages as the real game printed them
+    godot --headless --path . res://tests/check_shore_rules.tscn     # SHORE LEAVE: 7 recorded routes through the rules, state and text
+    godot --headless --fixed-fps 60 --path . res://tests/drive_chart.tscn    # the vector chart, by pointer and keys: a click, the question, Y and N, Space, the way to the console and back
+    godot --headless --fixed-fps 60 --path . res://tests/drive_com.tscn      # the command console, the reports and END, by keys: every menu, a course, the directory, every way out of it
+    godot --headless --fixed-fps 60 --path . res://tests/drive_radar.tscn    # the vector radar and I.D. over the flight, by keys
+    godot --headless --fixed-fps 60 --path . res://tests/drive_save.tscn     # title, END, save, CONTINUE
+    godot --headless --fixed-fps 60 --path . res://tests/drive_ground_forces.tscn   # GROUND FORCES and SHORE LEAVE's six commands on the console, by keys: refusals, recall, a win, a retreat, a loss, every question and refusal
+    godot --headless --fixed-fps 60 --path . res://tests/drive_native_flight.tscn   # the native flight scene: the stick, the speed keys, the lamps, C and R
+    godot --headless --fixed-fps 60 --path . res://tests/drive_console.tscn         # the console's menus, yes/no, number entry and waits
+
+The `check_*_rules` tests need the recordings in `../analysis/live/` (and `tests/golden/`). A compared
+byte is never adjusted to make a test pass: both times a test differed
+from the real game by a handful of bytes, the difference was something
+the original does that nobody had noticed (the seventeen-byte copy;
+`COM` printing through the chart's leftover text window).
+
+`COM`'s recording put right two things the listing had been misread
+for: a wrong key at the command menu asks again (it does not fall into
+the missing line 30), and the directory's "2) RETURN" comes out at the
+command menu, not at the navigation computer its `GOTO` names.
+
+### The two reports
+
+`STATUS` and `SUPPLY` are one panel each, not two screens a key apart,
+and nothing is painted or waited for. What the real game printed is the
+rules' (`scripts/rules/report_rules.gd`, held to the recordings by
+`check_report_rules`), but for what the machine got in the way of:
+
+- `HULL DMG` is the damage, so a whole ship reads 0%. `ENERGY` is a
+  percentage of 62 and a full ship has 63; the listing caps the 101.
+  `ENV.` and `NAV.COMP.` are always 100%. All as the original.
+- A condition, morale or place with no word for it prints no word. The
+  original prints nothing, not even the end of its line, and the next
+  line runs on after it.
+- `THE TROOPS ARE ALL DEAD!` is in the original's listing and cannot
+  appear (it tests two bytes that are neither of them the troops). Here
+  it appears when the troops are 0.
+- `* ELECTRONIC PARTS` is not cut short, and 2550 pounds of platinum
+  are not `= 255POUNDS`: the original's numbers have three cells before
+  its unit.
+
+### The radar
+
+`RADAR` is a vector display over the front window, in the manner of an early
+arcade game (`scripts/flight/vector_radar.gd`): thin glowing lines, nothing
+filled, drawn live while the flight goes on behind it. A plan of the world
+from above shows the planet as a wire sphere, the stars, the dashed box the
+defender fires from, the defender as its own wire-frame (the original's
+model data), and the ship as an arrow along its heading, with a sweep turning
+round the planet. `I` shows the SHIP I.D.: the defender's wire-frame, large,
+turning slowly beside the plan. All the writing is on the console's display
+(the numbers and keys for the radar, what the original's I.D. program says of
+the ship for the I.D.).
+`R`, `X` or Escape close it; the console's RADAR shows it over the flight and
+X goes back to the console. With the radar shot away it shows nothing. Whether
+it works, which I.D. text a defender gets (type 2 gets the light cruiser's) and
+where it goes back to are `radar_rules.gd`, held to the recordings by
+`check_radar_rules`; `drive_radar` goes through it by keys.
+
+### Fighting, hyperdrive, the atmosphere
+
+`scripts/rules/combat_rules.gd` is a fight pass by pass (missile box,
+firing box, lasers, shields, damage, fighters, the ends EX/DMG/S-X),
+compared with `analysis/live/combat/combat.log` (dice count and every
+byte). `hyperdrive_rules.gd` and the re-entry/orbit helpers in
+`flight_rules.gd` are compared with the byte-verified legacy code.
+`scripts/flight/native_flight.gd` shows them: beams, missile, explosion,
+a hyperspace burst, a ground plane and sky below the atmosphere.
+
+## The look
+
+The frame is 4:3 (1280 by 960), the Apple's television, and the window keeps it when resized. The 3D
+view holds its horizontal angle, so going from 16:9 added to the top and bottom and trimmed nothing.
+
+The native screens share one theme (`theme/space_vikings.tres`) and one
+font, `assets/fonts/space_vikings.res` (from `font_source/space_vikings.ttf`, made by `tools/make_font.py`; the `.res` holds the data so a fresh clone needs no import) from
+the game's own character table (the 7x8 glyphs `HI-RES CHARACTER
+GENERATOR` draws from). The lit dots of each glyph are followed as
+lines, eased into curves and drawn with a round pen, then set wide and
+monospaced, so the letters are the game's (slanted, a little uneven) and
+smooth at any size, in the manner of an early-80s display face. The
+accents are the Apple hi-res colours.
+
+## Liberties
+
+Where the port departs from the original on purpose:
+
+- **Stick and button.** The Apple has two paddles and a button. In
+  flight the arrow keys are the stick hard over while held, or a little
+  off centre for one pass when tapped; SPACE is the button, and a tap
+  between two passes is remembered. On the chart the mouse is the
+  paddles (the cross goes to the pointer), the arrow keys turn them, and
+  a click or ENTER is the button.
+- **Key hints** on the flight, chart, console, radar and END screens,
+  outside the Apple's picture.
+- **The console** is one panel with the lamps always beside it, not a
+  screen painted over the flight panel a row at a time. A wrong key is
+  not scolded and waited out; only the keys offered do anything. The
+  directory's stars are buttons as well as the number asked for. As in
+  the original, "2) RETURN" there comes out at the command menu, not at
+  the navigation computer its `GOTO` names. The original's `GOSUB` it
+  leaves on BASIC's stack each time (thirty would end in SYSTEM ERROR)
+  is not kept.
+- **The reports** (above) show both pages at once, and `STATUS` adds the
+  star the troops were left at when they are not aboard: the original's
+  says only PLANETSIDE or SHORE LEAVE, never where.
+- **Ground battle retreat.** In the original any key at all retreats.
+  The scene has a RETREAT button (and R). As in the original, the order
+  is obeyed after the round in hand, which is fought and paid for.
+- **Ground battle reports** wait about as long as the original's, but
+  a key or a click moves on; a refusal is said under the menu, which
+  stays up; the numbers are on show from the start.
+- **Shore leave, enlisting, weapons, repairs, base.** A number is typed
+  into a field that takes digits only; the original made what it could
+  of any characters, so a number below zero or a part of a troop could
+  be enlisted. Y and N are asked for by name; the original took any key
+  but N as yes to the repair bill, and asked it even of a bill of
+  nothing. TOO MANY TROOPS asks again where the original began the
+  command again. What is said stays up about as long as the original's,
+  and a key or a click moves on.
+- **COLLECT's two slips are fixed** (below), and likewise the other
+  quirks of the machine: the keys that were not a number losing the game
+  in hand, the saved game used up at one boot, hung machines.
+
+## Not ported, estimated, or unverified
+
+- `GROUND FORCES`: two rules rest on the listing alone, as no
+  recording reaches them (a retreat with morale already 0; a primitive
+  planet whose strength was not 0 already). Line 172 (one escort
+  fighter, a planet that has given in) puts the battle screen up and
+  takes it down with nothing said, as the original does.
+- `SHORE LEAVE`: the cost of mending anything but the energy is worked
+  from `100 - D`, where Applesoft's `100 - ((D / 100) * 100)` is off by
+  about one part in 10^8 for some D (`../analysis/live/shore/`); a cost
+  could be one credit out where the product falls that close to a whole
+  number. Every bill in the recordings comes out the same.
+- `COLLECT`'s two slips are fixed, not ported: a primitive planet's
+  silver is its own sum (the original set it to the gold), and titanium
+  is collected (the original poked the wrong address). Simpler Godot
+  decides what of the original's quirks stay.
+- `RADAR` pokes 38151 with 5 on its way to an I.D. program. Nothing
+  found reads a 5 there, and the port does not keep it.
+- The save file keeps the byte after the record table
+  (`planet_record_overrun`, which planet 20's seventeen-byte copy
+  reaches). The original saves `P/F` without it (`L$140`); what an old
+  game finds in that byte has not been looked at.
+- Open questions about the original's own code are marked ❓ in
+  `CALL_SITES.md`.
+
+## Convention
+
+No script uses `class_name`: it needs Godot's global class cache, which
+only exists once the project has been opened in the editor, and a fresh
+clone run from the command line has none. Scripts `preload()` each other
+into a local const (see `scripts/rules/combat_rules.gd`). Scripts that
+need the `GameState` autoload are run as scenes.
+
+## Lint
+
+`.gdlintrc` holds the project's settings for `gdlint` (from `gdtoolkit`, `pip install gdtoolkit`):
+
+    find . -name '*.gd' -not -path './.godot/*' | xargs gdlint
+
+The tree passes clean. Lines run to 160 because they carry their citations of the original's
+code, and definitions are grouped by topic rather than by kind, so those two rules are relaxed.
+
+## Credits
+
+*Space Vikings* is by Mitchell Robbins, published by SubLOGIC in 1982 (© 1982 Mitchell Robbins);
+the A2-3D1 graphics package is © 1979 SubLOGIC Company. This remake is unofficial, built from
+the original's disassembly, and not affiliated with them. A longer appreciation of the original and of the digital
+archaeology behind this remake is in [`APPRECIATION.md`](../APPRECIATION.md).

@@ -1,0 +1,2316 @@
+[8] w 973=56 pc=C61A
+[21] text 38391=255
+ 0|               APPLE ][
+[221] text 38391=255
+23|]
+[521] text 38391=255
+22|]
+[859] w 38391=0 pc=ACA3
+[859] w 38392=255 pc=ACA3
+[860] w 38391=0 pc=E781
+[901] text 38391=0
+ 7|           *****************
+ 8|           *               *
+ 9|           * SPACE VIKINGS *
+10|           *               *
+11|           * COPYRIGHT1982 *
+12|           *      BY:      *
+13|           *  G.M. ROBBINS *
+14|           *               *
+15|           *****************
+20|(N)EW GAME OR (O)LD GAME?
+21|`
+[901] key 'N'
+[907] w 974=32 pc=9326
+[907] w 973=0 pc=932E
+[921] text 38391=0
+
+[3930] w 974=64 pc=E781
+[3941] text 38391=0
+ 0|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+ 1|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+ 2|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+ 3|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+ 4|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+ 5|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+ 6|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+ 7|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+ 8|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+ 9|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+10|$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+[3961] text 38391=0
+ 0|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+ 1|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+ 2|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+ 3|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+ 4|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+ 5|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+ 6|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+ 7|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+ 8|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+ 9|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+10|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+11|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+12|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+13|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+14|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+15|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+16|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+17|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+18|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+19|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+20|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+21|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+22|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+23|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+[4537] w 38391=0 pc=ACA3
+[4537] w 38392=1 pc=ACA3
+[4755] w 38164=0 pc=ACA3
+[4755] w 38165=2 pc=ACA3
+[4755] w 38189=0 pc=ACA3
+[4755] w 38201=1 pc=ACA3
+[4755] w 38202=0 pc=ACA3
+[4756] w 38164=1 pc=E781
+[4759] w 974=64 pc=E781
+[5165] w 974=32 pc=E781
+[5221] w 973=255 pc=E781
+[5226] w 973=0 pc=E781
+[5241] text 38391=0
+ 0|........................................
+ 1|........................................
+ 2|........................................
+ 3|........................................
+ 4|........................................
+ 5|........................................
+ 6|........................................
+ 7|........................................
+ 8|........................................
+ 9|OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+10|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+11|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+12|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+13|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+14|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+15|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+16|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+17|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+18|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+19|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+20|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+21|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+22|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+23|DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+[5254] w 38189=10 pc=E781
+[5254] tranlit 38189=10 38167=3
+[5254] w 38189=0 pc=962D
+[5254] w 38201=0 pc=9666
+[5254] w 38202=1 pc=968A
+[5254] w 38165=3 pc=96DB
+[5255] w 38164=0 pc=9716
+[5261] text 38391=0
+ 0|........................................
+ 1|........................................
+ 2|........................................
+ 3|........................................
+ 4|........................................
+ 5|........................................
+ 6|........................................
+ 7|........................................
+ 8|........................................
+ 9|........................................
+10|........................................
+11|........................................
+12|........................................
+13|........................................
+14|........................................
+15|........................................
+16|........................................
+17|........................................
+18|........................................
+19|........................................
+20|........................................
+21|........................................
+22|........................................
+23|........................................
+[5845] w 974=64 pc=E781
+[5854] w 973=1 pc=E781
+[5855] w 973=0 pc=E781
+[6016] w 974=32 pc=E781
+[6025] w 973=1 pc=E781
+[6027] w 973=0 pc=E781
+[6078] in flight
+[6078] dump flight 38201=0 38202=1 38165=3 38164=0 38210=0 38393=0 38391=0 38392=1 38209=1 38189=0 c974=32 c973=0
+[6078] key 'C'
+[6193] w 974=64 pc=E781
+[6198] ch  51 '3' col=0 row=23 c974=64 c973=0
+[6198] ch  53 '5' col=1 row=23 c974=64 c973=0
+[6198] ch  48 '0' col=2 row=23 c974=64 c973=0
+[6198] ch  32 ' ' col=3 row=23 c974=64 c973=0
+[6199] ch  49 '1' col=6 row=23 c974=64 c973=0
+[6199] ch  48 '0' col=7 row=23 c974=64 c973=0
+[6199] ch  48 '0' col=8 row=23 c974=64 c973=0
+[6199] ch  32 ' ' col=9 row=23 c974=64 c973=0
+[6200] ch  45 '-' col=12 row=23 c974=64 c973=0
+[6200] ch  51 '3' col=13 row=23 c974=64 c973=0
+[6200] ch  51 '3' col=14 row=23 c974=64 c973=0
+[6200] ch  50 '2' col=15 row=23 c974=64 c973=0
+[6200] ch  49 '1' col=16 row=23 c974=64 c973=0
+[6200] ch  32 ' ' col=17 row=23 c974=64 c973=0
+[6201] ch  48 '0' col=25 row=23 c974=64 c973=0
+[6201] ch  32 ' ' col=26 row=23 c974=64 c973=0
+[6201] ch  32 ' ' col=27 row=23 c974=64 c973=0
+[6201] ch  48 '0' col=34 row=23 c974=64 c973=0
+[6202] ch  32 ' ' col=35 row=23 c974=64 c973=0
+[6202] ch  32 ' ' col=36 row=23 c974=64 c973=0
+[6202] w 973=1 pc=E781
+[6202] ch  45 '-' col=17 row=7 c974=64 c973=1
+[6202] ch  91 '[' col=18 row=7 c974=64 c973=1
+[6203] ch  32 ' ' col=19 row=7 c974=64 c973=1
+[6203] ch  32 ' ' col=20 row=7 c974=64 c973=1
+[6203] ch  93 ']' col=21 row=7 c974=64 c973=1
+[6203] ch  45 '-' col=22 row=7 c974=64 c973=1
+[6203] w 973=0 pc=E781
+[6662] w 974=32 pc=E781
+[6662] w 973=0 pc=E781
+[6940] ch  32 ' ' col=0 row=0 c974=32 c973=0
+[6942] ch  32 ' ' col=0 row=7 c974=32 c973=0
+[6946] ch  32 ' ' col=0 row=0 c974=32 c973=0
+[6946] ch  32 ' ' col=1 row=0 c974=32 c973=0
+[6946] ch  32 ' ' col=2 row=0 c974=32 c973=0
+[6946] ch  32 ' ' col=3 row=0 c974=32 c973=0
+[6946] ch  32 ' ' col=4 row=0 c974=32 c973=0
+[6946] ch  32 ' ' col=5 row=0 c974=32 c973=0
+[6946] ch  32 ' ' col=6 row=0 c974=32 c973=0
+[6946] ch  32 ' ' col=7 row=0 c974=32 c973=0
+[6946] ch  32 ' ' col=8 row=0 c974=32 c973=0
+[6946] ch  32 ' ' col=9 row=0 c974=32 c973=0
+[6946] ch  32 ' ' col=10 row=0 c974=32 c973=0
+[6946] ch  32 ' ' col=11 row=0 c974=32 c973=0
+[6947] ch  32 ' ' col=12 row=0 c974=32 c973=0
+[6947] ch  32 ' ' col=13 row=0 c974=32 c973=0
+[6947] ch  32 ' ' col=14 row=0 c974=32 c973=0
+[6947] ch  32 ' ' col=15 row=0 c974=32 c973=0
+[6947] ch  32 ' ' col=16 row=0 c974=32 c973=0
+[6947] ch  32 ' ' col=17 row=0 c974=32 c973=0
+[6947] ch  32 ' ' col=18 row=0 c974=32 c973=0
+[6947] ch  32 ' ' col=19 row=0 c974=32 c973=0
+[6948] ch  32 ' ' col=0 row=1 c974=32 c973=0
+[6948] ch  32 ' ' col=1 row=1 c974=32 c973=0
+[6948] ch  32 ' ' col=2 row=1 c974=32 c973=0
+[6949] ch  32 ' ' col=3 row=1 c974=32 c973=0
+[6949] ch  32 ' ' col=4 row=1 c974=32 c973=0
+[6949] ch  32 ' ' col=5 row=1 c974=32 c973=0
+[6949] ch  32 ' ' col=6 row=1 c974=32 c973=0
+[6949] ch  32 ' ' col=7 row=1 c974=32 c973=0
+[6949] ch  32 ' ' col=8 row=1 c974=32 c973=0
+[6949] ch  32 ' ' col=9 row=1 c974=32 c973=0
+[6949] ch  32 ' ' col=10 row=1 c974=32 c973=0
+[6949] ch  32 ' ' col=11 row=1 c974=32 c973=0
+[6949] ch  32 ' ' col=12 row=1 c974=32 c973=0
+[6949] ch  32 ' ' col=13 row=1 c974=32 c973=0
+[6949] ch  32 ' ' col=14 row=1 c974=32 c973=0
+[6949] ch  32 ' ' col=15 row=1 c974=32 c973=0
+[6949] ch  32 ' ' col=16 row=1 c974=32 c973=0
+[6949] ch  32 ' ' col=17 row=1 c974=32 c973=0
+[6949] ch  32 ' ' col=18 row=1 c974=32 c973=0
+[6949] ch  32 ' ' col=19 row=1 c974=32 c973=0
+[6950] ch  32 ' ' col=0 row=2 c974=32 c973=0
+[6950] ch  32 ' ' col=1 row=2 c974=32 c973=0
+[6950] ch  32 ' ' col=2 row=2 c974=32 c973=0
+[6950] ch  32 ' ' col=3 row=2 c974=32 c973=0
+[6950] ch  32 ' ' col=4 row=2 c974=32 c973=0
+[6950] ch  32 ' ' col=5 row=2 c974=32 c973=0
+[6950] ch  32 ' ' col=6 row=2 c974=32 c973=0
+[6950] ch  32 ' ' col=7 row=2 c974=32 c973=0
+[6950] ch  32 ' ' col=8 row=2 c974=32 c973=0
+[6950] ch  32 ' ' col=9 row=2 c974=32 c973=0
+[6950] ch  32 ' ' col=10 row=2 c974=32 c973=0
+[6950] ch  32 ' ' col=11 row=2 c974=32 c973=0
+[6950] ch  32 ' ' col=12 row=2 c974=32 c973=0
+[6950] ch  32 ' ' col=13 row=2 c974=32 c973=0
+[6951] ch  32 ' ' col=14 row=2 c974=32 c973=0
+[6951] ch  32 ' ' col=15 row=2 c974=32 c973=0
+[6951] ch  32 ' ' col=16 row=2 c974=32 c973=0
+[6951] ch  32 ' ' col=17 row=2 c974=32 c973=0
+[6951] ch  32 ' ' col=18 row=2 c974=32 c973=0
+[6951] ch  32 ' ' col=19 row=2 c974=32 c973=0
+[6951] ch  32 ' ' col=0 row=3 c974=32 c973=0
+[6951] ch  32 ' ' col=1 row=3 c974=32 c973=0
+[6951] ch  32 ' ' col=2 row=3 c974=32 c973=0
+[6951] ch  32 ' ' col=3 row=3 c974=32 c973=0
+[6951] ch  32 ' ' col=4 row=3 c974=32 c973=0
+[6951] ch  32 ' ' col=5 row=3 c974=32 c973=0
+[6951] ch  32 ' ' col=6 row=3 c974=32 c973=0
+[6951] ch  32 ' ' col=7 row=3 c974=32 c973=0
+[6951] ch  32 ' ' col=8 row=3 c974=32 c973=0
+[6952] ch  32 ' ' col=9 row=3 c974=32 c973=0
+[6952] ch  32 ' ' col=10 row=3 c974=32 c973=0
+[6952] ch  32 ' ' col=11 row=3 c974=32 c973=0
+[6952] ch  32 ' ' col=12 row=3 c974=32 c973=0
+[6952] ch  32 ' ' col=13 row=3 c974=32 c973=0
+[6952] ch  32 ' ' col=14 row=3 c974=32 c973=0
+[6952] ch  32 ' ' col=15 row=3 c974=32 c973=0
+[6952] ch  32 ' ' col=16 row=3 c974=32 c973=0
+[6952] ch  32 ' ' col=17 row=3 c974=32 c973=0
+[6952] ch  32 ' ' col=18 row=3 c974=32 c973=0
+[6952] ch  32 ' ' col=19 row=3 c974=32 c973=0
+[6952] ch  32 ' ' col=0 row=4 c974=32 c973=0
+[6952] ch  32 ' ' col=1 row=4 c974=32 c973=0
+[6952] ch  32 ' ' col=2 row=4 c974=32 c973=0
+[6953] ch  32 ' ' col=3 row=4 c974=32 c973=0
+[6953] ch  32 ' ' col=4 row=4 c974=32 c973=0
+[6953] ch  32 ' ' col=5 row=4 c974=32 c973=0
+[6953] ch  32 ' ' col=6 row=4 c974=32 c973=0
+[6953] ch  32 ' ' col=7 row=4 c974=32 c973=0
+[6953] ch  32 ' ' col=8 row=4 c974=32 c973=0
+[6953] ch  32 ' ' col=9 row=4 c974=32 c973=0
+[6953] ch  32 ' ' col=10 row=4 c974=32 c973=0
+[6953] ch  32 ' ' col=11 row=4 c974=32 c973=0
+[6953] ch  32 ' ' col=12 row=4 c974=32 c973=0
+[6953] ch  32 ' ' col=13 row=4 c974=32 c973=0
+[6953] ch  32 ' ' col=14 row=4 c974=32 c973=0
+[6953] ch  32 ' ' col=15 row=4 c974=32 c973=0
+[6953] ch  32 ' ' col=16 row=4 c974=32 c973=0
+[6953] ch  32 ' ' col=17 row=4 c974=32 c973=0
+[6953] ch  32 ' ' col=18 row=4 c974=32 c973=0
+[6953] ch  32 ' ' col=19 row=4 c974=32 c973=0
+[6954] ch  32 ' ' col=0 row=5 c974=32 c973=0
+[6954] ch  32 ' ' col=1 row=5 c974=32 c973=0
+[6954] ch  32 ' ' col=2 row=5 c974=32 c973=0
+[6954] ch  32 ' ' col=3 row=5 c974=32 c973=0
+[6954] ch  32 ' ' col=4 row=5 c974=32 c973=0
+[6954] ch  32 ' ' col=5 row=5 c974=32 c973=0
+[6954] ch  32 ' ' col=6 row=5 c974=32 c973=0
+[6954] ch  32 ' ' col=7 row=5 c974=32 c973=0
+[6954] ch  32 ' ' col=8 row=5 c974=32 c973=0
+[6954] ch  32 ' ' col=9 row=5 c974=32 c973=0
+[6954] ch  32 ' ' col=10 row=5 c974=32 c973=0
+[6954] ch  32 ' ' col=11 row=5 c974=32 c973=0
+[6954] ch  32 ' ' col=12 row=5 c974=32 c973=0
+[6954] ch  32 ' ' col=13 row=5 c974=32 c973=0
+[6954] ch  32 ' ' col=14 row=5 c974=32 c973=0
+[6955] ch  32 ' ' col=15 row=5 c974=32 c973=0
+[6955] ch  32 ' ' col=16 row=5 c974=32 c973=0
+[6955] ch  32 ' ' col=17 row=5 c974=32 c973=0
+[6955] ch  32 ' ' col=18 row=5 c974=32 c973=0
+[6955] ch  32 ' ' col=19 row=5 c974=32 c973=0
+[6955] ch  32 ' ' col=0 row=6 c974=32 c973=0
+[6955] ch  32 ' ' col=1 row=6 c974=32 c973=0
+[6955] ch  32 ' ' col=2 row=6 c974=32 c973=0
+[6955] ch  32 ' ' col=3 row=6 c974=32 c973=0
+[6955] ch  32 ' ' col=4 row=6 c974=32 c973=0
+[6955] ch  32 ' ' col=5 row=6 c974=32 c973=0
+[6955] ch  32 ' ' col=6 row=6 c974=32 c973=0
+[6955] ch  32 ' ' col=7 row=6 c974=32 c973=0
+[6955] ch  32 ' ' col=8 row=6 c974=32 c973=0
+[6956] ch  32 ' ' col=9 row=6 c974=32 c973=0
+[6956] ch  32 ' ' col=10 row=6 c974=32 c973=0
+[6956] ch  32 ' ' col=11 row=6 c974=32 c973=0
+[6956] ch  32 ' ' col=12 row=6 c974=32 c973=0
+[6956] ch  32 ' ' col=13 row=6 c974=32 c973=0
+[6956] ch  32 ' ' col=14 row=6 c974=32 c973=0
+[6956] ch  32 ' ' col=15 row=6 c974=32 c973=0
+[6956] ch  32 ' ' col=16 row=6 c974=32 c973=0
+[6956] ch  32 ' ' col=17 row=6 c974=32 c973=0
+[6956] ch  32 ' ' col=18 row=6 c974=32 c973=0
+[6956] ch  32 ' ' col=19 row=6 c974=32 c973=0
+[6956] ch  32 ' ' col=0 row=7 c974=32 c973=0
+[6956] ch  32 ' ' col=1 row=7 c974=32 c973=0
+[6956] ch  32 ' ' col=2 row=7 c974=32 c973=0
+[6957] ch  32 ' ' col=3 row=7 c974=32 c973=0
+[6957] ch  32 ' ' col=4 row=7 c974=32 c973=0
+[6957] ch  32 ' ' col=5 row=7 c974=32 c973=0
+[6957] ch  32 ' ' col=6 row=7 c974=32 c973=0
+[6957] ch  32 ' ' col=7 row=7 c974=32 c973=0
+[6957] ch  32 ' ' col=8 row=7 c974=32 c973=0
+[6957] ch  32 ' ' col=9 row=7 c974=32 c973=0
+[6957] ch  32 ' ' col=10 row=7 c974=32 c973=0
+[6957] ch  32 ' ' col=11 row=7 c974=32 c973=0
+[6957] ch  32 ' ' col=12 row=7 c974=32 c973=0
+[6957] ch  32 ' ' col=13 row=7 c974=32 c973=0
+[6957] ch  32 ' ' col=14 row=7 c974=32 c973=0
+[6957] ch  32 ' ' col=15 row=7 c974=32 c973=0
+[6957] ch  32 ' ' col=16 row=7 c974=32 c973=0
+[6957] ch  32 ' ' col=17 row=7 c974=32 c973=0
+[6957] ch  32 ' ' col=18 row=7 c974=32 c973=0
+[6957] ch  32 ' ' col=19 row=7 c974=32 c973=0
+[6958] ch  32 ' ' col=0 row=8 c974=32 c973=0
+[6958] ch  32 ' ' col=1 row=8 c974=32 c973=0
+[6958] ch  32 ' ' col=2 row=8 c974=32 c973=0
+[6958] ch  32 ' ' col=3 row=8 c974=32 c973=0
+[6958] ch  32 ' ' col=4 row=8 c974=32 c973=0
+[6958] ch  32 ' ' col=5 row=8 c974=32 c973=0
+[6958] ch  32 ' ' col=6 row=8 c974=32 c973=0
+[6958] ch  32 ' ' col=7 row=8 c974=32 c973=0
+[6958] ch  32 ' ' col=8 row=8 c974=32 c973=0
+[6958] ch  32 ' ' col=9 row=8 c974=32 c973=0
+[6958] ch  32 ' ' col=10 row=8 c974=32 c973=0
+[6958] ch  32 ' ' col=11 row=8 c974=32 c973=0
+[6958] ch  32 ' ' col=12 row=8 c974=32 c973=0
+[6958] ch  32 ' ' col=13 row=8 c974=32 c973=0
+[6958] ch  32 ' ' col=14 row=8 c974=32 c973=0
+[6959] ch  32 ' ' col=15 row=8 c974=32 c973=0
+[6959] ch  32 ' ' col=16 row=8 c974=32 c973=0
+[6959] ch  32 ' ' col=17 row=8 c974=32 c973=0
+[6959] ch  32 ' ' col=18 row=8 c974=32 c973=0
+[6959] ch  32 ' ' col=19 row=8 c974=32 c973=0
+[6959] ch  32 ' ' col=0 row=9 c974=32 c973=0
+[6959] ch  32 ' ' col=1 row=9 c974=32 c973=0
+[6959] ch  32 ' ' col=2 row=9 c974=32 c973=0
+[6959] ch  32 ' ' col=3 row=9 c974=32 c973=0
+[6959] ch  32 ' ' col=4 row=9 c974=32 c973=0
+[6959] ch  32 ' ' col=5 row=9 c974=32 c973=0
+[6959] ch  32 ' ' col=6 row=9 c974=32 c973=0
+[6959] ch  32 ' ' col=7 row=9 c974=32 c973=0
+[6959] ch  32 ' ' col=8 row=9 c974=32 c973=0
+[6960] ch  32 ' ' col=9 row=9 c974=32 c973=0
+[6960] ch  32 ' ' col=10 row=9 c974=32 c973=0
+[6960] ch  32 ' ' col=11 row=9 c974=32 c973=0
+[6960] ch  32 ' ' col=12 row=9 c974=32 c973=0
+[6960] ch  32 ' ' col=13 row=9 c974=32 c973=0
+[6960] ch  32 ' ' col=14 row=9 c974=32 c973=0
+[6960] ch  32 ' ' col=15 row=9 c974=32 c973=0
+[6960] ch  32 ' ' col=16 row=9 c974=32 c973=0
+[6960] ch  32 ' ' col=17 row=9 c974=32 c973=0
+[6960] ch  32 ' ' col=18 row=9 c974=32 c973=0
+[6960] ch  32 ' ' col=19 row=9 c974=32 c973=0
+[6960] ch  32 ' ' col=0 row=10 c974=32 c973=0
+[6960] ch  32 ' ' col=1 row=10 c974=32 c973=0
+[6960] ch  32 ' ' col=2 row=10 c974=32 c973=0
+[6960] ch  32 ' ' col=3 row=10 c974=32 c973=0
+[6961] ch  32 ' ' col=4 row=10 c974=32 c973=0
+[6961] ch  32 ' ' col=5 row=10 c974=32 c973=0
+[6961] ch  32 ' ' col=6 row=10 c974=32 c973=0
+[6961] ch  32 ' ' col=7 row=10 c974=32 c973=0
+[6961] ch  32 ' ' col=8 row=10 c974=32 c973=0
+[6961] ch  32 ' ' col=9 row=10 c974=32 c973=0
+[6961] ch  32 ' ' col=10 row=10 c974=32 c973=0
+[6961] ch  32 ' ' col=11 row=10 c974=32 c973=0
+[6961] ch  32 ' ' col=12 row=10 c974=32 c973=0
+[6961] ch  32 ' ' col=13 row=10 c974=32 c973=0
+[6961] ch  32 ' ' col=14 row=10 c974=32 c973=0
+[6961] ch  32 ' ' col=15 row=10 c974=32 c973=0
+[6961] ch  32 ' ' col=16 row=10 c974=32 c973=0
+[6961] ch  32 ' ' col=17 row=10 c974=32 c973=0
+[6961] ch  32 ' ' col=18 row=10 c974=32 c973=0
+[6961] ch  32 ' ' col=19 row=10 c974=32 c973=0
+[6962] ch  32 ' ' col=0 row=11 c974=32 c973=0
+[6962] ch  32 ' ' col=1 row=11 c974=32 c973=0
+[6962] ch  32 ' ' col=2 row=11 c974=32 c973=0
+[6962] ch  32 ' ' col=3 row=11 c974=32 c973=0
+[6962] ch  32 ' ' col=4 row=11 c974=32 c973=0
+[6962] ch  32 ' ' col=5 row=11 c974=32 c973=0
+[6962] ch  32 ' ' col=6 row=11 c974=32 c973=0
+[6962] ch  32 ' ' col=7 row=11 c974=32 c973=0
+[6962] ch  32 ' ' col=8 row=11 c974=32 c973=0
+[6962] ch  32 ' ' col=9 row=11 c974=32 c973=0
+[6962] ch  32 ' ' col=10 row=11 c974=32 c973=0
+[6962] ch  32 ' ' col=11 row=11 c974=32 c973=0
+[6962] ch  32 ' ' col=12 row=11 c974=32 c973=0
+[6962] ch  32 ' ' col=13 row=11 c974=32 c973=0
+[6962] ch  32 ' ' col=14 row=11 c974=32 c973=0
+[6963] ch  32 ' ' col=15 row=11 c974=32 c973=0
+[6963] ch  32 ' ' col=16 row=11 c974=32 c973=0
+[6963] ch  32 ' ' col=17 row=11 c974=32 c973=0
+[6963] ch  32 ' ' col=18 row=11 c974=32 c973=0
+[6963] ch  32 ' ' col=19 row=11 c974=32 c973=0
+[6963] ch  32 ' ' col=0 row=12 c974=32 c973=0
+[6963] ch  32 ' ' col=1 row=12 c974=32 c973=0
+[6963] ch  32 ' ' col=2 row=12 c974=32 c973=0
+[6963] ch  32 ' ' col=3 row=12 c974=32 c973=0
+[6963] ch  32 ' ' col=4 row=12 c974=32 c973=0
+[6963] ch  32 ' ' col=5 row=12 c974=32 c973=0
+[6963] ch  32 ' ' col=6 row=12 c974=32 c973=0
+[6963] ch  32 ' ' col=7 row=12 c974=32 c973=0
+[6963] ch  32 ' ' col=8 row=12 c974=32 c973=0
+[6964] ch  32 ' ' col=9 row=12 c974=32 c973=0
+[6964] ch  32 ' ' col=10 row=12 c974=32 c973=0
+[6964] ch  32 ' ' col=11 row=12 c974=32 c973=0
+[6964] ch  32 ' ' col=12 row=12 c974=32 c973=0
+[6964] ch  32 ' ' col=13 row=12 c974=32 c973=0
+[6964] ch  32 ' ' col=14 row=12 c974=32 c973=0
+[6964] ch  32 ' ' col=15 row=12 c974=32 c973=0
+[6964] ch  32 ' ' col=16 row=12 c974=32 c973=0
+[6964] ch  32 ' ' col=17 row=12 c974=32 c973=0
+[6964] ch  32 ' ' col=18 row=12 c974=32 c973=0
+[6964] ch  32 ' ' col=19 row=12 c974=32 c973=0
+[6964] ch  32 ' ' col=0 row=13 c974=32 c973=0
+[6964] ch  32 ' ' col=1 row=13 c974=32 c973=0
+[6964] ch  32 ' ' col=2 row=13 c974=32 c973=0
+[6964] ch  32 ' ' col=3 row=13 c974=32 c973=0
+[6965] ch  32 ' ' col=4 row=13 c974=32 c973=0
+[6965] ch  32 ' ' col=5 row=13 c974=32 c973=0
+[6965] ch  32 ' ' col=6 row=13 c974=32 c973=0
+[6965] ch  32 ' ' col=7 row=13 c974=32 c973=0
+[6965] ch  32 ' ' col=8 row=13 c974=32 c973=0
+[6965] ch  32 ' ' col=9 row=13 c974=32 c973=0
+[6965] ch  32 ' ' col=10 row=13 c974=32 c973=0
+[6965] ch  32 ' ' col=11 row=13 c974=32 c973=0
+[6965] ch  32 ' ' col=12 row=13 c974=32 c973=0
+[6965] ch  32 ' ' col=13 row=13 c974=32 c973=0
+[6965] ch  32 ' ' col=14 row=13 c974=32 c973=0
+[6965] ch  32 ' ' col=15 row=13 c974=32 c973=0
+[6965] ch  32 ' ' col=16 row=13 c974=32 c973=0
+[6965] ch  32 ' ' col=17 row=13 c974=32 c973=0
+[6965] ch  32 ' ' col=18 row=13 c974=32 c973=0
+[6965] ch  32 ' ' col=19 row=13 c974=32 c973=0
+[6977] w 973=0 pc=E781
+[6985] ch  32 ' ' col=22 row=1 c974=32 c973=0
+[6985] ch  32 ' ' col=23 row=1 c974=32 c973=0
+[6985] ch  49 '1' col=24 row=1 c974=32 c973=0
+[6985] ch  32 ' ' col=25 row=1 c974=32 c973=0
+[6985] ch  32 ' ' col=26 row=1 c974=32 c973=0
+[6988] w 973=0 pc=E781
+[6988] ch  32 ' ' col=22 row=2 c974=32 c973=0
+[6988] ch  69 'E' col=23 row=2 c974=32 c973=0
+[6988] ch  78 'N' col=24 row=2 c974=32 c973=0
+[6988] ch  71 'G' col=25 row=2 c974=32 c973=0
+[6988] ch  32 ' ' col=26 row=2 c974=32 c973=0
+[6991] w 973=0 pc=E781
+[6992] ch  32 ' ' col=28 row=1 c974=32 c973=0
+[6992] ch  32 ' ' col=29 row=1 c974=32 c973=0
+[6992] ch  50 '2' col=30 row=1 c974=32 c973=0
+[6992] ch  32 ' ' col=31 row=1 c974=32 c973=0
+[6992] ch  32 ' ' col=32 row=1 c974=32 c973=0
+[6994] w 973=0 pc=E781
+[6995] ch  32 ' ' col=28 row=2 c974=32 c973=0
+[6995] ch  69 'E' col=29 row=2 c974=32 c973=0
+[6995] ch  78 'N' col=30 row=2 c974=32 c973=0
+[6995] ch  71 'G' col=31 row=2 c974=32 c973=0
+[6995] ch  32 ' ' col=32 row=2 c974=32 c973=0
+[6998] w 973=0 pc=E781
+[6998] ch  32 ' ' col=34 row=1 c974=32 c973=0
+[6998] ch  67 'C' col=35 row=1 c974=32 c973=0
+[6998] ch  79 'O' col=36 row=1 c974=32 c973=0
+[6998] ch  77 'M' col=37 row=1 c974=32 c973=0
+[6998] ch  80 'P' col=38 row=1 c974=32 c973=0
+[7001] w 973=0 pc=E781
+[7001] ch  78 'N' col=34 row=2 c974=32 c973=0
+[7001] ch  79 'O' col=35 row=2 c974=32 c973=0
+[7001] ch  47 '/' col=36 row=2 c974=32 c973=0
+[7001] ch  71 'G' col=37 row=2 c974=32 c973=0
+[7001] ch  79 'O' col=38 row=2 c974=32 c973=0
+[7004] w 973=0 pc=E781
+[7005] ch  82 'R' col=22 row=4 c974=32 c973=0
+[7005] ch  65 'A' col=23 row=4 c974=32 c973=0
+[7005] ch  68 'D' col=24 row=4 c974=32 c973=0
+[7005] ch  65 'A' col=25 row=4 c974=32 c973=0
+[7005] ch  82 'R' col=26 row=4 c974=32 c973=0
+[7007] w 973=0 pc=E781
+[7008] ch  78 'N' col=22 row=5 c974=32 c973=0
+[7008] ch  79 'O' col=23 row=5 c974=32 c973=0
+[7008] ch  47 '/' col=24 row=5 c974=32 c973=0
+[7008] ch  71 'G' col=25 row=5 c974=32 c973=0
+[7008] ch  79 'O' col=26 row=5 c974=32 c973=0
+[7011] w 973=0 pc=E781
+[7011] ch  32 ' ' col=28 row=4 c974=32 c973=0
+[7011] ch  69 'E' col=29 row=4 c974=32 c973=0
+[7011] ch  78 'N' col=30 row=4 c974=32 c973=0
+[7011] ch  86 'V' col=31 row=4 c974=32 c973=0
+[7011] ch  32 ' ' col=32 row=4 c974=32 c973=0
+[7014] w 973=0 pc=E781
+[7014] ch  78 'N' col=28 row=5 c974=32 c973=0
+[7014] ch  79 'O' col=29 row=5 c974=32 c973=0
+[7014] ch  47 '/' col=30 row=5 c974=32 c973=0
+[7014] ch  71 'G' col=31 row=5 c974=32 c973=0
+[7014] ch  79 'O' col=32 row=5 c974=32 c973=0
+[7017] w 973=0 pc=E781
+[7018] ch  32 ' ' col=34 row=4 c974=32 c973=0
+[7018] ch  72 'H' col=35 row=4 c974=32 c973=0
+[7018] ch  85 'U' col=36 row=4 c974=32 c973=0
+[7018] ch  76 'L' col=37 row=4 c974=32 c973=0
+[7018] ch  76 'L' col=38 row=4 c974=32 c973=0
+[7020] w 973=0 pc=E781
+[7021] ch  32 ' ' col=34 row=5 c974=32 c973=0
+[7021] ch  68 'D' col=35 row=5 c974=32 c973=0
+[7021] ch  77 'M' col=36 row=5 c974=32 c973=0
+[7021] ch  71 'G' col=37 row=5 c974=32 c973=0
+[7021] ch  32 ' ' col=38 row=5 c974=32 c973=0
+[7024] w 973=0 pc=E781
+[7024] ch  80 'P' col=22 row=7 c974=32 c973=0
+[7024] ch  79 'O' col=23 row=7 c974=32 c973=0
+[7024] ch  87 'W' col=24 row=7 c974=32 c973=0
+[7024] ch  69 'E' col=25 row=7 c974=32 c973=0
+[7024] ch  82 'R' col=26 row=7 c974=32 c973=0
+[7026] w 973=0 pc=E781
+[7027] ch  32 ' ' col=22 row=8 c974=32 c973=0
+[7027] ch  76 'L' col=23 row=8 c974=32 c973=0
+[7027] ch  79 'O' col=24 row=8 c974=32 c973=0
+[7027] ch  87 'W' col=25 row=8 c974=32 c973=0
+[7027] ch  32 ' ' col=26 row=8 c974=32 c973=0
+[7030] w 973=0 pc=E781
+[7031] ch  32 ' ' col=28 row=7 c974=32 c973=0
+[7031] ch  83 'S' col=29 row=7 c974=32 c973=0
+[7031] ch  72 'H' col=30 row=7 c974=32 c973=0
+[7031] ch  76 'L' col=31 row=7 c974=32 c973=0
+[7031] ch  68 'D' col=32 row=7 c974=32 c973=0
+[7033] w 973=0 pc=E781
+[7034] ch  78 'N' col=28 row=8 c974=32 c973=0
+[7034] ch  79 'O' col=29 row=8 c974=32 c973=0
+[7034] ch  47 '/' col=30 row=8 c974=32 c973=0
+[7034] ch  71 'G' col=31 row=8 c974=32 c973=0
+[7034] ch  79 'O' col=32 row=8 c974=32 c973=0
+[7036] w 973=0 pc=E781
+[7037] ch  72 'H' col=34 row=7 c974=32 c973=0
+[7037] ch  89 'Y' col=35 row=7 c974=32 c973=0
+[7037] ch  80 'P' col=36 row=7 c974=32 c973=0
+[7037] ch  69 'E' col=37 row=7 c974=32 c973=0
+[7037] ch  82 'R' col=38 row=7 c974=32 c973=0
+[7039] w 973=0 pc=E781
+[7040] ch  68 'D' col=34 row=8 c974=32 c973=0
+[7040] ch  82 'R' col=35 row=8 c974=32 c973=0
+[7040] ch  73 'I' col=36 row=8 c974=32 c973=0
+[7040] ch  86 'V' col=37 row=8 c974=32 c973=0
+[7040] ch  69 'E' col=38 row=8 c974=32 c973=0
+[7043] w 973=0 pc=E781
+[7044] ch  32 ' ' col=22 row=10 c974=32 c973=0
+[7044] ch  77 'M' col=23 row=10 c974=32 c973=0
+[7044] ch  83 'S' col=24 row=10 c974=32 c973=0
+[7044] ch  76 'L' col=25 row=10 c974=32 c973=0
+[7044] ch  32 ' ' col=26 row=10 c974=32 c973=0
+[7046] w 973=0 pc=E781
+[7046] ch  78 'N' col=22 row=11 c974=32 c973=0
+[7047] ch  79 'O' col=23 row=11 c974=32 c973=0
+[7047] ch  47 '/' col=24 row=11 c974=32 c973=0
+[7047] ch  71 'G' col=25 row=11 c974=32 c973=0
+[7047] ch  79 'O' col=26 row=11 c974=32 c973=0
+[7049] w 973=0 pc=E781
+[7050] ch  76 'L' col=28 row=10 c974=32 c973=0
+[7050] ch  65 'A' col=29 row=10 c974=32 c973=0
+[7050] ch  83 'S' col=30 row=10 c974=32 c973=0
+[7050] ch  69 'E' col=31 row=10 c974=32 c973=0
+[7050] ch  82 'R' col=32 row=10 c974=32 c973=0
+[7052] w 973=0 pc=E781
+[7053] ch  78 'N' col=28 row=11 c974=32 c973=0
+[7053] ch  79 'O' col=29 row=11 c974=32 c973=0
+[7053] ch  47 '/' col=30 row=11 c974=32 c973=0
+[7053] ch  71 'G' col=31 row=11 c974=32 c973=0
+[7053] ch  79 'O' col=32 row=11 c974=32 c973=0
+[7056] w 973=0 pc=E781
+[7056] ch  32 ' ' col=34 row=10 c974=32 c973=0
+[7057] ch  67 'C' col=35 row=10 c974=32 c973=0
+[7057] ch  79 'O' col=36 row=10 c974=32 c973=0
+[7057] ch  77 'M' col=37 row=10 c974=32 c973=0
+[7057] ch  32 ' ' col=38 row=10 c974=32 c973=0
+[7059] w 973=0 pc=E781
+[7059] ch  78 'N' col=34 row=11 c974=32 c973=0
+[7059] ch  79 'O' col=35 row=11 c974=32 c973=0
+[7060] ch  47 '/' col=36 row=11 c974=32 c973=0
+[7060] ch  71 'G' col=37 row=11 c974=32 c973=0
+[7060] ch  79 'O' col=38 row=11 c974=32 c973=0
+[7061] w 973=0 pc=E781
+[7061] ch  32 ' ' col=0 row=14 c974=32 c973=0
+[7061] ch  32 ' ' col=1 row=14 c974=32 c973=0
+[7061] ch  67 'C' col=2 row=14 c974=32 c973=0
+[7061] ch  79 'O' col=3 row=14 c974=32 c973=0
+[7061] ch  77 'M' col=4 row=14 c974=32 c973=0
+[7061] ch  80 'P' col=5 row=14 c974=32 c973=0
+[7061] ch  85 'U' col=6 row=14 c974=32 c973=0
+[7061] ch  84 'T' col=7 row=14 c974=32 c973=0
+[7062] ch  69 'E' col=8 row=14 c974=32 c973=0
+[7062] ch  82 'R' col=9 row=14 c974=32 c973=0
+[7062] ch  32 ' ' col=10 row=14 c974=32 c973=0
+[7062] ch  68 'D' col=11 row=14 c974=32 c973=0
+[7062] ch  73 'I' col=12 row=14 c974=32 c973=0
+[7062] ch  83 'S' col=13 row=14 c974=32 c973=0
+[7062] ch  80 'P' col=14 row=14 c974=32 c973=0
+[7062] ch  76 'L' col=15 row=14 c974=32 c973=0
+[7062] ch  65 'A' col=16 row=14 c974=32 c973=0
+[7062] ch  89 'Y' col=17 row=14 c974=32 c973=0
+[7062] ch  32 ' ' col=18 row=14 c974=32 c973=0
+[7062] ch  32 ' ' col=19 row=14 c974=32 c973=0
+[7062] ch  32 ' ' col=20 row=14 c974=32 c973=0
+[7062] ch  32 ' ' col=21 row=14 c974=32 c973=0
+[7062] ch  32 ' ' col=22 row=14 c974=32 c973=0
+[7062] ch  32 ' ' col=23 row=14 c974=32 c973=0
+[7062] ch  68 'D' col=24 row=14 c974=32 c973=0
+[7063] ch  65 'A' col=25 row=14 c974=32 c973=0
+[7063] ch  77 'M' col=26 row=14 c974=32 c973=0
+[7063] ch  65 'A' col=27 row=14 c974=32 c973=0
+[7063] ch  71 'G' col=28 row=14 c974=32 c973=0
+[7063] ch  69 'E' col=29 row=14 c974=32 c973=0
+[7063] ch  32 ' ' col=30 row=14 c974=32 c973=0
+[7063] ch  67 'C' col=31 row=14 c974=32 c973=0
+[7063] ch  79 'O' col=32 row=14 c974=32 c973=0
+[7063] ch  78 'N' col=33 row=14 c974=32 c973=0
+[7063] ch  84 'T' col=34 row=14 c974=32 c973=0
+[7063] ch  82 'R' col=35 row=14 c974=32 c973=0
+[7063] ch  79 'O' col=36 row=14 c974=32 c973=0
+[7063] ch  76 'L' col=37 row=14 c974=32 c973=0
+[7063] ch  32 ' ' col=38 row=14 c974=32 c973=0
+[7063] ch  32 ' ' col=39 row=14 c974=32 c973=0
+[7069] ch  32 ' ' col=1 row=1 c974=32 c973=0
+[7069] ch  67 'C' col=2 row=1 c974=32 c973=0
+[7069] ch  79 'O' col=3 row=1 c974=32 c973=0
+[7070] ch  77 'M' col=4 row=1 c974=32 c973=0
+[7070] ch  77 'M' col=5 row=1 c974=32 c973=0
+[7070] ch  65 'A' col=6 row=1 c974=32 c973=0
+[7070] ch  78 'N' col=7 row=1 c974=32 c973=0
+[7070] ch  68 'D' col=8 row=1 c974=32 c973=0
+[7070] ch  32 ' ' col=9 row=1 c974=32 c973=0
+[7070] ch  77 'M' col=10 row=1 c974=32 c973=0
+[7070] ch  79 'O' col=11 row=1 c974=32 c973=0
+[7070] ch  68 'D' col=12 row=1 c974=32 c973=0
+[7070] ch  69 'E' col=13 row=1 c974=32 c973=0
+[7070] ch  49 '1' col=1 row=3 c974=32 c973=0
+[7070] ch  41 ')' col=2 row=3 c974=32 c973=0
+[7070] ch  32 ' ' col=3 row=3 c974=32 c973=0
+[7070] ch  67 'C' col=4 row=3 c974=32 c973=0
+[7071] ch  79 'O' col=5 row=3 c974=32 c973=0
+[7071] ch  77 'M' col=6 row=3 c974=32 c973=0
+[7071] ch  80 'P' col=7 row=3 c974=32 c973=0
+[7071] ch  85 'U' col=8 row=3 c974=32 c973=0
+[7071] ch  84 'T' col=9 row=3 c974=32 c973=0
+[7071] ch  69 'E' col=10 row=3 c974=32 c973=0
+[7071] ch  82 'R' col=11 row=3 c974=32 c973=0
+[7071] ch  50 '2' col=1 row=4 c974=32 c973=0
+[7071] ch  41 ')' col=2 row=4 c974=32 c973=0
+[7071] ch  32 ' ' col=3 row=4 c974=32 c973=0
+[7071] ch  71 'G' col=4 row=4 c974=32 c973=0
+[7071] ch  82 'R' col=5 row=4 c974=32 c973=0
+[7071] ch  79 'O' col=6 row=4 c974=32 c973=0
+[7071] ch  85 'U' col=7 row=4 c974=32 c973=0
+[7071] ch  78 'N' col=8 row=4 c974=32 c973=0
+[7071] ch  68 'D' col=9 row=4 c974=32 c973=0
+[7072] ch  32 ' ' col=10 row=4 c974=32 c973=0
+[7072] ch  70 'F' col=11 row=4 c974=32 c973=0
+[7072] ch  79 'O' col=12 row=4 c974=32 c973=0
+[7072] ch  82 'R' col=13 row=4 c974=32 c973=0
+[7072] ch  67 'C' col=14 row=4 c974=32 c973=0
+[7072] ch  69 'E' col=15 row=4 c974=32 c973=0
+[7072] ch  83 'S' col=16 row=4 c974=32 c973=0
+[7072] ch  51 '3' col=1 row=5 c974=32 c973=0
+[7072] ch  41 ')' col=2 row=5 c974=32 c973=0
+[7072] ch  32 ' ' col=3 row=5 c974=32 c973=0
+[7072] ch  82 'R' col=4 row=5 c974=32 c973=0
+[7072] ch  65 'A' col=5 row=5 c974=32 c973=0
+[7072] ch  68 'D' col=6 row=5 c974=32 c973=0
+[7072] ch  65 'A' col=7 row=5 c974=32 c973=0
+[7072] ch  82 'R' col=8 row=5 c974=32 c973=0
+[7073] ch  52 '4' col=1 row=6 c974=32 c973=0
+[7073] ch  41 ')' col=2 row=6 c974=32 c973=0
+[7073] ch  32 ' ' col=3 row=6 c974=32 c973=0
+[7073] ch  69 'E' col=4 row=6 c974=32 c973=0
+[7073] ch  78 'N' col=5 row=6 c974=32 c973=0
+[7073] ch  68 'D' col=6 row=6 c974=32 c973=0
+[7073] ch  53 '5' col=1 row=7 c974=32 c973=0
+[7073] ch  41 ')' col=2 row=7 c974=32 c973=0
+[7073] ch  32 ' ' col=3 row=7 c974=32 c973=0
+[7073] ch  82 'R' col=4 row=7 c974=32 c973=0
+[7073] ch  69 'E' col=5 row=7 c974=32 c973=0
+[7073] ch  84 'T' col=6 row=7 c974=32 c973=0
+[7073] ch  85 'U' col=7 row=7 c974=32 c973=0
+[7073] ch  82 'R' col=8 row=7 c974=32 c973=0
+[7073] ch  78 'N' col=9 row=7 c974=32 c973=0
+[7074] ch  67 'C' col=1 row=9 c974=32 c973=0
+[7074] ch  79 'O' col=2 row=9 c974=32 c973=0
+[7074] ch  77 'M' col=3 row=9 c974=32 c973=0
+[7074] ch  77 'M' col=4 row=9 c974=32 c973=0
+[7074] ch  65 'A' col=5 row=9 c974=32 c973=0
+[7074] ch  78 'N' col=6 row=9 c974=32 c973=0
+[7075] ch  68 'D' col=7 row=9 c974=32 c973=0
+[7075] ch  63 '?' col=8 row=9 c974=32 c973=0
+[8478] dump com_menu 38201=0 38202=1 38165=3 38164=0 38210=0 38393=0 38391=0 38392=1 38209=1 38189=0 c974=32 c973=0
+[8478] key '4'
+[8483] w 974=64 pc=E781
+[8483] w 974=32 pc=E781
+[8485] ch  32 ' ' col=9 row=9 c974=32 c973=0
+[8486] w 974=64 pc=E781
+[8636] w 974=32 pc=E781
+[8637] ch  32 ' ' col=0 row=0 c974=32 c973=0
+[8637] ch  32 ' ' col=1 row=0 c974=32 c973=0
+[8637] ch  32 ' ' col=2 row=0 c974=32 c973=0
+[8637] ch  32 ' ' col=3 row=0 c974=32 c973=0
+[8637] ch  32 ' ' col=4 row=0 c974=32 c973=0
+[8637] ch  32 ' ' col=5 row=0 c974=32 c973=0
+[8637] ch  32 ' ' col=6 row=0 c974=32 c973=0
+[8637] ch  32 ' ' col=7 row=0 c974=32 c973=0
+[8637] ch  32 ' ' col=8 row=0 c974=32 c973=0
+[8637] ch  32 ' ' col=9 row=0 c974=32 c973=0
+[8637] ch  32 ' ' col=10 row=0 c974=32 c973=0
+[8637] ch  32 ' ' col=11 row=0 c974=32 c973=0
+[8637] ch  32 ' ' col=12 row=0 c974=32 c973=0
+[8637] ch  32 ' ' col=13 row=0 c974=32 c973=0
+[8637] ch  32 ' ' col=14 row=0 c974=32 c973=0
+[8637] ch  32 ' ' col=15 row=0 c974=32 c973=0
+[8638] ch  32 ' ' col=16 row=0 c974=32 c973=0
+[8638] ch  32 ' ' col=17 row=0 c974=32 c973=0
+[8638] ch  32 ' ' col=18 row=0 c974=32 c973=0
+[8638] ch  32 ' ' col=19 row=0 c974=32 c973=0
+[8638] ch  32 ' ' col=20 row=0 c974=32 c973=0
+[8638] ch  32 ' ' col=21 row=0 c974=32 c973=0
+[8638] ch  32 ' ' col=22 row=0 c974=32 c973=0
+[8638] ch  32 ' ' col=23 row=0 c974=32 c973=0
+[8638] ch  32 ' ' col=24 row=0 c974=32 c973=0
+[8638] ch  32 ' ' col=25 row=0 c974=32 c973=0
+[8638] ch  32 ' ' col=26 row=0 c974=32 c973=0
+[8638] ch  32 ' ' col=27 row=0 c974=32 c973=0
+[8638] ch  32 ' ' col=28 row=0 c974=32 c973=0
+[8638] ch  32 ' ' col=29 row=0 c974=32 c973=0
+[8638] ch  32 ' ' col=30 row=0 c974=32 c973=0
+[8638] ch  32 ' ' col=31 row=0 c974=32 c973=0
+[8638] ch  32 ' ' col=32 row=0 c974=32 c973=0
+[8639] ch  32 ' ' col=33 row=0 c974=32 c973=0
+[8639] ch  32 ' ' col=34 row=0 c974=32 c973=0
+[8639] ch  32 ' ' col=35 row=0 c974=32 c973=0
+[8639] ch  32 ' ' col=36 row=0 c974=32 c973=0
+[8639] ch  32 ' ' col=37 row=0 c974=32 c973=0
+[8639] ch  32 ' ' col=38 row=0 c974=32 c973=0
+[8639] ch  32 ' ' col=39 row=0 c974=32 c973=0
+[8639] ch  32 ' ' col=0 row=1 c974=32 c973=0
+[8639] ch  32 ' ' col=1 row=1 c974=32 c973=0
+[8639] ch  32 ' ' col=2 row=1 c974=32 c973=0
+[8639] ch  32 ' ' col=3 row=1 c974=32 c973=0
+[8639] ch  32 ' ' col=4 row=1 c974=32 c973=0
+[8639] ch  32 ' ' col=5 row=1 c974=32 c973=0
+[8640] ch  32 ' ' col=6 row=1 c974=32 c973=0
+[8640] ch  32 ' ' col=7 row=1 c974=32 c973=0
+[8640] ch  32 ' ' col=8 row=1 c974=32 c973=0
+[8640] ch  32 ' ' col=9 row=1 c974=32 c973=0
+[8640] ch  32 ' ' col=10 row=1 c974=32 c973=0
+[8640] ch  32 ' ' col=11 row=1 c974=32 c973=0
+[8640] ch  32 ' ' col=12 row=1 c974=32 c973=0
+[8640] ch  32 ' ' col=13 row=1 c974=32 c973=0
+[8640] ch  32 ' ' col=14 row=1 c974=32 c973=0
+[8640] ch  32 ' ' col=15 row=1 c974=32 c973=0
+[8640] ch  32 ' ' col=16 row=1 c974=32 c973=0
+[8640] ch  32 ' ' col=17 row=1 c974=32 c973=0
+[8640] ch  32 ' ' col=18 row=1 c974=32 c973=0
+[8640] ch  32 ' ' col=19 row=1 c974=32 c973=0
+[8640] ch  32 ' ' col=20 row=1 c974=32 c973=0
+[8640] ch  32 ' ' col=21 row=1 c974=32 c973=0
+[8640] ch  32 ' ' col=22 row=1 c974=32 c973=0
+[8641] ch  32 ' ' col=23 row=1 c974=32 c973=0
+[8641] ch  32 ' ' col=24 row=1 c974=32 c973=0
+[8641] ch  32 ' ' col=25 row=1 c974=32 c973=0
+[8641] ch  32 ' ' col=26 row=1 c974=32 c973=0
+[8641] ch  32 ' ' col=27 row=1 c974=32 c973=0
+[8641] ch  32 ' ' col=28 row=1 c974=32 c973=0
+[8641] ch  32 ' ' col=29 row=1 c974=32 c973=0
+[8641] ch  32 ' ' col=30 row=1 c974=32 c973=0
+[8641] ch  32 ' ' col=31 row=1 c974=32 c973=0
+[8641] ch  32 ' ' col=32 row=1 c974=32 c973=0
+[8641] ch  32 ' ' col=33 row=1 c974=32 c973=0
+[8641] ch  32 ' ' col=34 row=1 c974=32 c973=0
+[8641] ch  32 ' ' col=35 row=1 c974=32 c973=0
+[8641] ch  32 ' ' col=36 row=1 c974=32 c973=0
+[8641] ch  32 ' ' col=37 row=1 c974=32 c973=0
+[8641] ch  32 ' ' col=38 row=1 c974=32 c973=0
+[8641] ch  32 ' ' col=39 row=1 c974=32 c973=0
+[8642] ch  32 ' ' col=0 row=2 c974=32 c973=0
+[8642] ch  32 ' ' col=1 row=2 c974=32 c973=0
+[8642] ch  32 ' ' col=2 row=2 c974=32 c973=0
+[8642] ch  32 ' ' col=3 row=2 c974=32 c973=0
+[8642] ch  32 ' ' col=4 row=2 c974=32 c973=0
+[8642] ch  32 ' ' col=5 row=2 c974=32 c973=0
+[8642] ch  32 ' ' col=6 row=2 c974=32 c973=0
+[8642] ch  32 ' ' col=7 row=2 c974=32 c973=0
+[8642] ch  32 ' ' col=8 row=2 c974=32 c973=0
+[8642] ch  32 ' ' col=9 row=2 c974=32 c973=0
+[8642] ch  32 ' ' col=10 row=2 c974=32 c973=0
+[8642] ch  32 ' ' col=11 row=2 c974=32 c973=0
+[8642] ch  32 ' ' col=12 row=2 c974=32 c973=0
+[8643] ch  32 ' ' col=13 row=2 c974=32 c973=0
+[8643] ch  32 ' ' col=14 row=2 c974=32 c973=0
+[8643] ch  32 ' ' col=15 row=2 c974=32 c973=0
+[8643] ch  32 ' ' col=16 row=2 c974=32 c973=0
+[8643] ch  32 ' ' col=17 row=2 c974=32 c973=0
+[8643] ch  32 ' ' col=18 row=2 c974=32 c973=0
+[8643] ch  32 ' ' col=19 row=2 c974=32 c973=0
+[8643] ch  32 ' ' col=20 row=2 c974=32 c973=0
+[8643] ch  32 ' ' col=21 row=2 c974=32 c973=0
+[8643] ch  32 ' ' col=22 row=2 c974=32 c973=0
+[8643] ch  32 ' ' col=23 row=2 c974=32 c973=0
+[8643] ch  32 ' ' col=24 row=2 c974=32 c973=0
+[8643] ch  32 ' ' col=25 row=2 c974=32 c973=0
+[8643] ch  32 ' ' col=26 row=2 c974=32 c973=0
+[8643] ch  32 ' ' col=27 row=2 c974=32 c973=0
+[8643] ch  32 ' ' col=28 row=2 c974=32 c973=0
+[8643] ch  32 ' ' col=29 row=2 c974=32 c973=0
+[8644] ch  32 ' ' col=30 row=2 c974=32 c973=0
+[8644] ch  32 ' ' col=31 row=2 c974=32 c973=0
+[8644] ch  32 ' ' col=32 row=2 c974=32 c973=0
+[8644] ch  32 ' ' col=33 row=2 c974=32 c973=0
+[8644] ch  32 ' ' col=34 row=2 c974=32 c973=0
+[8644] ch  32 ' ' col=35 row=2 c974=32 c973=0
+[8644] ch  32 ' ' col=36 row=2 c974=32 c973=0
+[8644] ch  32 ' ' col=37 row=2 c974=32 c973=0
+[8644] ch  32 ' ' col=38 row=2 c974=32 c973=0
+[8644] ch  32 ' ' col=39 row=2 c974=32 c973=0
+[8644] ch  32 ' ' col=0 row=3 c974=32 c973=0
+[8644] ch  32 ' ' col=1 row=3 c974=32 c973=0
+[8645] ch  32 ' ' col=2 row=3 c974=32 c973=0
+[8645] ch  32 ' ' col=3 row=3 c974=32 c973=0
+[8645] ch  32 ' ' col=4 row=3 c974=32 c973=0
+[8645] ch  32 ' ' col=5 row=3 c974=32 c973=0
+[8645] ch  32 ' ' col=6 row=3 c974=32 c973=0
+[8645] ch  32 ' ' col=7 row=3 c974=32 c973=0
+[8645] ch  32 ' ' col=8 row=3 c974=32 c973=0
+[8645] ch  32 ' ' col=9 row=3 c974=32 c973=0
+[8645] ch  32 ' ' col=10 row=3 c974=32 c973=0
+[8645] ch  32 ' ' col=11 row=3 c974=32 c973=0
+[8645] ch  32 ' ' col=12 row=3 c974=32 c973=0
+[8645] ch  32 ' ' col=13 row=3 c974=32 c973=0
+[8645] ch  32 ' ' col=14 row=3 c974=32 c973=0
+[8645] ch  32 ' ' col=15 row=3 c974=32 c973=0
+[8645] ch  32 ' ' col=16 row=3 c974=32 c973=0
+[8645] ch  32 ' ' col=17 row=3 c974=32 c973=0
+[8645] ch  32 ' ' col=18 row=3 c974=32 c973=0
+[8646] ch  32 ' ' col=19 row=3 c974=32 c973=0
+[8646] ch  32 ' ' col=20 row=3 c974=32 c973=0
+[8646] ch  32 ' ' col=21 row=3 c974=32 c973=0
+[8646] ch  32 ' ' col=22 row=3 c974=32 c973=0
+[8646] ch  32 ' ' col=23 row=3 c974=32 c973=0
+[8646] ch  32 ' ' col=24 row=3 c974=32 c973=0
+[8646] ch  32 ' ' col=25 row=3 c974=32 c973=0
+[8646] ch  32 ' ' col=26 row=3 c974=32 c973=0
+[8646] ch  32 ' ' col=27 row=3 c974=32 c973=0
+[8646] ch  32 ' ' col=28 row=3 c974=32 c973=0
+[8646] ch  32 ' ' col=29 row=3 c974=32 c973=0
+[8646] ch  32 ' ' col=30 row=3 c974=32 c973=0
+[8646] ch  32 ' ' col=31 row=3 c974=32 c973=0
+[8646] ch  32 ' ' col=32 row=3 c974=32 c973=0
+[8646] ch  32 ' ' col=33 row=3 c974=32 c973=0
+[8646] ch  32 ' ' col=34 row=3 c974=32 c973=0
+[8646] ch  32 ' ' col=35 row=3 c974=32 c973=0
+[8647] ch  32 ' ' col=36 row=3 c974=32 c973=0
+[8647] ch  32 ' ' col=37 row=3 c974=32 c973=0
+[8647] ch  32 ' ' col=38 row=3 c974=32 c973=0
+[8647] ch  32 ' ' col=39 row=3 c974=32 c973=0
+[8647] ch  32 ' ' col=0 row=4 c974=32 c973=0
+[8647] ch  32 ' ' col=1 row=4 c974=32 c973=0
+[8647] ch  32 ' ' col=2 row=4 c974=32 c973=0
+[8647] ch  32 ' ' col=3 row=4 c974=32 c973=0
+[8647] ch  32 ' ' col=4 row=4 c974=32 c973=0
+[8647] ch  32 ' ' col=5 row=4 c974=32 c973=0
+[8647] ch  32 ' ' col=6 row=4 c974=32 c973=0
+[8647] ch  32 ' ' col=7 row=4 c974=32 c973=0
+[8647] ch  32 ' ' col=8 row=4 c974=32 c973=0
+[8648] ch  32 ' ' col=9 row=4 c974=32 c973=0
+[8648] ch  32 ' ' col=10 row=4 c974=32 c973=0
+[8648] ch  32 ' ' col=11 row=4 c974=32 c973=0
+[8648] ch  32 ' ' col=12 row=4 c974=32 c973=0
+[8648] ch  32 ' ' col=13 row=4 c974=32 c973=0
+[8648] ch  32 ' ' col=14 row=4 c974=32 c973=0
+[8648] ch  32 ' ' col=15 row=4 c974=32 c973=0
+[8648] ch  32 ' ' col=16 row=4 c974=32 c973=0
+[8648] ch  32 ' ' col=17 row=4 c974=32 c973=0
+[8648] ch  32 ' ' col=18 row=4 c974=32 c973=0
+[8648] ch  32 ' ' col=19 row=4 c974=32 c973=0
+[8648] ch  32 ' ' col=20 row=4 c974=32 c973=0
+[8648] ch  32 ' ' col=21 row=4 c974=32 c973=0
+[8648] ch  32 ' ' col=22 row=4 c974=32 c973=0
+[8648] ch  32 ' ' col=23 row=4 c974=32 c973=0
+[8648] ch  32 ' ' col=24 row=4 c974=32 c973=0
+[8648] ch  32 ' ' col=25 row=4 c974=32 c973=0
+[8649] ch  32 ' ' col=26 row=4 c974=32 c973=0
+[8649] ch  32 ' ' col=27 row=4 c974=32 c973=0
+[8649] ch  32 ' ' col=28 row=4 c974=32 c973=0
+[8649] ch  32 ' ' col=29 row=4 c974=32 c973=0
+[8649] ch  32 ' ' col=30 row=4 c974=32 c973=0
+[8649] ch  32 ' ' col=31 row=4 c974=32 c973=0
+[8649] ch  32 ' ' col=32 row=4 c974=32 c973=0
+[8649] ch  32 ' ' col=33 row=4 c974=32 c973=0
+[8649] ch  32 ' ' col=34 row=4 c974=32 c973=0
+[8649] ch  32 ' ' col=35 row=4 c974=32 c973=0
+[8649] ch  32 ' ' col=36 row=4 c974=32 c973=0
+[8649] ch  32 ' ' col=37 row=4 c974=32 c973=0
+[8649] ch  32 ' ' col=38 row=4 c974=32 c973=0
+[8649] ch  32 ' ' col=39 row=4 c974=32 c973=0
+[8650] ch  32 ' ' col=0 row=5 c974=32 c973=0
+[8650] ch  32 ' ' col=1 row=5 c974=32 c973=0
+[8650] ch  32 ' ' col=2 row=5 c974=32 c973=0
+[8650] ch  32 ' ' col=3 row=5 c974=32 c973=0
+[8650] ch  32 ' ' col=4 row=5 c974=32 c973=0
+[8650] ch  32 ' ' col=5 row=5 c974=32 c973=0
+[8650] ch  32 ' ' col=6 row=5 c974=32 c973=0
+[8650] ch  32 ' ' col=7 row=5 c974=32 c973=0
+[8650] ch  32 ' ' col=8 row=5 c974=32 c973=0
+[8650] ch  32 ' ' col=9 row=5 c974=32 c973=0
+[8650] ch  32 ' ' col=10 row=5 c974=32 c973=0
+[8650] ch  32 ' ' col=11 row=5 c974=32 c973=0
+[8650] ch  32 ' ' col=12 row=5 c974=32 c973=0
+[8650] ch  32 ' ' col=13 row=5 c974=32 c973=0
+[8650] ch  32 ' ' col=14 row=5 c974=32 c973=0
+[8651] ch  32 ' ' col=15 row=5 c974=32 c973=0
+[8651] ch  32 ' ' col=16 row=5 c974=32 c973=0
+[8651] ch  32 ' ' col=17 row=5 c974=32 c973=0
+[8651] ch  32 ' ' col=18 row=5 c974=32 c973=0
+[8651] ch  32 ' ' col=19 row=5 c974=32 c973=0
+[8651] ch  32 ' ' col=20 row=5 c974=32 c973=0
+[8651] ch  32 ' ' col=21 row=5 c974=32 c973=0
+[8651] ch  32 ' ' col=22 row=5 c974=32 c973=0
+[8651] ch  32 ' ' col=23 row=5 c974=32 c973=0
+[8651] ch  32 ' ' col=24 row=5 c974=32 c973=0
+[8651] ch  32 ' ' col=25 row=5 c974=32 c973=0
+[8651] ch  32 ' ' col=26 row=5 c974=32 c973=0
+[8651] ch  32 ' ' col=27 row=5 c974=32 c973=0
+[8651] ch  32 ' ' col=28 row=5 c974=32 c973=0
+[8651] ch  32 ' ' col=29 row=5 c974=32 c973=0
+[8651] ch  32 ' ' col=30 row=5 c974=32 c973=0
+[8651] ch  32 ' ' col=31 row=5 c974=32 c973=0
+[8652] ch  32 ' ' col=32 row=5 c974=32 c973=0
+[8652] ch  32 ' ' col=33 row=5 c974=32 c973=0
+[8652] ch  32 ' ' col=34 row=5 c974=32 c973=0
+[8652] ch  32 ' ' col=35 row=5 c974=32 c973=0
+[8652] ch  32 ' ' col=36 row=5 c974=32 c973=0
+[8652] ch  32 ' ' col=37 row=5 c974=32 c973=0
+[8652] ch  32 ' ' col=38 row=5 c974=32 c973=0
+[8652] ch  32 ' ' col=39 row=5 c974=32 c973=0
+[8652] ch  32 ' ' col=0 row=6 c974=32 c973=0
+[8652] ch  32 ' ' col=1 row=6 c974=32 c973=0
+[8652] ch  32 ' ' col=2 row=6 c974=32 c973=0
+[8652] ch  32 ' ' col=3 row=6 c974=32 c973=0
+[8652] ch  32 ' ' col=4 row=6 c974=32 c973=0
+[8653] ch  32 ' ' col=5 row=6 c974=32 c973=0
+[8653] ch  32 ' ' col=6 row=6 c974=32 c973=0
+[8653] ch  32 ' ' col=7 row=6 c974=32 c973=0
+[8653] ch  32 ' ' col=8 row=6 c974=32 c973=0
+[8653] ch  32 ' ' col=9 row=6 c974=32 c973=0
+[8653] ch  32 ' ' col=10 row=6 c974=32 c973=0
+[8653] ch  32 ' ' col=11 row=6 c974=32 c973=0
+[8653] ch  32 ' ' col=12 row=6 c974=32 c973=0
+[8653] ch  32 ' ' col=13 row=6 c974=32 c973=0
+[8653] ch  32 ' ' col=14 row=6 c974=32 c973=0
+[8653] ch  32 ' ' col=15 row=6 c974=32 c973=0
+[8653] ch  32 ' ' col=16 row=6 c974=32 c973=0
+[8653] ch  32 ' ' col=17 row=6 c974=32 c973=0
+[8653] ch  32 ' ' col=18 row=6 c974=32 c973=0
+[8653] ch  32 ' ' col=19 row=6 c974=32 c973=0
+[8653] ch  32 ' ' col=20 row=6 c974=32 c973=0
+[8653] ch  32 ' ' col=21 row=6 c974=32 c973=0
+[8654] ch  32 ' ' col=22 row=6 c974=32 c973=0
+[8654] ch  32 ' ' col=23 row=6 c974=32 c973=0
+[8654] ch  32 ' ' col=24 row=6 c974=32 c973=0
+[8654] ch  32 ' ' col=25 row=6 c974=32 c973=0
+[8654] ch  32 ' ' col=26 row=6 c974=32 c973=0
+[8654] ch  32 ' ' col=27 row=6 c974=32 c973=0
+[8654] ch  32 ' ' col=28 row=6 c974=32 c973=0
+[8654] ch  32 ' ' col=29 row=6 c974=32 c973=0
+[8654] ch  32 ' ' col=30 row=6 c974=32 c973=0
+[8654] ch  32 ' ' col=31 row=6 c974=32 c973=0
+[8654] ch  32 ' ' col=32 row=6 c974=32 c973=0
+[8654] ch  32 ' ' col=33 row=6 c974=32 c973=0
+[8654] ch  32 ' ' col=34 row=6 c974=32 c973=0
+[8654] ch  32 ' ' col=35 row=6 c974=32 c973=0
+[8654] ch  32 ' ' col=36 row=6 c974=32 c973=0
+[8654] ch  32 ' ' col=37 row=6 c974=32 c973=0
+[8654] ch  32 ' ' col=38 row=6 c974=32 c973=0
+[8655] ch  32 ' ' col=39 row=6 c974=32 c973=0
+[8655] ch  32 ' ' col=0 row=7 c974=32 c973=0
+[8655] ch  32 ' ' col=1 row=7 c974=32 c973=0
+[8655] ch  32 ' ' col=2 row=7 c974=32 c973=0
+[8655] ch  32 ' ' col=3 row=7 c974=32 c973=0
+[8655] ch  32 ' ' col=4 row=7 c974=32 c973=0
+[8655] ch  32 ' ' col=5 row=7 c974=32 c973=0
+[8655] ch  32 ' ' col=6 row=7 c974=32 c973=0
+[8655] ch  32 ' ' col=7 row=7 c974=32 c973=0
+[8655] ch  32 ' ' col=8 row=7 c974=32 c973=0
+[8655] ch  32 ' ' col=9 row=7 c974=32 c973=0
+[8655] ch  32 ' ' col=10 row=7 c974=32 c973=0
+[8655] ch  32 ' ' col=11 row=7 c974=32 c973=0
+[8656] ch  32 ' ' col=12 row=7 c974=32 c973=0
+[8656] ch  32 ' ' col=13 row=7 c974=32 c973=0
+[8656] ch  32 ' ' col=14 row=7 c974=32 c973=0
+[8656] ch  32 ' ' col=15 row=7 c974=32 c973=0
+[8656] ch  32 ' ' col=16 row=7 c974=32 c973=0
+[8656] ch  32 ' ' col=17 row=7 c974=32 c973=0
+[8656] ch  32 ' ' col=18 row=7 c974=32 c973=0
+[8656] ch  32 ' ' col=19 row=7 c974=32 c973=0
+[8656] ch  32 ' ' col=20 row=7 c974=32 c973=0
+[8656] ch  32 ' ' col=21 row=7 c974=32 c973=0
+[8656] ch  32 ' ' col=22 row=7 c974=32 c973=0
+[8656] ch  32 ' ' col=23 row=7 c974=32 c973=0
+[8656] ch  32 ' ' col=24 row=7 c974=32 c973=0
+[8656] ch  32 ' ' col=25 row=7 c974=32 c973=0
+[8656] ch  32 ' ' col=26 row=7 c974=32 c973=0
+[8656] ch  32 ' ' col=27 row=7 c974=32 c973=0
+[8657] ch  32 ' ' col=28 row=7 c974=32 c973=0
+[8657] ch  32 ' ' col=29 row=7 c974=32 c973=0
+[8657] ch  32 ' ' col=30 row=7 c974=32 c973=0
+[8657] ch  32 ' ' col=31 row=7 c974=32 c973=0
+[8657] ch  32 ' ' col=32 row=7 c974=32 c973=0
+[8657] ch  32 ' ' col=33 row=7 c974=32 c973=0
+[8657] ch  32 ' ' col=34 row=7 c974=32 c973=0
+[8657] ch  32 ' ' col=35 row=7 c974=32 c973=0
+[8657] ch  32 ' ' col=36 row=7 c974=32 c973=0
+[8657] ch  32 ' ' col=37 row=7 c974=32 c973=0
+[8657] ch  32 ' ' col=38 row=7 c974=32 c973=0
+[8657] ch  32 ' ' col=39 row=7 c974=32 c973=0
+[8657] ch  32 ' ' col=0 row=8 c974=32 c973=0
+[8658] ch  32 ' ' col=1 row=8 c974=32 c973=0
+[8658] ch  32 ' ' col=2 row=8 c974=32 c973=0
+[8658] ch  32 ' ' col=3 row=8 c974=32 c973=0
+[8658] ch  32 ' ' col=4 row=8 c974=32 c973=0
+[8658] ch  32 ' ' col=5 row=8 c974=32 c973=0
+[8658] ch  32 ' ' col=6 row=8 c974=32 c973=0
+[8658] ch  32 ' ' col=7 row=8 c974=32 c973=0
+[8658] ch  32 ' ' col=8 row=8 c974=32 c973=0
+[8658] ch  32 ' ' col=9 row=8 c974=32 c973=0
+[8658] ch  32 ' ' col=10 row=8 c974=32 c973=0
+[8658] ch  32 ' ' col=11 row=8 c974=32 c973=0
+[8658] ch  32 ' ' col=12 row=8 c974=32 c973=0
+[8658] ch  32 ' ' col=13 row=8 c974=32 c973=0
+[8658] ch  32 ' ' col=14 row=8 c974=32 c973=0
+[8658] ch  32 ' ' col=15 row=8 c974=32 c973=0
+[8658] ch  32 ' ' col=16 row=8 c974=32 c973=0
+[8658] ch  32 ' ' col=17 row=8 c974=32 c973=0
+[8659] ch  32 ' ' col=18 row=8 c974=32 c973=0
+[8659] ch  32 ' ' col=19 row=8 c974=32 c973=0
+[8659] ch  32 ' ' col=20 row=8 c974=32 c973=0
+[8659] ch  32 ' ' col=21 row=8 c974=32 c973=0
+[8659] ch  32 ' ' col=22 row=8 c974=32 c973=0
+[8659] ch  32 ' ' col=23 row=8 c974=32 c973=0
+[8659] ch  32 ' ' col=24 row=8 c974=32 c973=0
+[8659] ch  32 ' ' col=25 row=8 c974=32 c973=0
+[8659] ch  32 ' ' col=26 row=8 c974=32 c973=0
+[8659] ch  32 ' ' col=27 row=8 c974=32 c973=0
+[8659] ch  32 ' ' col=28 row=8 c974=32 c973=0
+[8659] ch  32 ' ' col=29 row=8 c974=32 c973=0
+[8659] ch  32 ' ' col=30 row=8 c974=32 c973=0
+[8659] ch  32 ' ' col=31 row=8 c974=32 c973=0
+[8659] ch  32 ' ' col=32 row=8 c974=32 c973=0
+[8659] ch  32 ' ' col=33 row=8 c974=32 c973=0
+[8659] ch  32 ' ' col=34 row=8 c974=32 c973=0
+[8660] ch  32 ' ' col=35 row=8 c974=32 c973=0
+[8660] ch  32 ' ' col=36 row=8 c974=32 c973=0
+[8660] ch  32 ' ' col=37 row=8 c974=32 c973=0
+[8660] ch  32 ' ' col=38 row=8 c974=32 c973=0
+[8660] ch  32 ' ' col=39 row=8 c974=32 c973=0
+[8660] ch  32 ' ' col=0 row=9 c974=32 c973=0
+[8660] ch  32 ' ' col=1 row=9 c974=32 c973=0
+[8660] ch  32 ' ' col=2 row=9 c974=32 c973=0
+[8660] ch  32 ' ' col=3 row=9 c974=32 c973=0
+[8660] ch  32 ' ' col=4 row=9 c974=32 c973=0
+[8660] ch  32 ' ' col=5 row=9 c974=32 c973=0
+[8660] ch  32 ' ' col=6 row=9 c974=32 c973=0
+[8660] ch  32 ' ' col=7 row=9 c974=32 c973=0
+[8661] ch  32 ' ' col=8 row=9 c974=32 c973=0
+[8661] ch  32 ' ' col=9 row=9 c974=32 c973=0
+[8661] ch  32 ' ' col=10 row=9 c974=32 c973=0
+[8661] ch  32 ' ' col=11 row=9 c974=32 c973=0
+[8661] ch  32 ' ' col=12 row=9 c974=32 c973=0
+[8661] ch  32 ' ' col=13 row=9 c974=32 c973=0
+[8661] ch  32 ' ' col=14 row=9 c974=32 c973=0
+[8661] ch  32 ' ' col=15 row=9 c974=32 c973=0
+[8661] ch  32 ' ' col=16 row=9 c974=32 c973=0
+[8661] ch  32 ' ' col=17 row=9 c974=32 c973=0
+[8661] ch  32 ' ' col=18 row=9 c974=32 c973=0
+[8661] ch  32 ' ' col=19 row=9 c974=32 c973=0
+[8661] ch  32 ' ' col=20 row=9 c974=32 c973=0
+[8661] ch  32 ' ' col=21 row=9 c974=32 c973=0
+[8661] ch  32 ' ' col=22 row=9 c974=32 c973=0
+[8661] ch  32 ' ' col=23 row=9 c974=32 c973=0
+[8661] ch  32 ' ' col=24 row=9 c974=32 c973=0
+[8662] ch  32 ' ' col=25 row=9 c974=32 c973=0
+[8662] ch  32 ' ' col=26 row=9 c974=32 c973=0
+[8662] ch  32 ' ' col=27 row=9 c974=32 c973=0
+[8662] ch  32 ' ' col=28 row=9 c974=32 c973=0
+[8662] ch  32 ' ' col=29 row=9 c974=32 c973=0
+[8662] ch  32 ' ' col=30 row=9 c974=32 c973=0
+[8662] ch  32 ' ' col=31 row=9 c974=32 c973=0
+[8662] ch  32 ' ' col=32 row=9 c974=32 c973=0
+[8662] ch  32 ' ' col=33 row=9 c974=32 c973=0
+[8662] ch  32 ' ' col=34 row=9 c974=32 c973=0
+[8662] ch  32 ' ' col=35 row=9 c974=32 c973=0
+[8662] ch  32 ' ' col=36 row=9 c974=32 c973=0
+[8662] ch  32 ' ' col=37 row=9 c974=32 c973=0
+[8662] ch  32 ' ' col=38 row=9 c974=32 c973=0
+[8662] ch  32 ' ' col=39 row=9 c974=32 c973=0
+[8663] ch  32 ' ' col=0 row=10 c974=32 c973=0
+[8663] ch  32 ' ' col=1 row=10 c974=32 c973=0
+[8663] ch  32 ' ' col=2 row=10 c974=32 c973=0
+[8663] ch  32 ' ' col=3 row=10 c974=32 c973=0
+[8663] ch  32 ' ' col=4 row=10 c974=32 c973=0
+[8663] ch  32 ' ' col=5 row=10 c974=32 c973=0
+[8663] ch  32 ' ' col=6 row=10 c974=32 c973=0
+[8663] ch  32 ' ' col=7 row=10 c974=32 c973=0
+[8663] ch  32 ' ' col=8 row=10 c974=32 c973=0
+[8663] ch  32 ' ' col=9 row=10 c974=32 c973=0
+[8663] ch  32 ' ' col=10 row=10 c974=32 c973=0
+[8663] ch  32 ' ' col=11 row=10 c974=32 c973=0
+[8663] ch  32 ' ' col=12 row=10 c974=32 c973=0
+[8663] ch  32 ' ' col=13 row=10 c974=32 c973=0
+[8664] ch  32 ' ' col=14 row=10 c974=32 c973=0
+[8664] ch  32 ' ' col=15 row=10 c974=32 c973=0
+[8664] ch  32 ' ' col=16 row=10 c974=32 c973=0
+[8664] ch  32 ' ' col=17 row=10 c974=32 c973=0
+[8664] ch  32 ' ' col=18 row=10 c974=32 c973=0
+[8664] ch  32 ' ' col=19 row=10 c974=32 c973=0
+[8664] ch  32 ' ' col=20 row=10 c974=32 c973=0
+[8664] ch  32 ' ' col=21 row=10 c974=32 c973=0
+[8664] ch  32 ' ' col=22 row=10 c974=32 c973=0
+[8664] ch  32 ' ' col=23 row=10 c974=32 c973=0
+[8664] ch  32 ' ' col=24 row=10 c974=32 c973=0
+[8664] ch  32 ' ' col=25 row=10 c974=32 c973=0
+[8664] ch  32 ' ' col=26 row=10 c974=32 c973=0
+[8664] ch  32 ' ' col=27 row=10 c974=32 c973=0
+[8664] ch  32 ' ' col=28 row=10 c974=32 c973=0
+[8664] ch  32 ' ' col=29 row=10 c974=32 c973=0
+[8664] ch  32 ' ' col=30 row=10 c974=32 c973=0
+[8665] ch  32 ' ' col=31 row=10 c974=32 c973=0
+[8665] ch  32 ' ' col=32 row=10 c974=32 c973=0
+[8665] ch  32 ' ' col=33 row=10 c974=32 c973=0
+[8665] ch  32 ' ' col=34 row=10 c974=32 c973=0
+[8665] ch  32 ' ' col=35 row=10 c974=32 c973=0
+[8665] ch  32 ' ' col=36 row=10 c974=32 c973=0
+[8665] ch  32 ' ' col=37 row=10 c974=32 c973=0
+[8665] ch  32 ' ' col=38 row=10 c974=32 c973=0
+[8665] ch  32 ' ' col=39 row=10 c974=32 c973=0
+[8665] ch  32 ' ' col=0 row=11 c974=32 c973=0
+[8665] ch  32 ' ' col=1 row=11 c974=32 c973=0
+[8665] ch  32 ' ' col=2 row=11 c974=32 c973=0
+[8665] ch  32 ' ' col=3 row=11 c974=32 c973=0
+[8666] ch  32 ' ' col=4 row=11 c974=32 c973=0
+[8666] ch  32 ' ' col=5 row=11 c974=32 c973=0
+[8666] ch  32 ' ' col=6 row=11 c974=32 c973=0
+[8666] ch  32 ' ' col=7 row=11 c974=32 c973=0
+[8666] ch  32 ' ' col=8 row=11 c974=32 c973=0
+[8666] ch  32 ' ' col=9 row=11 c974=32 c973=0
+[8666] ch  32 ' ' col=10 row=11 c974=32 c973=0
+[8666] ch  32 ' ' col=11 row=11 c974=32 c973=0
+[8666] ch  32 ' ' col=12 row=11 c974=32 c973=0
+[8666] ch  32 ' ' col=13 row=11 c974=32 c973=0
+[8666] ch  32 ' ' col=14 row=11 c974=32 c973=0
+[8666] ch  32 ' ' col=15 row=11 c974=32 c973=0
+[8666] ch  32 ' ' col=16 row=11 c974=32 c973=0
+[8666] ch  32 ' ' col=17 row=11 c974=32 c973=0
+[8666] ch  32 ' ' col=18 row=11 c974=32 c973=0
+[8666] ch  32 ' ' col=19 row=11 c974=32 c973=0
+[8666] ch  32 ' ' col=20 row=11 c974=32 c973=0
+[8667] ch  32 ' ' col=21 row=11 c974=32 c973=0
+[8667] ch  32 ' ' col=22 row=11 c974=32 c973=0
+[8667] ch  32 ' ' col=23 row=11 c974=32 c973=0
+[8667] ch  32 ' ' col=24 row=11 c974=32 c973=0
+[8667] ch  32 ' ' col=25 row=11 c974=32 c973=0
+[8667] ch  32 ' ' col=26 row=11 c974=32 c973=0
+[8667] ch  32 ' ' col=27 row=11 c974=32 c973=0
+[8667] ch  32 ' ' col=28 row=11 c974=32 c973=0
+[8667] ch  32 ' ' col=29 row=11 c974=32 c973=0
+[8667] ch  32 ' ' col=30 row=11 c974=32 c973=0
+[8667] ch  32 ' ' col=31 row=11 c974=32 c973=0
+[8667] ch  32 ' ' col=32 row=11 c974=32 c973=0
+[8667] ch  32 ' ' col=33 row=11 c974=32 c973=0
+[8667] ch  32 ' ' col=34 row=11 c974=32 c973=0
+[8667] ch  32 ' ' col=35 row=11 c974=32 c973=0
+[8667] ch  32 ' ' col=36 row=11 c974=32 c973=0
+[8667] ch  32 ' ' col=37 row=11 c974=32 c973=0
+[8668] ch  32 ' ' col=38 row=11 c974=32 c973=0
+[8668] ch  32 ' ' col=39 row=11 c974=32 c973=0
+[8668] ch  32 ' ' col=0 row=12 c974=32 c973=0
+[8668] ch  32 ' ' col=1 row=12 c974=32 c973=0
+[8668] ch  32 ' ' col=2 row=12 c974=32 c973=0
+[8668] ch  32 ' ' col=3 row=12 c974=32 c973=0
+[8668] ch  32 ' ' col=4 row=12 c974=32 c973=0
+[8668] ch  32 ' ' col=5 row=12 c974=32 c973=0
+[8668] ch  32 ' ' col=6 row=12 c974=32 c973=0
+[8668] ch  32 ' ' col=7 row=12 c974=32 c973=0
+[8668] ch  32 ' ' col=8 row=12 c974=32 c973=0
+[8668] ch  32 ' ' col=9 row=12 c974=32 c973=0
+[8669] ch  32 ' ' col=10 row=12 c974=32 c973=0
+[8669] ch  32 ' ' col=11 row=12 c974=32 c973=0
+[8669] ch  32 ' ' col=12 row=12 c974=32 c973=0
+[8669] ch  32 ' ' col=13 row=12 c974=32 c973=0
+[8669] ch  32 ' ' col=14 row=12 c974=32 c973=0
+[8669] ch  32 ' ' col=15 row=12 c974=32 c973=0
+[8669] ch  32 ' ' col=16 row=12 c974=32 c973=0
+[8669] ch  32 ' ' col=17 row=12 c974=32 c973=0
+[8669] ch  32 ' ' col=18 row=12 c974=32 c973=0
+[8669] ch  32 ' ' col=19 row=12 c974=32 c973=0
+[8669] ch  32 ' ' col=20 row=12 c974=32 c973=0
+[8669] ch  32 ' ' col=21 row=12 c974=32 c973=0
+[8669] ch  32 ' ' col=22 row=12 c974=32 c973=0
+[8669] ch  32 ' ' col=23 row=12 c974=32 c973=0
+[8669] ch  32 ' ' col=24 row=12 c974=32 c973=0
+[8669] ch  32 ' ' col=25 row=12 c974=32 c973=0
+[8669] ch  32 ' ' col=26 row=12 c974=32 c973=0
+[8670] ch  32 ' ' col=27 row=12 c974=32 c973=0
+[8670] ch  32 ' ' col=28 row=12 c974=32 c973=0
+[8670] ch  32 ' ' col=29 row=12 c974=32 c973=0
+[8670] ch  32 ' ' col=30 row=12 c974=32 c973=0
+[8670] ch  32 ' ' col=31 row=12 c974=32 c973=0
+[8670] ch  32 ' ' col=32 row=12 c974=32 c973=0
+[8670] ch  32 ' ' col=33 row=12 c974=32 c973=0
+[8670] ch  32 ' ' col=34 row=12 c974=32 c973=0
+[8670] ch  32 ' ' col=35 row=12 c974=32 c973=0
+[8670] ch  32 ' ' col=36 row=12 c974=32 c973=0
+[8670] ch  32 ' ' col=37 row=12 c974=32 c973=0
+[8670] ch  32 ' ' col=38 row=12 c974=32 c973=0
+[8670] ch  32 ' ' col=39 row=12 c974=32 c973=0
+[8671] ch  32 ' ' col=0 row=13 c974=32 c973=0
+[8671] ch  32 ' ' col=1 row=13 c974=32 c973=0
+[8671] ch  32 ' ' col=2 row=13 c974=32 c973=0
+[8671] ch  32 ' ' col=3 row=13 c974=32 c973=0
+[8671] ch  32 ' ' col=4 row=13 c974=32 c973=0
+[8671] ch  32 ' ' col=5 row=13 c974=32 c973=0
+[8671] ch  32 ' ' col=6 row=13 c974=32 c973=0
+[8671] ch  32 ' ' col=7 row=13 c974=32 c973=0
+[8671] ch  32 ' ' col=8 row=13 c974=32 c973=0
+[8671] ch  32 ' ' col=9 row=13 c974=32 c973=0
+[8671] ch  32 ' ' col=10 row=13 c974=32 c973=0
+[8671] ch  32 ' ' col=11 row=13 c974=32 c973=0
+[8671] ch  32 ' ' col=12 row=13 c974=32 c973=0
+[8671] ch  32 ' ' col=13 row=13 c974=32 c973=0
+[8671] ch  32 ' ' col=14 row=13 c974=32 c973=0
+[8671] ch  32 ' ' col=15 row=13 c974=32 c973=0
+[8671] ch  32 ' ' col=16 row=13 c974=32 c973=0
+[8672] ch  32 ' ' col=17 row=13 c974=32 c973=0
+[8672] ch  32 ' ' col=18 row=13 c974=32 c973=0
+[8672] ch  32 ' ' col=19 row=13 c974=32 c973=0
+[8672] ch  32 ' ' col=20 row=13 c974=32 c973=0
+[8672] ch  32 ' ' col=21 row=13 c974=32 c973=0
+[8672] ch  32 ' ' col=22 row=13 c974=32 c973=0
+[8672] ch  32 ' ' col=23 row=13 c974=32 c973=0
+[8672] ch  32 ' ' col=24 row=13 c974=32 c973=0
+[8672] ch  32 ' ' col=25 row=13 c974=32 c973=0
+[8672] ch  32 ' ' col=26 row=13 c974=32 c973=0
+[8672] ch  32 ' ' col=27 row=13 c974=32 c973=0
+[8672] ch  32 ' ' col=28 row=13 c974=32 c973=0
+[8672] ch  32 ' ' col=29 row=13 c974=32 c973=0
+[8672] ch  32 ' ' col=30 row=13 c974=32 c973=0
+[8672] ch  32 ' ' col=31 row=13 c974=32 c973=0
+[8672] ch  32 ' ' col=32 row=13 c974=32 c973=0
+[8672] ch  32 ' ' col=33 row=13 c974=32 c973=0
+[8673] ch  32 ' ' col=34 row=13 c974=32 c973=0
+[8673] ch  32 ' ' col=35 row=13 c974=32 c973=0
+[8673] ch  32 ' ' col=36 row=13 c974=32 c973=0
+[8673] ch  32 ' ' col=37 row=13 c974=32 c973=0
+[8673] ch  32 ' ' col=38 row=13 c974=32 c973=0
+[8673] ch  32 ' ' col=39 row=13 c974=32 c973=0
+[8673] ch  32 ' ' col=0 row=14 c974=32 c973=0
+[8673] ch  32 ' ' col=1 row=14 c974=32 c973=0
+[8673] ch  32 ' ' col=2 row=14 c974=32 c973=0
+[8673] ch  32 ' ' col=3 row=14 c974=32 c973=0
+[8673] ch  32 ' ' col=4 row=14 c974=32 c973=0
+[8673] ch  32 ' ' col=5 row=14 c974=32 c973=0
+[8673] ch  32 ' ' col=6 row=14 c974=32 c973=0
+[8674] ch  32 ' ' col=7 row=14 c974=32 c973=0
+[8674] ch  32 ' ' col=8 row=14 c974=32 c973=0
+[8674] ch  32 ' ' col=9 row=14 c974=32 c973=0
+[8674] ch  32 ' ' col=10 row=14 c974=32 c973=0
+[8674] ch  32 ' ' col=11 row=14 c974=32 c973=0
+[8674] ch  32 ' ' col=12 row=14 c974=32 c973=0
+[8674] ch  32 ' ' col=13 row=14 c974=32 c973=0
+[8674] ch  32 ' ' col=14 row=14 c974=32 c973=0
+[8674] ch  32 ' ' col=15 row=14 c974=32 c973=0
+[8674] ch  32 ' ' col=16 row=14 c974=32 c973=0
+[8674] ch  32 ' ' col=17 row=14 c974=32 c973=0
+[8674] ch  32 ' ' col=18 row=14 c974=32 c973=0
+[8674] ch  32 ' ' col=19 row=14 c974=32 c973=0
+[8674] ch  32 ' ' col=20 row=14 c974=32 c973=0
+[8674] ch  32 ' ' col=21 row=14 c974=32 c973=0
+[8674] ch  32 ' ' col=22 row=14 c974=32 c973=0
+[8674] ch  32 ' ' col=23 row=14 c974=32 c973=0
+[8675] ch  32 ' ' col=24 row=14 c974=32 c973=0
+[8675] ch  32 ' ' col=25 row=14 c974=32 c973=0
+[8675] ch  32 ' ' col=26 row=14 c974=32 c973=0
+[8675] ch  32 ' ' col=27 row=14 c974=32 c973=0
+[8675] ch  32 ' ' col=28 row=14 c974=32 c973=0
+[8675] ch  32 ' ' col=29 row=14 c974=32 c973=0
+[8675] ch  32 ' ' col=30 row=14 c974=32 c973=0
+[8675] ch  32 ' ' col=31 row=14 c974=32 c973=0
+[8675] ch  32 ' ' col=32 row=14 c974=32 c973=0
+[8675] ch  32 ' ' col=33 row=14 c974=32 c973=0
+[8675] ch  32 ' ' col=34 row=14 c974=32 c973=0
+[8675] ch  32 ' ' col=35 row=14 c974=32 c973=0
+[8675] ch  32 ' ' col=36 row=14 c974=32 c973=0
+[8675] ch  32 ' ' col=37 row=14 c974=32 c973=0
+[8675] ch  32 ' ' col=38 row=14 c974=32 c973=0
+[8675] ch  32 ' ' col=39 row=14 c974=32 c973=0
+[8676] ch  32 ' ' col=0 row=15 c974=32 c973=0
+[8676] ch  32 ' ' col=1 row=15 c974=32 c973=0
+[8676] ch  32 ' ' col=2 row=15 c974=32 c973=0
+[8676] ch  32 ' ' col=3 row=15 c974=32 c973=0
+[8676] ch  32 ' ' col=4 row=15 c974=32 c973=0
+[8676] ch  32 ' ' col=5 row=15 c974=32 c973=0
+[8676] ch  32 ' ' col=6 row=15 c974=32 c973=0
+[8676] ch  32 ' ' col=7 row=15 c974=32 c973=0
+[8676] ch  32 ' ' col=8 row=15 c974=32 c973=0
+[8676] ch  32 ' ' col=9 row=15 c974=32 c973=0
+[8676] ch  32 ' ' col=10 row=15 c974=32 c973=0
+[8676] ch  32 ' ' col=11 row=15 c974=32 c973=0
+[8676] ch  32 ' ' col=12 row=15 c974=32 c973=0
+[8677] ch  32 ' ' col=13 row=15 c974=32 c973=0
+[8677] ch  32 ' ' col=14 row=15 c974=32 c973=0
+[8677] ch  32 ' ' col=15 row=15 c974=32 c973=0
+[8677] ch  32 ' ' col=16 row=15 c974=32 c973=0
+[8677] ch  32 ' ' col=17 row=15 c974=32 c973=0
+[8677] ch  32 ' ' col=18 row=15 c974=32 c973=0
+[8677] ch  32 ' ' col=19 row=15 c974=32 c973=0
+[8677] ch  32 ' ' col=20 row=15 c974=32 c973=0
+[8677] ch  32 ' ' col=21 row=15 c974=32 c973=0
+[8677] ch  32 ' ' col=22 row=15 c974=32 c973=0
+[8677] ch  32 ' ' col=23 row=15 c974=32 c973=0
+[8677] ch  32 ' ' col=24 row=15 c974=32 c973=0
+[8677] ch  32 ' ' col=25 row=15 c974=32 c973=0
+[8677] ch  32 ' ' col=26 row=15 c974=32 c973=0
+[8677] ch  32 ' ' col=27 row=15 c974=32 c973=0
+[8677] ch  32 ' ' col=28 row=15 c974=32 c973=0
+[8677] ch  32 ' ' col=29 row=15 c974=32 c973=0
+[8678] ch  32 ' ' col=30 row=15 c974=32 c973=0
+[8678] ch  32 ' ' col=31 row=15 c974=32 c973=0
+[8678] ch  32 ' ' col=32 row=15 c974=32 c973=0
+[8678] ch  32 ' ' col=33 row=15 c974=32 c973=0
+[8678] ch  32 ' ' col=34 row=15 c974=32 c973=0
+[8678] ch  32 ' ' col=35 row=15 c974=32 c973=0
+[8678] ch  32 ' ' col=36 row=15 c974=32 c973=0
+[8678] ch  32 ' ' col=37 row=15 c974=32 c973=0
+[8678] ch  32 ' ' col=38 row=15 c974=32 c973=0
+[8678] ch  32 ' ' col=39 row=15 c974=32 c973=0
+[8679] ch  32 ' ' col=0 row=0 c974=32 c973=0
+[8680] ch  69 'E' col=15 row=1 c974=32 c973=0
+[8680] ch  78 'N' col=16 row=1 c974=32 c973=0
+[8680] ch  68 'D' col=17 row=1 c974=32 c973=0
+[8680] ch  32 ' ' col=18 row=1 c974=32 c973=0
+[8680] ch  71 'G' col=19 row=1 c974=32 c973=0
+[8680] ch  65 'A' col=20 row=1 c974=32 c973=0
+[8680] ch  77 'M' col=21 row=1 c974=32 c973=0
+[8680] ch  69 'E' col=22 row=1 c974=32 c973=0
+[8680] ch  32 ' ' col=0 row=4 c974=32 c973=0
+[8680] ch  32 ' ' col=1 row=4 c974=32 c973=0
+[8680] ch  32 ' ' col=2 row=4 c974=32 c973=0
+[8681] ch  32 ' ' col=3 row=4 c974=32 c973=0
+[8681] ch  32 ' ' col=4 row=4 c974=32 c973=0
+[8681] ch  32 ' ' col=5 row=4 c974=32 c973=0
+[8681] ch  49 '1' col=6 row=4 c974=32 c973=0
+[8681] ch  41 ')' col=7 row=4 c974=32 c973=0
+[8681] ch  32 ' ' col=8 row=4 c974=32 c973=0
+[8681] ch  83 'S' col=9 row=4 c974=32 c973=0
+[8681] ch  65 'A' col=10 row=4 c974=32 c973=0
+[8681] ch  86 'V' col=11 row=4 c974=32 c973=0
+[8681] ch  69 'E' col=12 row=4 c974=32 c973=0
+[8681] ch  32 ' ' col=13 row=4 c974=32 c973=0
+[8681] ch  71 'G' col=14 row=4 c974=32 c973=0
+[8681] ch  65 'A' col=15 row=4 c974=32 c973=0
+[8681] ch  77 'M' col=16 row=4 c974=32 c973=0
+[8681] ch  69 'E' col=17 row=4 c974=32 c973=0
+[8682] ch  32 ' ' col=0 row=5 c974=32 c973=0
+[8682] ch  32 ' ' col=1 row=5 c974=32 c973=0
+[8682] ch  32 ' ' col=2 row=5 c974=32 c973=0
+[8682] ch  32 ' ' col=3 row=5 c974=32 c973=0
+[8682] ch  32 ' ' col=4 row=5 c974=32 c973=0
+[8682] ch  32 ' ' col=5 row=5 c974=32 c973=0
+[8682] ch  50 '2' col=6 row=5 c974=32 c973=0
+[8682] ch  41 ')' col=7 row=5 c974=32 c973=0
+[8682] ch  32 ' ' col=8 row=5 c974=32 c973=0
+[8682] ch  67 'C' col=9 row=5 c974=32 c973=0
+[8682] ch  79 'O' col=10 row=5 c974=32 c973=0
+[8682] ch  78 'N' col=11 row=5 c974=32 c973=0
+[8682] ch  84 'T' col=12 row=5 c974=32 c973=0
+[8682] ch  73 'I' col=13 row=5 c974=32 c973=0
+[8682] ch  78 'N' col=14 row=5 c974=32 c973=0
+[8683] ch  85 'U' col=15 row=5 c974=32 c973=0
+[8683] ch  69 'E' col=16 row=5 c974=32 c973=0
+[8683] ch  32 ' ' col=17 row=5 c974=32 c973=0
+[8683] ch  80 'P' col=18 row=5 c974=32 c973=0
+[8683] ch  82 'R' col=19 row=5 c974=32 c973=0
+[8683] ch  69 'E' col=20 row=5 c974=32 c973=0
+[8683] ch  83 'S' col=21 row=5 c974=32 c973=0
+[8683] ch  69 'E' col=22 row=5 c974=32 c973=0
+[8683] ch  78 'N' col=23 row=5 c974=32 c973=0
+[8683] ch  84 'T' col=24 row=5 c974=32 c973=0
+[8683] ch  32 ' ' col=25 row=5 c974=32 c973=0
+[8683] ch  71 'G' col=26 row=5 c974=32 c973=0
+[8683] ch  65 'A' col=27 row=5 c974=32 c973=0
+[8683] ch  77 'M' col=28 row=5 c974=32 c973=0
+[8683] ch  69 'E' col=29 row=5 c974=32 c973=0
+[8684] ch  32 ' ' col=0 row=6 c974=32 c973=0
+[8684] ch  32 ' ' col=1 row=6 c974=32 c973=0
+[8684] ch  32 ' ' col=2 row=6 c974=32 c973=0
+[8684] ch  32 ' ' col=3 row=6 c974=32 c973=0
+[8684] ch  32 ' ' col=4 row=6 c974=32 c973=0
+[8684] ch  32 ' ' col=5 row=6 c974=32 c973=0
+[8684] ch  51 '3' col=6 row=6 c974=32 c973=0
+[8684] ch  41 ')' col=7 row=6 c974=32 c973=0
+[8684] ch  32 ' ' col=8 row=6 c974=32 c973=0
+[8684] ch  69 'E' col=9 row=6 c974=32 c973=0
+[8684] ch  78 'N' col=10 row=6 c974=32 c973=0
+[8684] ch  68 'D' col=11 row=6 c974=32 c973=0
+[8684] ch  32 ' ' col=12 row=6 c974=32 c973=0
+[8684] ch  71 'G' col=13 row=6 c974=32 c973=0
+[8684] ch  65 'A' col=14 row=6 c974=32 c973=0
+[8685] ch  77 'M' col=15 row=6 c974=32 c973=0
+[8685] ch  69 'E' col=16 row=6 c974=32 c973=0
+[8685] ch  69 'E' col=0 row=9 c974=32 c973=0
+[8685] ch  78 'N' col=1 row=9 c974=32 c973=0
+[8685] ch  84 'T' col=2 row=9 c974=32 c973=0
+[8685] ch  69 'E' col=3 row=9 c974=32 c973=0
+[8685] ch  82 'R' col=4 row=9 c974=32 c973=0
+[8685] ch  32 ' ' col=5 row=9 c974=32 c973=0
+[8685] ch  67 'C' col=6 row=9 c974=32 c973=0
+[8685] ch  72 'H' col=7 row=9 c974=32 c973=0
+[8685] ch  79 'O' col=8 row=9 c974=32 c973=0
+[8685] ch  73 'I' col=9 row=9 c974=32 c973=0
+[8685] ch  67 'C' col=10 row=9 c974=32 c973=0
+[8685] ch  69 'E' col=11 row=9 c974=32 c973=0
+[8685] ch  46 '.' col=12 row=9 c974=32 c973=0
+[8686] ch  32 ' ' col=13 row=9 c974=32 c973=0
+[8686] ch  32 ' ' col=14 row=9 c974=32 c973=0
+[9978] dump end_menu 38201=0 38202=1 38165=3 38164=0 38210=0 38393=0 38391=0 38392=1 38209=1 38189=0 c974=32 c973=0
+[9978] key '1'
+[9982] ch  32 ' ' col=15 row=9 c974=32 c973=0
+[9990] w 38391=77 pc=E781
+[9991] w 38392=1 pc=E781
+[10590] ch  71 'G' col=0 row=11 c974=32 c973=0
+[10590] ch  65 'A' col=1 row=11 c974=32 c973=0
+[10590] ch  77 'M' col=2 row=11 c974=32 c973=0
+[10590] ch  69 'E' col=3 row=11 c974=32 c973=0
+[10590] ch  32 ' ' col=4 row=11 c974=32 c973=0
+[10591] ch  83 'S' col=5 row=11 c974=32 c973=0
+[10591] ch  65 'A' col=6 row=11 c974=32 c973=0
+[10591] ch  86 'V' col=7 row=11 c974=32 c973=0
+[10591] ch  69 'E' col=8 row=11 c974=32 c973=0
+[10591] ch  68 'D' col=9 row=11 c974=32 c973=0
+[10591] ch  46 '.' col=10 row=11 c974=32 c973=0
+[10704] ch  32 ' ' col=0 row=0 c974=32 c973=0
+[10704] ch  32 ' ' col=1 row=0 c974=32 c973=0
+[10704] ch  32 ' ' col=2 row=0 c974=32 c973=0
+[10704] ch  32 ' ' col=3 row=0 c974=32 c973=0
+[10704] ch  32 ' ' col=4 row=0 c974=32 c973=0
+[10705] ch  32 ' ' col=5 row=0 c974=32 c973=0
+[10705] ch  32 ' ' col=6 row=0 c974=32 c973=0
+[10705] ch  32 ' ' col=7 row=0 c974=32 c973=0
+[10705] ch  32 ' ' col=8 row=0 c974=32 c973=0
+[10705] ch  32 ' ' col=9 row=0 c974=32 c973=0
+[10705] ch  32 ' ' col=10 row=0 c974=32 c973=0
+[10705] ch  32 ' ' col=11 row=0 c974=32 c973=0
+[10705] ch  32 ' ' col=12 row=0 c974=32 c973=0
+[10705] ch  32 ' ' col=13 row=0 c974=32 c973=0
+[10705] ch  32 ' ' col=14 row=0 c974=32 c973=0
+[10705] ch  32 ' ' col=15 row=0 c974=32 c973=0
+[10705] ch  32 ' ' col=16 row=0 c974=32 c973=0
+[10705] ch  32 ' ' col=17 row=0 c974=32 c973=0
+[10705] ch  32 ' ' col=18 row=0 c974=32 c973=0
+[10705] ch  32 ' ' col=19 row=0 c974=32 c973=0
+[10705] ch  32 ' ' col=20 row=0 c974=32 c973=0
+[10705] ch  32 ' ' col=21 row=0 c974=32 c973=0
+[10706] ch  32 ' ' col=22 row=0 c974=32 c973=0
+[10706] ch  32 ' ' col=23 row=0 c974=32 c973=0
+[10706] ch  32 ' ' col=24 row=0 c974=32 c973=0
+[10706] ch  32 ' ' col=25 row=0 c974=32 c973=0
+[10706] ch  32 ' ' col=26 row=0 c974=32 c973=0
+[10706] ch  32 ' ' col=27 row=0 c974=32 c973=0
+[10706] ch  32 ' ' col=28 row=0 c974=32 c973=0
+[10706] ch  32 ' ' col=29 row=0 c974=32 c973=0
+[10706] ch  32 ' ' col=30 row=0 c974=32 c973=0
+[10706] ch  32 ' ' col=31 row=0 c974=32 c973=0
+[10706] ch  32 ' ' col=32 row=0 c974=32 c973=0
+[10706] ch  32 ' ' col=33 row=0 c974=32 c973=0
+[10706] ch  32 ' ' col=34 row=0 c974=32 c973=0
+[10706] ch  32 ' ' col=35 row=0 c974=32 c973=0
+[10706] ch  32 ' ' col=36 row=0 c974=32 c973=0
+[10706] ch  32 ' ' col=37 row=0 c974=32 c973=0
+[10706] ch  32 ' ' col=38 row=0 c974=32 c973=0
+[10707] ch  32 ' ' col=39 row=0 c974=32 c973=0
+[10707] ch  32 ' ' col=0 row=1 c974=32 c973=0
+[10707] ch  32 ' ' col=1 row=1 c974=32 c973=0
+[10707] ch  32 ' ' col=2 row=1 c974=32 c973=0
+[10707] ch  32 ' ' col=3 row=1 c974=32 c973=0
+[10707] ch  32 ' ' col=4 row=1 c974=32 c973=0
+[10707] ch  32 ' ' col=5 row=1 c974=32 c973=0
+[10707] ch  32 ' ' col=6 row=1 c974=32 c973=0
+[10707] ch  32 ' ' col=7 row=1 c974=32 c973=0
+[10707] ch  32 ' ' col=8 row=1 c974=32 c973=0
+[10707] ch  32 ' ' col=9 row=1 c974=32 c973=0
+[10707] ch  32 ' ' col=10 row=1 c974=32 c973=0
+[10708] ch  32 ' ' col=11 row=1 c974=32 c973=0
+[10708] ch  32 ' ' col=12 row=1 c974=32 c973=0
+[10708] ch  32 ' ' col=13 row=1 c974=32 c973=0
+[10708] ch  32 ' ' col=14 row=1 c974=32 c973=0
+[10708] ch  32 ' ' col=15 row=1 c974=32 c973=0
+[10708] ch  32 ' ' col=16 row=1 c974=32 c973=0
+[10708] ch  32 ' ' col=17 row=1 c974=32 c973=0
+[10708] ch  32 ' ' col=18 row=1 c974=32 c973=0
+[10708] ch  32 ' ' col=19 row=1 c974=32 c973=0
+[10708] ch  32 ' ' col=20 row=1 c974=32 c973=0
+[10708] ch  32 ' ' col=21 row=1 c974=32 c973=0
+[10708] ch  32 ' ' col=22 row=1 c974=32 c973=0
+[10708] ch  32 ' ' col=23 row=1 c974=32 c973=0
+[10708] ch  32 ' ' col=24 row=1 c974=32 c973=0
+[10708] ch  32 ' ' col=25 row=1 c974=32 c973=0
+[10708] ch  32 ' ' col=26 row=1 c974=32 c973=0
+[10708] ch  32 ' ' col=27 row=1 c974=32 c973=0
+[10709] ch  32 ' ' col=28 row=1 c974=32 c973=0
+[10709] ch  32 ' ' col=29 row=1 c974=32 c973=0
+[10709] ch  32 ' ' col=30 row=1 c974=32 c973=0
+[10709] ch  32 ' ' col=31 row=1 c974=32 c973=0
+[10709] ch  32 ' ' col=32 row=1 c974=32 c973=0
+[10709] ch  32 ' ' col=33 row=1 c974=32 c973=0
+[10709] ch  32 ' ' col=34 row=1 c974=32 c973=0
+[10709] ch  32 ' ' col=35 row=1 c974=32 c973=0
+[10709] ch  32 ' ' col=36 row=1 c974=32 c973=0
+[10709] ch  32 ' ' col=37 row=1 c974=32 c973=0
+[10709] ch  32 ' ' col=38 row=1 c974=32 c973=0
+[10709] ch  32 ' ' col=39 row=1 c974=32 c973=0
+[10709] ch  32 ' ' col=0 row=2 c974=32 c973=0
+[10710] ch  32 ' ' col=1 row=2 c974=32 c973=0
+[10710] ch  32 ' ' col=2 row=2 c974=32 c973=0
+[10710] ch  32 ' ' col=3 row=2 c974=32 c973=0
+[10710] ch  32 ' ' col=4 row=2 c974=32 c973=0
+[10710] ch  32 ' ' col=5 row=2 c974=32 c973=0
+[10710] ch  32 ' ' col=6 row=2 c974=32 c973=0
+[10710] ch  32 ' ' col=7 row=2 c974=32 c973=0
+[10710] ch  32 ' ' col=8 row=2 c974=32 c973=0
+[10710] ch  32 ' ' col=9 row=2 c974=32 c973=0
+[10710] ch  32 ' ' col=10 row=2 c974=32 c973=0
+[10710] ch  32 ' ' col=11 row=2 c974=32 c973=0
+[10710] ch  32 ' ' col=12 row=2 c974=32 c973=0
+[10710] ch  32 ' ' col=13 row=2 c974=32 c973=0
+[10710] ch  32 ' ' col=14 row=2 c974=32 c973=0
+[10710] ch  32 ' ' col=15 row=2 c974=32 c973=0
+[10710] ch  32 ' ' col=16 row=2 c974=32 c973=0
+[10710] ch  32 ' ' col=17 row=2 c974=32 c973=0
+[10711] ch  32 ' ' col=18 row=2 c974=32 c973=0
+[10711] ch  32 ' ' col=19 row=2 c974=32 c973=0
+[10711] ch  32 ' ' col=20 row=2 c974=32 c973=0
+[10711] ch  32 ' ' col=21 row=2 c974=32 c973=0
+[10711] ch  32 ' ' col=22 row=2 c974=32 c973=0
+[10711] ch  32 ' ' col=23 row=2 c974=32 c973=0
+[10711] ch  32 ' ' col=24 row=2 c974=32 c973=0
+[10711] ch  32 ' ' col=25 row=2 c974=32 c973=0
+[10711] ch  32 ' ' col=26 row=2 c974=32 c973=0
+[10711] ch  32 ' ' col=27 row=2 c974=32 c973=0
+[10711] ch  32 ' ' col=28 row=2 c974=32 c973=0
+[10711] ch  32 ' ' col=29 row=2 c974=32 c973=0
+[10711] ch  32 ' ' col=30 row=2 c974=32 c973=0
+[10711] ch  32 ' ' col=31 row=2 c974=32 c973=0
+[10711] ch  32 ' ' col=32 row=2 c974=32 c973=0
+[10711] ch  32 ' ' col=33 row=2 c974=32 c973=0
+[10711] ch  32 ' ' col=34 row=2 c974=32 c973=0
+[10712] ch  32 ' ' col=35 row=2 c974=32 c973=0
+[10712] ch  32 ' ' col=36 row=2 c974=32 c973=0
+[10712] ch  32 ' ' col=37 row=2 c974=32 c973=0
+[10712] ch  32 ' ' col=38 row=2 c974=32 c973=0
+[10712] ch  32 ' ' col=39 row=2 c974=32 c973=0
+[10712] ch  32 ' ' col=0 row=3 c974=32 c973=0
+[10712] ch  32 ' ' col=1 row=3 c974=32 c973=0
+[10712] ch  32 ' ' col=2 row=3 c974=32 c973=0
+[10712] ch  32 ' ' col=3 row=3 c974=32 c973=0
+[10712] ch  32 ' ' col=4 row=3 c974=32 c973=0
+[10712] ch  32 ' ' col=5 row=3 c974=32 c973=0
+[10712] ch  32 ' ' col=6 row=3 c974=32 c973=0
+[10712] ch  32 ' ' col=7 row=3 c974=32 c973=0
+[10713] ch  32 ' ' col=8 row=3 c974=32 c973=0
+[10713] ch  32 ' ' col=9 row=3 c974=32 c973=0
+[10713] ch  32 ' ' col=10 row=3 c974=32 c973=0
+[10713] ch  32 ' ' col=11 row=3 c974=32 c973=0
+[10713] ch  32 ' ' col=12 row=3 c974=32 c973=0
+[10713] ch  32 ' ' col=13 row=3 c974=32 c973=0
+[10713] ch  32 ' ' col=14 row=3 c974=32 c973=0
+[10713] ch  32 ' ' col=15 row=3 c974=32 c973=0
+[10713] ch  32 ' ' col=16 row=3 c974=32 c973=0
+[10713] ch  32 ' ' col=17 row=3 c974=32 c973=0
+[10713] ch  32 ' ' col=18 row=3 c974=32 c973=0
+[10713] ch  32 ' ' col=19 row=3 c974=32 c973=0
+[10713] ch  32 ' ' col=20 row=3 c974=32 c973=0
+[10713] ch  32 ' ' col=21 row=3 c974=32 c973=0
+[10713] ch  32 ' ' col=22 row=3 c974=32 c973=0
+[10713] ch  32 ' ' col=23 row=3 c974=32 c973=0
+[10713] ch  32 ' ' col=24 row=3 c974=32 c973=0
+[10714] ch  32 ' ' col=25 row=3 c974=32 c973=0
+[10714] ch  32 ' ' col=26 row=3 c974=32 c973=0
+[10714] ch  32 ' ' col=27 row=3 c974=32 c973=0
+[10714] ch  32 ' ' col=28 row=3 c974=32 c973=0
+[10714] ch  32 ' ' col=29 row=3 c974=32 c973=0
+[10714] ch  32 ' ' col=30 row=3 c974=32 c973=0
+[10714] ch  32 ' ' col=31 row=3 c974=32 c973=0
+[10714] ch  32 ' ' col=32 row=3 c974=32 c973=0
+[10714] ch  32 ' ' col=33 row=3 c974=32 c973=0
+[10714] ch  32 ' ' col=34 row=3 c974=32 c973=0
+[10714] ch  32 ' ' col=35 row=3 c974=32 c973=0
+[10714] ch  32 ' ' col=36 row=3 c974=32 c973=0
+[10714] ch  32 ' ' col=37 row=3 c974=32 c973=0
+[10714] ch  32 ' ' col=38 row=3 c974=32 c973=0
+[10714] ch  32 ' ' col=39 row=3 c974=32 c973=0
+[10715] ch  32 ' ' col=0 row=4 c974=32 c973=0
+[10715] ch  32 ' ' col=1 row=4 c974=32 c973=0
+[10715] ch  32 ' ' col=2 row=4 c974=32 c973=0
+[10715] ch  32 ' ' col=3 row=4 c974=32 c973=0
+[10715] ch  32 ' ' col=4 row=4 c974=32 c973=0
+[10715] ch  32 ' ' col=5 row=4 c974=32 c973=0
+[10715] ch  32 ' ' col=6 row=4 c974=32 c973=0
+[10715] ch  32 ' ' col=7 row=4 c974=32 c973=0
+[10715] ch  32 ' ' col=8 row=4 c974=32 c973=0
+[10715] ch  32 ' ' col=9 row=4 c974=32 c973=0
+[10715] ch  32 ' ' col=10 row=4 c974=32 c973=0
+[10715] ch  32 ' ' col=11 row=4 c974=32 c973=0
+[10715] ch  32 ' ' col=12 row=4 c974=32 c973=0
+[10715] ch  32 ' ' col=13 row=4 c974=32 c973=0
+[10716] ch  32 ' ' col=14 row=4 c974=32 c973=0
+[10716] ch  32 ' ' col=15 row=4 c974=32 c973=0
+[10716] ch  32 ' ' col=16 row=4 c974=32 c973=0
+[10716] ch  32 ' ' col=17 row=4 c974=32 c973=0
+[10716] ch  32 ' ' col=18 row=4 c974=32 c973=0
+[10716] ch  32 ' ' col=19 row=4 c974=32 c973=0
+[10716] ch  32 ' ' col=20 row=4 c974=32 c973=0
+[10716] ch  32 ' ' col=21 row=4 c974=32 c973=0
+[10716] ch  32 ' ' col=22 row=4 c974=32 c973=0
+[10716] ch  32 ' ' col=23 row=4 c974=32 c973=0
+[10716] ch  32 ' ' col=24 row=4 c974=32 c973=0
+[10716] ch  32 ' ' col=25 row=4 c974=32 c973=0
+[10716] ch  32 ' ' col=26 row=4 c974=32 c973=0
+[10716] ch  32 ' ' col=27 row=4 c974=32 c973=0
+[10716] ch  32 ' ' col=28 row=4 c974=32 c973=0
+[10716] ch  32 ' ' col=29 row=4 c974=32 c973=0
+[10716] ch  32 ' ' col=30 row=4 c974=32 c973=0
+[10717] ch  32 ' ' col=31 row=4 c974=32 c973=0
+[10717] ch  32 ' ' col=32 row=4 c974=32 c973=0
+[10717] ch  32 ' ' col=33 row=4 c974=32 c973=0
+[10717] ch  32 ' ' col=34 row=4 c974=32 c973=0
+[10717] ch  32 ' ' col=35 row=4 c974=32 c973=0
+[10717] ch  32 ' ' col=36 row=4 c974=32 c973=0
+[10717] ch  32 ' ' col=37 row=4 c974=32 c973=0
+[10717] ch  32 ' ' col=38 row=4 c974=32 c973=0
+[10717] ch  32 ' ' col=39 row=4 c974=32 c973=0
+[10717] ch  32 ' ' col=0 row=5 c974=32 c973=0
+[10717] ch  32 ' ' col=1 row=5 c974=32 c973=0
+[10717] ch  32 ' ' col=2 row=5 c974=32 c973=0
+[10717] ch  32 ' ' col=3 row=5 c974=32 c973=0
+[10718] ch  32 ' ' col=4 row=5 c974=32 c973=0
+[10718] ch  32 ' ' col=5 row=5 c974=32 c973=0
+[10718] ch  32 ' ' col=6 row=5 c974=32 c973=0
+[10718] ch  32 ' ' col=7 row=5 c974=32 c973=0
+[10718] ch  32 ' ' col=8 row=5 c974=32 c973=0
+[10718] ch  32 ' ' col=9 row=5 c974=32 c973=0
+[10718] ch  32 ' ' col=10 row=5 c974=32 c973=0
+[10718] ch  32 ' ' col=11 row=5 c974=32 c973=0
+[10718] ch  32 ' ' col=12 row=5 c974=32 c973=0
+[10718] ch  32 ' ' col=13 row=5 c974=32 c973=0
+[10718] ch  32 ' ' col=14 row=5 c974=32 c973=0
+[10718] ch  32 ' ' col=15 row=5 c974=32 c973=0
+[10718] ch  32 ' ' col=16 row=5 c974=32 c973=0
+[10718] ch  32 ' ' col=17 row=5 c974=32 c973=0
+[10718] ch  32 ' ' col=18 row=5 c974=32 c973=0
+[10718] ch  32 ' ' col=19 row=5 c974=32 c973=0
+[10718] ch  32 ' ' col=20 row=5 c974=32 c973=0
+[10719] ch  32 ' ' col=21 row=5 c974=32 c973=0
+[10719] ch  32 ' ' col=22 row=5 c974=32 c973=0
+[10719] ch  32 ' ' col=23 row=5 c974=32 c973=0
+[10719] ch  32 ' ' col=24 row=5 c974=32 c973=0
+[10719] ch  32 ' ' col=25 row=5 c974=32 c973=0
+[10719] ch  32 ' ' col=26 row=5 c974=32 c973=0
+[10719] ch  32 ' ' col=27 row=5 c974=32 c973=0
+[10719] ch  32 ' ' col=28 row=5 c974=32 c973=0
+[10719] ch  32 ' ' col=29 row=5 c974=32 c973=0
+[10719] ch  32 ' ' col=30 row=5 c974=32 c973=0
+[10719] ch  32 ' ' col=31 row=5 c974=32 c973=0
+[10719] ch  32 ' ' col=32 row=5 c974=32 c973=0
+[10719] ch  32 ' ' col=33 row=5 c974=32 c973=0
+[10719] ch  32 ' ' col=34 row=5 c974=32 c973=0
+[10719] ch  32 ' ' col=35 row=5 c974=32 c973=0
+[10719] ch  32 ' ' col=36 row=5 c974=32 c973=0
+[10719] ch  32 ' ' col=37 row=5 c974=32 c973=0
+[10720] ch  32 ' ' col=38 row=5 c974=32 c973=0
+[10720] ch  32 ' ' col=39 row=5 c974=32 c973=0
+[10720] ch  32 ' ' col=0 row=6 c974=32 c973=0
+[10720] ch  32 ' ' col=1 row=6 c974=32 c973=0
+[10720] ch  32 ' ' col=2 row=6 c974=32 c973=0
+[10720] ch  32 ' ' col=3 row=6 c974=32 c973=0
+[10720] ch  32 ' ' col=4 row=6 c974=32 c973=0
+[10720] ch  32 ' ' col=5 row=6 c974=32 c973=0
+[10720] ch  32 ' ' col=6 row=6 c974=32 c973=0
+[10720] ch  32 ' ' col=7 row=6 c974=32 c973=0
+[10720] ch  32 ' ' col=8 row=6 c974=32 c973=0
+[10720] ch  32 ' ' col=9 row=6 c974=32 c973=0
+[10721] ch  32 ' ' col=10 row=6 c974=32 c973=0
+[10721] ch  32 ' ' col=11 row=6 c974=32 c973=0
+[10721] ch  32 ' ' col=12 row=6 c974=32 c973=0
+[10721] ch  32 ' ' col=13 row=6 c974=32 c973=0
+[10721] ch  32 ' ' col=14 row=6 c974=32 c973=0
+[10721] ch  32 ' ' col=15 row=6 c974=32 c973=0
+[10721] ch  32 ' ' col=16 row=6 c974=32 c973=0
+[10721] ch  32 ' ' col=17 row=6 c974=32 c973=0
+[10721] ch  32 ' ' col=18 row=6 c974=32 c973=0
+[10721] ch  32 ' ' col=19 row=6 c974=32 c973=0
+[10721] ch  32 ' ' col=20 row=6 c974=32 c973=0
+[10721] ch  32 ' ' col=21 row=6 c974=32 c973=0
+[10721] ch  32 ' ' col=22 row=6 c974=32 c973=0
+[10721] ch  32 ' ' col=23 row=6 c974=32 c973=0
+[10721] ch  32 ' ' col=24 row=6 c974=32 c973=0
+[10721] ch  32 ' ' col=25 row=6 c974=32 c973=0
+[10721] ch  32 ' ' col=26 row=6 c974=32 c973=0
+[10722] ch  32 ' ' col=27 row=6 c974=32 c973=0
+[10722] ch  32 ' ' col=28 row=6 c974=32 c973=0
+[10722] ch  32 ' ' col=29 row=6 c974=32 c973=0
+[10722] ch  32 ' ' col=30 row=6 c974=32 c973=0
+[10722] ch  32 ' ' col=31 row=6 c974=32 c973=0
+[10722] ch  32 ' ' col=32 row=6 c974=32 c973=0
+[10722] ch  32 ' ' col=33 row=6 c974=32 c973=0
+[10722] ch  32 ' ' col=34 row=6 c974=32 c973=0
+[10722] ch  32 ' ' col=35 row=6 c974=32 c973=0
+[10722] ch  32 ' ' col=36 row=6 c974=32 c973=0
+[10722] ch  32 ' ' col=37 row=6 c974=32 c973=0
+[10722] ch  32 ' ' col=38 row=6 c974=32 c973=0
+[10722] ch  32 ' ' col=39 row=6 c974=32 c973=0
+[10723] ch  32 ' ' col=0 row=7 c974=32 c973=0
+[10723] ch  32 ' ' col=1 row=7 c974=32 c973=0
+[10723] ch  32 ' ' col=2 row=7 c974=32 c973=0
+[10723] ch  32 ' ' col=3 row=7 c974=32 c973=0
+[10723] ch  32 ' ' col=4 row=7 c974=32 c973=0
+[10723] ch  32 ' ' col=5 row=7 c974=32 c973=0
+[10723] ch  32 ' ' col=6 row=7 c974=32 c973=0
+[10723] ch  32 ' ' col=7 row=7 c974=32 c973=0
+[10723] ch  32 ' ' col=8 row=7 c974=32 c973=0
+[10723] ch  32 ' ' col=9 row=7 c974=32 c973=0
+[10723] ch  32 ' ' col=10 row=7 c974=32 c973=0
+[10723] ch  32 ' ' col=11 row=7 c974=32 c973=0
+[10723] ch  32 ' ' col=12 row=7 c974=32 c973=0
+[10723] ch  32 ' ' col=13 row=7 c974=32 c973=0
+[10723] ch  32 ' ' col=14 row=7 c974=32 c973=0
+[10723] ch  32 ' ' col=15 row=7 c974=32 c973=0
+[10723] ch  32 ' ' col=16 row=7 c974=32 c973=0
+[10724] ch  32 ' ' col=17 row=7 c974=32 c973=0
+[10724] ch  32 ' ' col=18 row=7 c974=32 c973=0
+[10724] ch  32 ' ' col=19 row=7 c974=32 c973=0
+[10724] ch  32 ' ' col=20 row=7 c974=32 c973=0
+[10724] ch  32 ' ' col=21 row=7 c974=32 c973=0
+[10724] ch  32 ' ' col=22 row=7 c974=32 c973=0
+[10724] ch  32 ' ' col=23 row=7 c974=32 c973=0
+[10724] ch  32 ' ' col=24 row=7 c974=32 c973=0
+[10724] ch  32 ' ' col=25 row=7 c974=32 c973=0
+[10724] ch  32 ' ' col=26 row=7 c974=32 c973=0
+[10724] ch  32 ' ' col=27 row=7 c974=32 c973=0
+[10724] ch  32 ' ' col=28 row=7 c974=32 c973=0
+[10724] ch  32 ' ' col=29 row=7 c974=32 c973=0
+[10724] ch  32 ' ' col=30 row=7 c974=32 c973=0
+[10724] ch  32 ' ' col=31 row=7 c974=32 c973=0
+[10724] ch  32 ' ' col=32 row=7 c974=32 c973=0
+[10724] ch  32 ' ' col=33 row=7 c974=32 c973=0
+[10725] ch  32 ' ' col=34 row=7 c974=32 c973=0
+[10725] ch  32 ' ' col=35 row=7 c974=32 c973=0
+[10725] ch  32 ' ' col=36 row=7 c974=32 c973=0
+[10725] ch  32 ' ' col=37 row=7 c974=32 c973=0
+[10725] ch  32 ' ' col=38 row=7 c974=32 c973=0
+[10725] ch  32 ' ' col=39 row=7 c974=32 c973=0
+[10725] ch  32 ' ' col=0 row=8 c974=32 c973=0
+[10725] ch  32 ' ' col=1 row=8 c974=32 c973=0
+[10725] ch  32 ' ' col=2 row=8 c974=32 c973=0
+[10725] ch  32 ' ' col=3 row=8 c974=32 c973=0
+[10725] ch  32 ' ' col=4 row=8 c974=32 c973=0
+[10725] ch  32 ' ' col=5 row=8 c974=32 c973=0
+[10725] ch  32 ' ' col=6 row=8 c974=32 c973=0
+[10726] ch  32 ' ' col=7 row=8 c974=32 c973=0
+[10726] ch  32 ' ' col=8 row=8 c974=32 c973=0
+[10726] ch  32 ' ' col=9 row=8 c974=32 c973=0
+[10726] ch  32 ' ' col=10 row=8 c974=32 c973=0
+[10726] ch  32 ' ' col=11 row=8 c974=32 c973=0
+[10726] ch  32 ' ' col=12 row=8 c974=32 c973=0
+[10726] ch  32 ' ' col=13 row=8 c974=32 c973=0
+[10726] ch  32 ' ' col=14 row=8 c974=32 c973=0
+[10726] ch  32 ' ' col=15 row=8 c974=32 c973=0
+[10726] ch  32 ' ' col=16 row=8 c974=32 c973=0
+[10726] ch  32 ' ' col=17 row=8 c974=32 c973=0
+[10726] ch  32 ' ' col=18 row=8 c974=32 c973=0
+[10726] ch  32 ' ' col=19 row=8 c974=32 c973=0
+[10726] ch  32 ' ' col=20 row=8 c974=32 c973=0
+[10726] ch  32 ' ' col=21 row=8 c974=32 c973=0
+[10726] ch  32 ' ' col=22 row=8 c974=32 c973=0
+[10727] ch  32 ' ' col=23 row=8 c974=32 c973=0
+[10727] ch  32 ' ' col=24 row=8 c974=32 c973=0
+[10727] ch  32 ' ' col=25 row=8 c974=32 c973=0
+[10727] ch  32 ' ' col=26 row=8 c974=32 c973=0
+[10727] ch  32 ' ' col=27 row=8 c974=32 c973=0
+[10727] ch  32 ' ' col=28 row=8 c974=32 c973=0
+[10727] ch  32 ' ' col=29 row=8 c974=32 c973=0
+[10727] ch  32 ' ' col=30 row=8 c974=32 c973=0
+[10727] ch  32 ' ' col=31 row=8 c974=32 c973=0
+[10727] ch  32 ' ' col=32 row=8 c974=32 c973=0
+[10727] ch  32 ' ' col=33 row=8 c974=32 c973=0
+[10727] ch  32 ' ' col=34 row=8 c974=32 c973=0
+[10727] ch  32 ' ' col=35 row=8 c974=32 c973=0
+[10727] ch  32 ' ' col=36 row=8 c974=32 c973=0
+[10727] ch  32 ' ' col=37 row=8 c974=32 c973=0
+[10727] ch  32 ' ' col=38 row=8 c974=32 c973=0
+[10727] ch  32 ' ' col=39 row=8 c974=32 c973=0
+[10728] ch  32 ' ' col=0 row=9 c974=32 c973=0
+[10728] ch  32 ' ' col=1 row=9 c974=32 c973=0
+[10728] ch  32 ' ' col=2 row=9 c974=32 c973=0
+[10728] ch  32 ' ' col=3 row=9 c974=32 c973=0
+[10728] ch  32 ' ' col=4 row=9 c974=32 c973=0
+[10728] ch  32 ' ' col=5 row=9 c974=32 c973=0
+[10728] ch  32 ' ' col=6 row=9 c974=32 c973=0
+[10728] ch  32 ' ' col=7 row=9 c974=32 c973=0
+[10728] ch  32 ' ' col=8 row=9 c974=32 c973=0
+[10728] ch  32 ' ' col=9 row=9 c974=32 c973=0
+[10728] ch  32 ' ' col=10 row=9 c974=32 c973=0
+[10728] ch  32 ' ' col=11 row=9 c974=32 c973=0
+[10728] ch  32 ' ' col=12 row=9 c974=32 c973=0
+[10729] ch  32 ' ' col=13 row=9 c974=32 c973=0
+[10729] ch  32 ' ' col=14 row=9 c974=32 c973=0
+[10729] ch  32 ' ' col=15 row=9 c974=32 c973=0
+[10729] ch  32 ' ' col=16 row=9 c974=32 c973=0
+[10729] ch  32 ' ' col=17 row=9 c974=32 c973=0
+[10729] ch  32 ' ' col=18 row=9 c974=32 c973=0
+[10729] ch  32 ' ' col=19 row=9 c974=32 c973=0
+[10729] ch  32 ' ' col=20 row=9 c974=32 c973=0
+[10729] ch  32 ' ' col=21 row=9 c974=32 c973=0
+[10729] ch  32 ' ' col=22 row=9 c974=32 c973=0
+[10729] ch  32 ' ' col=23 row=9 c974=32 c973=0
+[10729] ch  32 ' ' col=24 row=9 c974=32 c973=0
+[10729] ch  32 ' ' col=25 row=9 c974=32 c973=0
+[10729] ch  32 ' ' col=26 row=9 c974=32 c973=0
+[10729] ch  32 ' ' col=27 row=9 c974=32 c973=0
+[10729] ch  32 ' ' col=28 row=9 c974=32 c973=0
+[10729] ch  32 ' ' col=29 row=9 c974=32 c973=0
+[10730] ch  32 ' ' col=30 row=9 c974=32 c973=0
+[10730] ch  32 ' ' col=31 row=9 c974=32 c973=0
+[10730] ch  32 ' ' col=32 row=9 c974=32 c973=0
+[10730] ch  32 ' ' col=33 row=9 c974=32 c973=0
+[10730] ch  32 ' ' col=34 row=9 c974=32 c973=0
+[10730] ch  32 ' ' col=35 row=9 c974=32 c973=0
+[10730] ch  32 ' ' col=36 row=9 c974=32 c973=0
+[10730] ch  32 ' ' col=37 row=9 c974=32 c973=0
+[10730] ch  32 ' ' col=38 row=9 c974=32 c973=0
+[10730] ch  32 ' ' col=39 row=9 c974=32 c973=0
+[10730] ch  32 ' ' col=0 row=10 c974=32 c973=0
+[10730] ch  32 ' ' col=1 row=10 c974=32 c973=0
+[10730] ch  32 ' ' col=2 row=10 c974=32 c973=0
+[10731] ch  32 ' ' col=3 row=10 c974=32 c973=0
+[10731] ch  32 ' ' col=4 row=10 c974=32 c973=0
+[10731] ch  32 ' ' col=5 row=10 c974=32 c973=0
+[10731] ch  32 ' ' col=6 row=10 c974=32 c973=0
+[10731] ch  32 ' ' col=7 row=10 c974=32 c973=0
+[10731] ch  32 ' ' col=8 row=10 c974=32 c973=0
+[10731] ch  32 ' ' col=9 row=10 c974=32 c973=0
+[10731] ch  32 ' ' col=10 row=10 c974=32 c973=0
+[10731] ch  32 ' ' col=11 row=10 c974=32 c973=0
+[10731] ch  32 ' ' col=12 row=10 c974=32 c973=0
+[10731] ch  32 ' ' col=13 row=10 c974=32 c973=0
+[10731] ch  32 ' ' col=14 row=10 c974=32 c973=0
+[10731] ch  32 ' ' col=15 row=10 c974=32 c973=0
+[10731] ch  32 ' ' col=16 row=10 c974=32 c973=0
+[10731] ch  32 ' ' col=17 row=10 c974=32 c973=0
+[10731] ch  32 ' ' col=18 row=10 c974=32 c973=0
+[10731] ch  32 ' ' col=19 row=10 c974=32 c973=0
+[10732] ch  32 ' ' col=20 row=10 c974=32 c973=0
+[10732] ch  32 ' ' col=21 row=10 c974=32 c973=0
+[10732] ch  32 ' ' col=22 row=10 c974=32 c973=0
+[10732] ch  32 ' ' col=23 row=10 c974=32 c973=0
+[10732] ch  32 ' ' col=24 row=10 c974=32 c973=0
+[10732] ch  32 ' ' col=25 row=10 c974=32 c973=0
+[10732] ch  32 ' ' col=26 row=10 c974=32 c973=0
+[10732] ch  32 ' ' col=27 row=10 c974=32 c973=0
+[10732] ch  32 ' ' col=28 row=10 c974=32 c973=0
+[10732] ch  32 ' ' col=29 row=10 c974=32 c973=0
+[10732] ch  32 ' ' col=30 row=10 c974=32 c973=0
+[10732] ch  32 ' ' col=31 row=10 c974=32 c973=0
+[10732] ch  32 ' ' col=32 row=10 c974=32 c973=0
+[10732] ch  32 ' ' col=33 row=10 c974=32 c973=0
+[10732] ch  32 ' ' col=34 row=10 c974=32 c973=0
+[10732] ch  32 ' ' col=35 row=10 c974=32 c973=0
+[10732] ch  32 ' ' col=36 row=10 c974=32 c973=0
+[10733] ch  32 ' ' col=37 row=10 c974=32 c973=0
+[10733] ch  32 ' ' col=38 row=10 c974=32 c973=0
+[10733] ch  32 ' ' col=39 row=10 c974=32 c973=0
+[10733] ch  32 ' ' col=0 row=11 c974=32 c973=0
+[10733] ch  32 ' ' col=1 row=11 c974=32 c973=0
+[10733] ch  32 ' ' col=2 row=11 c974=32 c973=0
+[10733] ch  32 ' ' col=3 row=11 c974=32 c973=0
+[10733] ch  32 ' ' col=4 row=11 c974=32 c973=0
+[10733] ch  32 ' ' col=5 row=11 c974=32 c973=0
+[10733] ch  32 ' ' col=6 row=11 c974=32 c973=0
+[10733] ch  32 ' ' col=7 row=11 c974=32 c973=0
+[10733] ch  32 ' ' col=8 row=11 c974=32 c973=0
+[10734] ch  32 ' ' col=9 row=11 c974=32 c973=0
+[10734] ch  32 ' ' col=10 row=11 c974=32 c973=0
+[10734] ch  32 ' ' col=11 row=11 c974=32 c973=0
+[10734] ch  32 ' ' col=12 row=11 c974=32 c973=0
+[10734] ch  32 ' ' col=13 row=11 c974=32 c973=0
+[10734] ch  32 ' ' col=14 row=11 c974=32 c973=0
+[10734] ch  32 ' ' col=15 row=11 c974=32 c973=0
+[10734] ch  32 ' ' col=16 row=11 c974=32 c973=0
+[10734] ch  32 ' ' col=17 row=11 c974=32 c973=0
+[10734] ch  32 ' ' col=18 row=11 c974=32 c973=0
+[10734] ch  32 ' ' col=19 row=11 c974=32 c973=0
+[10734] ch  32 ' ' col=20 row=11 c974=32 c973=0
+[10734] ch  32 ' ' col=21 row=11 c974=32 c973=0
+[10734] ch  32 ' ' col=22 row=11 c974=32 c973=0
+[10734] ch  32 ' ' col=23 row=11 c974=32 c973=0
+[10734] ch  32 ' ' col=24 row=11 c974=32 c973=0
+[10734] ch  32 ' ' col=25 row=11 c974=32 c973=0
+[10735] ch  32 ' ' col=26 row=11 c974=32 c973=0
+[10735] ch  32 ' ' col=27 row=11 c974=32 c973=0
+[10735] ch  32 ' ' col=28 row=11 c974=32 c973=0
+[10735] ch  32 ' ' col=29 row=11 c974=32 c973=0
+[10735] ch  32 ' ' col=30 row=11 c974=32 c973=0
+[10735] ch  32 ' ' col=31 row=11 c974=32 c973=0
+[10735] ch  32 ' ' col=32 row=11 c974=32 c973=0
+[10735] ch  32 ' ' col=33 row=11 c974=32 c973=0
+[10735] ch  32 ' ' col=34 row=11 c974=32 c973=0
+[10735] ch  32 ' ' col=35 row=11 c974=32 c973=0
+[10735] ch  32 ' ' col=36 row=11 c974=32 c973=0
+[10735] ch  32 ' ' col=37 row=11 c974=32 c973=0
+[10735] ch  32 ' ' col=38 row=11 c974=32 c973=0
+[10735] ch  32 ' ' col=39 row=11 c974=32 c973=0
+[10736] ch  32 ' ' col=0 row=12 c974=32 c973=0
+[10736] ch  32 ' ' col=1 row=12 c974=32 c973=0
+[10736] ch  32 ' ' col=2 row=12 c974=32 c973=0
+[10736] ch  32 ' ' col=3 row=12 c974=32 c973=0
+[10736] ch  32 ' ' col=4 row=12 c974=32 c973=0
+[10736] ch  32 ' ' col=5 row=12 c974=32 c973=0
+[10736] ch  32 ' ' col=6 row=12 c974=32 c973=0
+[10736] ch  32 ' ' col=7 row=12 c974=32 c973=0
+[10736] ch  32 ' ' col=8 row=12 c974=32 c973=0
+[10736] ch  32 ' ' col=9 row=12 c974=32 c973=0
+[10736] ch  32 ' ' col=10 row=12 c974=32 c973=0
+[10736] ch  32 ' ' col=11 row=12 c974=32 c973=0
+[10736] ch  32 ' ' col=12 row=12 c974=32 c973=0
+[10736] ch  32 ' ' col=13 row=12 c974=32 c973=0
+[10736] ch  32 ' ' col=14 row=12 c974=32 c973=0
+[10736] ch  32 ' ' col=15 row=12 c974=32 c973=0
+[10737] ch  32 ' ' col=16 row=12 c974=32 c973=0
+[10737] ch  32 ' ' col=17 row=12 c974=32 c973=0
+[10737] ch  32 ' ' col=18 row=12 c974=32 c973=0
+[10737] ch  32 ' ' col=19 row=12 c974=32 c973=0
+[10737] ch  32 ' ' col=20 row=12 c974=32 c973=0
+[10737] ch  32 ' ' col=21 row=12 c974=32 c973=0
+[10737] ch  32 ' ' col=22 row=12 c974=32 c973=0
+[10737] ch  32 ' ' col=23 row=12 c974=32 c973=0
+[10737] ch  32 ' ' col=24 row=12 c974=32 c973=0
+[10737] ch  32 ' ' col=25 row=12 c974=32 c973=0
+[10737] ch  32 ' ' col=26 row=12 c974=32 c973=0
+[10737] ch  32 ' ' col=27 row=12 c974=32 c973=0
+[10737] ch  32 ' ' col=28 row=12 c974=32 c973=0
+[10737] ch  32 ' ' col=29 row=12 c974=32 c973=0
+[10737] ch  32 ' ' col=30 row=12 c974=32 c973=0
+[10737] ch  32 ' ' col=31 row=12 c974=32 c973=0
+[10737] ch  32 ' ' col=32 row=12 c974=32 c973=0
+[10738] ch  32 ' ' col=33 row=12 c974=32 c973=0
+[10738] ch  32 ' ' col=34 row=12 c974=32 c973=0
+[10738] ch  32 ' ' col=35 row=12 c974=32 c973=0
+[10738] ch  32 ' ' col=36 row=12 c974=32 c973=0
+[10738] ch  32 ' ' col=37 row=12 c974=32 c973=0
+[10738] ch  32 ' ' col=38 row=12 c974=32 c973=0
+[10738] ch  32 ' ' col=39 row=12 c974=32 c973=0
+[10738] ch  32 ' ' col=0 row=13 c974=32 c973=0
+[10738] ch  32 ' ' col=1 row=13 c974=32 c973=0
+[10738] ch  32 ' ' col=2 row=13 c974=32 c973=0
+[10738] ch  32 ' ' col=3 row=13 c974=32 c973=0
+[10738] ch  32 ' ' col=4 row=13 c974=32 c973=0
+[10739] ch  32 ' ' col=5 row=13 c974=32 c973=0
+[10739] ch  32 ' ' col=6 row=13 c974=32 c973=0
+[10739] ch  32 ' ' col=7 row=13 c974=32 c973=0
+[10739] ch  32 ' ' col=8 row=13 c974=32 c973=0
+[10739] ch  32 ' ' col=9 row=13 c974=32 c973=0
+[10739] ch  32 ' ' col=10 row=13 c974=32 c973=0
+[10739] ch  32 ' ' col=11 row=13 c974=32 c973=0
+[10739] ch  32 ' ' col=12 row=13 c974=32 c973=0
+[10739] ch  32 ' ' col=13 row=13 c974=32 c973=0
+[10739] ch  32 ' ' col=14 row=13 c974=32 c973=0
+[10739] ch  32 ' ' col=15 row=13 c974=32 c973=0
+[10739] ch  32 ' ' col=16 row=13 c974=32 c973=0
+[10739] ch  32 ' ' col=17 row=13 c974=32 c973=0
+[10739] ch  32 ' ' col=18 row=13 c974=32 c973=0
+[10739] ch  32 ' ' col=19 row=13 c974=32 c973=0
+[10739] ch  32 ' ' col=20 row=13 c974=32 c973=0
+[10739] ch  32 ' ' col=21 row=13 c974=32 c973=0
+[10740] ch  32 ' ' col=22 row=13 c974=32 c973=0
+[10740] ch  32 ' ' col=23 row=13 c974=32 c973=0
+[10740] ch  32 ' ' col=24 row=13 c974=32 c973=0
+[10740] ch  32 ' ' col=25 row=13 c974=32 c973=0
+[10740] ch  32 ' ' col=26 row=13 c974=32 c973=0
+[10740] ch  32 ' ' col=27 row=13 c974=32 c973=0
+[10740] ch  32 ' ' col=28 row=13 c974=32 c973=0
+[10740] ch  32 ' ' col=29 row=13 c974=32 c973=0
+[10740] ch  32 ' ' col=30 row=13 c974=32 c973=0
+[10740] ch  32 ' ' col=31 row=13 c974=32 c973=0
+[10740] ch  32 ' ' col=32 row=13 c974=32 c973=0
+[10740] ch  32 ' ' col=33 row=13 c974=32 c973=0
+[10740] ch  32 ' ' col=34 row=13 c974=32 c973=0
+[10740] ch  32 ' ' col=35 row=13 c974=32 c973=0
+[10740] ch  32 ' ' col=36 row=13 c974=32 c973=0
+[10740] ch  32 ' ' col=37 row=13 c974=32 c973=0
+[10740] ch  32 ' ' col=38 row=13 c974=32 c973=0
+[10741] ch  32 ' ' col=39 row=13 c974=32 c973=0
+[10741] ch  32 ' ' col=0 row=14 c974=32 c973=0
+[10741] ch  32 ' ' col=1 row=14 c974=32 c973=0
+[10741] ch  32 ' ' col=2 row=14 c974=32 c973=0
+[10741] ch  32 ' ' col=3 row=14 c974=32 c973=0
+[10741] ch  32 ' ' col=4 row=14 c974=32 c973=0
+[10741] ch  32 ' ' col=5 row=14 c974=32 c973=0
+[10741] ch  32 ' ' col=6 row=14 c974=32 c973=0
+[10741] ch  32 ' ' col=7 row=14 c974=32 c973=0
+[10741] ch  32 ' ' col=8 row=14 c974=32 c973=0
+[10741] ch  32 ' ' col=9 row=14 c974=32 c973=0
+[10741] ch  32 ' ' col=10 row=14 c974=32 c973=0
+[10741] ch  32 ' ' col=11 row=14 c974=32 c973=0
+[10742] ch  32 ' ' col=12 row=14 c974=32 c973=0
+[10742] ch  32 ' ' col=13 row=14 c974=32 c973=0
+[10742] ch  32 ' ' col=14 row=14 c974=32 c973=0
+[10742] ch  32 ' ' col=15 row=14 c974=32 c973=0
+[10742] ch  32 ' ' col=16 row=14 c974=32 c973=0
+[10742] ch  32 ' ' col=17 row=14 c974=32 c973=0
+[10742] ch  32 ' ' col=18 row=14 c974=32 c973=0
+[10742] ch  32 ' ' col=19 row=14 c974=32 c973=0
+[10742] ch  32 ' ' col=20 row=14 c974=32 c973=0
+[10742] ch  32 ' ' col=21 row=14 c974=32 c973=0
+[10742] ch  32 ' ' col=22 row=14 c974=32 c973=0
+[10742] ch  32 ' ' col=23 row=14 c974=32 c973=0
+[10742] ch  32 ' ' col=24 row=14 c974=32 c973=0
+[10742] ch  32 ' ' col=25 row=14 c974=32 c973=0
+[10742] ch  32 ' ' col=26 row=14 c974=32 c973=0
+[10742] ch  32 ' ' col=27 row=14 c974=32 c973=0
+[10742] ch  32 ' ' col=28 row=14 c974=32 c973=0
+[10743] ch  32 ' ' col=29 row=14 c974=32 c973=0
+[10743] ch  32 ' ' col=30 row=14 c974=32 c973=0
+[10743] ch  32 ' ' col=31 row=14 c974=32 c973=0
+[10743] ch  32 ' ' col=32 row=14 c974=32 c973=0
+[10743] ch  32 ' ' col=33 row=14 c974=32 c973=0
+[10743] ch  32 ' ' col=34 row=14 c974=32 c973=0
+[10743] ch  32 ' ' col=35 row=14 c974=32 c973=0
+[10743] ch  32 ' ' col=36 row=14 c974=32 c973=0
+[10743] ch  32 ' ' col=37 row=14 c974=32 c973=0
+[10743] ch  32 ' ' col=38 row=14 c974=32 c973=0
+[10743] ch  32 ' ' col=39 row=14 c974=32 c973=0
+[10743] ch  32 ' ' col=0 row=15 c974=32 c973=0
+[10743] ch  32 ' ' col=1 row=15 c974=32 c973=0
+[10744] ch  32 ' ' col=2 row=15 c974=32 c973=0
+[10744] ch  32 ' ' col=3 row=15 c974=32 c973=0
+[10744] ch  32 ' ' col=4 row=15 c974=32 c973=0
+[10744] ch  32 ' ' col=5 row=15 c974=32 c973=0
+[10744] ch  32 ' ' col=6 row=15 c974=32 c973=0
+[10744] ch  32 ' ' col=7 row=15 c974=32 c973=0
+[10744] ch  32 ' ' col=8 row=15 c974=32 c973=0
+[10744] ch  32 ' ' col=9 row=15 c974=32 c973=0
+[10744] ch  32 ' ' col=10 row=15 c974=32 c973=0
+[10744] ch  32 ' ' col=11 row=15 c974=32 c973=0
+[10744] ch  32 ' ' col=12 row=15 c974=32 c973=0
+[10744] ch  32 ' ' col=13 row=15 c974=32 c973=0
+[10744] ch  32 ' ' col=14 row=15 c974=32 c973=0
+[10744] ch  32 ' ' col=15 row=15 c974=32 c973=0
+[10744] ch  32 ' ' col=16 row=15 c974=32 c973=0
+[10744] ch  32 ' ' col=17 row=15 c974=32 c973=0
+[10744] ch  32 ' ' col=18 row=15 c974=32 c973=0
+[10745] ch  32 ' ' col=19 row=15 c974=32 c973=0
+[10745] ch  32 ' ' col=20 row=15 c974=32 c973=0
+[10745] ch  32 ' ' col=21 row=15 c974=32 c973=0
+[10745] ch  32 ' ' col=22 row=15 c974=32 c973=0
+[10745] ch  32 ' ' col=23 row=15 c974=32 c973=0
+[10745] ch  32 ' ' col=24 row=15 c974=32 c973=0
+[10745] ch  32 ' ' col=25 row=15 c974=32 c973=0
+[10745] ch  32 ' ' col=26 row=15 c974=32 c973=0
+[10745] ch  32 ' ' col=27 row=15 c974=32 c973=0
+[10745] ch  32 ' ' col=28 row=15 c974=32 c973=0
+[10745] ch  32 ' ' col=29 row=15 c974=32 c973=0
+[10745] ch  32 ' ' col=30 row=15 c974=32 c973=0
+[10745] ch  32 ' ' col=31 row=15 c974=32 c973=0
+[10745] ch  32 ' ' col=32 row=15 c974=32 c973=0
+[10745] ch  32 ' ' col=33 row=15 c974=32 c973=0
+[10745] ch  32 ' ' col=34 row=15 c974=32 c973=0
+[10746] ch  32 ' ' col=35 row=15 c974=32 c973=0
+[10746] ch  32 ' ' col=36 row=15 c974=32 c973=0
+[10746] ch  32 ' ' col=37 row=15 c974=32 c973=0
+[10746] ch  32 ' ' col=38 row=15 c974=32 c973=0
+[10746] ch  32 ' ' col=39 row=15 c974=32 c973=0
+[10747] ch  32 ' ' col=0 row=0 c974=32 c973=0
+[10747] ch  69 'E' col=15 row=1 c974=32 c973=0
+[10747] ch  78 'N' col=16 row=1 c974=32 c973=0
+[10747] ch  68 'D' col=17 row=1 c974=32 c973=0
+[10748] ch  32 ' ' col=18 row=1 c974=32 c973=0
+[10748] ch  71 'G' col=19 row=1 c974=32 c973=0
+[10748] ch  65 'A' col=20 row=1 c974=32 c973=0
+[10748] ch  77 'M' col=21 row=1 c974=32 c973=0
+[10748] ch  69 'E' col=22 row=1 c974=32 c973=0
+[10748] ch  32 ' ' col=0 row=4 c974=32 c973=0
+[10748] ch  32 ' ' col=1 row=4 c974=32 c973=0
+[10748] ch  32 ' ' col=2 row=4 c974=32 c973=0
+[10748] ch  32 ' ' col=3 row=4 c974=32 c973=0
+[10748] ch  32 ' ' col=4 row=4 c974=32 c973=0
+[10748] ch  32 ' ' col=5 row=4 c974=32 c973=0
+[10748] ch  49 '1' col=6 row=4 c974=32 c973=0
+[10749] ch  41 ')' col=7 row=4 c974=32 c973=0
+[10749] ch  32 ' ' col=8 row=4 c974=32 c973=0
+[10749] ch  83 'S' col=9 row=4 c974=32 c973=0
+[10749] ch  65 'A' col=10 row=4 c974=32 c973=0
+[10749] ch  86 'V' col=11 row=4 c974=32 c973=0
+[10749] ch  69 'E' col=12 row=4 c974=32 c973=0
+[10749] ch  32 ' ' col=13 row=4 c974=32 c973=0
+[10749] ch  71 'G' col=14 row=4 c974=32 c973=0
+[10749] ch  65 'A' col=15 row=4 c974=32 c973=0
+[10749] ch  77 'M' col=16 row=4 c974=32 c973=0
+[10749] ch  69 'E' col=17 row=4 c974=32 c973=0
+[10749] ch  32 ' ' col=0 row=5 c974=32 c973=0
+[10749] ch  32 ' ' col=1 row=5 c974=32 c973=0
+[10749] ch  32 ' ' col=2 row=5 c974=32 c973=0
+[10749] ch  32 ' ' col=3 row=5 c974=32 c973=0
+[10750] ch  32 ' ' col=4 row=5 c974=32 c973=0
+[10750] ch  32 ' ' col=5 row=5 c974=32 c973=0
+[10750] ch  50 '2' col=6 row=5 c974=32 c973=0
+[10750] ch  41 ')' col=7 row=5 c974=32 c973=0
+[10750] ch  32 ' ' col=8 row=5 c974=32 c973=0
+[10750] ch  67 'C' col=9 row=5 c974=32 c973=0
+[10750] ch  79 'O' col=10 row=5 c974=32 c973=0
+[10750] ch  78 'N' col=11 row=5 c974=32 c973=0
+[10750] ch  84 'T' col=12 row=5 c974=32 c973=0
+[10750] ch  73 'I' col=13 row=5 c974=32 c973=0
+[10750] ch  78 'N' col=14 row=5 c974=32 c973=0
+[10750] ch  85 'U' col=15 row=5 c974=32 c973=0
+[10750] ch  69 'E' col=16 row=5 c974=32 c973=0
+[10750] ch  32 ' ' col=17 row=5 c974=32 c973=0
+[10750] ch  80 'P' col=18 row=5 c974=32 c973=0
+[10750] ch  82 'R' col=19 row=5 c974=32 c973=0
+[10751] ch  69 'E' col=20 row=5 c974=32 c973=0
+[10751] ch  83 'S' col=21 row=5 c974=32 c973=0
+[10751] ch  69 'E' col=22 row=5 c974=32 c973=0
+[10751] ch  78 'N' col=23 row=5 c974=32 c973=0
+[10751] ch  84 'T' col=24 row=5 c974=32 c973=0
+[10751] ch  32 ' ' col=25 row=5 c974=32 c973=0
+[10751] ch  71 'G' col=26 row=5 c974=32 c973=0
+[10751] ch  65 'A' col=27 row=5 c974=32 c973=0
+[10751] ch  77 'M' col=28 row=5 c974=32 c973=0
+[10751] ch  69 'E' col=29 row=5 c974=32 c973=0
+[10751] ch  32 ' ' col=0 row=6 c974=32 c973=0
+[10751] ch  32 ' ' col=1 row=6 c974=32 c973=0
+[10751] ch  32 ' ' col=2 row=6 c974=32 c973=0
+[10751] ch  32 ' ' col=3 row=6 c974=32 c973=0
+[10751] ch  32 ' ' col=4 row=6 c974=32 c973=0
+[10752] ch  32 ' ' col=5 row=6 c974=32 c973=0
+[10752] ch  51 '3' col=6 row=6 c974=32 c973=0
+[10752] ch  41 ')' col=7 row=6 c974=32 c973=0
+[10752] ch  32 ' ' col=8 row=6 c974=32 c973=0
+[10752] ch  69 'E' col=9 row=6 c974=32 c973=0
+[10752] ch  78 'N' col=10 row=6 c974=32 c973=0
+[10752] ch  68 'D' col=11 row=6 c974=32 c973=0
+[10752] ch  32 ' ' col=12 row=6 c974=32 c973=0
+[10752] ch  71 'G' col=13 row=6 c974=32 c973=0
+[10752] ch  65 'A' col=14 row=6 c974=32 c973=0
+[10752] ch  77 'M' col=15 row=6 c974=32 c973=0
+[10752] ch  69 'E' col=16 row=6 c974=32 c973=0
+[10752] ch  69 'E' col=0 row=9 c974=32 c973=0
+[10753] ch  78 'N' col=1 row=9 c974=32 c973=0
+[10753] ch  84 'T' col=2 row=9 c974=32 c973=0
+[10753] ch  69 'E' col=3 row=9 c974=32 c973=0
+[10753] ch  82 'R' col=4 row=9 c974=32 c973=0
+[10753] ch  32 ' ' col=5 row=9 c974=32 c973=0
+[10753] ch  67 'C' col=6 row=9 c974=32 c973=0
+[10753] ch  72 'H' col=7 row=9 c974=32 c973=0
+[10753] ch  79 'O' col=8 row=9 c974=32 c973=0
+[10753] ch  73 'I' col=9 row=9 c974=32 c973=0
+[10753] ch  67 'C' col=10 row=9 c974=32 c973=0
+[10753] ch  69 'E' col=11 row=9 c974=32 c973=0
+[10753] ch  46 '.' col=12 row=9 c974=32 c973=0
+[10753] ch  32 ' ' col=13 row=9 c974=32 c973=0
+[10753] ch  32 ' ' col=14 row=9 c974=32 c973=0
+[13978] dump end_saved 38201=0 38202=1 38165=3 38164=0 38210=0 38393=0 38391=77 38392=1 38209=1 38189=0 c974=32 c973=0
+[13978] key '2'
+[13982] ch  32 ' ' col=15 row=9 c974=32 c973=0
+[13983] w 38391=77 pc=E781
+[14220] w 38391=0 pc=E781
+[14778] w 974=64 pc=E781
+[14782] ch  51 '3' col=0 row=23 c974=64 c973=0
+[14782] ch  53 '5' col=1 row=23 c974=64 c973=0
+[14782] ch  48 '0' col=2 row=23 c974=64 c973=0
+[14782] ch  32 ' ' col=3 row=23 c974=64 c973=0
+[14783] ch  49 '1' col=6 row=23 c974=64 c973=0
+[14783] ch  48 '0' col=7 row=23 c974=64 c973=0
+[14783] ch  48 '0' col=8 row=23 c974=64 c973=0
+[14784] ch  32 ' ' col=9 row=23 c974=64 c973=0
+[14785] ch  45 '-' col=12 row=23 c974=64 c973=0
+[14785] ch  51 '3' col=13 row=23 c974=64 c973=0
+[14785] ch  50 '2' col=14 row=23 c974=64 c973=0
+[14785] ch  54 '6' col=15 row=23 c974=64 c973=0
+[14785] ch  49 '1' col=16 row=23 c974=64 c973=0
+[14785] ch  32 ' ' col=17 row=23 c974=64 c973=0
+[14785] ch  48 '0' col=25 row=23 c974=64 c973=0
+[14785] ch  32 ' ' col=26 row=23 c974=64 c973=0
+[14785] ch  32 ' ' col=27 row=23 c974=64 c973=0
+[14786] ch  48 '0' col=34 row=23 c974=64 c973=0
+[14786] ch  32 ' ' col=35 row=23 c974=64 c973=0
+[14786] ch  32 ' ' col=36 row=23 c974=64 c973=0
+[14786] w 973=1 pc=E781
+[14787] ch  45 '-' col=17 row=7 c974=64 c973=1
+[14787] ch  91 '[' col=18 row=7 c974=64 c973=1
+[14787] ch  32 ' ' col=19 row=7 c974=64 c973=1
+[14787] ch  32 ' ' col=20 row=7 c974=64 c973=1
+[14787] ch  93 ']' col=21 row=7 c974=64 c973=1
+[14788] ch  45 '-' col=22 row=7 c974=64 c973=1
+[14788] w 973=0 pc=E781
+[14949] w 974=32 pc=E781
+[14954] ch  51 '3' col=0 row=23 c974=32 c973=0
+[14954] ch  53 '5' col=1 row=23 c974=32 c973=0
+[14954] ch  48 '0' col=2 row=23 c974=32 c973=0
+[14954] ch  32 ' ' col=3 row=23 c974=32 c973=0
+[14955] ch  49 '1' col=6 row=23 c974=32 c973=0
+[14955] ch  48 '0' col=7 row=23 c974=32 c973=0
+[14955] ch  48 '0' col=8 row=23 c974=32 c973=0
+[14955] ch  32 ' ' col=9 row=23 c974=32 c973=0
+[14956] ch  45 '-' col=12 row=23 c974=32 c973=0
+[14956] ch  51 '3' col=13 row=23 c974=32 c973=0
+[14956] ch  50 '2' col=14 row=23 c974=32 c973=0
+[14956] ch  48 '0' col=15 row=23 c974=32 c973=0
+[14956] ch  49 '1' col=16 row=23 c974=32 c973=0
+[14956] ch  32 ' ' col=17 row=23 c974=32 c973=0
+[14957] ch  48 '0' col=25 row=23 c974=32 c973=0
+[14957] ch  32 ' ' col=26 row=23 c974=32 c973=0
+[14957] ch  32 ' ' col=27 row=23 c974=32 c973=0
+[14957] ch  48 '0' col=34 row=23 c974=32 c973=0
+[14957] ch  32 ' ' col=35 row=23 c974=32 c973=0
+[14957] ch  32 ' ' col=36 row=23 c974=32 c973=0
+[14958] w 973=1 pc=E781
+[14958] ch  45 '-' col=17 row=7 c974=32 c973=1
+[14958] ch  91 '[' col=18 row=7 c974=32 c973=1
+[14958] ch  32 ' ' col=19 row=7 c974=32 c973=1
+[14959] ch  32 ' ' col=20 row=7 c974=32 c973=1
+[14959] ch  93 ']' col=21 row=7 c974=32 c973=1
+[14959] ch  45 '-' col=22 row=7 c974=32 c973=1
+[14959] w 973=0 pc=E781
+[15011] flight again after CONTINUE (after 1033)
+[15011] dump continued 38201=0 38202=1 38165=3 38164=0 38210=0 38393=0 38391=0 38392=1 38209=1 38189=0 c974=32 c973=0
+[15126] w 974=64 pc=E781
+[15130] ch  51 '3' col=0 row=23 c974=64 c973=0
+[15131] ch  53 '5' col=1 row=23 c974=64 c973=0
+[15131] ch  48 '0' col=2 row=23 c974=64 c973=0
+[15131] ch  32 ' ' col=3 row=23 c974=64 c973=0
+[15132] ch  49 '1' col=6 row=23 c974=64 c973=0
+[15132] ch  48 '0' col=7 row=23 c974=64 c973=0
+[15132] ch  48 '0' col=8 row=23 c974=64 c973=0
+[15132] ch  32 ' ' col=9 row=23 c974=64 c973=0
+[15133] ch  45 '-' col=12 row=23 c974=64 c973=0
+[15133] ch  51 '3' col=13 row=23 c974=64 c973=0
+[15133] ch  49 '1' col=14 row=23 c974=64 c973=0
+[15133] ch  52 '4' col=15 row=23 c974=64 c973=0
+[15133] ch  49 '1' col=16 row=23 c974=64 c973=0
+[15133] ch  32 ' ' col=17 row=23 c974=64 c973=0
+[15134] ch  48 '0' col=25 row=23 c974=64 c973=0
+[15134] ch  32 ' ' col=26 row=23 c974=64 c973=0
+[15134] ch  32 ' ' col=27 row=23 c974=64 c973=0
+[15134] ch  48 '0' col=34 row=23 c974=64 c973=0
+[15134] ch  32 ' ' col=35 row=23 c974=64 c973=0
+[15134] ch  32 ' ' col=36 row=23 c974=64 c973=0
+[15135] w 973=1 pc=E781
+[15135] ch  45 '-' col=17 row=7 c974=64 c973=1
+[15135] ch  91 '[' col=18 row=7 c974=64 c973=1
+[15135] ch  32 ' ' col=19 row=7 c974=64 c973=1
+[15135] ch  32 ' ' col=20 row=7 c974=64 c973=1
+[15136] ch  93 ']' col=21 row=7 c974=64 c973=1
+[15136] ch  45 '-' col=22 row=7 c974=64 c973=1
+[15136] w 973=0 pc=E781
+[15301] w 974=32 pc=E781
+[15306] ch  51 '3' col=0 row=23 c974=32 c973=0
+[15306] ch  53 '5' col=1 row=23 c974=32 c973=0
+[15306] ch  48 '0' col=2 row=23 c974=32 c973=0
+[15306] ch  32 ' ' col=3 row=23 c974=32 c973=0
+[15307] ch  49 '1' col=6 row=23 c974=32 c973=0
+[15307] ch  48 '0' col=7 row=23 c974=32 c973=0
+[15308] ch  48 '0' col=8 row=23 c974=32 c973=0
+[15308] ch  32 ' ' col=9 row=23 c974=32 c973=0
+[15309] ch  45 '-' col=12 row=23 c974=32 c973=0
+[15309] ch  51 '3' col=13 row=23 c974=32 c973=0
+[15309] ch  48 '0' col=14 row=23 c974=32 c973=0
+[15309] ch  56 '8' col=15 row=23 c974=32 c973=0
+[15309] ch  49 '1' col=16 row=23 c974=32 c973=0
+[15309] ch  32 ' ' col=17 row=23 c974=32 c973=0
+[15309] ch  48 '0' col=25 row=23 c974=32 c973=0
+[15309] ch  32 ' ' col=26 row=23 c974=32 c973=0
+[15310] ch  32 ' ' col=27 row=23 c974=32 c973=0
+[15310] ch  48 '0' col=34 row=23 c974=32 c973=0
+[15310] ch  32 ' ' col=35 row=23 c974=32 c973=0
+[15310] ch  32 ' ' col=36 row=23 c974=32 c973=0
+[15311] dump continued_300 38201=0 38202=1 38165=3 38164=0 38210=0 38393=0 38391=0 38392=1 38209=1 38189=0 c974=32 c973=0
+[15311] w 973=1 pc=E781
+[15311] ch  45 '-' col=17 row=7 c974=32 c973=1
+[15311] ch  91 '[' col=18 row=7 c974=32 c973=1
+[15311] ch  32 ' ' col=19 row=7 c974=32 c973=1
+[15311] ch  32 ' ' col=20 row=7 c974=32 c973=1
+[15311] ch  93 ']' col=21 row=7 c974=32 c973=1
+done

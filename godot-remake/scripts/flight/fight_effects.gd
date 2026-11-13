@@ -1,0 +1,654 @@
+extends Node3D
+## What the fighting looks like: the laser's two bolts, a missile flying on a
+## flame and smoke trail and bursting, the flash of a hit, a fighter swooping
+## across the view and the turrets answering it. The rules decide what happens
+## (scripts/rules/combat_rules.gd) and hand over events; this plays them in
+## Godot's own way: tweens with easing, particles with ramps and curves,
+## additive glow and short-lived lights, not the original's flicker.
+
+const Craft = preload("res://scripts/world/craft.gd")
+
+signal flashed(strength: float)
+signal shaken(strength: float)
+
+## Seconds to a step of a fighter's pass, and to a step of a missile's flight.
+const FIGHTER_STEP := 0.09
+const MISSILE_STEP := 0.04
+const TWIN_GAP := 0.28 ## the second missile's burst follows the first's (1200 bursts the left, then the right)
+
+const FLAME := Color(1.0, 0.62, 0.2)
+const GREEN := Color(0.45, 1.0, 0.55)
+const RED := Color(1.0, 0.3, 0.25)
+
+var camera: Camera3D
+## How much bigger the world is than the original's units: a missile covers that much more space
+## in the same time. The weapons' own sizes are not scaled.
+var world_scale := 1.0
+## How many times bigger than in the atmosphere the weapons are drawn: in the orbit, where the world is,
+## a missile and a burst would be specks; the ratio of a missile to a ship is kept.
+var size_scale := 1.0
+
+var _glow_texture: GradientTexture2D
+var _ring_texture: GradientTexture2D
+
+
+func _ready() -> void:
+	_glow_texture = _radial([0.0, 0.4, 1.0], [Color(1, 1, 1, 1), Color(1, 1, 1, 0.6), Color(1, 1, 1, 0)])
+	_ring_texture = _radial([0.0, 0.62, 0.8, 0.9, 1.0], [Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 0.9), Color(1, 1, 1, 0.2), Color(1, 1, 1, 0)])
+
+
+# --- the ship's laser --------------------------------------------------------
+
+
+## Two bolts from the bottom corners to a point ahead: a bright core in a wider
+## halo, a flare where each leaves, a flicker of light.
+func laser() -> void:
+	AudioManager.play_laser()
+	for side in [-1.0, 1.0]:
+		var from := _ahead(Vector3(side * 1.9, -1.1, -1.5))
+		_bolt(from, _ahead(Vector3(0.0, 0.0, -420.0)), GREEN, 0.3, 0.12)
+		_flare(from, GREEN, 1.6)
+	_light(_ahead(Vector3(0.0, -1.0, -3.0)), GREEN, 2.5, 18.0, 0.2)
+
+
+# --- the missile ---------------------------------------------------------------
+
+
+## A pair of missiles from the ship along `direction` for `steps` steps of 160 units, as
+## the original fired them: one from each side, drawn together up the screen, bursting at
+## the end, the left and then the right, if they hit. They leave slowly and gather speed,
+## rolling on their way, a flame behind each and a smoke trail left in the air.
+func missile(direction: Vector3, steps: int, hit: bool, ground := Vector3.INF, target := Vector3.INF, hull := Callable()) -> void:
+	AudioManager.play_missile()
+	var basis := camera.global_transform.basis
+	var start := camera.global_position + basis * Vector3(0.0, -0.9, -3.0) * size_scale
+	var end := camera.global_position + direction * 160.0 * world_scale * steps
+	var seconds := steps * MISSILE_STEP
+	if hit and ground != Vector3.INF: # aimed at the ground: it goes there, and bursts on it
+		end = ground
+		seconds = maxf(start.distance_to(end) / (160.0 * world_scale), 1.0) * MISSILE_STEP
+	elif hit and target != Vector3.INF: # at a ship: it bursts on its hull, not at the end of its range
+		end = target
+		seconds = maxf(start.distance_to(end) / (160.0 * world_scale), 1.0) * MISSILE_STEP
+	var sideways := basis.x * 2.2 * size_scale
+	for side in [-1.0, 1.0]: # the left, then the right
+		var pair_start: Vector3 = start + sideways * side
+		var pair_end: Vector3 = end + sideways * side * 0.12 # they draw in as they go
+		if hit and ground == Vector3.INF and target != Vector3.INF and hull.is_valid(): # each bursts on the hull it meets
+			var on_hull: Vector3 = hull.call(pair_start, direction)
+			if on_hull == Vector3.INF:
+				on_hull = hull.call(pair_start, (target - pair_start).normalized())
+			if on_hull != Vector3.INF:
+				pair_end = on_hull
+		var burst: Callable
+		if not hit: # out of range: it self-destructs, a smaller burst than a hit (the manual)
+			burst = explosion.bind(pair_end, 70.0)
+		elif ground != Vector3.INF:
+			burst = ground_burst.bind(pair_end, 260.0)
+		else:
+			burst = explosion.bind(pair_end, 260.0)
+		_launch(pair_start, pair_end, direction, seconds, burst, 0.0 if side < 0.0 else TWIN_GAP)
+
+
+## One missile, flying from `start` to `end` and bursting there `late` seconds after arriving.
+func _launch(start: Vector3, end: Vector3, direction: Vector3, seconds: float, burst: Callable, late: float) -> void:
+	var rocket := Node3D.new()
+	add_child(rocket)
+	rocket.global_transform = Transform3D(Basis.looking_at(direction, Vector3.UP), start)
+	var body := MeshInstance3D.new()
+	body.mesh = Craft.missile()
+	body.scale = Vector3.ONE * 3.0 * size_scale
+	body.material_override = Craft.material(Color(0.82, 0.84, 0.88))
+	rocket.add_child(body)
+	var light := OmniLight3D.new()
+	light.light_color = FLAME
+	light.light_energy = 2.0
+	light.omni_range = 80.0
+	light.position = Vector3(0.0, 0.0, 3.0)
+	rocket.add_child(light)
+	rocket.add_child(_exhaust(Vector3(0.0, 0.0, 2.6), true))
+	rocket.add_child(_exhaust(Vector3(0.0, 0.0, 2.6), false))
+	var flight := create_tween()
+	flight.set_parallel(true)
+	flight.tween_property(rocket, "global_position", end, seconds).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	flight.tween_property(body, "rotation:z", TAU * 3.0, seconds)
+	flight.chain().tween_callback(_finish_rocket.bind(rocket))
+	flight.tween_callback(burst).set_delay(late)
+
+
+## Stops a rocket's engine and lets its trail thin out before the node goes.
+func _finish_rocket(rocket: Node3D) -> void:
+	for child in rocket.get_children():
+		if child is CPUParticles3D:
+			(child as CPUParticles3D).emitting = false
+		elif child is MeshInstance3D or child is OmniLight3D:
+			child.visible = false
+	get_tree().create_timer(1.6).timeout.connect(rocket.queue_free)
+
+
+## The engine's flame (additive, short) or its smoke (grey, long); both leave
+## their particles in the world, so that the trail stays where it was made.
+func _exhaust(at: Vector3, flame: bool) -> CPUParticles3D:
+	var particles := CPUParticles3D.new()
+	particles.position = at
+	particles.local_coords = false
+	particles.amount = 36 if flame else 40
+	particles.lifetime = 0.3 if flame else 1.3
+	particles.direction = Vector3(0, 0, 1)
+	particles.spread = 6.0 if flame else 12.0
+	particles.gravity = Vector3.ZERO
+	particles.initial_velocity_min = 8.0
+	particles.initial_velocity_max = 26.0 if flame else 12.0
+	particles.scale_amount_min = 4.0 if flame else 5.0
+	particles.scale_amount_max = 7.0 if flame else 9.0
+	var ramp := Gradient.new()
+	if flame:
+		ramp.colors = PackedColorArray([Color(1.0, 0.95, 0.7, 1.0), Color(1.0, 0.45, 0.1, 0.8), Color(0.5, 0.1, 0.05, 0.0)])
+		ramp.offsets = PackedFloat32Array([0.0, 0.4, 1.0])
+	else:
+		ramp.colors = PackedColorArray([Color(0.6, 0.6, 0.6, 0.0), Color(0.55, 0.55, 0.58, 0.45), Color(0.3, 0.3, 0.33, 0.0)])
+		ramp.offsets = PackedFloat32Array([0.0, 0.2, 1.0])
+	particles.color_ramp = ramp
+	var growth := Curve.new()
+	growth.add_point(Vector2(0.0, 0.5))
+	growth.add_point(Vector2(1.0, 0.2 if flame else 1.8))
+	particles.scale_amount_curve = growth
+	particles.mesh = _sprite(_glow_texture, flame)
+	particles.emitting = true
+	return particles
+
+
+# --- bursts ----------------------------------------------------------------------
+
+
+## A fireball with a white flash, a shockwave ring, sparks and a pulse of light;
+## `size` is about the radius it reaches.
+func explosion(at: Vector3, blast: float, grounded := false) -> void:
+	var size := blast * size_scale
+	if size >= 150.0:
+		AudioManager.play_explosion()
+	else:
+		AudioManager.play_small_explosion()
+	var flash := _sprite_node(Color(1.0, 0.95, 0.8, 1.0), size * 1.6, true)
+	add_child(flash)
+	flash.global_position = at
+	var burst := create_tween()
+	burst.set_parallel(true)
+	burst.tween_property(flash, "scale", Vector3.ONE * 1.5, 0.14).from(Vector3.ONE * 0.3).set_ease(Tween.EASE_OUT)
+	burst.tween_property(flash, "transparency", 1.0, 0.18).from(0.0)
+	burst.chain().tween_callback(flash.queue_free)
+	var ring: Node3D
+	if grounded: # the wave runs out over the ground, lying flat on it
+		var disc := MeshInstance3D.new()
+		var quad := QuadMesh.new()
+		quad.size = Vector2.ONE * size * 4.8
+		quad.orientation = PlaneMesh.FACE_Y
+		quad.material = _sprite_material(_ring_texture, true)
+		disc.mesh = quad
+		ring = disc
+		add_child(ring)
+		ring.global_position = at
+		var flat := create_tween()
+		flat.set_parallel(true)
+		flat.tween_property(ring, "scale", Vector3.ONE, 0.6).from(Vector3.ONE * 0.1).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+		flat.tween_property(ring, "transparency", 1.0, 0.6).from(0.0)
+		flat.chain().tween_callback(ring.queue_free)
+	else:
+		var sprite := _sprite_node(Color(1.0, 0.75, 0.4, 0.9), size * 2.4, true, _ring_texture)
+		ring = sprite
+		add_child(ring)
+		ring.global_position = at
+		var wave := create_tween()
+		wave.set_parallel(true)
+		wave.tween_property(ring, "scale", Vector3.ONE, 0.55).from(Vector3.ONE * 0.1).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+		wave.tween_property(ring, "transparency", 1.0, 0.55).from(0.0)
+		wave.chain().tween_callback(ring.queue_free)
+	_burst(at, size, 54, 0.95, Color(1.0, 0.85, 0.45), true) # the fire
+	_burst(at, size, 24, 1.6, Color(0.3, 0.28, 0.28), false) # the smoke that follows
+	_sparks(at, size)
+	_light(at, Color(1.0, 0.7, 0.35), 8.0, size * 7.0, 0.7)
+	shaken.emit(clampf(size / 260.0, 0.15, 1.0))
+	flashed.emit(clampf(size / 400.0, 0.1, 0.6))
+
+
+func _burst(at: Vector3, size: float, count: int, seconds: float, tint: Color, fire: bool) -> void:
+	var particles := CPUParticles3D.new()
+	particles.one_shot = true
+	particles.amount = count
+	particles.lifetime = seconds
+	particles.explosiveness = 0.92 if fire else 0.6
+	particles.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+	particles.emission_sphere_radius = size * 0.08
+	particles.direction = Vector3.UP
+	particles.spread = 180.0
+	particles.gravity = Vector3.ZERO
+	particles.initial_velocity_min = size * 0.25
+	particles.initial_velocity_max = size * (1.1 if fire else 0.6)
+	particles.damping_min = size * 0.6
+	particles.damping_max = size * 1.0
+	particles.scale_amount_min = size * (0.5 if fire else 0.45)
+	particles.scale_amount_max = size * (1.1 if fire else 0.9)
+	var growth := Curve.new()
+	growth.add_point(Vector2(0.0, 0.4))
+	growth.add_point(Vector2(0.35, 1.0))
+	growth.add_point(Vector2(1.0, 0.6 if fire else 1.2))
+	particles.scale_amount_curve = growth
+	var ramp := Gradient.new()
+	if fire:
+		ramp.colors = PackedColorArray([Color(1.0, 0.85, 0.45, 0.55), Color(1.0, 0.5, 0.12, 0.5), Color(0.7, 0.16, 0.04, 0.34), Color(0.15, 0.08, 0.06, 0.0)])
+		ramp.offsets = PackedFloat32Array([0.0, 0.18, 0.5, 1.0])
+	else:
+		ramp.colors = PackedColorArray([Color(0.25, 0.2, 0.18, 0.0), Color(tint, 0.16), Color(0.15, 0.15, 0.17, 0.0)])
+		ramp.offsets = PackedFloat32Array([0.0, 0.25, 1.0])
+	particles.color_ramp = ramp
+	particles.mesh = _sprite(_glow_texture, fire)
+	add_child(particles)
+	particles.global_position = at
+	particles.emitting = true
+	get_tree().create_timer(seconds + 0.6).timeout.connect(particles.queue_free)
+
+
+func _sparks(at: Vector3, size: float) -> void:
+	var particles := CPUParticles3D.new()
+	particles.one_shot = true
+	particles.amount = 36
+	particles.lifetime = 0.9
+	particles.explosiveness = 1.0
+	particles.direction = Vector3.UP
+	particles.spread = 180.0
+	particles.gravity = Vector3.ZERO
+	particles.initial_velocity_min = size * 1.2
+	particles.initial_velocity_max = size * 3.2
+	particles.damping_min = size * 1.2
+	particles.damping_max = size * 2.2
+	particles.scale_amount_min = size * 0.025
+	particles.scale_amount_max = size * 0.06
+	var ramp := Gradient.new()
+	ramp.colors = PackedColorArray([Color(1.0, 1.0, 0.85, 1.0), Color(1.0, 0.6, 0.2, 0.8), Color(1.0, 0.3, 0.1, 0.0)])
+	ramp.offsets = PackedFloat32Array([0.0, 0.5, 1.0])
+	particles.color_ramp = ramp
+	particles.mesh = _sprite(_glow_texture, true)
+	add_child(particles)
+	particles.global_position = at
+	particles.emitting = true
+	get_tree().create_timer(1.5).timeout.connect(particles.queue_free)
+
+
+## A burst on the ground: the fireball and its shockwave, and earth thrown up that
+## falls back, and a cloud of dust that hangs.
+func ground_burst(at: Vector3, size: float) -> void:
+	explosion(at + Vector3(0.0, size * 0.15, 0.0), size * 0.8, true)
+	var dirt := CPUParticles3D.new()
+	dirt.one_shot = true
+	dirt.amount = 70
+	dirt.lifetime = 1.8
+	dirt.explosiveness = 0.95
+	dirt.direction = Vector3.UP
+	dirt.spread = 55.0
+	dirt.gravity = Vector3(0.0, -size * 1.4, 0.0)
+	dirt.initial_velocity_min = size * 0.5
+	dirt.initial_velocity_max = size * 1.5
+	dirt.scale_amount_min = size * 0.03
+	dirt.scale_amount_max = size * 0.09
+	var ramp := Gradient.new()
+	ramp.colors = PackedColorArray([Color(0.45, 0.34, 0.22, 1.0), Color(0.3, 0.24, 0.17, 0.9), Color(0.2, 0.17, 0.13, 0.0)])
+	ramp.offsets = PackedFloat32Array([0.0, 0.6, 1.0])
+	dirt.color_ramp = ramp
+	dirt.mesh = _sprite(_glow_texture, false)
+	add_child(dirt)
+	dirt.global_position = at
+	dirt.emitting = true
+	get_tree().create_timer(2.4).timeout.connect(dirt.queue_free)
+	# the dust: a low brown cloud spreading
+	var dust := CPUParticles3D.new()
+	dust.one_shot = true
+	dust.amount = 36
+	dust.lifetime = 3.2
+	dust.explosiveness = 0.7
+	dust.direction = Vector3.UP
+	dust.spread = 85.0
+	dust.gravity = Vector3.ZERO
+	dust.initial_velocity_min = size * 0.2
+	dust.initial_velocity_max = size * 0.6
+	dust.damping_min = size * 0.2
+	dust.damping_max = size * 0.4
+	dust.scale_amount_min = size * 0.4
+	dust.scale_amount_max = size * 0.9
+	var dust_ramp := Gradient.new()
+	dust_ramp.colors = PackedColorArray([Color(0.5, 0.42, 0.32, 0.0), Color(0.5, 0.42, 0.32, 0.3), Color(0.5, 0.45, 0.4, 0.0)])
+	dust_ramp.offsets = PackedFloat32Array([0.0, 0.25, 1.0])
+	dust.color_ramp = dust_ramp
+	dust.mesh = _sprite(_glow_texture, false)
+	add_child(dust)
+	dust.global_position = at
+	dust.emitting = true
+	get_tree().create_timer(3.8).timeout.connect(dust.queue_free)
+
+
+## A city burning: flames and a column of smoke, for `seconds`, then it dies down.
+func fire(at: Vector3, seconds: float, size := 1.0) -> void:
+	var flames := CPUParticles3D.new()
+	flames.amount = 40
+	flames.lifetime = 1.4
+	flames.direction = Vector3.UP
+	flames.spread = 25.0
+	flames.gravity = Vector3(0.0, 30.0, 0.0)
+	flames.initial_velocity_min = 30.0 * size
+	flames.initial_velocity_max = 90.0 * size
+	flames.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+	flames.emission_sphere_radius = 110.0 * size
+	flames.scale_amount_min = 35.0 * size
+	flames.scale_amount_max = 80.0 * size
+	var ramp := Gradient.new()
+	ramp.colors = PackedColorArray([Color(1.0, 0.85, 0.4, 0.8), Color(1.0, 0.4, 0.1, 0.55), Color(0.2, 0.08, 0.04, 0.0)])
+	ramp.offsets = PackedFloat32Array([0.0, 0.4, 1.0])
+	flames.color_ramp = ramp
+	flames.mesh = _sprite(_glow_texture, true)
+	add_child(flames)
+	flames.global_position = at
+	flames.emitting = true
+	var smoke := CPUParticles3D.new()
+	smoke.amount = 30
+	smoke.lifetime = 7.0
+	smoke.direction = Vector3.UP
+	smoke.spread = 10.0
+	smoke.gravity = Vector3(0.0, 25.0, 0.0)
+	smoke.initial_velocity_min = 60.0 * size
+	smoke.initial_velocity_max = 120.0 * size
+	smoke.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+	smoke.emission_sphere_radius = 90.0 * size
+	smoke.scale_amount_min = 80.0 * size
+	smoke.scale_amount_max = 200.0 * size
+	var grey := Gradient.new()
+	grey.colors = PackedColorArray([Color(0.1, 0.09, 0.08, 0.0), Color(0.12, 0.11, 0.1, 0.45), Color(0.2, 0.2, 0.2, 0.0)])
+	grey.offsets = PackedFloat32Array([0.0, 0.2, 1.0])
+	smoke.color_ramp = grey
+	smoke.mesh = _sprite(_glow_texture, false)
+	add_child(smoke)
+	smoke.global_position = at
+	smoke.emitting = true
+	get_tree().create_timer(seconds).timeout.connect(_put_out.bind(flames, smoke))
+
+
+func _put_out(flames: CPUParticles3D, smoke: CPUParticles3D) -> void:
+	if is_instance_valid(flames):
+		flames.emitting = false
+		get_tree().create_timer(2.0).timeout.connect(flames.queue_free)
+	if is_instance_valid(smoke):
+		smoke.emitting = false
+		get_tree().create_timer(8.0).timeout.connect(smoke.queue_free)
+
+
+## A laser bolt striking the ground: a flash, sparks, a puff of dirt.
+func ground_spark(at: Vector3) -> void:
+	_flare(at + Vector3(0.0, 4.0, 0.0), Color(1.0, 0.85, 0.5), 60.0)
+	_sparks(at + Vector3(0.0, 3.0, 0.0), 40.0)
+	var puff := CPUParticles3D.new()
+	puff.one_shot = true
+	puff.amount = 14
+	puff.lifetime = 1.0
+	puff.explosiveness = 0.9
+	puff.direction = Vector3.UP
+	puff.spread = 40.0
+	puff.gravity = Vector3(0.0, -60.0, 0.0)
+	puff.initial_velocity_min = 25.0
+	puff.initial_velocity_max = 70.0
+	puff.scale_amount_min = 10.0
+	puff.scale_amount_max = 22.0
+	var ramp := Gradient.new()
+	ramp.colors = PackedColorArray([Color(0.45, 0.36, 0.25, 0.7), Color(0.4, 0.34, 0.28, 0.0)])
+	puff.color_ramp = ramp
+	puff.mesh = _sprite(_glow_texture, false)
+	add_child(puff)
+	puff.global_position = at
+	puff.emitting = true
+	get_tree().create_timer(1.6).timeout.connect(puff.queue_free)
+
+
+# --- fighters ----------------------------------------------------------------------
+
+
+## A fighter's pass: `from` and `step` are the original's screen (x 10 to 270,
+## y 10 to 120), `strafes` the steps at which it fires (and the turret that
+## answers, 0 for none, and whether it was shot down). It sweeps in a curve,
+## nearer as it crosses, banking into the turn.
+func fighter(from: Vector2, step: Vector2, steps: int, strafes: Array) -> void:
+	var craft := Node3D.new()
+	camera.add_child(craft)
+	var body := MeshInstance3D.new()
+	body.mesh = Craft.fighter()
+	body.scale = Vector3.ONE * 16.0 * size_scale
+	var materials := Craft.fighter_materials()
+	for surface in materials.size():
+		body.set_surface_override_material(surface, materials[surface])
+	craft.add_child(body)
+	_navigation_lights(craft)
+	for side in [-1.0, 1.0]: # the engines
+		var engine := _exhaust(Vector3(side * 0.42, -0.02, 1.35) * 16.0, true)
+		engine.amount = 20
+		engine.scale_amount_min = 4.0
+		engine.scale_amount_max = 7.0
+		engine.initial_velocity_max = 40.0
+		engine.local_coords = false
+		craft.add_child(engine)
+	craft.position = _place(from, 0.0)
+	var by_step := {}
+	for strafe: Dictionary in strafes:
+		by_step[strafe["step"]] = strafe
+	var tween := create_tween()
+	var at := from
+	for i in steps:
+		var strafe: Dictionary = by_step.get(i, {})
+		if not strafe.is_empty():
+			tween.tween_callback(_strafe.bind(craft, strafe))
+		if strafe.get("shot_down", false):
+			tween.tween_callback(_tumble.bind(craft))
+			tween.tween_interval(FIGHTER_STEP * 4.0)
+			tween.tween_callback(_shot_down.bind(craft))
+			return
+		at += step
+		var progress := float(i + 1) / float(steps)
+		var to := _place(at, progress)
+		tween.tween_callback(_steer.bind(craft, to))
+		tween.tween_property(craft, "position", to, FIGHTER_STEP).set_trans(Tween.TRANS_SINE)
+	tween.tween_callback(craft.queue_free)
+
+
+## Turns a fighter to face where it is going and rolls it into the turn.
+func _steer(craft: Node3D, to: Vector3) -> void:
+	if not is_instance_valid(craft):
+		return
+	var heading := to - craft.position
+	if heading.length() < 0.01:
+		return
+	var facing := Basis.looking_at(heading.normalized(), Vector3.UP)
+	var roll := clampf(-heading.x / maxf(heading.length(), 0.01) * 1.1, -0.8, 0.8)
+	var target := (facing * Basis(Vector3(0, 0, 1), roll)).get_rotation_quaternion()
+	var turn := create_tween()
+	turn.tween_method(func(t: float) -> void:
+		if is_instance_valid(craft):
+			craft.quaternion = craft.quaternion.slerp(target, t), 0.0, 1.0, FIGHTER_STEP * 1.5).set_ease(Tween.EASE_OUT)
+
+
+## A fighter fires on the ship: two bolts from its wings across to the ship, which
+## flash the screen and shake it; and a turret's answer, if there is one.
+func _strafe(craft: Node3D, strafe: Dictionary) -> void:
+	if not is_instance_valid(craft):
+		return
+	var target := _ahead(Vector3(0.0, -2.0, -6.0))
+	AudioManager.play_enemy_fire()
+	for side in [-1.0, 1.0]:
+		var muzzle := craft.to_global(Vector3(side * 1.6, 0.0, -0.3) * 16.0)
+		_flare(muzzle, RED, 7.0)
+		_bolt(muzzle, target + Vector3(side * 0.8, 0.0, 0.0), RED, 0.22, 0.12, 0.17)
+	get_tree().create_timer(0.17).timeout.connect(_hit_ship.bind(target))
+	var turret: float = strafe.get("turret", 0.0)
+	if turret > 0.0:
+		AudioManager.play_laser()
+		for offset in [-20.0, 20.0]:
+			var from := _ahead(_place(Vector2(turret + offset, 123.0), 0.0) * 0.012 + Vector3(0.0, -0.4, 0.0))
+			_bolt(from, craft.global_position, GREEN, 0.2, 0.08, 0.16)
+			_flare(from, GREEN, 0.9)
+
+
+func _hit_ship(at: Vector3) -> void:
+	AudioManager.play_hit_light()
+	_flare(at, RED, 2.6)
+	flashed.emit(0.25)
+	shaken.emit(0.25)
+
+
+## Hit by the turrets: it tumbles, trailing smoke and fire, before it goes.
+func _tumble(craft: Node3D) -> void:
+	if not is_instance_valid(craft):
+		return
+	var spin := create_tween()
+	spin.set_parallel(true)
+	spin.tween_property(craft, "rotation", craft.rotation + Vector3(2.4, 1.1, 5.5), FIGHTER_STEP * 4.0).set_ease(Tween.EASE_IN)
+	spin.tween_property(craft, "position", craft.position + Vector3(0.0, -18.0, 22.0), FIGHTER_STEP * 4.0).set_ease(Tween.EASE_IN)
+	craft.add_child(_exhaust(Vector3.ZERO, false))
+
+
+func _shot_down(craft: Node3D) -> void:
+	if is_instance_valid(craft):
+		explosion(craft.global_position, 60.0)
+		craft.queue_free()
+
+
+# --- small parts -----------------------------------------------------------------
+
+
+## A bolt of light from `from` to `to`: it travels there in `travel` seconds as a
+## short bright streak, then fades. Core and halo, additive.
+func _bolt(from: Vector3, to: Vector3, color: Color, seconds: float, width: float, travel := 0.0) -> void:
+	var direction := (to - from).normalized()
+	var length := from.distance_to(to)
+	var streak := minf(length, 18.0 if travel > 0.0 else length)
+	var bolt := Node3D.new()
+	add_child(bolt)
+	bolt.global_transform = Transform3D(Basis.looking_at(direction, Vector3.UP), from)
+	for layer in 2:
+		var mesh := MeshInstance3D.new()
+		var box := BoxMesh.new()
+		box.size = Vector3(width * (1.0 if layer == 0 else 3.2), width * (1.0 if layer == 0 else 3.2), streak) * Vector3(size_scale, size_scale, 1.0)
+		mesh.mesh = box
+		mesh.material_override = _emissive(Color(1, 1, 1, 0.95) if layer == 0 else Color(color, 0.35))
+		mesh.position = Vector3(0, 0, -streak / 2.0)
+		bolt.add_child(mesh)
+	var tween := create_tween()
+	if travel > 0.0:
+		tween.tween_property(bolt, "global_position", to, travel)
+		tween.tween_callback(bolt.queue_free)
+	else:
+		tween.tween_property(bolt, "scale", Vector3(0.15, 0.15, 1.0), seconds).set_ease(Tween.EASE_IN)
+		tween.tween_callback(bolt.queue_free)
+
+
+## A soft round flash of light, at once and gone.
+func _flare(at: Vector3, color: Color, size: float) -> void:
+	var node := _sprite_node(Color(color, 0.9).lightened(0.3), size * size_scale, true)
+	add_child(node)
+	node.global_position = at
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(node, "scale", Vector3.ONE * 1.6, 0.16).from(Vector3.ONE * 0.5)
+	tween.tween_property(node, "transparency", 1.0, 0.16).from(0.0)
+	tween.chain().tween_callback(node.queue_free)
+
+
+func _light(at: Vector3, color: Color, energy: float, light_range: float, seconds: float) -> void:
+	var light := OmniLight3D.new()
+	light.light_color = color
+	light.light_energy = energy
+	light.omni_range = light_range * size_scale
+	add_child(light)
+	light.global_position = at
+	var tween := create_tween()
+	tween.tween_property(light, "light_energy", 0.0, seconds).set_ease(Tween.EASE_OUT)
+	tween.tween_callback(light.queue_free)
+
+
+## A billboard sprite: a quad that always faces the camera, additive or blended.
+func _sprite_node(color: Color, size: float, additive: bool, texture: Texture2D = null) -> Sprite3D:
+	var node := Sprite3D.new()
+	node.texture = texture if texture != null else _glow_texture
+	node.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	node.shaded = false
+	node.modulate = color
+	node.pixel_size = size / 64.0
+	node.transparent = true
+	node.double_sided = true
+	node.alpha_cut = SpriteBase3D.ALPHA_CUT_DISABLED
+	if additive:
+		node.material_override = _sprite_material(node.texture, true)
+	return node
+
+
+func _sprite(texture: Texture2D, additive: bool) -> QuadMesh:
+	var quad := QuadMesh.new()
+	quad.size = Vector2.ONE
+	quad.material = _sprite_material(texture, additive)
+	return quad
+
+
+func _sprite_material(texture: Texture2D, additive: bool) -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	m.billboard_keep_scale = true # the particles' own sizes
+	m.particles_anim_h_frames = 1
+	m.particles_anim_v_frames = 1
+	m.vertex_color_use_as_albedo = true
+	m.albedo_texture = texture
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD if additive else BaseMaterial3D.BLEND_MODE_MIX
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	return m
+
+
+func _radial(offsets: Array, colors: Array) -> GradientTexture2D:
+	var gradient := Gradient.new()
+	gradient.offsets = PackedFloat32Array(offsets)
+	gradient.colors = PackedColorArray(colors)
+	var texture := GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill = GradientTexture2D.FILL_RADIAL
+	texture.fill_from = Vector2(0.5, 0.5)
+	texture.fill_to = Vector2(1.0, 0.5)
+	texture.width = 128
+	texture.height = 128
+	return texture
+
+
+## Red to port, green to starboard, on the wingtips, blinking out of step.
+func _navigation_lights(craft: Node3D) -> void:
+	for side in [-1.0, 1.0]:
+		var light := _sprite_node(RED if side < 0.0 else GREEN, 5.0, true)
+		light.position = Vector3(side * 1.85, -0.04, 0.8) * 16.0
+		craft.add_child(light)
+		var blink := light.create_tween().set_loops()
+		blink.tween_property(light, "modulate:a", 0.15, 0.35)
+		blink.tween_property(light, "modulate:a", 1.0, 0.35)
+		if side > 0.0:
+			blink.pause()
+			light.modulate.a = 0.6
+
+
+## A point of the original's 3D window on a plane ahead of the camera: nearer as
+## `progress` (0 to 1) goes on, as a fighter swoops across.
+func _place(point: Vector2, progress: float) -> Vector3:
+	var depth := lerpf(620.0, 440.0, sin(progress * PI * 0.5))
+	return Vector3((point.x - 140.0) / 130.0 * depth * 0.62, (65.0 - point.y) / 55.0 * depth * 0.30, -depth) * size_scale
+
+
+func _ahead(local: Vector3) -> Vector3:
+	return camera.global_position + camera.global_transform.basis * (local * size_scale)
+
+
+func _emissive(color: Color) -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.albedo_color = color
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	return m

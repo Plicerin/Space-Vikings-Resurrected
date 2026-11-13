@@ -92,12 +92,17 @@ The game uses memory in distinct regions:
 
 ### Shape Table Loading Address
 - **$8000 (32768)**: Graphics binaries (PLANET/SHIP files) loading address
-- **Shape table format**:
+- **Shape table format** (corrected 2026-11-07 — the format below this
+  line was an invented guess that produced scrambled shapes; see
+  `tools/shape_table_decoder.py`'s module docstring for the real,
+  manual-art-verified format and how it was derived):
   - First byte = number of shapes minus 1
-  - Followed by offsets to each shape's data
-  - Directions: 0=Right, 1=Up-Right, 2=Up, 3=Up-Left, 4=Left, 5=Down-Left, 6=Down, 7=Down-Right
-  - Steps: Encoded as 1-15, with 0 meaning 16 steps
-  - Pen status: Bit 0 = 1 means move without drawing, 0 means draw line
+  - Followed by one 1-byte offset per shape
+  - Each byte after that packs **three** vectors (bits 0-2, 3-5, 6-7),
+    each vector's low bit a plot flag and its remaining bits selecting
+    one of 4 **diagonal** directions (NE/SE/SW/NW), not 8 compass
+    directions with a step count — there is no step count in the real
+    format, every vector moves exactly one diagonal step
   - Terminator: $00 byte ends each shape
 
 ### Converted Graphics
@@ -109,7 +114,7 @@ The game uses memory in distinct regions:
 
 ### Core Sound Routines
 - **SOUND GEN ($9276)**: Core sound generation routine
-- **EXPL ($9100)**: Explosion sound routine that calls SOUND GEN
+- **EXPL** (catalog address $9270, not $9100): Not a sound routine — REA's Ghidra decode rejects both candidate addresses as invalid 6502 code, and `H_D.bas` only invokes it via Applesoft's `DRAW` command. It's shape-table graphics data for the explosion visual, not code, and does not call SOUND GEN.
 - **Apple II speaker**: $C030 accessed via LDA $C030 instruction
 - **Sound parameters**: $9270-$9275 memory locations
 
@@ -123,7 +128,7 @@ The game uses memory in distinct regions:
 ### Top 10 Most Referenced Addresses
 
 1. **$03CE (974) - 62 references**
-   - **Purpose**: Likely screen/display control
+   - **Purpose**: Likely screen/display control — this guess, not "crew morale" (see `GAME_MECHANICS_DOCUMENTATION.md`/`JAVASCRIPT_REMAKE_PLAN.md`'s now-corrected claim), is supported by REA's decompile of `HI-RES CHARACTER GENERATOR`, which reads/writes $03CD-$03CE as inverse/flash-mode text flags.
    - **Usage**: POKE operations in COM.bas, STATUS.bas, etc.
    - **Values**: 64 (most common), 32, 0
 

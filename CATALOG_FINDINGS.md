@@ -52,7 +52,7 @@ runtime addresses, harvested from `START.bas`:
 | `MEM TRANSFER A` | `$9400` | `$0070` | `$946F` | Memory-block copy helper. |
 | `SHIP'S DATA` (or `-M`) | `$9506` | `$0036` | `$953B` | Live ship state. Mutated during play. |
 | `PLANET FILE` (or `-M`) | `$954C` | `$00AF` | `$95FA` | Live galactic state. Magic byte at `$95F7` (= 38391) — value `77` ($4D) means "saved game exists". |
-| `TRANLIT.OBJ0` | `$9600` | `$035B` *on disk* | `$995A` *if fully loaded* | A2-3D1 transformation+lit (transform/literal/translation) helper. **Effective code is only `$9600`–`$97E0` (~481 bytes); the rest gets overwritten by P/F.** |
+| `TRANLIT.OBJ0` | `$9600` | `$035B` *on disk* | `$995A` *if fully loaded* | Two routines, neither part of A2-3D1: the panel-toggle handler for the A/B/S/W keys (`$9602`) and the per-planet record copy (`$97A9`) — see `CALL_SITES.md` §2-§3. **Effective code is only `$9600`–`$97E0` (~481 bytes); the rest gets overwritten by P/F.** |
 | `P/F` (or `-M`) | `$97E1` | `$0140` | `$9920` | Player-file: extended save state. **Overwrites the tail of TRANLIT.OBJ0.** |
 | `CHARACTER TABLE` | `$8800` | `$0400` | `$8BFF` | 1 KB of 8×8 character bitmaps. |
 
@@ -62,15 +62,21 @@ runtime addresses, harvested from `START.bas`:
 
 | File | Length | Purpose |
 |---|---|---|
-| `PLANET # 0` … `PLANET # 20` | `$021D`–`$05DC` each | One per planet. Loaded into `$7300` when the player approaches. **21 distinct planets.** |
+| `PLANET # 0` … `PLANET # 20` | `$021D`–`$05DC` each | One per planet. Loaded into `$7300` when the player approaches. **21 distinct planets.** (Corrected twice now, 2026-11-07: same file as `extracted/PLANET no N.payload.bin` — confirmed via a direct DOS 3.3 catalog/TSL read, there is no separate file. First correction said this was the Applesoft shape-table format, same as the manual-verified SHIP/ENEMY art; that was itself wrong — it just happened to *also* parse under that format without erroring. **Second correction, now live-confirmed**: it's real `A2-3D1` bytecode, same VM as the ships (see that doc's "Planet point-field" section) — MAME live memory trace caught the VM's own program-counter zero page walking cleanly through `$7300`+ with zero decode errors all the way to EOF, something the shape-table reading never demonstrated. `PLANET # 0` specifically (the only one `ORBIT.bas` ever actually loads — the `# 0` is hardcoded, not parameterized by `J`) decodes as 195 isolated-point plots (opcode `0`, never connected by a line) with no surface at all, which is why it reads on screen as scattered dots rather than a shape. `PLANET # 5`/`# 11` (never observed loaded in play) decode with real connecting-line opcodes instead — open question why those exist if `ORBIT.bas` can't reach them.) |
 | `DEBRIS` | `$0162` | Debris-field record, also at `$7300`. |
 
-`$7879` is reused as the player's-ship sprite buffer:
+`$7879` is reused as a ship-model buffer (corrected 2026-11-07: this is
+the **orbital defender's** ship, not the player's — confirmed live, see
+`A2-3D1_ENGINE_ANALYSIS.md`'s "Resolved 2026-11-07"/"Live-verified"
+sections. `J=PEEK(38205)` — the defender's tech tier, tier-corrected
+`2→3` — picks which `SHIP # J` loads here, and `RADAR.bas` (`CALL
+24576`) renders it as a real 3D wireframe blip on the radar display,
+not during flight):
 
 | File | Length | Purpose |
 |---|---|---|
-| `SHIP # 1`, `SHIP # 3`, `SHIP # 4` | `$03C2`–`$0638` | 3D model data for the player's chosen ship. (Indices 0 and 2 absent — see note above.) |
-| `SHIP # 0` | `$0001` | One-byte file at the same slot. Likely a placeholder/marker since ship 0 is also referenced by `SHIP # 0 I.D.` text. |
+| `SHIP # 1`, `SHIP # 3`, `SHIP # 4` | `$03C2`–`$0638` | Real A2-3D1 bytecode-VM 3D wireframe model (opcodes `1`/`2`/`3`, line-to-vertex) of the orbital defender for that tech tier, rendered on radar. |
+| `SHIP # 0` | `$0001` | Genuinely just the `$7F` terminator byte, confirmed via a direct disk read — tier 0 (the unarmed station) has no defender model to show at all, not an extraction bug. |
 
 `$7FFF` is the enemy-data slot:
 
@@ -147,8 +153,8 @@ free RAM at the top end, consistent with a 48 KB system fully packed.)
 9. BLOAD `LASER` ($92D1), `ENEMY I.A24580.L68` ($7FFF), `TRANLIT.OBJ0` ($9600).
 10. Set initial Z=−7000, X=700, Y=200 in the A2-3D1 origin pointers ($7325/27/29) — that's the player's starting position in 3D space.
 11. New game: BLOAD `*-M` master files into live slots, POKE initial state, write `MISC FILE`. Old game: BLOAD live files, set magic byte.
-12. POKE 38823 = (PEEK 38392 = saved-J), POKE 38824=0, CALL 38825 (= `$97C9`, inside what was TRANLIT but is now P/F territory — this CALL is the per-ship init).
-13. Pick ship sprite: J = PEEK 38205 (in SHIP'S DATA); if J=2 then J=3 (ships 2 swapped with 3). If shields/condition allow, BLOAD `SHIP # n` at `$7879`; else BLOAD `DEBRIS` (player is wrecked).
+12. POKE 38823 = (PEEK 38392 = saved-J), POKE 38824=0, CALL 38825 (= `$97A9`, the last routine in TRANLIT's live code, just below P/F): loads planet J's 16-byte record from P/F into the working registers 38204-38219 (`CALL_SITES.md` §3).
+13. Pick the orbital defender's model: J = PEEK 38205 (byte 1 of the record just loaded); if J=2 then J=3. BLOAD `SHIP # n` at `$7879`, or `DEBRIS` when the planet's defender has been destroyed.
 14. `RUN INSTRUMENTS` → draws HUD → `RUN STARSHIP SIMULATOR` (new) or `RUN GALAXY MAP` (old).
 
 ## Verified game-state addresses
@@ -170,12 +176,12 @@ From the POKE/PEEK pattern in `START.bas`:
 | `$9543` | 38211 | Saved X (loaded into XI on resume) |
 | `$9544` | 38212 | Saved X high |
 | `$9545–$954B` | 38213–38219 | Saved Y, Z, P, B, H |
-| `$953D` | 38205 | Saved ship index J (1, 3, or 4) |
+| `$953D` | 38205 | Orbital defender type of the current planet (0, 1, 3 or 4; a stored 2 is shown as 3) |
 | `$954A`–wards | 38209+ | Damage/condition flags array |
 | `$95F7` | 38391 | Save-magic byte (`$4D` = 'M' = 77 dec — initial of "Mitchell"? a designer's signature) |
 | `$95F8` | 38392 | Saved J for ship init |
-| `$97C9` | 38825 | Per-ship init routine entry (in P/F area) |
-| `$9602` | 38402 | TRANLIT entry called by INSTRUMENTS for new-game setup |
+| `$97A9` | 38825 | Per-planet record load/store (args poked to 38823 = planet, 38824 = 0 load / non-zero store) |
+| `$9602` | 38402 | Panel-toggle handler: A/B/S/W keys in flight (mode in 38167), and INSTRUMENTS' new-game redraw (38189 = 10) |
 | `$9244` | 38188 | (Line 50: `POKE 38148,1` — actually $9504, inside SHIP'S DATA — flag byte) |
 | `$95B4` | 38388 | Some flag, zeroed at 7500 |
 | `$95B8` | 38392 | (already listed) |

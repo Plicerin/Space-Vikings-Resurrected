@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "target_sha256": "8b587b33fdab09df72a7d5b31440a49484c445a66dd5ed22966a4f6769587417",
+  "provider": {
+    "id": "ghidra",
+    "name": "Ghidra",
+    "version": "12.1.2"
+  },
+  "analysis_profile_digest": "c7ddf7665d6cd670b1b645865fdbb955aaf9dab74461aa33a497ddf4e58c0e68",
+  "layout": "address",
+  "layout_status": "address",
+  "limitations": [],
+  "functions": [
+    {
+      "address": "0x9400",
+      "name": "entry",
+      "status": "written",
+      "relative_path": "functions/0x9400.c",
+      "sha256": "1fd76e50690fd0dc3abd7735d499def9e83301a6e7f3bda33db2377ee8699e9b",
+      "body": {
+        "available": true,
+        "ranges": [
+          {
+            "start": "0x9400",
+            "end": "0x942f"
+          }
+        ],
+        "non_contiguous": false
+      },
+      "limitations": [
+        "The session serves operations only after Ghidra reports default auto-analysis complete; incomplete analysis does not expose partial results.",
+        "The imported Program and temporary project are ephemeral and deleted on close. Annotation operations edit session database metadata; original executable bytes are never written.",
+        "Cancelling an active Ghidra request terminates its ephemeral database and discards session annotations. The selected target remains open; the next provider query imports the original artifact again.",
+        "Default-space addresses use lowercase 0x-prefixed hexadecimal; other address spaces use <percent-encoded-space>:0x<hex>.",
+        "Headerless raw-binary analysis uses the caller-supplied architecture and entry address; file offset 0 is mapped at that address. Headers are not discovered from file bytes.",
+        "Little-endian generic Ghidra languages are used for x86, x86_64, arm, arm64, and NMOS 6502; m68k uses the big-endian 68000 default language, which decodes the 68040 superset. Big-endian ARM, Thumb-only, Cortex-M, 65C02, 65816, separate 68020/68030/CPU32/ColdFire variants, and other processor variants are unsupported in this increment.",
+        "Static analysis does not emulate reset vectors, memory-mapped I/O, or firmware boot sequences.",
+        "This session uses Ghidra 12.1.2. The bridge is verified against 12.1.4; other 12.1.x builds are accepted and the observed version is reported.",
+        "Pseudocode is Ghidra decompiler output, not original source and not text-equivalent to Hopper output.",
+        "External functions and functions without an analyzable body return null; other decompiler failures remain explicit."
+      ]
+    },
+    {
+      "address": "0x9460",
+      "name": "FUN_9460",
+      "status": "written",
+      "relative_path": "functions/0x9460.c",
+      "sha256": "5601147daaf115d95aa2ea812bd986d0311c9c7c5e283f8ba90d0f2bedb57a67",
+      "body": {
+        "available": true,
+        "ranges": [
+          {
+            "start": "0x9460",
+            "end": "0x946d"
+          }
+        ],
+        "non_contiguous": false
+      },
+      "limitations": [
+        "The session serves operations only after Ghidra reports default auto-analysis complete; incomplete analysis does not expose partial results.",
+        "The imported Program and temporary project are ephemeral and deleted on close. Annotation operations edit session database metadata; original executable bytes are never written.",
+        "Cancelling an active Ghidra request terminates its ephemeral database and discards session annotations. The selected target remains open; the next provider query imports the original artifact again.",
+        "Default-space addresses use lowercase 0x-prefixed hexadecimal; other address spaces use <percent-encoded-space>:0x<hex>.",
+        "Headerless raw-binary analysis uses the caller-supplied architecture and entry address; file offset 0 is mapped at that address. Headers are not discovered from file bytes.",
+        "Little-endian generic Ghidra languages are used for x86, x86_64, arm, arm64, and NMOS 6502; m68k uses the big-endian 68000 default language, which decodes the 68040 superset. Big-endian ARM, Thumb-only, Cortex-M, 65C02, 65816, separate 68020/68030/CPU32/ColdFire variants, and other processor variants are unsupported in this increment.",
+        "Static analysis does not emulate reset vectors, memory-mapped I/O, or firmware boot sequences.",
+        "This session uses Ghidra 12.1.2. The bridge is verified against 12.1.4; other 12.1.x builds are accepted and the observed version is reported.",
+        "Pseudocode is Ghidra decompiler output, not original source and not text-equivalent to Hopper output.",
+        "External functions and functions without an analyzable body return null; other decompiler failures remain explicit."
+      ]
+    }
+  ]
+}
