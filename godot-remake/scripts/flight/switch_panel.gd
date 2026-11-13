@@ -144,13 +144,32 @@ func _label(parent: Node3D, text: String, at: Vector3) -> Label3D:
 	return label
 
 
-## A missile standing on end: body, nose and two fins.
+## A missile standing on end, stencilled like a round on a munitions rack: a pointed ogive, a warhead
+## collar, a body in two with black hazard bands across it, a motor collar and nozzle, two swept fins,
+## and a cradle under it. The bands stay black; the rest is what lights.
 func _missile(parent: Node3D, at: Vector3) -> Array[MeshInstance3D]:
 	var parts: Array[MeshInstance3D] = []
+	var holder := Node3D.new()
+	holder.position = at
+	holder.scale = Vector3.ONE * 1.3
+	parent.add_child(holder)
 	var material := _flat(DIM)
-	parts.append(_mesh(parent, _cylinder(0.06, 0.06, 0.3), at, material))
-	parts.append(_mesh(parent, _cylinder(0.0, 0.06, 0.14), at + Vector3(0.0, 0.22, 0.0), material))
-	parts.append(_mesh(parent, _box(Vector3(0.2, 0.08, 0.02)), at + Vector3(0.0, -0.15, 0.0), material))
+	var black := _flat(Color(0.05, 0.05, 0.05))
+	parts.append(_mesh(holder, _cylinder(0.0, 0.055, 0.14), Vector3(0.0, 0.235, 0.0), material)) # the ogive
+	parts.append(_mesh(holder, _cylinder(0.064, 0.064, 0.03), Vector3(0.0, 0.15, 0.0), material)) # the warhead collar
+	parts.append(_mesh(holder, _cylinder(0.055, 0.055, 0.1), Vector3(0.0, 0.085, 0.0), material)) # the body, in two
+	parts.append(_mesh(holder, _cylinder(0.055, 0.055, 0.1), Vector3(0.0, -0.03, 0.0), material))
+	parts.append(_mesh(holder, _cylinder(0.064, 0.064, 0.025), Vector3(0.0, -0.105, 0.0), material)) # the motor collar
+	parts.append(_mesh(holder, _cylinder(0.038, 0.058, 0.05), Vector3(0.0, -0.145, 0.0), material)) # the nozzle
+	for side in [-1.0, 1.0]: # the fins, swept back from the body
+		var fin := PrismMesh.new()
+		fin.size = Vector3(0.1, 0.15, 0.016)
+		fin.left_to_right = 1.0 if side < 0.0 else 0.0 # the straight edge on the body
+		parts.append(_mesh(holder, fin, Vector3(side * 0.105, -0.045, 0.0), material))
+	parts.append(_mesh(holder, _box(Vector3(0.24, 0.022, 0.02)), Vector3(0.0, -0.2, 0.0), material)) # the cradle
+	for y in [0.115, 0.055, -0.005, -0.065]: # the hazard bands
+		_mesh(holder, _cylinder(0.0575, 0.0575, 0.014), Vector3(0.0, y, 0.0), black)
+	_mesh(holder, _cylinder(0.0, 0.03, 0.04), Vector3(0.0, 0.215, 0.0), black) # the ogive's painted tip
 	return parts
 
 
